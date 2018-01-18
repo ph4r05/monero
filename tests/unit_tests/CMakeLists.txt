@@ -57,6 +57,7 @@ set(unit_tests_sources
   mlocker.cpp
   mnemonics.cpp
   mul_div.cpp
+  multiexp.cpp
   multisig.cpp
   parse_amount.cpp
   random.cpp
