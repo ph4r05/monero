@@ -38,6 +38,7 @@
 #include <atomic>
 #include "serialization/variant.h"
 #include "serialization/vector.h"
+#include "serialization/set.h"
 #include "serialization/binary_archive.h"
 #include "serialization/json_archive.h"
 #include "serialization/debug_archive.h"

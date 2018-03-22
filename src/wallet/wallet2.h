@@ -54,6 +54,9 @@
 #include "ringct/rctTypes.h"
 #include "ringct/rctOps.h"
 #include "checkpoints/checkpoints.h"
+#include "serialization/set.h"
+#include "serialization/pair.h"
+#include "serialization/unordered_set.h"
 
 #include "wallet_errors.h"
 #include "common/password.h"
