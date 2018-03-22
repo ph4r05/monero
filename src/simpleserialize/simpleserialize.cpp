@@ -103,6 +103,27 @@ int main(int argc, char* argv[])
   std::ostringstream oss;
   boost::archive::portable_binary_oarchive arx(oss);
 
+//  txin_gen in;
+//  in.height = 0x34;
+//  cryptonote::txin_v txin(in);
+//  arx & txin;
+
+  tx_destination_entry de;
+  account_public_address pub;
+  memset(pub.m_spend_public_key.data, 0, 32);
+  memset(pub.m_view_public_key.data, 0, 32);
+  pub.m_spend_public_key.data[0]=0xcc;
+  pub.m_spend_public_key.data[31]=0xee;
+  pub.m_view_public_key.data[0]=0xaa;
+  pub.m_view_public_key.data[31]=0xdd;
+
+  de.amount = 0x44;
+  de.is_subaddress = true;
+  de.addr = pub;
+
+
+  arx & de;
+
 
   std::cout << epee::string_tools::buff_to_hex_nodelimer(oss.str()) << std::endl;
   std::cout << oss.str() << std::endl;
