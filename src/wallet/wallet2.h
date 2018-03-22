@@ -387,6 +387,11 @@ namespace tools
     {
       std::vector<tx_construction_data> txes;
       wallet2::transfer_container transfers;
+
+      BEGIN_SERIALIZE_OBJECT()
+        FIELD(txes)
+        FIELD(transfers)
+      END_SERIALIZE()
     };
 
     struct signed_tx_set
