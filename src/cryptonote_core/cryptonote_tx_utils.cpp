@@ -578,6 +578,12 @@ namespace cryptonote
       crypto::hash tx_prefix_hash;
       get_transaction_prefix_hash(tx, tx_prefix_hash);
       rct::ctkeyV outSk;
+      MCINFO("", "tx_prefix_hash: " << obj_to_json_str(tx_prefix_hash) << ENDL);
+      MCINFO("", "inamounts: " << obj_to_json_str(inamounts) << ENDL);
+      MCINFO("", "outamounts: " << obj_to_json_str(outamounts) << ENDL);
+      MCINFO("", "inSk: " << obj_to_json_str(inSk) << ENDL);
+      MCINFO("", "amount_keys: " << obj_to_json_str(amount_keys) << ENDL);
+      MCINFO("", "mixRing: " << obj_to_json_str(mixRing) << ENDL);
       if (use_simple_rct)
         tx.rct_signatures = rct::genRctSimple(rct::hash2rct(tx_prefix_hash), inSk, destinations, inamounts, outamounts, amount_in - amount_out, mixRing, amount_keys, msout ? &kLRki : NULL, msout, index, outSk, bulletproof);
       else
@@ -585,6 +591,9 @@ namespace cryptonote
 
       CHECK_AND_ASSERT_MES(tx.vout.size() == outSk.size(), false, "outSk size does not match vout");
 
+      crypto::hash pre_mlsag_hash = rct::rct2hash(rct::get_pre_mlsag_hash(tx.rct_signatures));
+      MCINFO("", "outSk: " << obj_to_json_str(outSk) << ENDL);
+      MCINFO("", "pre_mlsag_hash: " << obj_to_json_str(pre_mlsag_hash) << ENDL);
       MCINFO("construct_tx", "transaction_created: " << get_transaction_hash(tx) << ENDL << obj_to_json_str(tx) << ENDL);
     }
 
