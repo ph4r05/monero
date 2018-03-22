@@ -130,7 +130,7 @@ namespace rct {
     xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key & mask);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i);
-
+    key get_pre_mlsag_hash(const rctSig &rv);
     bool signMultisig(rctSig &rv, const std::vector<unsigned int> &indices, const keyV &k, const multisig_out &msout, const key &secret_key);
 }
 #endif  /* RCTSIGS_H */
