@@ -1021,6 +1021,9 @@ namespace tools
     crypto::public_key get_multisig_signing_public_key(size_t idx) const;
     crypto::public_key get_multisig_signing_public_key(const crypto::secret_key &skey) const;
 
+    int create_unsigned_transaction(unsigned_tx_set &unsigned_tx, std::vector<wallet2::pending_tx> ptx_vector);
+    std::string serialize_unsigned_transaction(unsigned_tx_set &unsigned_tx);
+
   private:
     /*!
      * \brief  Stores wallet information to wallet file.

@@ -9660,4 +9660,22 @@ void wallet2::generate_genesis(cryptonote::block& b) const {
     cryptonote::generate_genesis_block(b, config::GENESIS_TX, config::GENESIS_NONCE);
   }
 }
+//----------------------------------------------------------------------------------------------------
+int wallet2::create_unsigned_transaction(unsigned_tx_set &unsigned_tx, std::vector<wallet2::pending_tx> ptx_vector){
+  for (auto &tx: ptx_vector)
+  {
+    // Short payment id is encrypted with tx_key.
+    // Since sign_tx() generates new tx_keys and encrypts the payment id, we need to save the decrypted payment ID
+    // Save tx construction_data to unsigned_tx_set
+    unsigned_tx.txes.push_back(get_construction_data_with_decrypted_short_payment_id(tx));
+  }
+
+  unsigned_tx.transfers = m_transfers;
+  return 0;
+}
+//----------------------------------------------------------------------------------------------------
+std::string wallet2::serialize_unsigned_transaction(unsigned_tx_set &unsigned_tx){
+  return epee::string_tools::buff_to_hex_nodelimer(t_serializable_object_to_blob(unsigned_tx));
+}
+
 }

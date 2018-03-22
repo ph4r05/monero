@@ -679,6 +679,7 @@ namespace tools
     boost::archive::portable_binary_oarchive ar(oss);
     try
     {
+      // ar << BOOST_SERIALIZATION_NVP(ptx);
       ar << ptx;
     }
     catch (...)
@@ -848,6 +849,91 @@ namespace tools
 
       return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, req.do_not_relay,
           res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
+    }
+    catch (const std::exception& e)
+    {
+      handle_rpc_exception(std::current_exception(), er, WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR);
+      return false;
+    }
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_transfer_unsigned(const wallet_rpc::COMMAND_RPC_TRANSFER_UNSIGNED::request& req, wallet_rpc::COMMAND_RPC_TRANSFER_UNSIGNED::response& res, epee::json_rpc::error& er)
+  {
+    std::vector<cryptonote::tx_destination_entry> dsts;
+    std::vector<uint8_t> extra;
+
+    if (!m_wallet) return not_open(er);
+    if (m_wallet->restricted())
+    {
+      er.code = WALLET_RPC_ERROR_CODE_DENIED;
+      er.message = "Command unavailable in restricted mode.";
+      return false;
+    }
+
+    // validate the transfer requested and populate dsts & extra; RPC_TRANSFER::request and RPC_TRANSFER_SPLIT::request are identical types.
+    if (!validate_transfer(req.destinations, req.payment_id, dsts, extra, true, er))
+    {
+      return false;
+    }
+
+    try
+    {
+      uint64_t mixin = m_wallet->adjust_mixin(req.mixin);
+      uint32_t priority = m_wallet->adjust_priority(req.priority);
+      LOG_PRINT_L2("on_transfer_unsigned calling create_transactions_2");
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_2(dsts, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices, m_trusted_daemon);
+      LOG_PRINT_L2("on_transfer_unsigned called create_transactions_2");
+
+      tools::wallet2::unsigned_tx_set tx_set;
+      m_wallet->create_unsigned_transaction(tx_set, ptx_vector);
+      std::string tx_set_blob = m_wallet->serialize_unsigned_transaction(tx_set);
+
+      for (const auto & ptx : ptx_vector)
+      {
+        if (req.get_tx_keys)
+        {
+          std::string s = epee::string_tools::pod_to_hex(ptx.tx_key);
+          for (const crypto::secret_key& additional_tx_key : ptx.additional_tx_keys)
+            s += epee::string_tools::pod_to_hex(additional_tx_key);
+          fill(res.tx_key_list, s);
+        }
+        // Compute amount leaving wallet in tx. By convention dests does not include change outputs
+        fill(res.amount_list, total_amount(ptx));
+        fill(res.fee_list, ptx.fee);
+      }
+
+      if (m_wallet->multisig())
+      {
+        res.multisig_txset = epee::string_tools::buff_to_hex_nodelimer(m_wallet->save_multisig_tx(ptx_vector));
+        if (res.multisig_txset.empty())
+        {
+          er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+          er.message = "Failed to save multisig tx set after creation";
+          return false;
+        }
+      }
+      else
+      {
+        // populate response with tx hashes
+        for (auto & ptx : ptx_vector)
+        {
+          bool r = fill(res.tx_hash_list, epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx.tx)));
+          r = r && (!req.get_tx_hex || fill(res.tx_blob_list, epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(ptx.tx))));
+          r = r && (!req.get_tx_metadata || fill(res.tx_metadata_list, ptx_to_string(ptx)));
+          res.tx_unsigned = tx_set_blob;
+
+          if (!r)
+          {
+            er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+            er.message = "Failed to save tx info";
+            return false;
+          }
+        }
+      }
+
+//      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, req.do_not_relay,
+//          res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
     }
     catch (const std::exception& e)
     {
