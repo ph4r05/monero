@@ -33,6 +33,8 @@
 #include <boost/algorithm/string.hpp>
 #include <cstdint>
 #include "include_base_utils.h"
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/archive/xml_oarchive.hpp>
 using namespace epee;
 
 #include "wallet_rpc_server.h"
