@@ -597,7 +597,7 @@ namespace cryptonote
 
       CHECK_AND_ASSERT_MES(tx.vout.size() == outSk.size(), false, "outSk size does not match vout");
 
-      crypto::hash pre_mlsag_hash = rct::rct2hash(rct::get_pre_mlsag_hash(tx.rct_signatures));
+      crypto::hash pre_mlsag_hash = rct::rct2hash(rct::get_pre_mlsag_hash(tx.rct_signatures, hwdev));
       MCINFO("", "outSk: " << obj_to_json_str(outSk) << ENDL);
       MCINFO("", "pre_mlsag_hash: " << obj_to_json_str(pre_mlsag_hash) << ENDL);
       MCINFO("construct_tx", "transaction_created: " << get_transaction_hash(tx) << ENDL << obj_to_json_str(tx) << ENDL);
