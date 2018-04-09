@@ -99,9 +99,9 @@ Dates are provided in the format YYYY-MM-DD.
 | 1220516                        | 2017-01-05 | v4                | v0.10.1                | v0.10.2.1                  | Allow normal and RingCT transactions |
 | 1288616                        | 2017-04-15 | v5                | v0.10.3.0              | v0.10.3.1                  | Adjusted minimum blocksize and fee algorithm      |
 | 1400000                        | 2017-09-16 | v6                | v0.11.0.0              | v0.11.0.0                  | Allow only RingCT transactions, allow only >= ringsize 5      |
-| XXXXXXX                        | 2018-03-XX | XX                | XXXXXXXXX              | XXXXXXXXX                  | XXXXXX
+| 1546000                        | 2018-04-06 | v7                | v0.12.0.0              | v0.12.0.0                  | Cryptonight variant 1, ringsize >= 7, sorted inputs
 
-X's indicate that these details have not been determined as of commit date, 2017-09-20. 
+X's indicate that these details have not been determined as of commit date.
 
 ## Release staging schedule and protocol
 
@@ -186,6 +186,16 @@ library archives (`.a`).
 
 [^] On Debian/Ubuntu `libgtest-dev` only includes sources and headers. You must
 build the library binary manually. This can be done with the following command ```sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake . && sudo make && sudo mv libg* /usr/lib/ ```
+
+### Cloning the repository
+
+Clone recursively to pull-in needed submodule(s):
+
+`$ git clone --recursive https://github.com/monero-project/monero`
+
+If you already have a repo cloned, initialize and update:
+
+`$ cd monero && git submodule init && git submodule update`
 
 ### Build instructions
 
@@ -373,7 +383,7 @@ To build: `env CC=egcc CXX=eg++ CPP=ecpp DEVELOPER_LOCAL_TOOLS=1 BOOST_ROOT=/pat
 
 #### OpenBSD >= 6.2
 
-You will need to add a few packages to your system. Choose version 4 for db. `pkg_add db cmake miniupnpc zeromq`.
+You will need to add a few packages to your system. `pkg_add cmake miniupnpc zeromq libiconv`.
 
 The doxygen and graphviz packages are optional and require the xbase set.
 
@@ -396,16 +406,24 @@ ftp -o boost_1_64_0.tar.bz2 https://netcologne.dl.sourceforge.net/project/boost/
 echo "7bcc5caace97baa948931d712ea5f37038dbb1c5d89b43ad4def4ed7cb683332 boost_1_64_0.tar.bz2" | sha256 -c
 tar xfj boost_1_64_0.tar.bz2
 
-# Fetch a boost patch, required for OpenBSD
-ftp -o boost.patch https://raw.githubusercontent.com/openbsd/ports/bee9e6df517077a7269ff0dfd57995f5c6a10379/devel/boost/patches/patch-boost_test_impl_execution_monitor_ipp
+# Fetch and apply boost patches, required for OpenBSD
+ftp -o boost_test_impl_execution_monitor_ipp.patch https://raw.githubusercontent.com/openbsd/ports/bee9e6df517077a7269ff0dfd57995f5c6a10379/devel/boost/patches/patch-boost_test_impl_execution_monitor_ipp
+ftp -o boost_config_platform_bsd_hpp.patch https://raw.githubusercontent.com/openbsd/ports/90658284fb786f5a60dd9d6e8d14500c167bdaa0/devel/boost/patches/patch-boost_config_platform_bsd_hpp
+
+# MUST output: (SHA256) boost_config_platform_bsd_hpp.patch: OK
+echo "1f5e59d1154f16ee1e0cc169395f30d5e7d22a5bd9f86358f738b0ccaea5e51d boost_config_platform_bsd_hpp.patch" | sha256 -c
+# MUST output: (SHA256) boost_test_impl_execution_monitor_ipp.patch: OK
+echo "30cec182a1437d40c3e0bd9a866ab5ddc1400a56185b7e671bb3782634ed0206 boost_test_impl_execution_monitor_ipp.patch" | sha256 -c
+
 cd boost_1_64_0
-patch -p0 < ../boost.patch
+patch -p0 < ../boost_test_impl_execution_monitor_ipp.patch
+patch -p0 < ../boost_config_platform_bsd_hpp.patch
 
 # Start building boost
 echo 'using clang : : c++ : <cxxflags>"-fvisibility=hidden -fPIC" <linkflags>"" <archiver>"ar" <striper>"strip"  <ranlib>"ranlib" <rc>"" : ;' > user-config.jam
-./bootstrap.sh --without-icu --with-libraries=chrono,filesystem,program_options,system,thread,test,date_time,regex,serialization --with-toolset=clang
-./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++"
-doas ./b2 -d0 runtime-link=shared threadapi=pthread threading=multi link=static variant=release --layout=tagged --build-type=complete --user-config=user-config.jam -sNO_BZIP2=1 --prefix=/usr/local install
+./bootstrap.sh --without-icu --with-libraries=chrono,filesystem,program_options,system,thread,test,date_time,regex,serialization,locale --with-toolset=clang
+./b2 toolset=clang cxxflags="-stdlib=libc++" linkflags="-stdlib=libc++" -sICONV_PATH=/usr/local
+doas ./b2 -d0 runtime-link=shared threadapi=pthread threading=multi link=static variant=release --layout=tagged --build-type=complete --user-config=user-config.jam -sNO_BZIP2=1 -sICONV_PATH=/usr/local --prefix=/usr/local install
 ```
 
 Build cppzmq
@@ -415,22 +433,19 @@ Build the cppzmq bindings.
 We assume you are compiling with a non-root user and you have `doas` enabled.
 
 ```
-# Create a library link so cmake is able to find it
-doas ln -s /usr/local/lib/libzmq.so.4.1 /usr/local/lib/libzmq.so
-
 # Create cppzmq building directory
 mkdir ~/cppzmq
 cd ~/cppzmq
 
 # Fetch cppzmq source
-ftp -o cppzmq-4.2.2.tar.gz https://github.com/zeromq/cppzmq/archive/v4.2.2.tar.gz
+ftp -o cppzmq-4.2.3.tar.gz https://github.com/zeromq/cppzmq/archive/v4.2.3.tar.gz
 
-# MUST output: (SHA256) cppzmq-4.2.2.tar.gz: OK
-echo "3ef50070ac5877c06c6bb25091028465020e181bbfd08f110294ed6bc419737d cppzmq-4.2.2.tar.gz" | sha256 -c
-tar xfz cppzmq-4.2.2.tar.gz
+# MUST output: (SHA256) cppzmq-4.2.3.tar.gz: OK
+echo "3e6b57bf49115f4ae893b1ff7848ead7267013087dc7be1ab27636a97144d373 cppzmq-4.2.3.tar.gz" | sha256 -c
+tar xfz cppzmq-4.2.3.tar.gz
 
 # Start building cppzmq
-cd cppzmq-4.2.2
+cd cppzmq-4.2.3
 mkdir build
 cd build
 cmake ..
@@ -505,21 +520,39 @@ See [README.i18n.md](README.i18n.md).
 
 ## Using Tor
 
-While Monero isn't made to integrate with Tor, it can be used wrapped with torsocks, if you add --p2p-bind-ip 127.0.0.1 to the monerod command line. You also want to set DNS requests to go over TCP, so they'll be routed through Tor, by setting DNS_PUBLIC=tcp or use a particular DNS server with DNS_PUBLIC=tcp://a.b.c.d (default is 8.8.4.4, which is Google DNS). You may also disable IGD (UPnP port forwarding negotiation), which is pointless with Tor. To allow local connections from the wallet, you might have to add TORSOCKS_ALLOW_INBOUND=1, some OSes need it and some don't. Example:
+While Monero isn't made to integrate with Tor, it can be used wrapped with torsocks, by
+setting the following configuration parameters and environment variables:
 
-`DNS_PUBLIC=tcp torsocks monerod --p2p-bind-ip 127.0.0.1 --no-igd`
+* `--p2p-bind-ip 127.0.0.1` on the command line or `p2p-bind-ip=127.0.0.1` in
+  monerod.conf to disable listening for connections on external interfaces.
+* `--no-igd` on the command line or `no-igd=1` in monerod.conf to disable IGD
+  (UPnP port forwarding negotiation), which is pointless with Tor.
+* `DNS_PUBLIC=tcp` or `DNS_PUBLIC=tcp://x.x.x.x` where x.x.x.x is the IP of the
+  desired DNS server, for DNS requests to go over TCP, so that they are routed
+  through Tor. When IP is not specified, monerod uses the default list of
+  servers defined in [src/common/dns_utils.cpp](src/common/dns_utils.cpp).
+* `TORSOCKS_ALLOW_INBOUND=1` to tell torsocks to allow monerod to bind to interfaces
+   to accept connections from the wallet. On some Linux systems, torsocks
+   allows binding to localhost by default, so setting this variable is only
+   necessary to allow binding to local LAN/VPN interfaces to allow wallets to
+   connect from remote hosts. On other systems, it may be needed for local wallets
+   as well.
+* Do NOT pass `--detach` when running through torsocks with systemd, (see
+  [utils/systemd/monerod.service](utils/systemd/monerod.service) for details).
 
-or:
+Example command line to start monerod through Tor:
 
-`DNS_PUBLIC=tcp TORSOCKS_ALLOW_INBOUND=1 torsocks monerod --p2p-bind-ip 127.0.0.1 --no-igd`
+    DNS_PUBLIC=tcp torsocks monerod --p2p-bind-ip 127.0.0.1 --no-igd
 
-TAILS ships with a very restrictive set of firewall rules. Therefore, you need to add a rule to allow this connection too, in addition to telling torsocks to allow inbound connections. Full example:
+### Using Tor on Tails
 
-`sudo iptables -I OUTPUT 2 -p tcp -d 127.0.0.1 -m tcp --dport 18081 -j ACCEPT`
+TAILS ships with a very restrictive set of firewall rules. Therefore, you need
+to add a rule to allow this connection too, in addition to telling torsocks to
+allow inbound connections. Full example:
 
-`DNS_PUBLIC=tcp torsocks ./monerod --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 --data-dir /home/amnesia/Persistent/your/directory/to/the/blockchain`
-
-`./monero-wallet-cli`
+    sudo iptables -I OUTPUT 2 -p tcp -d 127.0.0.1 -m tcp --dport 18081 -j ACCEPT
+    DNS_PUBLIC=tcp torsocks ./monerod --p2p-bind-ip 127.0.0.1 --no-igd --rpc-bind-ip 127.0.0.1 \
+        --data-dir /home/amnesia/Persistent/your/directory/to/the/blockchain
 
 ## Debugging
 
