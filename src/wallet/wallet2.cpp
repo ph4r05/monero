@@ -97,7 +97,7 @@ using namespace cryptonote;
 #define RECENT_OUTPUT_RATIO (0.5) // 50% of outputs are from the recent zone
 #define RECENT_OUTPUT_DAYS (1.8) // last 1.8 day makes up the recent zone (taken from monerolink.pdf, Miller et al)
 #define RECENT_OUTPUT_ZONE ((time_t)(RECENT_OUTPUT_DAYS * 86400))
-#define RECENT_OUTPUT_BLOCKS (RECENT_OUTPUT_DAYS * 720)
+#define RECENT_OUTPUT_BLOCKS (RECENT_OUTPUT_DAYS * 10)
 
 #define FEE_ESTIMATE_GRACE_BLOCKS 10 // estimate fee valid for that many blocks
 
@@ -111,7 +111,7 @@ using namespace cryptonote;
 #define MULTISIG_EXPORT_FILE_MAGIC "Monero multisig export\001"
 
 #define SEGREGATION_FORK_HEIGHT 1546000
-#define TESTNET_SEGREGATION_FORK_HEIGHT 1300
+#define TESTNET_SEGREGATION_FORK_HEIGHT 1400
 #define STAGENET_SEGREGATION_FORK_HEIGHT 1000000
 #define SEGREGATION_FORK_VICINITY 1500 /* blocks */
 
