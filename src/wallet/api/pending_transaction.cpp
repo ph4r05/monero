@@ -92,7 +92,7 @@ bool PendingTransactionImpl::commit(const std::string &filename, bool overwrite)
           LOG_ERROR(m_errorString);
           return false;
         }
-        bool r = m_wallet.m_wallet->save_tx(m_pending_tx, filename);
+        bool r = m_wallet.m_wallet->save_unsigned_tx_to_file(m_pending_tx, filename);
         if (!r) {
           m_errorString = tr("Failed to write transaction(s) to file");
           m_status = Status_Error;

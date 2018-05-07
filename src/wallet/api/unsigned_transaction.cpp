@@ -79,7 +79,7 @@ bool UnsignedTransactionImpl::sign(const std::string &signedFileName)
   std::vector<tools::wallet2::pending_tx> ptx;
   try
   {
-    bool r = m_wallet.m_wallet->sign_tx(m_unsigned_tx_set, signedFileName, ptx);
+    bool r = m_wallet.m_wallet->sign_tx_to_file(m_unsigned_tx_set, signedFileName, ptx);
     if (!r)
     {
       m_errorString = tr("Failed to sign transaction");
