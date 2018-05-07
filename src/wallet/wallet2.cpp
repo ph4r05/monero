@@ -4670,6 +4670,8 @@ bool wallet2::save_tx(const std::vector<pending_tx>& ptx_vector, const std::stri
     return false;
   }
   LOG_PRINT_L2("Saving unsigned tx data: " << oss.str());
+  std::string as_hex = epee::string_tools::buff_to_hex_nodelimer(oss.str());
+  LOG_PRINT_L2("Saving unsigned tx data hex: " << as_hex);
   std::string ciphertext = encrypt_with_view_secret_key(oss.str());
   return epee::file_io_utils::save_string_to_file(filename, std::string(UNSIGNED_TX_PREFIX) + ciphertext);
 }
