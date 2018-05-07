@@ -501,6 +501,29 @@ namespace wallet_rpc
     };
   };
 
+  struct COMMAND_RPC_SUBMIT_TRANSFER
+  {
+    struct request
+    {
+      std::string tx_data_hex;
+      bool do_not_relay;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_data_hex)
+        KV_SERIALIZE_OPT(do_not_relay, false)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::list<std::string> tx_hash_list;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash_list)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
   struct COMMAND_RPC_SWEEP_DUST
   {
     struct request
