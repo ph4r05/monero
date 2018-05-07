@@ -109,12 +109,13 @@ int main(int argc, char* argv[])
   in.height = 0x34;
   cryptonote::txin_v txin(in);
 
-  arx & num;
+//  arx & num;
 //  arx & in;
-  arx & txin;
+//  arx & txin;
 
 
 //  tx_destination_entry de;
+//  tx_destination_entry de2;
 //  account_public_address pub;
 //  memset(pub.m_spend_public_key.data, 0, 32);
 //  memset(pub.m_view_public_key.data, 0, 32);
@@ -126,6 +127,14 @@ int main(int argc, char* argv[])
 //  de.amount = 0x44;
 //  de.is_subaddress = true;
 //  de.addr = pub;
+//  arx & de;
+//
+//  de2.amount = 0x22;
+//  de2.is_subaddress = false;
+//  pub.m_spend_public_key.data[0] = 0x11;
+//  pub.m_view_public_key.data[0] = 0x33;
+//  de2.addr = pub;
+//  arx & de2;
 
   rct::ctkey ct{};
   rct::key key1{};
@@ -135,6 +144,9 @@ int main(int argc, char* argv[])
 //  arx & ct;
 //  arx & key1;
 
+  rct::boroSig bsig;
+  bsig.s0[0].bytes[0] = 0x22;
+  arx & bsig;
 
   std::cout << epee::string_tools::buff_to_hex_nodelimer(oss.str()) << std::endl;
   std::cout << oss.str() << std::endl;
