@@ -951,7 +951,7 @@ int WalletImpl::autoRefreshInterval() const
 UnsignedTransaction *WalletImpl::loadUnsignedTx(const std::string &unsigned_filename) {
   clearStatus();
   UnsignedTransactionImpl * transaction = new UnsignedTransactionImpl(*this);
-  if (!m_wallet->load_unsigned_tx(unsigned_filename, transaction->m_unsigned_tx_set)){
+  if (!m_wallet->load_unsigned_tx_from_file(unsigned_filename, transaction->m_unsigned_tx_set)){
     m_errorString = tr("Failed to load unsigned transactions");
     m_status = Status_Error;
   }
@@ -971,7 +971,7 @@ bool WalletImpl::submitTransaction(const string &fileName) {
   clearStatus();
   std::unique_ptr<PendingTransactionImpl> transaction(new PendingTransactionImpl(*this));
 
-  bool r = m_wallet->load_tx(fileName, transaction->m_pending_tx);
+  bool r = m_wallet->load_signed_tx_from_file(fileName, transaction->m_pending_tx);
   if (!r) {
     m_errorString = tr("Failed to load transaction from file");
     m_status = Status_Ok;
