@@ -419,6 +419,7 @@ namespace wallet_rpc
       std::string tx_blob;
       std::string tx_metadata;
       std::string multisig_txset;
+      std::string unsigned_txset;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
@@ -429,6 +430,7 @@ namespace wallet_rpc
         KV_SERIALIZE(tx_blob)
         KV_SERIALIZE(tx_metadata)
         KV_SERIALIZE(multisig_txset)
+        KV_SERIALIZE(unsigned_txset)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -484,6 +486,7 @@ namespace wallet_rpc
       std::list<std::string> tx_blob_list;
       std::list<std::string> tx_metadata_list;
       std::string multisig_txset;
+      std::string unsigned_txset;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash_list)
@@ -493,6 +496,30 @@ namespace wallet_rpc
         KV_SERIALIZE(tx_blob_list)
         KV_SERIALIZE(tx_metadata_list)
         KV_SERIALIZE(multisig_txset)
+        KV_SERIALIZE(unsigned_txset)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_SUBMIT_TRANSFER
+  {
+    struct request
+    {
+      std::string tx_data_hex;
+      bool do_not_relay;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_data_hex)
+        KV_SERIALIZE_OPT(do_not_relay, false)
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      std::list<std::string> tx_hash_list;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(tx_hash_list)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -596,6 +623,7 @@ namespace wallet_rpc
       std::list<std::string> tx_blob_list;
       std::list<std::string> tx_metadata_list;
       std::string multisig_txset;
+      std::string unsigned_txset;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash_list)
@@ -605,6 +633,7 @@ namespace wallet_rpc
         KV_SERIALIZE(tx_blob_list)
         KV_SERIALIZE(tx_metadata_list)
         KV_SERIALIZE(multisig_txset)
+        KV_SERIALIZE(unsigned_txset)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -662,6 +691,7 @@ namespace wallet_rpc
       std::list<std::string> tx_blob_list;
       std::list<std::string> tx_metadata_list;
       std::string multisig_txset;
+      std::string unsigned_txset;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash_list)
@@ -671,6 +701,7 @@ namespace wallet_rpc
         KV_SERIALIZE(tx_blob_list)
         KV_SERIALIZE(tx_metadata_list)
         KV_SERIALIZE(multisig_txset)
+        KV_SERIALIZE(unsigned_txset)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -715,6 +746,7 @@ namespace wallet_rpc
       std::string tx_blob;
       std::string tx_metadata;
       std::string multisig_txset;
+      std::string unsigned_txset;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
@@ -724,6 +756,7 @@ namespace wallet_rpc
         KV_SERIALIZE(tx_blob)
         KV_SERIALIZE(tx_metadata)
         KV_SERIALIZE(multisig_txset)
+        KV_SERIALIZE(unsigned_txset)
       END_KV_SERIALIZE_MAP()
     };
   };
