@@ -84,7 +84,7 @@ int ColdTransactionFuzzer::run(const std::string &filename)
     boost::archive::portable_binary_iarchive ar(iss);
     ar >> exported_txs;
     std::vector<tools::wallet2::pending_tx> ptx;
-    bool success = wallet.sign_tx(exported_txs, "/tmp/cold-transaction-test-signed", ptx);
+    bool success = wallet.sign_tx_to_file(exported_txs, "/tmp/cold-transaction-test-signed", ptx);
     std::cout << (success ? "signed" : "error") << std::endl;
   }
   catch (const std::exception &e)
