@@ -9897,6 +9897,7 @@ size_t wallet2::import_outputs_from_str(const std::string &outputs_st)
     THROW_WALLET_EXCEPTION(error::wallet_internal_error, std::string("Outputs from are for a different account"));
   }
 
+  size_t imported_outputs = 0;
   try
   {
     std::string body(data, headerlen);
@@ -9916,12 +9917,14 @@ size_t wallet2::import_outputs_from_str(const std::string &outputs_st)
       ar >> outputs;
     }
 
-    return import_outputs(outputs);
+    imported_outputs = import_outputs(outputs);
   }
   catch (const std::exception &e)
   {
     THROW_WALLET_EXCEPTION(error::wallet_internal_error, std::string("Failed to import outputs") + e.what());
   }
+
+  return imported_outputs;
 }
 //----------------------------------------------------------------------------------------------------
 crypto::public_key wallet2::get_multisig_signer_public_key(const crypto::secret_key &spend_skey) const
