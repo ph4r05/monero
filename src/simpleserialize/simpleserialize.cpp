@@ -79,20 +79,20 @@ namespace po = boost::program_options;
 
 namespace
 {
-  tools::scoped_message_writer success_msg_writer(bool color = false)
-  {
-    return tools::scoped_message_writer(color ? console_color_green : console_color_default, false, std::string(), el::Level::Info);
-  }
-
-  tools::scoped_message_writer message_writer(epee::console_colors color = epee::console_color_default, bool bright = false)
-  {
-    return tools::scoped_message_writer(color, bright);
-  }
-
-  tools::scoped_message_writer fail_msg_writer()
-  {
-    return tools::scoped_message_writer(console_color_red, true, "Error ", el::Level::Error);
-  }
+//  tools::scoped_message_writer success_msg_writer(bool color = false)
+//  {
+//    return tools::scoped_message_writer(color ? console_color_green : console_color_default, false, std::string(), el::Level::Info);
+//  }
+//
+//  tools::scoped_message_writer message_writer(epee::console_colors color = epee::console_color_default, bool bright = false)
+//  {
+//    return tools::scoped_message_writer(color, bright);
+//  }
+//
+//  tools::scoped_message_writer fail_msg_writer()
+//  {
+//    return tools::scoped_message_writer(console_color_red, true, "Error ", el::Level::Error);
+//  }
 }
 
 
