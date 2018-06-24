@@ -54,9 +54,6 @@
 #include "ringct/rctTypes.h"
 #include "ringct/rctOps.h"
 #include "checkpoints/checkpoints.h"
-#include "serialization/set.h"
-#include "serialization/pair.h"
-#include "serialization/unordered_set.h"
 
 #include "wallet_errors.h"
 #include "common/password.h"
@@ -393,11 +390,6 @@ namespace tools
     {
       std::vector<tx_construction_data> txes;
       wallet2::transfer_container transfers;
-
-      BEGIN_SERIALIZE_OBJECT()
-        FIELD(txes)
-        FIELD(transfers)
-      END_SERIALIZE()
     };
 
     struct signed_tx_set
@@ -700,9 +692,7 @@ namespace tools
     bool save_multisig_tx(const std::vector<pending_tx>& ptx_vector, const std::string &filename);
     multisig_tx_set make_multisig_tx_set(const std::vector<pending_tx>& ptx_vector) const;
     // load unsigned tx from file and sign it. Takes confirmation callback as argument. Used by the cli wallet
-    bool sign_tx_file(const std::string &unsigned_filename, const std::string &signed_filename, std::vector<wallet2::pending_tx> &ptx, std::function<bool(const unsigned_tx_set &)> accept_func = NULL, bool export_raw = false);
-    bool sign_tx(unsigned_tx_set &exported_txs, std::vector<wallet2::pending_tx> &ptx, signed_tx_set &signed_txs);
-    std::string sign_tx_to_str(unsigned_tx_set &exported_txs, std::vector<wallet2::pending_tx> &ptx, signed_tx_set &signed_txes);
+    bool sign_tx(const std::string &unsigned_filename, const std::string &signed_filename, std::vector<wallet2::pending_tx> &ptx, std::function<bool(const unsigned_tx_set&)> accept_func = NULL, bool export_raw = false);
     // sign unsigned tx. Takes unsigned_tx_set as argument. Used by GUI
     bool sign_tx(unsigned_tx_set &exported_txs, const std::string &signed_filename, std::vector<wallet2::pending_tx> &ptx, bool export_raw = false);
     bool sign_tx(unsigned_tx_set &exported_txs, std::vector<wallet2::pending_tx> &ptx, signed_tx_set &signed_txs);
@@ -1004,7 +994,6 @@ namespace tools
     // Import/Export wallet data
     std::vector<tools::wallet2::transfer_details> export_outputs() const;
     std::string export_outputs_to_str() const;
-
     size_t import_outputs(const std::vector<tools::wallet2::transfer_details> &outputs);
     size_t import_outputs_from_str(const std::string &outputs_st);
     payment_container export_payments() const;
@@ -1081,10 +1070,6 @@ namespace tools
     crypto::public_key get_multisig_signer_public_key() const;
     crypto::public_key get_multisig_signing_public_key(size_t idx) const;
     crypto::public_key get_multisig_signing_public_key(const crypto::secret_key &skey) const;
-
-
-    int create_unsigned_transaction(unsigned_tx_set &unsigned_tx, std::vector<wallet2::pending_tx> ptx_vector);
-    std::string serialize_unsigned_transaction(unsigned_tx_set &unsigned_tx);
 
     template<class t_request, class t_response>
     inline bool invoke_http_json(const boost::string_ref uri, const t_request& req, t_response& res, std::chrono::milliseconds timeout = std::chrono::seconds(15), const boost::string_ref http_method = "GET")

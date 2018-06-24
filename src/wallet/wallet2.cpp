@@ -4672,7 +4672,7 @@ void wallet2::commit_tx(std::vector<pending_tx>& ptx_vector)
   }
 }
 //----------------------------------------------------------------------------------------------------
-std::string wallet2::save_unsigned_tx_to_str(const std::vector<pending_tx> &ptx_vector) const
+bool wallet2::save_tx(const std::vector<pending_tx>& ptx_vector, const std::string &filename) const
 {
   LOG_PRINT_L0("saving " << ptx_vector.size() << " transactions");
   std::string ciphertext = dump_tx_to_str(ptx_vector);
@@ -4710,7 +4710,7 @@ std::string wallet2::dump_tx_to_str(const std::vector<pending_tx> &ptx_vector) c
   return std::string(UNSIGNED_TX_PREFIX) + ciphertext;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::load_unsigned_tx_from_file(const std::string &unsigned_filename, unsigned_tx_set &exported_txs) const
+bool wallet2::load_unsigned_tx(const std::string &unsigned_filename, unsigned_tx_set &exported_txs) const
 {
   std::string s;
   boost::system::error_code errcode;
@@ -4788,10 +4788,10 @@ bool wallet2::parse_unsigned_tx_from_str(const std::string &unsigned_tx_st, unsi
   return true;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::sign_tx_file(const std::string &unsigned_filename, const std::string &signed_filename, std::vector<wallet2::pending_tx> &txs, std::function<bool(const unsigned_tx_set &)> accept_func, bool export_raw)
+bool wallet2::sign_tx(const std::string &unsigned_filename, const std::string &signed_filename, std::vector<wallet2::pending_tx> &txs, std::function<bool(const unsigned_tx_set&)> accept_func, bool export_raw)
 {
   unsigned_tx_set exported_txs;
-  if(!load_unsigned_tx_from_file(unsigned_filename, exported_txs))
+  if(!load_unsigned_tx(unsigned_filename, exported_txs))
     return false;
   
   if (accept_func && !accept_func(exported_txs))
@@ -4799,7 +4799,7 @@ bool wallet2::sign_tx_file(const std::string &unsigned_filename, const std::stri
     LOG_PRINT_L1("Transactions rejected by callback");
     return false;
   }
-  return sign_tx_to_file(exported_txs, signed_filename, txs, export_raw);
+  return sign_tx(exported_txs, signed_filename, txs, export_raw);
 }
 //----------------------------------------------------------------------------------------------------
 bool wallet2::sign_tx(unsigned_tx_set &exported_txs, std::vector<wallet2::pending_tx> &txs, signed_tx_set &signed_txes)
@@ -4812,8 +4812,8 @@ bool wallet2::sign_tx(unsigned_tx_set &exported_txs, std::vector<wallet2::pendin
     tools::wallet2::tx_construction_data &sd = exported_txs.txes[n];
     THROW_WALLET_EXCEPTION_IF(sd.sources.empty(), error::wallet_internal_error, "Empty sources");
     LOG_PRINT_L1(" " << (n+1) << ": " << sd.sources.size() << " inputs, ring size " << sd.sources[0].outputs.size());
-    signed_txs.ptx.push_back(pending_tx());
-    tools::wallet2::pending_tx &ptx = signed_txs.ptx.back();
+    signed_txes.ptx.push_back(pending_tx());
+    tools::wallet2::pending_tx &ptx = signed_txes.ptx.back();
     bool bulletproof = sd.use_rct && !ptx.tx.rct_signatures.p.bulletproofs.empty();
     crypto::secret_key tx_key;
     std::vector<crypto::secret_key> additional_tx_keys;
@@ -4860,25 +4860,12 @@ bool wallet2::sign_tx(unsigned_tx_set &exported_txs, std::vector<wallet2::pendin
   }
 
   // add key images
-  signed_txs.key_images.resize(m_transfers.size());
+  signed_txes.key_images.resize(m_transfers.size());
   for (size_t i = 0; i < m_transfers.size(); ++i)
   {
     if (!m_transfers[i].m_key_image_known || m_transfers[i].m_key_image_partial)
       LOG_PRINT_L0("WARNING: key image not known in signing wallet at index " << i);
-    signed_txs.key_images[i] = m_transfers[i].m_key_image;
-  }
-
-  return true;
-}
-//----------------------------------------------------------------------------------------------------
-std::string wallet2::sign_tx_to_str(unsigned_tx_set &exported_txs, std::vector<wallet2::pending_tx> &ptx, signed_tx_set &signed_txes)
-{
-  // sign the transactions
-  bool r = sign_tx(exported_txs, ptx, signed_txes);
-  if (!r)
-  {
-    LOG_PRINT_L0("Failed to sign unsigned_tx_set");
-    return std::string();
+    signed_txes.key_images[i] = m_transfers[i].m_key_image;
   }
 
   return true;
@@ -4945,7 +4932,7 @@ std::string wallet2::sign_tx_dump_to_str(unsigned_tx_set &exported_txs, std::vec
 //----------------------------------------------------------------------------------------------------
 bool wallet2::load_tx(const std::string &signed_filename, std::vector<tools::wallet2::pending_tx> &ptx, std::function<bool(const signed_tx_set&)> accept_func)
 {
-  std::string s = signed_tx_st;
+  std::string s;
   boost::system::error_code errcode;
   signed_tx_set signed_txs;
 
@@ -5051,27 +5038,6 @@ bool wallet2::parse_tx_from_str(const std::string &signed_tx_st, std::vector<too
   ptx = signed_txs.ptx;
 
   return true;
-}
-//----------------------------------------------------------------------------------------------------
-bool wallet2::load_signed_tx_from_file(const std::string &signed_filename, std::vector<tools::wallet2::pending_tx> &ptx, std::function<bool(const signed_tx_set&)> accept_func)
-{
-  std::string s;
-  boost::system::error_code errcode;
-  signed_tx_set signed_txs;
-
-  if (!boost::filesystem::exists(signed_filename, errcode))
-  {
-    LOG_PRINT_L0("File " << signed_filename << " does not exist: " << errcode);
-    return false;
-  }
-
-  if (!epee::file_io_utils::load_file_to_string(signed_filename.c_str(), s))
-  {
-    LOG_PRINT_L0("Failed to load from " << signed_filename);
-    return false;
-  }
-
-  return load_signed_tx_from_str(s, ptx, accept_func);
 }
 //----------------------------------------------------------------------------------------------------
 std::string wallet2::save_multisig_tx(multisig_tx_set txs)
