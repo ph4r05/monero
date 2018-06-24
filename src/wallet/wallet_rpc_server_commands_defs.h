@@ -39,6 +39,17 @@
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "wallet.rpc"
 
+// When making *any* change here, bump minor
+// If the change is incompatible, then bump major and set minor to 0
+// This ensures WALLET_RPC_VERSION always increases, that every change
+// has its own version, and that clients can just test major to see
+// whether they can talk to a given wallet without having to know in
+// advance which version they will stop working with
+// Don't go over 32767 for any of these
+#define WALLET_RPC_VERSION_MAJOR 1
+#define WALLET_RPC_VERSION_MINOR 0
+#define MAKE_WALLET_RPC_VERSION(major,minor) (((major)<<16)|(minor))
+#define WALLET_RPC_VERSION MAKE_WALLET_RPC_VERSION(WALLET_RPC_VERSION_MAJOR, WALLET_RPC_VERSION_MINOR)
 namespace tools
 {
 namespace wallet_rpc
@@ -506,9 +517,11 @@ namespace wallet_rpc
     struct request
     {
       std::string unsigned_txset;
+      bool export_raw;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(unsigned_txset)
+        KV_SERIALIZE_OPT(export_raw, false)
       END_KV_SERIALIZE_MAP()
     };
 
@@ -516,10 +529,12 @@ namespace wallet_rpc
     {
       std::string signed_txset;
       std::list<std::string> tx_hash_list;
+      std::list<std::string> tx_raw_list;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(signed_txset)
         KV_SERIALIZE(tx_hash_list)
+        KV_SERIALIZE(tx_raw_list)
       END_KV_SERIALIZE_MAP()
     };
   };
@@ -1957,6 +1972,24 @@ namespace wallet_rpc
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash_list)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_GET_VERSION
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      uint32_t version;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(version)
       END_KV_SERIALIZE_MAP()
     };
   };

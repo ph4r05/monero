@@ -742,7 +742,7 @@ namespace tools
     else
     {
       if (m_wallet->watch_only()){
-        unsigned_txset = epee::string_tools::buff_to_hex_nodelimer(m_wallet->save_unsigned_tx_to_str(ptx_vector));
+        unsigned_txset = epee::string_tools::buff_to_hex_nodelimer(m_wallet->dump_tx_to_str(ptx_vector));
         if (unsigned_txset.empty())
         {
           er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
@@ -820,8 +820,8 @@ namespace tools
         return false;
       }
 
-      return fill_response(ptx_vector, req.get_tx_key, res.tx_key, res.amount, res.fee, res.multisig_txset, res.unsigned_txset,
-          req.do_not_relay, res.tx_hash, req.get_tx_hex, res.tx_blob, req.get_tx_metadata, res.tx_metadata, er);
+      return fill_response(ptx_vector, req.get_tx_key, res.tx_key, res.amount, res.fee, res.multisig_txset, res.unsigned_txset, req.do_not_relay,
+          res.tx_hash, req.get_tx_hex, res.tx_blob, req.get_tx_metadata, res.tx_metadata, er);
     }
     catch (const std::exception& e)
     {
@@ -867,8 +867,8 @@ namespace tools
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_2(dsts, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices, m_trusted_daemon);
       LOG_PRINT_L2("on_transfer_split called create_transactions_2");
 
-      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset,
-          req.do_not_relay, res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
+      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset, req.do_not_relay,
+          res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
     }
     catch (const std::exception& e)
     {
@@ -909,7 +909,7 @@ namespace tools
     }
 
     tools::wallet2::unsigned_tx_set exported_txs;
-    if(!m_wallet->load_unsigned_tx_from_str(blob, exported_txs))
+    if(!m_wallet->parse_unsigned_tx_from_str(blob, exported_txs))
     {
       er.code = WALLET_RPC_ERROR_CODE_BAD_UNSIGNED_TX_DATA;
       er.message = "cannot load unsigned_txset";
@@ -920,7 +920,7 @@ namespace tools
     try
     {
       tools::wallet2::signed_tx_set signed_txs;
-      std::string ciphertext = m_wallet->sign_tx_to_str(exported_txs, ptxs, signed_txs);
+      std::string ciphertext = m_wallet->sign_tx_dump_to_str(exported_txs, ptxs, signed_txs);
       if (ciphertext.empty())
       {
         er.code = WALLET_RPC_ERROR_CODE_SIGN_UNSIGNED;
@@ -940,6 +940,14 @@ namespace tools
     for (auto &ptx: ptxs)
     {
       res.tx_hash_list.push_back(epee::string_tools::pod_to_hex(cryptonote::get_transaction_hash(ptx.tx)));
+    }
+
+    if (req.export_raw)
+    {
+      for (auto &ptx: ptxs)
+      {
+        res.tx_raw_list.push_back(epee::string_tools::buff_to_hex_nodelimer(cryptonote::tx_to_blob(ptx.tx)));
+      }
     }
 
     return true;
@@ -972,7 +980,7 @@ namespace tools
     std::vector<tools::wallet2::pending_tx> ptx_vector;
     try
     {
-      bool r = m_wallet->load_signed_tx_from_str(blob, ptx_vector, NULL);
+      bool r = m_wallet->parse_tx_from_str(blob, ptx_vector, NULL);
       if (!r)
       {
         er.code = WALLET_RPC_ERROR_CODE_BAD_SIGNED_TX_DATA;
@@ -1019,8 +1027,9 @@ namespace tools
     {
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_unmixable_sweep_transactions(m_trusted_daemon);
 
-      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset,
-          req.do_not_relay, res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
+      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset, req.do_not_relay,
+          res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
+
     }
     catch (const std::exception& e)
     {
@@ -1067,8 +1076,8 @@ namespace tools
       uint32_t priority = m_wallet->adjust_priority(req.priority);
       std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_all(req.below_amount, dsts[0].addr, dsts[0].is_subaddress, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices, m_trusted_daemon);
 
-      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset,
-          req.do_not_relay, res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
+      return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset, req.do_not_relay,
+          res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
     }
     catch (const std::exception& e)
     {
@@ -3100,6 +3109,12 @@ namespace tools
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_get_version(const wallet_rpc::COMMAND_RPC_GET_VERSION::request& req, wallet_rpc::COMMAND_RPC_GET_VERSION::response& res, epee::json_rpc::error& er)
+  {
+    res.version = WALLET_RPC_VERSION;
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
 }
 
 int main(int argc, char** argv) {
@@ -3119,7 +3134,9 @@ int main(int argc, char** argv) {
   command_line::add_arg(desc_params, arg_wallet_dir);
   command_line::add_arg(desc_params, arg_prompt_for_password);
 
-  const auto vm = wallet_args::main(
+  boost::optional<po::variables_map> vm;
+  bool should_terminate = false;
+  std::tie(vm, should_terminate) = wallet_args::main(
     argc, argv,
     "monero-wallet-rpc [--wallet-file=<file>|--generate-from-json=<file>|--wallet-dir=<directory>] [--rpc-bind-port=<port>]",
     tools::wallet_rpc_server::tr("This is the RPC monero wallet. It needs to connect to a monero\ndaemon to work correctly."),
@@ -3132,6 +3149,10 @@ int main(int argc, char** argv) {
   if (!vm)
   {
     return 1;
+  }
+  if (should_terminate)
+  {
+    return 0;
   }
 
   std::unique_ptr<tools::wallet2> wal;
