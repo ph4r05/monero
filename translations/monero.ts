@@ -461,7 +461,7 @@
     </message>
     <message>
         <location filename="../src/rpc/rpc_args.cpp" line="105"/>
-        <source> requires RFC server password --</source>
+        <source> requires RPC server password --</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -1607,7 +1607,7 @@ If the &quot;tag_description&quot; argument is specified, the tag &lt;tag_name&g
     </message>
     <message>
         <location filename="../src/simplewallet/simplewallet.cpp" line="1653"/>
-        <source>If no arguments are specified or &lt;index&gt; is specified, the wallet shows the default or specified address. If &quot;all&quot; is specified, the walllet shows all the existing addresses in the currently selected account. If &quot;new &quot; is specified, the wallet creates a new address with the provided label text (which can be empty). If &quot;label&quot; is specified, the wallet sets the label of the address specified by &lt;index&gt; to the provided label text.</source>
+        <source>If no arguments are specified or &lt;index&gt; is specified, the wallet shows the default or specified address. If &quot;all&quot; is specified, the wallet shows all the existing addresses in the currently selected account. If &quot;new &quot; is specified, the wallet creates a new address with the provided label text (which can be empty). If &quot;label&quot; is specified, the wallet sets the label of the address specified by &lt;index&gt; to the provided label text.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1678,7 +1678,7 @@ If the &quot;tag_description&quot; argument is specified, the tag &lt;tag_name&g
  refresh-type &lt;full|optimize-coinbase|no-coinbase|default&gt;
    Set the wallet&apos;s refresh behaviour.
  priority [0|1|2|3|4]
-   Set the fee too default/unimportant/normal/elevated/priority.
+   Set the fee to default/unimportant/normal/elevated/priority.
  confirm-missing-payment-id &lt;1|0&gt;
  ask-password &lt;1|0&gt;
  unit &lt;monero|millinero|micronero|nanonero|piconero&gt;
@@ -3528,7 +3528,7 @@ Outputs per *: </source>
     </message>
     <message>
         <location filename="../src/gen_multisig/gen_multisig.cpp" line="72"/>
-        <source>How many participants wil share parts of the multisig wallet</source>
+        <source>How many participants will share parts of the multisig wallet</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

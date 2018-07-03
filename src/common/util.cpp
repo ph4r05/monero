@@ -34,6 +34,17 @@
 #include <gnu/libc-version.h>
 #endif
 
+#ifdef __GLIBC__
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <ustat.h>
+#include <unistd.h>
+#include <dirent.h>
+#include <string.h>
+#include <ctype.h>
+#include <string>
+#endif
+
 #include "unbound.h"
 
 #include "include_base_utils.h"
@@ -43,6 +54,7 @@ using namespace epee;
 
 #include "crypto/crypto.h"
 #include "util.h"
+#include "stack_trace.h"
 #include "memwipe.h"
 #include "cryptonote_config.h"
 #include "net/http_client.h"                        // epee::net_utils::...
@@ -181,6 +193,73 @@ namespace tools
       boost::filesystem::remove(filename(), ec);
     }
     catch (...) {}
+  }
+
+  file_locker::file_locker(const std::string &filename)
+  {
+#ifdef WIN32
+    m_fd = INVALID_HANDLE_VALUE;
+    std::wstring filename_wide;
+    try
+    {
+      filename_wide = string_tools::utf8_to_utf16(filename);
+    }
+    catch (const std::exception &e)
+    {
+      MERROR("Failed to convert path \"" << filename << "\" to UTF-16: " << e.what());
+      return;
+    }
+    m_fd = CreateFileW(filename_wide.c_str(), GENERIC_READ, 0, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    if (m_fd != INVALID_HANDLE_VALUE)
+    {
+      OVERLAPPED ov;
+      memset(&ov, 0, sizeof(ov));
+      if (!LockFileEx(m_fd, LOCKFILE_FAIL_IMMEDIATELY | LOCKFILE_EXCLUSIVE_LOCK, 0, 1, 0, &ov))
+      {
+        MERROR("Failed to lock " << filename << ": " << std::error_code(GetLastError(), std::system_category()));
+        CloseHandle(m_fd);
+        m_fd = INVALID_HANDLE_VALUE;
+      }
+    }
+    else
+    {
+      MERROR("Failed to open " << filename << ": " << std::error_code(GetLastError(), std::system_category()));
+    }
+#else
+    m_fd = open(filename.c_str(), O_RDONLY | O_CREAT, 0666);
+    if (m_fd != -1)
+    {
+      if (flock(m_fd, LOCK_EX | LOCK_NB) == -1)
+      {
+        MERROR("Failed to lock " << filename << ": " << std::strerror(errno));
+        close(m_fd);
+        m_fd = -1;
+      }
+    }
+    else
+    {
+      MERROR("Failed to open " << filename << ": " << std::strerror(errno));
+    }
+#endif
+  }
+  file_locker::~file_locker()
+  {
+    if (locked())
+    {
+#ifdef WIN32
+      CloseHandle(m_fd);
+#else
+      close(m_fd);
+#endif
+    }
+  }
+  bool file_locker::locked() const
+  {
+#ifdef WIN32
+    return m_fd != INVALID_HANDLE_VALUE;
+#else
+    return m_fd != -1;
+#endif
   }
 
 #ifdef WIN32
@@ -435,15 +514,22 @@ std::string get_nix_version_display_string()
 #ifdef WIN32
   std::string get_special_folder_path(int nfolder, bool iscreate)
   {
-    namespace fs = boost::filesystem;
-    char psz_path[MAX_PATH] = "";
+    WCHAR psz_path[MAX_PATH] = L"";
 
-    if(SHGetSpecialFolderPathA(NULL, psz_path, nfolder, iscreate))
+    if (SHGetSpecialFolderPathW(NULL, psz_path, nfolder, iscreate))
     {
-      return psz_path;
+      try
+      {
+        return string_tools::utf16_to_utf8(psz_path);
+      }
+      catch (const std::exception &e)
+      {
+        MERROR("utf16_to_utf8 failed: " << e.what());
+        return "";
+      }
     }
 
-    LOG_ERROR("SHGetSpecialFolderPathA() failed, could not obtain requested path.");
+    LOG_ERROR("SHGetSpecialFolderPathW() failed, could not obtain requested path.");
     return "";
   }
 #endif
@@ -501,13 +587,20 @@ std::string get_nix_version_display_string()
     int code;
 #if defined(WIN32)
     // Maximizing chances for success
-    DWORD attributes = ::GetFileAttributes(replaced_name.c_str());
+    std::wstring wide_replacement_name;
+    try { wide_replacement_name = string_tools::utf8_to_utf16(replacement_name); }
+    catch (...) { return std::error_code(GetLastError(), std::system_category()); }
+    std::wstring wide_replaced_name;
+    try { wide_replaced_name = string_tools::utf8_to_utf16(replaced_name); }
+    catch (...) { return std::error_code(GetLastError(), std::system_category()); }
+
+    DWORD attributes = ::GetFileAttributesW(wide_replaced_name.c_str());
     if (INVALID_FILE_ATTRIBUTES != attributes)
     {
-      ::SetFileAttributes(replaced_name.c_str(), attributes & (~FILE_ATTRIBUTE_READONLY));
+      ::SetFileAttributesW(wide_replaced_name.c_str(), attributes & (~FILE_ATTRIBUTE_READONLY));
     }
 
-    bool ok = 0 != ::MoveFileEx(replacement_name.c_str(), replaced_name.c_str(), MOVEFILE_REPLACE_EXISTING);
+    bool ok = 0 != ::MoveFileExW(wide_replacement_name.c_str(), wide_replaced_name.c_str(), MOVEFILE_REPLACE_EXISTING);
     code = ok ? 0 : static_cast<int>(::GetLastError());
 #else
     bool ok = 0 == std::rename(replacement_name.c_str(), replaced_name.c_str());
@@ -520,7 +613,10 @@ std::string get_nix_version_display_string()
   {
     ub_ctx *ctx = ub_ctx_create();
     if (!ctx) return false; // cheat a bit, should not happen unless OOM
-    ub_ctx_zone_add(ctx, "monero", "unbound"); // this calls ub_ctx_finalize first, then errors out with UB_SYNTAX
+    char *monero = strdup("monero"), *unbound = strdup("unbound");
+    ub_ctx_zone_add(ctx, monero, unbound); // this calls ub_ctx_finalize first, then errors out with UB_SYNTAX
+    free(unbound);
+    free(monero);
     // if no threads, bails out early with UB_NOERROR, otherwise fails with UB_AFTERFINAL id already finalized
     bool with_threads = ub_ctx_async(ctx, 1) != 0; // UB_AFTERFINAL is not defined in public headers, check any error
     ub_ctx_delete(ctx);
@@ -550,9 +646,47 @@ std::string get_nix_version_display_string()
     }
     return false;
   }
+
+#ifdef STACK_TRACE
+#ifdef _WIN32
+  // https://stackoverflow.com/questions/1992816/how-to-handle-seg-faults-under-windows
+  static LONG WINAPI windows_crash_handler(PEXCEPTION_POINTERS pExceptionInfo)
+  {
+    tools::log_stack_trace("crashing");
+    exit(1);
+    return EXCEPTION_CONTINUE_SEARCH;
+  }
+  static void setup_crash_dump()
+  {
+    SetUnhandledExceptionFilter(windows_crash_handler);
+  }
+#else
+  static void posix_crash_handler(int signal)
+  {
+    tools::log_stack_trace(("crashing with fatal signal " + std::to_string(signal)).c_str());
+#ifdef NDEBUG
+    _exit(1);
+#else
+    abort();
+#endif
+  }
+  static void setup_crash_dump()
+  {
+    signal(SIGSEGV, posix_crash_handler);
+    signal(SIGBUS, posix_crash_handler);
+    signal(SIGILL, posix_crash_handler);
+    signal(SIGFPE, posix_crash_handler);
+  }
+#endif
+#else
+  static void setup_crash_dump() {}
+#endif
+
   bool on_startup()
   {
     mlog_configure("", true);
+
+    setup_crash_dump();
 
     sanitize_locale();
 
@@ -583,6 +717,65 @@ std::string get_nix_version_display_string()
 #endif
   }
 
+  bool is_hdd(const char *path)
+  {
+#ifdef __GLIBC__
+    std::string device = "";
+    struct stat st, dst;
+    if (stat(path, &st) < 0)
+      return 0;
+
+    DIR *dir = opendir("/dev/block");
+    if (!dir)
+      return 0;
+    struct dirent *de;
+    while ((de = readdir(dir)))
+    {
+      if (strcmp(de->d_name, ".") && strcmp(de->d_name, ".."))
+      {
+        std::string dev_path = std::string("/dev/block/") + de->d_name;
+        char resolved[PATH_MAX];
+        if (realpath(dev_path.c_str(), resolved) && !strncmp(resolved, "/dev/", 5))
+        {
+          if (stat(resolved, &dst) == 0)
+          {
+            if (dst.st_rdev == st.st_dev)
+            {
+              // take out trailing digits (eg, sda1 -> sda)
+              char *ptr = resolved;
+              while (*ptr)
+                ++ptr;
+              while (ptr > resolved && isdigit(*--ptr))
+                *ptr = 0;
+              device = resolved + 5;
+              break;
+            }
+          }
+        }
+      }
+    }
+    closedir(dir);
+
+    if (device.empty())
+      return 0;
+
+    std::string sys_path = "/sys/block/" + device + "/queue/rotational";
+    FILE *f = fopen(sys_path.c_str(), "r");
+    if (!f)
+      return false;
+    char s[8];
+    char *ptr = fgets(s, sizeof(s), f);
+    fclose(f);
+    if (!ptr)
+      return 0;
+    s[sizeof(s) - 1] = 0;
+    int n = atoi(s); // returns 0 on parse error
+    return n == 1;
+#else
+    return 0;
+#endif
+  }
+
   namespace
   {
     boost::mutex max_concurrency_lock;
@@ -608,6 +801,13 @@ std::string get_nix_version_display_string()
 
   bool is_local_address(const std::string &address)
   {
+    // always assume Tor/I2P addresses to be untrusted by default
+    if (boost::ends_with(address, ".onion") || boost::ends_with(address, ".i2p"))
+    {
+      MDEBUG("Address '" << address << "' is Tor/I2P, non local");
+      return false;
+    }
+
     // extract host
     epee::net_utils::http::url_content u_c;
     if (!epee::net_utils::parse_url(address, u_c))
@@ -700,5 +900,23 @@ std::string get_nix_version_display_string()
     if (!SHA256_Final((unsigned char*)hash.data, &ctx))
       return false;
     return true;
+  }
+
+  boost::optional<std::pair<uint32_t, uint32_t>> parse_subaddress_lookahead(const std::string& str)
+  {
+    auto pos = str.find(":");
+    bool r = pos != std::string::npos;
+    uint32_t major;
+    r = r && epee::string_tools::get_xtype_from_string(major, str.substr(0, pos));
+    uint32_t minor;
+    r = r && epee::string_tools::get_xtype_from_string(minor, str.substr(pos + 1));
+    if (r)
+    {
+      return std::make_pair(major, minor);
+    }
+    else
+    {
+      return {};
+    }
   }
 }

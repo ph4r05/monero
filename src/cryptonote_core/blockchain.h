@@ -111,25 +111,25 @@ namespace cryptonote
      * @brief Initialize the Blockchain state
      *
      * @param db a pointer to the backing store to use for the blockchain
-     * @param testnet true if on testnet, else false
+     * @param nettype network type
      * @param offline true if running offline, else false
      * @param test_options test parameters
      *
      * @return true on success, false if any initialization steps fail
      */
-    bool init(BlockchainDB* db, const bool testnet = false, bool offline = false, const cryptonote::test_options *test_options = NULL);
+    bool init(BlockchainDB* db, const network_type nettype = MAINNET, bool offline = false, const cryptonote::test_options *test_options = NULL);
 
     /**
      * @brief Initialize the Blockchain state
      *
      * @param db a pointer to the backing store to use for the blockchain
      * @param hf a structure containing hardfork information
-     * @param testnet true if on testnet, else false
+     * @param nettype network type
      * @param offline true if running offline, else false
      *
      * @return true on success, false if any initialization steps fail
      */
-    bool init(BlockchainDB* db, HardFork*& hf, const bool testnet = false, bool offline = false);
+    bool init(BlockchainDB* db, HardFork*& hf, const network_type nettype = MAINNET, bool offline = false);
 
     /**
      * @brief Uninitializes the blockchain state
@@ -157,7 +157,7 @@ namespace cryptonote
      *
      * @return false if start_offset > blockchain height, else true
      */
-    bool get_blocks(uint64_t start_offset, size_t count, std::list<std::pair<cryptonote::blobdata,block>>& blocks, std::list<cryptonote::blobdata>& txs) const;
+    bool get_blocks(uint64_t start_offset, size_t count, std::vector<std::pair<cryptonote::blobdata,block>>& blocks, std::vector<cryptonote::blobdata>& txs) const;
 
     /**
      * @brief get blocks from blocks based on start height and count
@@ -168,7 +168,7 @@ namespace cryptonote
      *
      * @return false if start_offset > blockchain height, else true
      */
-    bool get_blocks(uint64_t start_offset, size_t count, std::list<std::pair<cryptonote::blobdata,block>>& blocks) const;
+    bool get_blocks(uint64_t start_offset, size_t count, std::vector<std::pair<cryptonote::blobdata,block>>& blocks) const;
 
     /**
      * @brief compiles a list of all blocks stored as alternative chains
@@ -177,7 +177,7 @@ namespace cryptonote
      *
      * @return true
      */
-    bool get_alternative_blocks(std::list<block>& blocks) const;
+    bool get_alternative_blocks(std::vector<block>& blocks) const;
 
     /**
      * @brief returns the number of alternative blocks stored
@@ -207,22 +207,13 @@ namespace cryptonote
     bool get_block_by_hash(const crypto::hash &h, block &blk, bool *orphan = NULL) const;
 
     /**
-     * @brief get all block hashes (main chain, alt chains, and invalid blocks)
-     *
-     * @param main return-by-reference container to put result main chain blocks' hashes in
-     * @param alt return-by-reference container to put result alt chain blocks' hashes in
-     * @param invalid return-by-reference container to put result invalid blocks' hashes in
-     */
-    void get_all_known_block_ids(std::list<crypto::hash> &main, std::list<crypto::hash> &alt, std::list<crypto::hash> &invalid) const;
-
-    /**
      * @brief performs some preprocessing on a group of incoming blocks to speed up verification
      *
      * @param blocks a list of incoming blocks
      *
      * @return false on erroneous blocks, else true
      */
-    bool prepare_handle_incoming_blocks(const std::list<block_complete_entry>  &blocks);
+    bool prepare_handle_incoming_blocks(const std::vector<block_complete_entry>  &blocks);
 
     /**
      * @brief incoming blocks post-processing, cleanup, and disk sync
@@ -382,7 +373,7 @@ namespace cryptonote
      *
      * @return true if a block found in common, else false
      */
-    bool find_blockchain_supplement(const std::list<crypto::hash>& qblock_ids, std::list<crypto::hash>& hashes, uint64_t& start_height, uint64_t& current_height) const;
+    bool find_blockchain_supplement(const std::list<crypto::hash>& qblock_ids, std::vector<crypto::hash>& hashes, uint64_t& start_height, uint64_t& current_height) const;
 
     /**
      * @brief get recent block hashes for a foreign chain
@@ -424,11 +415,12 @@ namespace cryptonote
      * @param blocks return-by-reference the blocks and their transactions
      * @param total_height return-by-reference our current blockchain height
      * @param start_height return-by-reference the height of the first block returned
+     * @param pruned whether to return full or pruned tx blobs
      * @param max_count the max number of blocks to get
      *
      * @return true if a block found in common or req_start_block specified, else false
      */
-    bool find_blockchain_supplement(const uint64_t req_start_block, const std::list<crypto::hash>& qblock_ids, std::list<std::pair<cryptonote::blobdata, std::list<cryptonote::blobdata> > >& blocks, uint64_t& total_height, uint64_t& start_height, size_t max_count) const;
+    bool find_blockchain_supplement(const uint64_t req_start_block, const std::list<crypto::hash>& qblock_ids, std::vector<std::pair<std::pair<cryptonote::blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, cryptonote::blobdata> > > >& blocks, uint64_t& total_height, uint64_t& start_height, bool pruned, bool get_miner_tx_hash, size_t max_count) const;
 
     /**
      * @brief retrieves a set of blocks and their transactions, and possibly other transactions
@@ -531,6 +523,18 @@ namespace cryptonote
      * @return true
      */
     bool get_random_rct_outs(const COMMAND_RPC_GET_RANDOM_RCT_OUTPUTS::request& req, COMMAND_RPC_GET_RANDOM_RCT_OUTPUTS::response& res) const;
+
+    /**
+     * @brief gets per block distribution of outputs of a given amount
+     *
+     * @param amount the amount to get a ditribution for
+     * @param from_height the height before which we do not care about the data
+     * @param to_height the height after which we do not care about the data
+     * @param return-by-reference start_height the height of the first rct output
+     * @param return-by-reference distribution the start offset of the first rct output in this block (same as previous if none)
+     * @param return-by-reference base how many outputs of that amount are before the stated distribution
+     */
+    bool get_output_distribution(uint64_t amount, uint64_t from_height, uint64_t to_height, uint64_t &start_height, std::vector<uint64_t> &distribution, uint64_t &base) const;
 
     /**
      * @brief gets the global indices for outputs from a given transaction
@@ -676,11 +680,12 @@ namespace cryptonote
      * @param txs_ids a container of hashes for which to get the corresponding transactions
      * @param txs return-by-reference a container to store result transactions in
      * @param missed_txs return-by-reference a container to store missed transactions in
+     * @param pruned whether to return full or pruned blobs
      *
      * @return false if an unexpected exception occurs, else true
      */
     template<class t_ids_container, class t_tx_container, class t_missed_container>
-    bool get_transactions_blobs(const t_ids_container& txs_ids, t_tx_container& txs, t_missed_container& missed_txs) const;
+    bool get_transactions_blobs(const t_ids_container& txs_ids, t_tx_container& txs, t_missed_container& missed_txs, bool pruned = false) const;
     template<class t_ids_container, class t_tx_container, class t_missed_container>
     bool get_transactions(const t_ids_container& txs_ids, t_tx_container& txs, t_missed_container& missed_txs) const;
 
@@ -790,6 +795,13 @@ namespace cryptonote
     uint8_t get_hard_fork_version(uint64_t height) const { return m_hardfork->get(height); }
 
     /**
+     * @brief returns the earliest block a given version may activate
+     *
+     * @return the height
+     */
+    uint64_t get_earliest_ideal_height_for_version(uint8_t version) const { return m_hardfork->get_earliest_ideal_height_for_version(version); }
+
+    /**
      * @brief get information about hardfork voting for a version
      *
      * @param version the version in question
@@ -817,7 +829,7 @@ namespace cryptonote
      *
      * @return false if any removals fail, otherwise true
      */
-    bool flush_txes_from_pool(const std::list<crypto::hash> &txids);
+    bool flush_txes_from_pool(const std::vector<crypto::hash> &txids);
 
     /**
      * @brief return a histogram of outputs on the blockchain
@@ -825,10 +837,11 @@ namespace cryptonote
      * @param amounts optional set of amounts to lookup
      * @param unlocked whether to restrict instances to unlocked ones
      * @param recent_cutoff timestamp to consider outputs as recent
+     * @param min_count return only amounts with at least that many instances
      *
      * @return a set of amount/instances
      */
-    std::map<uint64_t, std::tuple<uint64_t, uint64_t, uint64_t>> get_output_histogram(const std::vector<uint64_t> &amounts, bool unlocked, uint64_t recent_cutoff) const;
+    std::map<uint64_t, std::tuple<uint64_t, uint64_t, uint64_t>> get_output_histogram(const std::vector<uint64_t> &amounts, bool unlocked, uint64_t recent_cutoff, uint64_t min_count = 0) const;
 
     /**
      * @brief perform a check on all key images in the blockchain
@@ -854,10 +867,11 @@ namespace cryptonote
      * @brief perform a check on all transactions in the blockchain
      *
      * @param std::function the check to perform, pass/fail
+     * @param bool pruned whether to return pruned txes only
      *
      * @return false if any transaction fails the check, otherwise true
      */
-    bool for_all_transactions(std::function<bool(const crypto::hash&, const cryptonote::transaction&)>) const;
+    bool for_all_transactions(std::function<bool(const crypto::hash&, const cryptonote::transaction&)>, bool pruned) const;
 
     /**
      * @brief perform a check on all outputs in the blockchain
@@ -866,7 +880,17 @@ namespace cryptonote
      *
      * @return false if any output fails the check, otherwise true
      */
-    bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, size_t tx_idx)>) const;
+    bool for_all_outputs(std::function<bool(uint64_t amount, const crypto::hash &tx_hash, uint64_t height, size_t tx_idx)>) const;
+
+    /**
+     * @brief perform a check on all outputs of a given amount in the blockchain
+     *
+     * @param amount the amount to iterate through
+     * @param std::function the check to perform, pass/fail
+     *
+     * @return false if any output fails the check, otherwise true
+     */
+    bool for_all_outputs(uint64_t amount, std::function<bool(uint64_t height)>) const;
 
     /**
      * @brief get a reference to the BlockchainDB in use by Blockchain
@@ -928,7 +952,7 @@ namespace cryptonote
 
     bool is_within_compiled_block_hash_area(uint64_t height) const;
     bool is_within_compiled_block_hash_area() const { return is_within_compiled_block_hash_area(m_db->height()); }
-    uint64_t prevalidate_block_hashes(uint64_t height, const std::list<crypto::hash> &hashes);
+    uint64_t prevalidate_block_hashes(uint64_t height, const std::vector<crypto::hash> &hashes);
 
     void lock();
     void unlock();
@@ -994,6 +1018,10 @@ namespace cryptonote
     std::vector<difficulty_type> m_difficulties;
     uint64_t m_timestamps_and_difficulties_height;
 
+    epee::critical_section m_difficulty_lock;
+    crypto::hash m_difficulty_for_next_block_top_hash;
+    difficulty_type m_difficulty_for_next_block;
+
     boost::asio::io_service m_async_service;
     boost::thread_group m_async_pool;
     std::unique_ptr<boost::asio::io_service::work> m_async_work_idle;
@@ -1010,7 +1038,7 @@ namespace cryptonote
 
     HardFork *m_hardfork;
 
-    bool m_testnet;
+    network_type m_nettype;
     bool m_offline;
 
     std::atomic<bool> m_cancel;
@@ -1279,10 +1307,12 @@ namespace cryptonote
      *   false otherwise
      *
      * @param b the block to be checked
+     * @param median_ts return-by-reference the median of timestamps
      *
      * @return true if the block's timestamp is valid, otherwise false
      */
-    bool check_block_timestamp(const block& b) const;
+    bool check_block_timestamp(const block& b, uint64_t& median_ts) const;
+    bool check_block_timestamp(const block& b) const { uint64_t median_ts; return check_block_timestamp(b, median_ts); }
 
     /**
      * @brief checks a block's timestamp
@@ -1295,7 +1325,8 @@ namespace cryptonote
      *
      * @return true if the block's timestamp is valid, otherwise false
      */
-    bool check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b) const;
+    bool check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b, uint64_t& median_ts) const;
+    bool check_block_timestamp(std::vector<uint64_t>& timestamps, const block& b) const { uint64_t median_ts; return check_block_timestamp(timestamps, b, median_ts); }
 
     /**
      * @brief get the "adjusted time"

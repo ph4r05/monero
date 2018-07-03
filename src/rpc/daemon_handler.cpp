@@ -50,9 +50,9 @@ namespace rpc
 
   void DaemonHandler::handle(const GetBlocksFast::Request& req, GetBlocksFast::Response& res)
   {
-    std::list<std::pair<blobdata, std::list<blobdata> > > blocks;
+    std::vector<std::pair<std::pair<blobdata, crypto::hash>, std::vector<std::pair<crypto::hash, blobdata> > > > blocks;
 
-    if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, blocks, res.current_height, res.start_height, COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT))
+    if(!m_core.find_blockchain_supplement(req.start_height, req.block_ids, blocks, res.current_height, res.start_height, req.prune, true, COMMAND_RPC_GET_BLOCKS_FAST_MAX_COUNT))
     {
       res.status = Message::STATUS_FAILED;
       res.error_details = "core::find_blockchain_supplement() returned false";
@@ -62,9 +62,6 @@ namespace rpc
     res.blocks.resize(blocks.size());
     res.output_indices.resize(blocks.size());
 
-    //TODO: really need to switch uses of std::list to std::vector unless
-    //      it's a huge performance concern
-
     auto it = blocks.begin();
 
     uint64_t block_count = 0;
@@ -72,7 +69,7 @@ namespace rpc
     {
       cryptonote::rpc::block_with_transactions& bwt = res.blocks[block_count];
 
-      if (!parse_and_validate_block_from_blob(it->first, bwt.block))
+      if (!parse_and_validate_block_from_blob(it->first.first, bwt.block))
       {
         res.blocks.clear();
         res.output_indices.clear();
@@ -89,11 +86,11 @@ namespace rpc
           res.error_details = "incorrect number of transactions retrieved for block";
           return;
       }
-      std::list<transaction> txs;
-      for (const auto& blob : it->second)
+      std::vector<transaction> txs;
+      for (const auto& p : it->second)
       {
         txs.resize(txs.size() + 1);
-        if (!parse_and_validate_tx_from_blob(blob, txs.back()))
+        if (!parse_and_validate_tx_from_blob(p.second, txs.back()))
         {
           res.blocks.clear();
           res.output_indices.clear();
@@ -163,10 +160,10 @@ namespace rpc
 
   void DaemonHandler::handle(const GetTransactions::Request& req, GetTransactions::Response& res)
   {
-    std::list<cryptonote::transaction> found_txs;
-    std::list<crypto::hash> missed_hashes;
+    std::vector<cryptonote::transaction> found_txs_vec;
+    std::vector<crypto::hash> missed_vec;
 
-    bool r = m_core.get_transactions(req.tx_hashes, found_txs, missed_hashes);
+    bool r = m_core.get_transactions(req.tx_hashes, found_txs_vec, missed_vec);
 
     // TODO: consider fixing core::get_transactions to not hide exceptions
     if (!r)
@@ -176,20 +173,7 @@ namespace rpc
       return;
     }
 
-    size_t num_found = found_txs.size();
-
-    // std::list is annoying
-    std::vector<cryptonote::transaction> found_txs_vec
-    {
-      std::make_move_iterator(std::begin(found_txs)),
-      std::make_move_iterator(std::end(found_txs))
-    };
-
-    std::vector<crypto::hash> missed_vec
-    {
-      std::make_move_iterator(std::begin(missed_hashes)),
-      std::make_move_iterator(std::end(missed_hashes))
-    };
+    size_t num_found = found_txs_vec.size();
 
     std::vector<uint64_t> heights(num_found);
     std::vector<bool> in_pool(num_found, false);
@@ -204,7 +188,7 @@ namespace rpc
     // if any missing from blockchain, check in tx pool
     if (!missed_vec.empty())
     {
-      std::list<cryptonote::transaction> pool_txs;
+      std::vector<cryptonote::transaction> pool_txs;
 
       m_core.get_pool_transactions(pool_txs);
 
@@ -413,7 +397,7 @@ namespace rpc
   void DaemonHandler::handle(const StartMining::Request& req, StartMining::Response& res)
   {
     cryptonote::address_parse_info info;
-    if(!get_account_address_from_str(info, m_core.get_testnet(), req.miner_address))
+    if(!get_account_address_from_str(info, m_core.get_nettype(), req.miner_address))
     {
       res.error_details = "Failed, wrong address";
       LOG_PRINT_L0(res.error_details);
@@ -492,7 +476,9 @@ namespace rpc
 
     res.info.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
 
-    res.info.testnet = m_core.get_testnet();
+    res.info.mainnet = m_core.get_nettype() == MAINNET;
+    res.info.testnet = m_core.get_nettype() == TESTNET;
+    res.info.stagenet = m_core.get_nettype() == STAGENET;
     res.info.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(res.info.height - 1);
     res.info.block_size_limit = m_core.get_blockchain_storage().get_current_cumulative_blocksize_limit();
     res.info.start_time = (uint64_t)m_core.get_start_time();
@@ -525,7 +511,7 @@ namespace rpc
       res.speed = lMiner.get_speed();
       res.threads_count = lMiner.get_threads_count();
       const account_public_address& lMiningAdr = lMiner.get_mining_address();
-      res.address = get_account_address_as_str(m_core.get_testnet(), false, lMiningAdr);
+      res.address = get_account_address_as_str(m_core.get_nettype(), false, lMiningAdr);
     }
 
     res.status = Message::STATUS_OK;
