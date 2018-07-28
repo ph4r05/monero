@@ -481,7 +481,7 @@ inline bool do_replay_events(std::vector<test_event_entry>& events)
     MERROR("Failed to flush txpool");
     return false;
   }
-  c.get_blockchain_storage().flush_txes_from_pool(std::list<crypto::hash>(pool_txs.begin(), pool_txs.end()));
+  c.get_blockchain_storage().flush_txes_from_pool(pool_txs);
 
   t_test_class validator;
   bool ret = replay_events_through_core<t_test_class>(c, events, validator);
@@ -664,6 +664,7 @@ inline bool do_replay_file(const std::string& filename)
     }
 
 #define GENERATE_AND_PLAY(genclass)                                                                        \
+  if (filter.empty() || boost::regex_match(std::string(#genclass), match, boost::regex(filter)))           \
   {                                                                                                        \
     std::vector<test_event_entry> events;                                                                  \
     ++tests_count;                                                                                         \
