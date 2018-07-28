@@ -1695,7 +1695,10 @@ namespace wallet_rpc
   {
     struct request
     {
+      bool trust_daemon;
+
       BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE_OPT(trust_daemon, false)
       END_KV_SERIALIZE_MAP()
     };
 

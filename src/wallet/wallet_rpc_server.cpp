@@ -2456,7 +2456,7 @@ namespace tools
     }
     try
     {
-      m_wallet->refresh(0, res.blocks_fetched, res.received_money);
+      m_wallet->refresh(req.trust_daemon, 0, res.blocks_fetched, res.received_money);
       return true;
     }
     catch (const std::exception& e)
