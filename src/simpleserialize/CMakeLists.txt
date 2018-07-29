@@ -51,6 +51,7 @@ target_link_libraries(simpleserialize
     epee
     ${EPEE_READLINE}
     version
+    device
     ${Boost_CHRONO_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}

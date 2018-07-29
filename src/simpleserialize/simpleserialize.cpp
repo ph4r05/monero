@@ -64,6 +64,8 @@
 #include "wallet/wallet_args.h"
 #include <stdexcept>
 
+#include "device/trezor/messages_map.h"
+
 #ifdef HAVE_READLINE
 #include "readline_buffer.h"
 #endif
@@ -102,6 +104,12 @@ int main(int argc, char* argv[])
 {
   std::ostringstream oss;
   boost::archive::portable_binary_oarchive arx(oss);
+
+  auto msg = hw::trezor::MessageMapper::get_message(501);
+  cout << "Message: " << msg->GetDescriptor()->full_name() << endl;
+  cout << "Message ID: " << hw::trezor::MessageMapper::get_message_wire_number(msg) << endl;
+  cout << "Message ID: " << hw::trezor::MessageMapper::get_message_wire_number(msg->GetDescriptor()->name()) << endl;
+  cout << endl;
 
   size_t num = 0x23;
 
