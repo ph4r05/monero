@@ -35,6 +35,9 @@ namespace trezor
     for(const string &text : PACKAGES){
       desc = google::protobuf::DescriptorPool::generated_pool()
           ->FindMessageTypeByName(text + "." + messageName);
+      if (desc != nullptr){
+        break;
+      }
     }
 
     if (desc == nullptr){
