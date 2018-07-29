@@ -55,8 +55,12 @@ else()
   set(Blocks "")
 endif()
 
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
+
 monero_private_headers(device
-  ${device_private_headers})
+  ${device_private_headers}
+  ${PROTOBUF_INCLUDE_DIR})
 
 monero_add_library(device
   ${device_sources}
@@ -69,6 +73,7 @@ target_link_libraries(device
     cncrypto
     ringct_basic
     ${OPENSSL_CRYPTO_LIBRARIES}
+    ${PROTOBUF_LIBRARY}
   PRIVATE
     ${Blocks}
     ${EXTRA_LIBRARIES})
