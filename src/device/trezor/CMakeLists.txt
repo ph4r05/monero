@@ -26,54 +26,50 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-set(device_sources
-  device.cpp
-  device_default.cpp
-  log.cpp
-  )
+set(TREZOR_PROTOB_H
+        messages/messages.pb.h
+        messages/messages-common.pb.h
+        messages/messages-management.pb.h
+        messages/messages-monero.pb.h
+)
 
-if(PCSC_FOUND)
-  set(device_sources ${device_sources} device_ledger.cpp)
-endif()
+set(TREZOR_PROTOB_CPP
+        messages/messages.pb.cc
+        messages/messages-common.pb.cc
+        messages/messages-management.pb.cc
+        messages/messages-monero.pb.cc
+)
 
-set(device_headers
-  device.hpp
-  device_default.hpp
-  log.hpp
- )
+set(trezor_headers
+        messages_map.h
+        ${TREZOR_PROTOB_H}
+)
 
-if(PCSC_FOUND)
-  set(device_headers ${device_headers} device_ledger.hpp)
-endif()
+set(trezor_sources
+        messages_map.cpp
+        ${TREZOR_PROTOB_CPP}
+)
 
-set(device_private_headers)
+set(trezor_private_headers)
 
 
-if(PER_BLOCK_CHECKPOINT)
-  set(Blocks "blocks")
-else()
-  set(Blocks "")
-endif()
+include(FindProtobuf)
+find_package(Protobuf REQUIRED)
 
-add_subdirectory(trezor)
+monero_private_headers(device_trezor
+        ${device_private_headers}
+        ${PROTOBUF_INCLUDE_DIR})
 
-monero_private_headers(device
-  ${device_private_headers}
-  ${PROTOBUF_INCLUDE_DIR})
+monero_add_library(device_trezor
+        ${trezor_sources}
+        ${trezor_headers}
+        ${trezor_private_headers})
 
-monero_add_library(device
-  ${device_sources}
-  ${device_headers}
-  ${device_private_headers})
-
-target_link_libraries(device
-  PUBLIC
-    ${PCSC_LIBRARIES}
-    cncrypto
-    ringct_basic
-    device_trezor
-    ${OPENSSL_CRYPTO_LIBRARIES}
-    ${PROTOBUF_LIBRARY}
-  PRIVATE
-    ${Blocks}
-    ${EXTRA_LIBRARIES})
+target_link_libraries(device_trezor
+        PUBLIC
+        cncrypto
+        ringct_basic
+        ${OPENSSL_CRYPTO_LIBRARIES}
+        ${PROTOBUF_LIBRARY}
+        PRIVATE
+        ${EXTRA_LIBRARIES})
