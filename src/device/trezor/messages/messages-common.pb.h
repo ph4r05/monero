@@ -27,6 +27,11 @@
 #include <google/protobuf/unknown_field_set.h>
 // @@protoc_insertion_point(includes)
 
+namespace hw {
+namespace trezor {
+namespace messages {
+namespace common {
+
 // Internal implementation detail -- do not call these.
 void  protobuf_AddDesc_messages_2dcommon_2eproto();
 void protobuf_AssignDesc_messages_2dcommon_2eproto();
@@ -192,7 +197,7 @@ class Success : public ::google::protobuf::Message {
   inline ::std::string* release_message();
   inline void set_allocated_message(::std::string* message);
 
-  // @@protoc_insertion_point(class_scope:Success)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.Success)
  private:
   inline void set_has_message();
   inline void clear_has_message();
@@ -299,12 +304,12 @@ class Failure : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .Failure.FailureType code = 1;
+  // optional .hw.trezor.messages.common.Failure.FailureType code = 1;
   inline bool has_code() const;
   inline void clear_code();
   static const int kCodeFieldNumber = 1;
-  inline ::Failure_FailureType code() const;
-  inline void set_code(::Failure_FailureType value);
+  inline ::hw::trezor::messages::common::Failure_FailureType code() const;
+  inline void set_code(::hw::trezor::messages::common::Failure_FailureType value);
 
   // optional string message = 2;
   inline bool has_message() const;
@@ -318,7 +323,7 @@ class Failure : public ::google::protobuf::Message {
   inline ::std::string* release_message();
   inline void set_allocated_message(::std::string* message);
 
-  // @@protoc_insertion_point(class_scope:Failure)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.Failure)
  private:
   inline void set_has_code();
   inline void clear_has_code();
@@ -429,12 +434,12 @@ class ButtonRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .ButtonRequest.ButtonRequestType code = 1;
+  // optional .hw.trezor.messages.common.ButtonRequest.ButtonRequestType code = 1;
   inline bool has_code() const;
   inline void clear_code();
   static const int kCodeFieldNumber = 1;
-  inline ::ButtonRequest_ButtonRequestType code() const;
-  inline void set_code(::ButtonRequest_ButtonRequestType value);
+  inline ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType code() const;
+  inline void set_code(::hw::trezor::messages::common::ButtonRequest_ButtonRequestType value);
 
   // optional string data = 2;
   inline bool has_data() const;
@@ -448,7 +453,7 @@ class ButtonRequest : public ::google::protobuf::Message {
   inline ::std::string* release_data();
   inline void set_allocated_data(::std::string* data);
 
-  // @@protoc_insertion_point(class_scope:ButtonRequest)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.ButtonRequest)
  private:
   inline void set_has_code();
   inline void clear_has_code();
@@ -523,7 +528,7 @@ class ButtonAck : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:ButtonAck)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.ButtonAck)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -617,14 +622,14 @@ class PinMatrixRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .PinMatrixRequest.PinMatrixRequestType type = 1;
+  // optional .hw.trezor.messages.common.PinMatrixRequest.PinMatrixRequestType type = 1;
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 1;
-  inline ::PinMatrixRequest_PinMatrixRequestType type() const;
-  inline void set_type(::PinMatrixRequest_PinMatrixRequestType value);
+  inline ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType type() const;
+  inline void set_type(::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType value);
 
-  // @@protoc_insertion_point(class_scope:PinMatrixRequest)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.PinMatrixRequest)
  private:
   inline void set_has_type();
   inline void clear_has_type();
@@ -708,7 +713,7 @@ class PinMatrixAck : public ::google::protobuf::Message {
   inline ::std::string* release_pin();
   inline void set_allocated_pin(::std::string* pin);
 
-  // @@protoc_insertion_point(class_scope:PinMatrixAck)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.PinMatrixAck)
  private:
   inline void set_has_pin();
   inline void clear_has_pin();
@@ -787,7 +792,7 @@ class PassphraseRequest : public ::google::protobuf::Message {
   inline bool on_device() const;
   inline void set_on_device(bool value);
 
-  // @@protoc_insertion_point(class_scope:PassphraseRequest)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.PassphraseRequest)
  private:
   inline void set_has_on_device();
   inline void clear_has_on_device();
@@ -883,7 +888,7 @@ class PassphraseAck : public ::google::protobuf::Message {
   inline ::std::string* release_state();
   inline void set_allocated_state(::std::string* state);
 
-  // @@protoc_insertion_point(class_scope:PassphraseAck)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.PassphraseAck)
  private:
   inline void set_has_passphrase();
   inline void clear_has_passphrase();
@@ -970,7 +975,7 @@ class PassphraseStateRequest : public ::google::protobuf::Message {
   inline ::std::string* release_state();
   inline void set_allocated_state(::std::string* state);
 
-  // @@protoc_insertion_point(class_scope:PassphraseStateRequest)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.PassphraseStateRequest)
  private:
   inline void set_has_state();
   inline void clear_has_state();
@@ -1042,7 +1047,7 @@ class PassphraseStateAck : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:PassphraseStateAck)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.PassphraseStateAck)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -1168,7 +1173,7 @@ class HDNodeType : public ::google::protobuf::Message {
   inline ::std::string* release_public_key();
   inline void set_allocated_public_key(::std::string* public_key);
 
-  // @@protoc_insertion_point(class_scope:HDNodeType)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.common.HDNodeType)
  private:
   inline void set_has_depth();
   inline void clear_has_depth();
@@ -1224,7 +1229,7 @@ inline void Success::clear_message() {
   clear_has_message();
 }
 inline const ::std::string& Success::message() const {
-  // @@protoc_insertion_point(field_get:Success.message)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.Success.message)
   return *message_;
 }
 inline void Success::set_message(const ::std::string& value) {
@@ -1233,7 +1238,7 @@ inline void Success::set_message(const ::std::string& value) {
     message_ = new ::std::string;
   }
   message_->assign(value);
-  // @@protoc_insertion_point(field_set:Success.message)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.Success.message)
 }
 inline void Success::set_message(const char* value) {
   set_has_message();
@@ -1241,7 +1246,7 @@ inline void Success::set_message(const char* value) {
     message_ = new ::std::string;
   }
   message_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Success.message)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.Success.message)
 }
 inline void Success::set_message(const char* value, size_t size) {
   set_has_message();
@@ -1249,14 +1254,14 @@ inline void Success::set_message(const char* value, size_t size) {
     message_ = new ::std::string;
   }
   message_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Success.message)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.Success.message)
 }
 inline ::std::string* Success::mutable_message() {
   set_has_message();
   if (message_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     message_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Success.message)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.Success.message)
   return message_;
 }
 inline ::std::string* Success::release_message() {
@@ -1280,14 +1285,14 @@ inline void Success::set_allocated_message(::std::string* message) {
     clear_has_message();
     message_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Success.message)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.Success.message)
 }
 
 // -------------------------------------------------------------------
 
 // Failure
 
-// optional .Failure.FailureType code = 1;
+// optional .hw.trezor.messages.common.Failure.FailureType code = 1;
 inline bool Failure::has_code() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1301,15 +1306,15 @@ inline void Failure::clear_code() {
   code_ = 1;
   clear_has_code();
 }
-inline ::Failure_FailureType Failure::code() const {
-  // @@protoc_insertion_point(field_get:Failure.code)
-  return static_cast< ::Failure_FailureType >(code_);
+inline ::hw::trezor::messages::common::Failure_FailureType Failure::code() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.Failure.code)
+  return static_cast< ::hw::trezor::messages::common::Failure_FailureType >(code_);
 }
-inline void Failure::set_code(::Failure_FailureType value) {
-  assert(::Failure_FailureType_IsValid(value));
+inline void Failure::set_code(::hw::trezor::messages::common::Failure_FailureType value) {
+  assert(::hw::trezor::messages::common::Failure_FailureType_IsValid(value));
   set_has_code();
   code_ = value;
-  // @@protoc_insertion_point(field_set:Failure.code)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.Failure.code)
 }
 
 // optional string message = 2;
@@ -1329,7 +1334,7 @@ inline void Failure::clear_message() {
   clear_has_message();
 }
 inline const ::std::string& Failure::message() const {
-  // @@protoc_insertion_point(field_get:Failure.message)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.Failure.message)
   return *message_;
 }
 inline void Failure::set_message(const ::std::string& value) {
@@ -1338,7 +1343,7 @@ inline void Failure::set_message(const ::std::string& value) {
     message_ = new ::std::string;
   }
   message_->assign(value);
-  // @@protoc_insertion_point(field_set:Failure.message)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.Failure.message)
 }
 inline void Failure::set_message(const char* value) {
   set_has_message();
@@ -1346,7 +1351,7 @@ inline void Failure::set_message(const char* value) {
     message_ = new ::std::string;
   }
   message_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Failure.message)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.Failure.message)
 }
 inline void Failure::set_message(const char* value, size_t size) {
   set_has_message();
@@ -1354,14 +1359,14 @@ inline void Failure::set_message(const char* value, size_t size) {
     message_ = new ::std::string;
   }
   message_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Failure.message)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.Failure.message)
 }
 inline ::std::string* Failure::mutable_message() {
   set_has_message();
   if (message_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     message_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Failure.message)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.Failure.message)
   return message_;
 }
 inline ::std::string* Failure::release_message() {
@@ -1385,14 +1390,14 @@ inline void Failure::set_allocated_message(::std::string* message) {
     clear_has_message();
     message_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Failure.message)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.Failure.message)
 }
 
 // -------------------------------------------------------------------
 
 // ButtonRequest
 
-// optional .ButtonRequest.ButtonRequestType code = 1;
+// optional .hw.trezor.messages.common.ButtonRequest.ButtonRequestType code = 1;
 inline bool ButtonRequest::has_code() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1406,15 +1411,15 @@ inline void ButtonRequest::clear_code() {
   code_ = 1;
   clear_has_code();
 }
-inline ::ButtonRequest_ButtonRequestType ButtonRequest::code() const {
-  // @@protoc_insertion_point(field_get:ButtonRequest.code)
-  return static_cast< ::ButtonRequest_ButtonRequestType >(code_);
+inline ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType ButtonRequest::code() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.ButtonRequest.code)
+  return static_cast< ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType >(code_);
 }
-inline void ButtonRequest::set_code(::ButtonRequest_ButtonRequestType value) {
-  assert(::ButtonRequest_ButtonRequestType_IsValid(value));
+inline void ButtonRequest::set_code(::hw::trezor::messages::common::ButtonRequest_ButtonRequestType value) {
+  assert(::hw::trezor::messages::common::ButtonRequest_ButtonRequestType_IsValid(value));
   set_has_code();
   code_ = value;
-  // @@protoc_insertion_point(field_set:ButtonRequest.code)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.ButtonRequest.code)
 }
 
 // optional string data = 2;
@@ -1434,7 +1439,7 @@ inline void ButtonRequest::clear_data() {
   clear_has_data();
 }
 inline const ::std::string& ButtonRequest::data() const {
-  // @@protoc_insertion_point(field_get:ButtonRequest.data)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.ButtonRequest.data)
   return *data_;
 }
 inline void ButtonRequest::set_data(const ::std::string& value) {
@@ -1443,7 +1448,7 @@ inline void ButtonRequest::set_data(const ::std::string& value) {
     data_ = new ::std::string;
   }
   data_->assign(value);
-  // @@protoc_insertion_point(field_set:ButtonRequest.data)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.ButtonRequest.data)
 }
 inline void ButtonRequest::set_data(const char* value) {
   set_has_data();
@@ -1451,7 +1456,7 @@ inline void ButtonRequest::set_data(const char* value) {
     data_ = new ::std::string;
   }
   data_->assign(value);
-  // @@protoc_insertion_point(field_set_char:ButtonRequest.data)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.ButtonRequest.data)
 }
 inline void ButtonRequest::set_data(const char* value, size_t size) {
   set_has_data();
@@ -1459,14 +1464,14 @@ inline void ButtonRequest::set_data(const char* value, size_t size) {
     data_ = new ::std::string;
   }
   data_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:ButtonRequest.data)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.ButtonRequest.data)
 }
 inline ::std::string* ButtonRequest::mutable_data() {
   set_has_data();
   if (data_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     data_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:ButtonRequest.data)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.ButtonRequest.data)
   return data_;
 }
 inline ::std::string* ButtonRequest::release_data() {
@@ -1490,7 +1495,7 @@ inline void ButtonRequest::set_allocated_data(::std::string* data) {
     clear_has_data();
     data_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:ButtonRequest.data)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.ButtonRequest.data)
 }
 
 // -------------------------------------------------------------------
@@ -1501,7 +1506,7 @@ inline void ButtonRequest::set_allocated_data(::std::string* data) {
 
 // PinMatrixRequest
 
-// optional .PinMatrixRequest.PinMatrixRequestType type = 1;
+// optional .hw.trezor.messages.common.PinMatrixRequest.PinMatrixRequestType type = 1;
 inline bool PinMatrixRequest::has_type() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -1515,15 +1520,15 @@ inline void PinMatrixRequest::clear_type() {
   type_ = 1;
   clear_has_type();
 }
-inline ::PinMatrixRequest_PinMatrixRequestType PinMatrixRequest::type() const {
-  // @@protoc_insertion_point(field_get:PinMatrixRequest.type)
-  return static_cast< ::PinMatrixRequest_PinMatrixRequestType >(type_);
+inline ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType PinMatrixRequest::type() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.PinMatrixRequest.type)
+  return static_cast< ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType >(type_);
 }
-inline void PinMatrixRequest::set_type(::PinMatrixRequest_PinMatrixRequestType value) {
-  assert(::PinMatrixRequest_PinMatrixRequestType_IsValid(value));
+inline void PinMatrixRequest::set_type(::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType value) {
+  assert(::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType_IsValid(value));
   set_has_type();
   type_ = value;
-  // @@protoc_insertion_point(field_set:PinMatrixRequest.type)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.PinMatrixRequest.type)
 }
 
 // -------------------------------------------------------------------
@@ -1547,7 +1552,7 @@ inline void PinMatrixAck::clear_pin() {
   clear_has_pin();
 }
 inline const ::std::string& PinMatrixAck::pin() const {
-  // @@protoc_insertion_point(field_get:PinMatrixAck.pin)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.PinMatrixAck.pin)
   return *pin_;
 }
 inline void PinMatrixAck::set_pin(const ::std::string& value) {
@@ -1556,7 +1561,7 @@ inline void PinMatrixAck::set_pin(const ::std::string& value) {
     pin_ = new ::std::string;
   }
   pin_->assign(value);
-  // @@protoc_insertion_point(field_set:PinMatrixAck.pin)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.PinMatrixAck.pin)
 }
 inline void PinMatrixAck::set_pin(const char* value) {
   set_has_pin();
@@ -1564,7 +1569,7 @@ inline void PinMatrixAck::set_pin(const char* value) {
     pin_ = new ::std::string;
   }
   pin_->assign(value);
-  // @@protoc_insertion_point(field_set_char:PinMatrixAck.pin)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.PinMatrixAck.pin)
 }
 inline void PinMatrixAck::set_pin(const char* value, size_t size) {
   set_has_pin();
@@ -1572,14 +1577,14 @@ inline void PinMatrixAck::set_pin(const char* value, size_t size) {
     pin_ = new ::std::string;
   }
   pin_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:PinMatrixAck.pin)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.PinMatrixAck.pin)
 }
 inline ::std::string* PinMatrixAck::mutable_pin() {
   set_has_pin();
   if (pin_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     pin_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:PinMatrixAck.pin)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.PinMatrixAck.pin)
   return pin_;
 }
 inline ::std::string* PinMatrixAck::release_pin() {
@@ -1603,7 +1608,7 @@ inline void PinMatrixAck::set_allocated_pin(::std::string* pin) {
     clear_has_pin();
     pin_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:PinMatrixAck.pin)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.PinMatrixAck.pin)
 }
 
 // -------------------------------------------------------------------
@@ -1625,13 +1630,13 @@ inline void PassphraseRequest::clear_on_device() {
   clear_has_on_device();
 }
 inline bool PassphraseRequest::on_device() const {
-  // @@protoc_insertion_point(field_get:PassphraseRequest.on_device)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.PassphraseRequest.on_device)
   return on_device_;
 }
 inline void PassphraseRequest::set_on_device(bool value) {
   set_has_on_device();
   on_device_ = value;
-  // @@protoc_insertion_point(field_set:PassphraseRequest.on_device)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.PassphraseRequest.on_device)
 }
 
 // -------------------------------------------------------------------
@@ -1655,7 +1660,7 @@ inline void PassphraseAck::clear_passphrase() {
   clear_has_passphrase();
 }
 inline const ::std::string& PassphraseAck::passphrase() const {
-  // @@protoc_insertion_point(field_get:PassphraseAck.passphrase)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.PassphraseAck.passphrase)
   return *passphrase_;
 }
 inline void PassphraseAck::set_passphrase(const ::std::string& value) {
@@ -1664,7 +1669,7 @@ inline void PassphraseAck::set_passphrase(const ::std::string& value) {
     passphrase_ = new ::std::string;
   }
   passphrase_->assign(value);
-  // @@protoc_insertion_point(field_set:PassphraseAck.passphrase)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.PassphraseAck.passphrase)
 }
 inline void PassphraseAck::set_passphrase(const char* value) {
   set_has_passphrase();
@@ -1672,7 +1677,7 @@ inline void PassphraseAck::set_passphrase(const char* value) {
     passphrase_ = new ::std::string;
   }
   passphrase_->assign(value);
-  // @@protoc_insertion_point(field_set_char:PassphraseAck.passphrase)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.PassphraseAck.passphrase)
 }
 inline void PassphraseAck::set_passphrase(const char* value, size_t size) {
   set_has_passphrase();
@@ -1680,14 +1685,14 @@ inline void PassphraseAck::set_passphrase(const char* value, size_t size) {
     passphrase_ = new ::std::string;
   }
   passphrase_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:PassphraseAck.passphrase)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.PassphraseAck.passphrase)
 }
 inline ::std::string* PassphraseAck::mutable_passphrase() {
   set_has_passphrase();
   if (passphrase_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     passphrase_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:PassphraseAck.passphrase)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.PassphraseAck.passphrase)
   return passphrase_;
 }
 inline ::std::string* PassphraseAck::release_passphrase() {
@@ -1711,7 +1716,7 @@ inline void PassphraseAck::set_allocated_passphrase(::std::string* passphrase) {
     clear_has_passphrase();
     passphrase_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:PassphraseAck.passphrase)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.PassphraseAck.passphrase)
 }
 
 // optional bytes state = 2;
@@ -1731,7 +1736,7 @@ inline void PassphraseAck::clear_state() {
   clear_has_state();
 }
 inline const ::std::string& PassphraseAck::state() const {
-  // @@protoc_insertion_point(field_get:PassphraseAck.state)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.PassphraseAck.state)
   return *state_;
 }
 inline void PassphraseAck::set_state(const ::std::string& value) {
@@ -1740,7 +1745,7 @@ inline void PassphraseAck::set_state(const ::std::string& value) {
     state_ = new ::std::string;
   }
   state_->assign(value);
-  // @@protoc_insertion_point(field_set:PassphraseAck.state)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.PassphraseAck.state)
 }
 inline void PassphraseAck::set_state(const char* value) {
   set_has_state();
@@ -1748,7 +1753,7 @@ inline void PassphraseAck::set_state(const char* value) {
     state_ = new ::std::string;
   }
   state_->assign(value);
-  // @@protoc_insertion_point(field_set_char:PassphraseAck.state)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.PassphraseAck.state)
 }
 inline void PassphraseAck::set_state(const void* value, size_t size) {
   set_has_state();
@@ -1756,14 +1761,14 @@ inline void PassphraseAck::set_state(const void* value, size_t size) {
     state_ = new ::std::string;
   }
   state_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:PassphraseAck.state)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.PassphraseAck.state)
 }
 inline ::std::string* PassphraseAck::mutable_state() {
   set_has_state();
   if (state_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     state_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:PassphraseAck.state)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.PassphraseAck.state)
   return state_;
 }
 inline ::std::string* PassphraseAck::release_state() {
@@ -1787,7 +1792,7 @@ inline void PassphraseAck::set_allocated_state(::std::string* state) {
     clear_has_state();
     state_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:PassphraseAck.state)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.PassphraseAck.state)
 }
 
 // -------------------------------------------------------------------
@@ -1811,7 +1816,7 @@ inline void PassphraseStateRequest::clear_state() {
   clear_has_state();
 }
 inline const ::std::string& PassphraseStateRequest::state() const {
-  // @@protoc_insertion_point(field_get:PassphraseStateRequest.state)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.PassphraseStateRequest.state)
   return *state_;
 }
 inline void PassphraseStateRequest::set_state(const ::std::string& value) {
@@ -1820,7 +1825,7 @@ inline void PassphraseStateRequest::set_state(const ::std::string& value) {
     state_ = new ::std::string;
   }
   state_->assign(value);
-  // @@protoc_insertion_point(field_set:PassphraseStateRequest.state)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.PassphraseStateRequest.state)
 }
 inline void PassphraseStateRequest::set_state(const char* value) {
   set_has_state();
@@ -1828,7 +1833,7 @@ inline void PassphraseStateRequest::set_state(const char* value) {
     state_ = new ::std::string;
   }
   state_->assign(value);
-  // @@protoc_insertion_point(field_set_char:PassphraseStateRequest.state)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.PassphraseStateRequest.state)
 }
 inline void PassphraseStateRequest::set_state(const void* value, size_t size) {
   set_has_state();
@@ -1836,14 +1841,14 @@ inline void PassphraseStateRequest::set_state(const void* value, size_t size) {
     state_ = new ::std::string;
   }
   state_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:PassphraseStateRequest.state)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.PassphraseStateRequest.state)
 }
 inline ::std::string* PassphraseStateRequest::mutable_state() {
   set_has_state();
   if (state_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     state_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:PassphraseStateRequest.state)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.PassphraseStateRequest.state)
   return state_;
 }
 inline ::std::string* PassphraseStateRequest::release_state() {
@@ -1867,7 +1872,7 @@ inline void PassphraseStateRequest::set_allocated_state(::std::string* state) {
     clear_has_state();
     state_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:PassphraseStateRequest.state)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.PassphraseStateRequest.state)
 }
 
 // -------------------------------------------------------------------
@@ -1893,13 +1898,13 @@ inline void HDNodeType::clear_depth() {
   clear_has_depth();
 }
 inline ::google::protobuf::uint32 HDNodeType::depth() const {
-  // @@protoc_insertion_point(field_get:HDNodeType.depth)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.HDNodeType.depth)
   return depth_;
 }
 inline void HDNodeType::set_depth(::google::protobuf::uint32 value) {
   set_has_depth();
   depth_ = value;
-  // @@protoc_insertion_point(field_set:HDNodeType.depth)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.HDNodeType.depth)
 }
 
 // required uint32 fingerprint = 2;
@@ -1917,13 +1922,13 @@ inline void HDNodeType::clear_fingerprint() {
   clear_has_fingerprint();
 }
 inline ::google::protobuf::uint32 HDNodeType::fingerprint() const {
-  // @@protoc_insertion_point(field_get:HDNodeType.fingerprint)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.HDNodeType.fingerprint)
   return fingerprint_;
 }
 inline void HDNodeType::set_fingerprint(::google::protobuf::uint32 value) {
   set_has_fingerprint();
   fingerprint_ = value;
-  // @@protoc_insertion_point(field_set:HDNodeType.fingerprint)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.HDNodeType.fingerprint)
 }
 
 // required uint32 child_num = 3;
@@ -1941,13 +1946,13 @@ inline void HDNodeType::clear_child_num() {
   clear_has_child_num();
 }
 inline ::google::protobuf::uint32 HDNodeType::child_num() const {
-  // @@protoc_insertion_point(field_get:HDNodeType.child_num)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.HDNodeType.child_num)
   return child_num_;
 }
 inline void HDNodeType::set_child_num(::google::protobuf::uint32 value) {
   set_has_child_num();
   child_num_ = value;
-  // @@protoc_insertion_point(field_set:HDNodeType.child_num)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.HDNodeType.child_num)
 }
 
 // required bytes chain_code = 4;
@@ -1967,7 +1972,7 @@ inline void HDNodeType::clear_chain_code() {
   clear_has_chain_code();
 }
 inline const ::std::string& HDNodeType::chain_code() const {
-  // @@protoc_insertion_point(field_get:HDNodeType.chain_code)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.HDNodeType.chain_code)
   return *chain_code_;
 }
 inline void HDNodeType::set_chain_code(const ::std::string& value) {
@@ -1976,7 +1981,7 @@ inline void HDNodeType::set_chain_code(const ::std::string& value) {
     chain_code_ = new ::std::string;
   }
   chain_code_->assign(value);
-  // @@protoc_insertion_point(field_set:HDNodeType.chain_code)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.HDNodeType.chain_code)
 }
 inline void HDNodeType::set_chain_code(const char* value) {
   set_has_chain_code();
@@ -1984,7 +1989,7 @@ inline void HDNodeType::set_chain_code(const char* value) {
     chain_code_ = new ::std::string;
   }
   chain_code_->assign(value);
-  // @@protoc_insertion_point(field_set_char:HDNodeType.chain_code)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.HDNodeType.chain_code)
 }
 inline void HDNodeType::set_chain_code(const void* value, size_t size) {
   set_has_chain_code();
@@ -1992,14 +1997,14 @@ inline void HDNodeType::set_chain_code(const void* value, size_t size) {
     chain_code_ = new ::std::string;
   }
   chain_code_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:HDNodeType.chain_code)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.HDNodeType.chain_code)
 }
 inline ::std::string* HDNodeType::mutable_chain_code() {
   set_has_chain_code();
   if (chain_code_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     chain_code_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:HDNodeType.chain_code)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.HDNodeType.chain_code)
   return chain_code_;
 }
 inline ::std::string* HDNodeType::release_chain_code() {
@@ -2023,7 +2028,7 @@ inline void HDNodeType::set_allocated_chain_code(::std::string* chain_code) {
     clear_has_chain_code();
     chain_code_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:HDNodeType.chain_code)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.HDNodeType.chain_code)
 }
 
 // optional bytes private_key = 5;
@@ -2043,7 +2048,7 @@ inline void HDNodeType::clear_private_key() {
   clear_has_private_key();
 }
 inline const ::std::string& HDNodeType::private_key() const {
-  // @@protoc_insertion_point(field_get:HDNodeType.private_key)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.HDNodeType.private_key)
   return *private_key_;
 }
 inline void HDNodeType::set_private_key(const ::std::string& value) {
@@ -2052,7 +2057,7 @@ inline void HDNodeType::set_private_key(const ::std::string& value) {
     private_key_ = new ::std::string;
   }
   private_key_->assign(value);
-  // @@protoc_insertion_point(field_set:HDNodeType.private_key)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.HDNodeType.private_key)
 }
 inline void HDNodeType::set_private_key(const char* value) {
   set_has_private_key();
@@ -2060,7 +2065,7 @@ inline void HDNodeType::set_private_key(const char* value) {
     private_key_ = new ::std::string;
   }
   private_key_->assign(value);
-  // @@protoc_insertion_point(field_set_char:HDNodeType.private_key)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.HDNodeType.private_key)
 }
 inline void HDNodeType::set_private_key(const void* value, size_t size) {
   set_has_private_key();
@@ -2068,14 +2073,14 @@ inline void HDNodeType::set_private_key(const void* value, size_t size) {
     private_key_ = new ::std::string;
   }
   private_key_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:HDNodeType.private_key)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.HDNodeType.private_key)
 }
 inline ::std::string* HDNodeType::mutable_private_key() {
   set_has_private_key();
   if (private_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     private_key_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:HDNodeType.private_key)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.HDNodeType.private_key)
   return private_key_;
 }
 inline ::std::string* HDNodeType::release_private_key() {
@@ -2099,7 +2104,7 @@ inline void HDNodeType::set_allocated_private_key(::std::string* private_key) {
     clear_has_private_key();
     private_key_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:HDNodeType.private_key)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.HDNodeType.private_key)
 }
 
 // optional bytes public_key = 6;
@@ -2119,7 +2124,7 @@ inline void HDNodeType::clear_public_key() {
   clear_has_public_key();
 }
 inline const ::std::string& HDNodeType::public_key() const {
-  // @@protoc_insertion_point(field_get:HDNodeType.public_key)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.common.HDNodeType.public_key)
   return *public_key_;
 }
 inline void HDNodeType::set_public_key(const ::std::string& value) {
@@ -2128,7 +2133,7 @@ inline void HDNodeType::set_public_key(const ::std::string& value) {
     public_key_ = new ::std::string;
   }
   public_key_->assign(value);
-  // @@protoc_insertion_point(field_set:HDNodeType.public_key)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.common.HDNodeType.public_key)
 }
 inline void HDNodeType::set_public_key(const char* value) {
   set_has_public_key();
@@ -2136,7 +2141,7 @@ inline void HDNodeType::set_public_key(const char* value) {
     public_key_ = new ::std::string;
   }
   public_key_->assign(value);
-  // @@protoc_insertion_point(field_set_char:HDNodeType.public_key)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.common.HDNodeType.public_key)
 }
 inline void HDNodeType::set_public_key(const void* value, size_t size) {
   set_has_public_key();
@@ -2144,14 +2149,14 @@ inline void HDNodeType::set_public_key(const void* value, size_t size) {
     public_key_ = new ::std::string;
   }
   public_key_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:HDNodeType.public_key)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.common.HDNodeType.public_key)
 }
 inline ::std::string* HDNodeType::mutable_public_key() {
   set_has_public_key();
   if (public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     public_key_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:HDNodeType.public_key)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.common.HDNodeType.public_key)
   return public_key_;
 }
 inline ::std::string* HDNodeType::release_public_key() {
@@ -2175,30 +2180,35 @@ inline void HDNodeType::set_allocated_public_key(::std::string* public_key) {
     clear_has_public_key();
     public_key_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:HDNodeType.public_key)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.common.HDNodeType.public_key)
 }
 
 
 // @@protoc_insertion_point(namespace_scope)
 
+}  // namespace common
+}  // namespace messages
+}  // namespace trezor
+}  // namespace hw
+
 #ifndef SWIG
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::Failure_FailureType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::common::Failure_FailureType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::Failure_FailureType>() {
-  return ::Failure_FailureType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::common::Failure_FailureType>() {
+  return ::hw::trezor::messages::common::Failure_FailureType_descriptor();
 }
-template <> struct is_proto_enum< ::ButtonRequest_ButtonRequestType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::ButtonRequest_ButtonRequestType>() {
-  return ::ButtonRequest_ButtonRequestType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType>() {
+  return ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType_descriptor();
 }
-template <> struct is_proto_enum< ::PinMatrixRequest_PinMatrixRequestType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::PinMatrixRequest_PinMatrixRequestType>() {
-  return ::PinMatrixRequest_PinMatrixRequestType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType>() {
+  return ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType_descriptor();
 }
 
 }  // namespace google

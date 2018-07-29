@@ -26,6 +26,10 @@
 #include "google/protobuf/descriptor.pb.h"
 // @@protoc_insertion_point(includes)
 
+namespace hw {
+namespace trezor {
+namespace messages {
+
 // Internal implementation detail -- do not call these.
 void  protobuf_AddDesc_messages_2eproto();
 void protobuf_AssignDesc_messages_2eproto();
@@ -234,14 +238,18 @@ extern ::google::protobuf::internal::ExtensionIdentifier< ::google::protobuf::En
 
 // @@protoc_insertion_point(namespace_scope)
 
+}  // namespace messages
+}  // namespace trezor
+}  // namespace hw
+
 #ifndef SWIG
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::MessageType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::MessageType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::MessageType>() {
-  return ::MessageType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::MessageType>() {
+  return ::hw::trezor::messages::MessageType_descriptor();
 }
 
 }  // namespace google

@@ -28,6 +28,11 @@
 #include "messages-common.pb.h"
 // @@protoc_insertion_point(includes)
 
+namespace hw {
+namespace trezor {
+namespace messages {
+namespace management {
+
 // Internal implementation detail -- do not call these.
 void  protobuf_AddDesc_messages_2dmanagement_2eproto();
 void protobuf_AssignDesc_messages_2dmanagement_2eproto();
@@ -188,7 +193,7 @@ class Initialize : public ::google::protobuf::Message {
   inline bool skip_passphrase() const;
   inline void set_skip_passphrase(bool value);
 
-  // @@protoc_insertion_point(class_scope:Initialize)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.Initialize)
  private:
   inline void set_has_state();
   inline void clear_has_state();
@@ -263,7 +268,7 @@ class GetFeatures : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:GetFeatures)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.GetFeatures)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -559,7 +564,7 @@ class Features : public ::google::protobuf::Message {
   inline bool unfinished_backup() const;
   inline void set_unfinished_backup(bool value);
 
-  // @@protoc_insertion_point(class_scope:Features)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.Features)
  private:
   inline void set_has_vendor();
   inline void clear_has_vendor();
@@ -706,7 +711,7 @@ class ClearSession : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:ClearSession)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.ClearSession)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -843,12 +848,12 @@ class ApplySettings : public ::google::protobuf::Message {
   inline ::std::string* release_homescreen();
   inline void set_allocated_homescreen(::std::string* homescreen);
 
-  // optional .ApplySettings.PassphraseSourceType passphrase_source = 5;
+  // optional .hw.trezor.messages.management.ApplySettings.PassphraseSourceType passphrase_source = 5;
   inline bool has_passphrase_source() const;
   inline void clear_passphrase_source();
   static const int kPassphraseSourceFieldNumber = 5;
-  inline ::ApplySettings_PassphraseSourceType passphrase_source() const;
-  inline void set_passphrase_source(::ApplySettings_PassphraseSourceType value);
+  inline ::hw::trezor::messages::management::ApplySettings_PassphraseSourceType passphrase_source() const;
+  inline void set_passphrase_source(::hw::trezor::messages::management::ApplySettings_PassphraseSourceType value);
 
   // optional uint32 auto_lock_delay_ms = 6;
   inline bool has_auto_lock_delay_ms() const;
@@ -857,7 +862,7 @@ class ApplySettings : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 auto_lock_delay_ms() const;
   inline void set_auto_lock_delay_ms(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:ApplySettings)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.ApplySettings)
  private:
   inline void set_has_language();
   inline void clear_has_language();
@@ -951,7 +956,7 @@ class ApplyFlags : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 flags() const;
   inline void set_flags(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:ApplyFlags)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.ApplyFlags)
  private:
   inline void set_has_flags();
   inline void clear_has_flags();
@@ -1030,7 +1035,7 @@ class ChangePin : public ::google::protobuf::Message {
   inline bool remove() const;
   inline void set_remove(bool value);
 
-  // @@protoc_insertion_point(class_scope:ChangePin)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.ChangePin)
  private:
   inline void set_has_remove();
   inline void clear_has_remove();
@@ -1135,7 +1140,7 @@ class Ping : public ::google::protobuf::Message {
   inline bool passphrase_protection() const;
   inline void set_passphrase_protection(bool value);
 
-  // @@protoc_insertion_point(class_scope:Ping)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.Ping)
  private:
   inline void set_has_message();
   inline void clear_has_message();
@@ -1216,7 +1221,7 @@ class Cancel : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:Cancel)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.Cancel)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -1292,7 +1297,7 @@ class GetEntropy : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 size() const;
   inline void set_size(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:GetEntropy)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.GetEntropy)
  private:
   inline void set_has_size();
   inline void clear_has_size();
@@ -1376,7 +1381,7 @@ class Entropy : public ::google::protobuf::Message {
   inline ::std::string* release_entropy();
   inline void set_allocated_entropy(::std::string* entropy);
 
-  // @@protoc_insertion_point(class_scope:Entropy)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.Entropy)
  private:
   inline void set_has_entropy();
   inline void clear_has_entropy();
@@ -1448,7 +1453,7 @@ class WipeDevice : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:WipeDevice)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.WipeDevice)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -1529,14 +1534,14 @@ class LoadDevice : public ::google::protobuf::Message {
   inline ::std::string* release_mnemonic();
   inline void set_allocated_mnemonic(::std::string* mnemonic);
 
-  // optional .HDNodeType node = 2;
+  // optional .hw.trezor.messages.common.HDNodeType node = 2;
   inline bool has_node() const;
   inline void clear_node();
   static const int kNodeFieldNumber = 2;
-  inline const ::HDNodeType& node() const;
-  inline ::HDNodeType* mutable_node();
-  inline ::HDNodeType* release_node();
-  inline void set_allocated_node(::HDNodeType* node);
+  inline const ::hw::trezor::messages::common::HDNodeType& node() const;
+  inline ::hw::trezor::messages::common::HDNodeType* mutable_node();
+  inline ::hw::trezor::messages::common::HDNodeType* release_node();
+  inline void set_allocated_node(::hw::trezor::messages::common::HDNodeType* node);
 
   // optional string pin = 3;
   inline bool has_pin() const;
@@ -1595,7 +1600,7 @@ class LoadDevice : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 u2f_counter() const;
   inline void set_u2f_counter(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:LoadDevice)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.LoadDevice)
  private:
   inline void set_has_mnemonic();
   inline void clear_has_mnemonic();
@@ -1619,7 +1624,7 @@ class LoadDevice : public ::google::protobuf::Message {
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::std::string* mnemonic_;
-  ::HDNodeType* node_;
+  ::hw::trezor::messages::common::HDNodeType* node_;
   ::std::string* pin_;
   static ::std::string* _default_language_;
   ::std::string* language_;
@@ -1755,7 +1760,7 @@ class ResetDevice : public ::google::protobuf::Message {
   inline bool skip_backup() const;
   inline void set_skip_backup(bool value);
 
-  // @@protoc_insertion_point(class_scope:ResetDevice)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.ResetDevice)
  private:
   inline void set_has_display_random();
   inline void clear_has_display_random();
@@ -1849,7 +1854,7 @@ class BackupDevice : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:BackupDevice)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.BackupDevice)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -1918,7 +1923,7 @@ class EntropyRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // @@protoc_insertion_point(class_scope:EntropyRequest)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.EntropyRequest)
  private:
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
@@ -1999,7 +2004,7 @@ class EntropyAck : public ::google::protobuf::Message {
   inline ::std::string* release_entropy();
   inline void set_allocated_entropy(::std::string* entropy);
 
-  // @@protoc_insertion_point(class_scope:EntropyAck)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.EntropyAck)
  private:
   inline void set_has_entropy();
   inline void clear_has_entropy();
@@ -2147,12 +2152,12 @@ class RecoveryDevice : public ::google::protobuf::Message {
   inline bool enforce_wordlist() const;
   inline void set_enforce_wordlist(bool value);
 
-  // optional .RecoveryDevice.RecoveryDeviceType type = 8;
+  // optional .hw.trezor.messages.management.RecoveryDevice.RecoveryDeviceType type = 8;
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 8;
-  inline ::RecoveryDevice_RecoveryDeviceType type() const;
-  inline void set_type(::RecoveryDevice_RecoveryDeviceType value);
+  inline ::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType type() const;
+  inline void set_type(::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType value);
 
   // optional uint32 u2f_counter = 9;
   inline bool has_u2f_counter() const;
@@ -2168,7 +2173,7 @@ class RecoveryDevice : public ::google::protobuf::Message {
   inline bool dry_run() const;
   inline void set_dry_run(bool value);
 
-  // @@protoc_insertion_point(class_scope:RecoveryDevice)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.RecoveryDevice)
  private:
   inline void set_has_word_count();
   inline void clear_has_word_count();
@@ -2290,14 +2295,14 @@ class WordRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional .WordRequest.WordRequestType type = 1;
+  // optional .hw.trezor.messages.management.WordRequest.WordRequestType type = 1;
   inline bool has_type() const;
   inline void clear_type();
   static const int kTypeFieldNumber = 1;
-  inline ::WordRequest_WordRequestType type() const;
-  inline void set_type(::WordRequest_WordRequestType value);
+  inline ::hw::trezor::messages::management::WordRequest_WordRequestType type() const;
+  inline void set_type(::hw::trezor::messages::management::WordRequest_WordRequestType value);
 
-  // @@protoc_insertion_point(class_scope:WordRequest)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.WordRequest)
  private:
   inline void set_has_type();
   inline void clear_has_type();
@@ -2381,7 +2386,7 @@ class WordAck : public ::google::protobuf::Message {
   inline ::std::string* release_word();
   inline void set_allocated_word(::std::string* word);
 
-  // @@protoc_insertion_point(class_scope:WordAck)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.WordAck)
  private:
   inline void set_has_word();
   inline void clear_has_word();
@@ -2460,7 +2465,7 @@ class SetU2FCounter : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 u2f_counter() const;
   inline void set_u2f_counter(::google::protobuf::uint32 value);
 
-  // @@protoc_insertion_point(class_scope:SetU2FCounter)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.management.SetU2FCounter)
  private:
   inline void set_has_u2f_counter();
   inline void clear_has_u2f_counter();
@@ -2501,7 +2506,7 @@ inline void Initialize::clear_state() {
   clear_has_state();
 }
 inline const ::std::string& Initialize::state() const {
-  // @@protoc_insertion_point(field_get:Initialize.state)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Initialize.state)
   return *state_;
 }
 inline void Initialize::set_state(const ::std::string& value) {
@@ -2510,7 +2515,7 @@ inline void Initialize::set_state(const ::std::string& value) {
     state_ = new ::std::string;
   }
   state_->assign(value);
-  // @@protoc_insertion_point(field_set:Initialize.state)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Initialize.state)
 }
 inline void Initialize::set_state(const char* value) {
   set_has_state();
@@ -2518,7 +2523,7 @@ inline void Initialize::set_state(const char* value) {
     state_ = new ::std::string;
   }
   state_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Initialize.state)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Initialize.state)
 }
 inline void Initialize::set_state(const void* value, size_t size) {
   set_has_state();
@@ -2526,14 +2531,14 @@ inline void Initialize::set_state(const void* value, size_t size) {
     state_ = new ::std::string;
   }
   state_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Initialize.state)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Initialize.state)
 }
 inline ::std::string* Initialize::mutable_state() {
   set_has_state();
   if (state_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     state_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Initialize.state)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Initialize.state)
   return state_;
 }
 inline ::std::string* Initialize::release_state() {
@@ -2557,7 +2562,7 @@ inline void Initialize::set_allocated_state(::std::string* state) {
     clear_has_state();
     state_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Initialize.state)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Initialize.state)
 }
 
 // optional bool skip_passphrase = 2;
@@ -2575,13 +2580,13 @@ inline void Initialize::clear_skip_passphrase() {
   clear_has_skip_passphrase();
 }
 inline bool Initialize::skip_passphrase() const {
-  // @@protoc_insertion_point(field_get:Initialize.skip_passphrase)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Initialize.skip_passphrase)
   return skip_passphrase_;
 }
 inline void Initialize::set_skip_passphrase(bool value) {
   set_has_skip_passphrase();
   skip_passphrase_ = value;
-  // @@protoc_insertion_point(field_set:Initialize.skip_passphrase)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Initialize.skip_passphrase)
 }
 
 // -------------------------------------------------------------------
@@ -2609,7 +2614,7 @@ inline void Features::clear_vendor() {
   clear_has_vendor();
 }
 inline const ::std::string& Features::vendor() const {
-  // @@protoc_insertion_point(field_get:Features.vendor)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.vendor)
   return *vendor_;
 }
 inline void Features::set_vendor(const ::std::string& value) {
@@ -2618,7 +2623,7 @@ inline void Features::set_vendor(const ::std::string& value) {
     vendor_ = new ::std::string;
   }
   vendor_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.vendor)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.vendor)
 }
 inline void Features::set_vendor(const char* value) {
   set_has_vendor();
@@ -2626,7 +2631,7 @@ inline void Features::set_vendor(const char* value) {
     vendor_ = new ::std::string;
   }
   vendor_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.vendor)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.vendor)
 }
 inline void Features::set_vendor(const char* value, size_t size) {
   set_has_vendor();
@@ -2634,14 +2639,14 @@ inline void Features::set_vendor(const char* value, size_t size) {
     vendor_ = new ::std::string;
   }
   vendor_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.vendor)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.vendor)
 }
 inline ::std::string* Features::mutable_vendor() {
   set_has_vendor();
   if (vendor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     vendor_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.vendor)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.vendor)
   return vendor_;
 }
 inline ::std::string* Features::release_vendor() {
@@ -2665,7 +2670,7 @@ inline void Features::set_allocated_vendor(::std::string* vendor) {
     clear_has_vendor();
     vendor_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.vendor)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.vendor)
 }
 
 // optional uint32 major_version = 2;
@@ -2683,13 +2688,13 @@ inline void Features::clear_major_version() {
   clear_has_major_version();
 }
 inline ::google::protobuf::uint32 Features::major_version() const {
-  // @@protoc_insertion_point(field_get:Features.major_version)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.major_version)
   return major_version_;
 }
 inline void Features::set_major_version(::google::protobuf::uint32 value) {
   set_has_major_version();
   major_version_ = value;
-  // @@protoc_insertion_point(field_set:Features.major_version)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.major_version)
 }
 
 // optional uint32 minor_version = 3;
@@ -2707,13 +2712,13 @@ inline void Features::clear_minor_version() {
   clear_has_minor_version();
 }
 inline ::google::protobuf::uint32 Features::minor_version() const {
-  // @@protoc_insertion_point(field_get:Features.minor_version)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.minor_version)
   return minor_version_;
 }
 inline void Features::set_minor_version(::google::protobuf::uint32 value) {
   set_has_minor_version();
   minor_version_ = value;
-  // @@protoc_insertion_point(field_set:Features.minor_version)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.minor_version)
 }
 
 // optional uint32 patch_version = 4;
@@ -2731,13 +2736,13 @@ inline void Features::clear_patch_version() {
   clear_has_patch_version();
 }
 inline ::google::protobuf::uint32 Features::patch_version() const {
-  // @@protoc_insertion_point(field_get:Features.patch_version)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.patch_version)
   return patch_version_;
 }
 inline void Features::set_patch_version(::google::protobuf::uint32 value) {
   set_has_patch_version();
   patch_version_ = value;
-  // @@protoc_insertion_point(field_set:Features.patch_version)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.patch_version)
 }
 
 // optional bool bootloader_mode = 5;
@@ -2755,13 +2760,13 @@ inline void Features::clear_bootloader_mode() {
   clear_has_bootloader_mode();
 }
 inline bool Features::bootloader_mode() const {
-  // @@protoc_insertion_point(field_get:Features.bootloader_mode)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.bootloader_mode)
   return bootloader_mode_;
 }
 inline void Features::set_bootloader_mode(bool value) {
   set_has_bootloader_mode();
   bootloader_mode_ = value;
-  // @@protoc_insertion_point(field_set:Features.bootloader_mode)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.bootloader_mode)
 }
 
 // optional string device_id = 6;
@@ -2781,7 +2786,7 @@ inline void Features::clear_device_id() {
   clear_has_device_id();
 }
 inline const ::std::string& Features::device_id() const {
-  // @@protoc_insertion_point(field_get:Features.device_id)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.device_id)
   return *device_id_;
 }
 inline void Features::set_device_id(const ::std::string& value) {
@@ -2790,7 +2795,7 @@ inline void Features::set_device_id(const ::std::string& value) {
     device_id_ = new ::std::string;
   }
   device_id_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.device_id)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.device_id)
 }
 inline void Features::set_device_id(const char* value) {
   set_has_device_id();
@@ -2798,7 +2803,7 @@ inline void Features::set_device_id(const char* value) {
     device_id_ = new ::std::string;
   }
   device_id_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.device_id)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.device_id)
 }
 inline void Features::set_device_id(const char* value, size_t size) {
   set_has_device_id();
@@ -2806,14 +2811,14 @@ inline void Features::set_device_id(const char* value, size_t size) {
     device_id_ = new ::std::string;
   }
   device_id_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.device_id)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.device_id)
 }
 inline ::std::string* Features::mutable_device_id() {
   set_has_device_id();
   if (device_id_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     device_id_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.device_id)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.device_id)
   return device_id_;
 }
 inline ::std::string* Features::release_device_id() {
@@ -2837,7 +2842,7 @@ inline void Features::set_allocated_device_id(::std::string* device_id) {
     clear_has_device_id();
     device_id_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.device_id)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.device_id)
 }
 
 // optional bool pin_protection = 7;
@@ -2855,13 +2860,13 @@ inline void Features::clear_pin_protection() {
   clear_has_pin_protection();
 }
 inline bool Features::pin_protection() const {
-  // @@protoc_insertion_point(field_get:Features.pin_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.pin_protection)
   return pin_protection_;
 }
 inline void Features::set_pin_protection(bool value) {
   set_has_pin_protection();
   pin_protection_ = value;
-  // @@protoc_insertion_point(field_set:Features.pin_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.pin_protection)
 }
 
 // optional bool passphrase_protection = 8;
@@ -2879,13 +2884,13 @@ inline void Features::clear_passphrase_protection() {
   clear_has_passphrase_protection();
 }
 inline bool Features::passphrase_protection() const {
-  // @@protoc_insertion_point(field_get:Features.passphrase_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.passphrase_protection)
   return passphrase_protection_;
 }
 inline void Features::set_passphrase_protection(bool value) {
   set_has_passphrase_protection();
   passphrase_protection_ = value;
-  // @@protoc_insertion_point(field_set:Features.passphrase_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.passphrase_protection)
 }
 
 // optional string language = 9;
@@ -2905,7 +2910,7 @@ inline void Features::clear_language() {
   clear_has_language();
 }
 inline const ::std::string& Features::language() const {
-  // @@protoc_insertion_point(field_get:Features.language)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.language)
   return *language_;
 }
 inline void Features::set_language(const ::std::string& value) {
@@ -2914,7 +2919,7 @@ inline void Features::set_language(const ::std::string& value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.language)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.language)
 }
 inline void Features::set_language(const char* value) {
   set_has_language();
@@ -2922,7 +2927,7 @@ inline void Features::set_language(const char* value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.language)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.language)
 }
 inline void Features::set_language(const char* value, size_t size) {
   set_has_language();
@@ -2930,14 +2935,14 @@ inline void Features::set_language(const char* value, size_t size) {
     language_ = new ::std::string;
   }
   language_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.language)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.language)
 }
 inline ::std::string* Features::mutable_language() {
   set_has_language();
   if (language_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     language_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.language)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.language)
   return language_;
 }
 inline ::std::string* Features::release_language() {
@@ -2961,7 +2966,7 @@ inline void Features::set_allocated_language(::std::string* language) {
     clear_has_language();
     language_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.language)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.language)
 }
 
 // optional string label = 10;
@@ -2981,7 +2986,7 @@ inline void Features::clear_label() {
   clear_has_label();
 }
 inline const ::std::string& Features::label() const {
-  // @@protoc_insertion_point(field_get:Features.label)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.label)
   return *label_;
 }
 inline void Features::set_label(const ::std::string& value) {
@@ -2990,7 +2995,7 @@ inline void Features::set_label(const ::std::string& value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.label)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.label)
 }
 inline void Features::set_label(const char* value) {
   set_has_label();
@@ -2998,7 +3003,7 @@ inline void Features::set_label(const char* value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.label)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.label)
 }
 inline void Features::set_label(const char* value, size_t size) {
   set_has_label();
@@ -3006,14 +3011,14 @@ inline void Features::set_label(const char* value, size_t size) {
     label_ = new ::std::string;
   }
   label_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.label)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.label)
 }
 inline ::std::string* Features::mutable_label() {
   set_has_label();
   if (label_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     label_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.label)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.label)
   return label_;
 }
 inline ::std::string* Features::release_label() {
@@ -3037,7 +3042,7 @@ inline void Features::set_allocated_label(::std::string* label) {
     clear_has_label();
     label_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.label)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.label)
 }
 
 // optional bool initialized = 12;
@@ -3055,13 +3060,13 @@ inline void Features::clear_initialized() {
   clear_has_initialized();
 }
 inline bool Features::initialized() const {
-  // @@protoc_insertion_point(field_get:Features.initialized)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.initialized)
   return initialized_;
 }
 inline void Features::set_initialized(bool value) {
   set_has_initialized();
   initialized_ = value;
-  // @@protoc_insertion_point(field_set:Features.initialized)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.initialized)
 }
 
 // optional bytes revision = 13;
@@ -3081,7 +3086,7 @@ inline void Features::clear_revision() {
   clear_has_revision();
 }
 inline const ::std::string& Features::revision() const {
-  // @@protoc_insertion_point(field_get:Features.revision)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.revision)
   return *revision_;
 }
 inline void Features::set_revision(const ::std::string& value) {
@@ -3090,7 +3095,7 @@ inline void Features::set_revision(const ::std::string& value) {
     revision_ = new ::std::string;
   }
   revision_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.revision)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.revision)
 }
 inline void Features::set_revision(const char* value) {
   set_has_revision();
@@ -3098,7 +3103,7 @@ inline void Features::set_revision(const char* value) {
     revision_ = new ::std::string;
   }
   revision_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.revision)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.revision)
 }
 inline void Features::set_revision(const void* value, size_t size) {
   set_has_revision();
@@ -3106,14 +3111,14 @@ inline void Features::set_revision(const void* value, size_t size) {
     revision_ = new ::std::string;
   }
   revision_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.revision)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.revision)
 }
 inline ::std::string* Features::mutable_revision() {
   set_has_revision();
   if (revision_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     revision_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.revision)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.revision)
   return revision_;
 }
 inline ::std::string* Features::release_revision() {
@@ -3137,7 +3142,7 @@ inline void Features::set_allocated_revision(::std::string* revision) {
     clear_has_revision();
     revision_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.revision)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.revision)
 }
 
 // optional bytes bootloader_hash = 14;
@@ -3157,7 +3162,7 @@ inline void Features::clear_bootloader_hash() {
   clear_has_bootloader_hash();
 }
 inline const ::std::string& Features::bootloader_hash() const {
-  // @@protoc_insertion_point(field_get:Features.bootloader_hash)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.bootloader_hash)
   return *bootloader_hash_;
 }
 inline void Features::set_bootloader_hash(const ::std::string& value) {
@@ -3166,7 +3171,7 @@ inline void Features::set_bootloader_hash(const ::std::string& value) {
     bootloader_hash_ = new ::std::string;
   }
   bootloader_hash_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.bootloader_hash)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.bootloader_hash)
 }
 inline void Features::set_bootloader_hash(const char* value) {
   set_has_bootloader_hash();
@@ -3174,7 +3179,7 @@ inline void Features::set_bootloader_hash(const char* value) {
     bootloader_hash_ = new ::std::string;
   }
   bootloader_hash_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.bootloader_hash)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.bootloader_hash)
 }
 inline void Features::set_bootloader_hash(const void* value, size_t size) {
   set_has_bootloader_hash();
@@ -3182,14 +3187,14 @@ inline void Features::set_bootloader_hash(const void* value, size_t size) {
     bootloader_hash_ = new ::std::string;
   }
   bootloader_hash_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.bootloader_hash)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.bootloader_hash)
 }
 inline ::std::string* Features::mutable_bootloader_hash() {
   set_has_bootloader_hash();
   if (bootloader_hash_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     bootloader_hash_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.bootloader_hash)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.bootloader_hash)
   return bootloader_hash_;
 }
 inline ::std::string* Features::release_bootloader_hash() {
@@ -3213,7 +3218,7 @@ inline void Features::set_allocated_bootloader_hash(::std::string* bootloader_ha
     clear_has_bootloader_hash();
     bootloader_hash_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.bootloader_hash)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.bootloader_hash)
 }
 
 // optional bool imported = 15;
@@ -3231,13 +3236,13 @@ inline void Features::clear_imported() {
   clear_has_imported();
 }
 inline bool Features::imported() const {
-  // @@protoc_insertion_point(field_get:Features.imported)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.imported)
   return imported_;
 }
 inline void Features::set_imported(bool value) {
   set_has_imported();
   imported_ = value;
-  // @@protoc_insertion_point(field_set:Features.imported)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.imported)
 }
 
 // optional bool pin_cached = 16;
@@ -3255,13 +3260,13 @@ inline void Features::clear_pin_cached() {
   clear_has_pin_cached();
 }
 inline bool Features::pin_cached() const {
-  // @@protoc_insertion_point(field_get:Features.pin_cached)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.pin_cached)
   return pin_cached_;
 }
 inline void Features::set_pin_cached(bool value) {
   set_has_pin_cached();
   pin_cached_ = value;
-  // @@protoc_insertion_point(field_set:Features.pin_cached)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.pin_cached)
 }
 
 // optional bool passphrase_cached = 17;
@@ -3279,13 +3284,13 @@ inline void Features::clear_passphrase_cached() {
   clear_has_passphrase_cached();
 }
 inline bool Features::passphrase_cached() const {
-  // @@protoc_insertion_point(field_get:Features.passphrase_cached)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.passphrase_cached)
   return passphrase_cached_;
 }
 inline void Features::set_passphrase_cached(bool value) {
   set_has_passphrase_cached();
   passphrase_cached_ = value;
-  // @@protoc_insertion_point(field_set:Features.passphrase_cached)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.passphrase_cached)
 }
 
 // optional bool firmware_present = 18;
@@ -3303,13 +3308,13 @@ inline void Features::clear_firmware_present() {
   clear_has_firmware_present();
 }
 inline bool Features::firmware_present() const {
-  // @@protoc_insertion_point(field_get:Features.firmware_present)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.firmware_present)
   return firmware_present_;
 }
 inline void Features::set_firmware_present(bool value) {
   set_has_firmware_present();
   firmware_present_ = value;
-  // @@protoc_insertion_point(field_set:Features.firmware_present)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.firmware_present)
 }
 
 // optional bool needs_backup = 19;
@@ -3327,13 +3332,13 @@ inline void Features::clear_needs_backup() {
   clear_has_needs_backup();
 }
 inline bool Features::needs_backup() const {
-  // @@protoc_insertion_point(field_get:Features.needs_backup)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.needs_backup)
   return needs_backup_;
 }
 inline void Features::set_needs_backup(bool value) {
   set_has_needs_backup();
   needs_backup_ = value;
-  // @@protoc_insertion_point(field_set:Features.needs_backup)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.needs_backup)
 }
 
 // optional uint32 flags = 20;
@@ -3351,13 +3356,13 @@ inline void Features::clear_flags() {
   clear_has_flags();
 }
 inline ::google::protobuf::uint32 Features::flags() const {
-  // @@protoc_insertion_point(field_get:Features.flags)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.flags)
   return flags_;
 }
 inline void Features::set_flags(::google::protobuf::uint32 value) {
   set_has_flags();
   flags_ = value;
-  // @@protoc_insertion_point(field_set:Features.flags)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.flags)
 }
 
 // optional string model = 21;
@@ -3377,7 +3382,7 @@ inline void Features::clear_model() {
   clear_has_model();
 }
 inline const ::std::string& Features::model() const {
-  // @@protoc_insertion_point(field_get:Features.model)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.model)
   return *model_;
 }
 inline void Features::set_model(const ::std::string& value) {
@@ -3386,7 +3391,7 @@ inline void Features::set_model(const ::std::string& value) {
     model_ = new ::std::string;
   }
   model_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.model)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.model)
 }
 inline void Features::set_model(const char* value) {
   set_has_model();
@@ -3394,7 +3399,7 @@ inline void Features::set_model(const char* value) {
     model_ = new ::std::string;
   }
   model_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.model)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.model)
 }
 inline void Features::set_model(const char* value, size_t size) {
   set_has_model();
@@ -3402,14 +3407,14 @@ inline void Features::set_model(const char* value, size_t size) {
     model_ = new ::std::string;
   }
   model_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.model)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.model)
 }
 inline ::std::string* Features::mutable_model() {
   set_has_model();
   if (model_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     model_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.model)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.model)
   return model_;
 }
 inline ::std::string* Features::release_model() {
@@ -3433,7 +3438,7 @@ inline void Features::set_allocated_model(::std::string* model) {
     clear_has_model();
     model_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.model)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.model)
 }
 
 // optional uint32 fw_major = 22;
@@ -3451,13 +3456,13 @@ inline void Features::clear_fw_major() {
   clear_has_fw_major();
 }
 inline ::google::protobuf::uint32 Features::fw_major() const {
-  // @@protoc_insertion_point(field_get:Features.fw_major)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.fw_major)
   return fw_major_;
 }
 inline void Features::set_fw_major(::google::protobuf::uint32 value) {
   set_has_fw_major();
   fw_major_ = value;
-  // @@protoc_insertion_point(field_set:Features.fw_major)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.fw_major)
 }
 
 // optional uint32 fw_minor = 23;
@@ -3475,13 +3480,13 @@ inline void Features::clear_fw_minor() {
   clear_has_fw_minor();
 }
 inline ::google::protobuf::uint32 Features::fw_minor() const {
-  // @@protoc_insertion_point(field_get:Features.fw_minor)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.fw_minor)
   return fw_minor_;
 }
 inline void Features::set_fw_minor(::google::protobuf::uint32 value) {
   set_has_fw_minor();
   fw_minor_ = value;
-  // @@protoc_insertion_point(field_set:Features.fw_minor)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.fw_minor)
 }
 
 // optional uint32 fw_patch = 24;
@@ -3499,13 +3504,13 @@ inline void Features::clear_fw_patch() {
   clear_has_fw_patch();
 }
 inline ::google::protobuf::uint32 Features::fw_patch() const {
-  // @@protoc_insertion_point(field_get:Features.fw_patch)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.fw_patch)
   return fw_patch_;
 }
 inline void Features::set_fw_patch(::google::protobuf::uint32 value) {
   set_has_fw_patch();
   fw_patch_ = value;
-  // @@protoc_insertion_point(field_set:Features.fw_patch)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.fw_patch)
 }
 
 // optional string fw_vendor = 25;
@@ -3525,7 +3530,7 @@ inline void Features::clear_fw_vendor() {
   clear_has_fw_vendor();
 }
 inline const ::std::string& Features::fw_vendor() const {
-  // @@protoc_insertion_point(field_get:Features.fw_vendor)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.fw_vendor)
   return *fw_vendor_;
 }
 inline void Features::set_fw_vendor(const ::std::string& value) {
@@ -3534,7 +3539,7 @@ inline void Features::set_fw_vendor(const ::std::string& value) {
     fw_vendor_ = new ::std::string;
   }
   fw_vendor_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.fw_vendor)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.fw_vendor)
 }
 inline void Features::set_fw_vendor(const char* value) {
   set_has_fw_vendor();
@@ -3542,7 +3547,7 @@ inline void Features::set_fw_vendor(const char* value) {
     fw_vendor_ = new ::std::string;
   }
   fw_vendor_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.fw_vendor)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.fw_vendor)
 }
 inline void Features::set_fw_vendor(const char* value, size_t size) {
   set_has_fw_vendor();
@@ -3550,14 +3555,14 @@ inline void Features::set_fw_vendor(const char* value, size_t size) {
     fw_vendor_ = new ::std::string;
   }
   fw_vendor_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.fw_vendor)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.fw_vendor)
 }
 inline ::std::string* Features::mutable_fw_vendor() {
   set_has_fw_vendor();
   if (fw_vendor_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     fw_vendor_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.fw_vendor)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.fw_vendor)
   return fw_vendor_;
 }
 inline ::std::string* Features::release_fw_vendor() {
@@ -3581,7 +3586,7 @@ inline void Features::set_allocated_fw_vendor(::std::string* fw_vendor) {
     clear_has_fw_vendor();
     fw_vendor_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.fw_vendor)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.fw_vendor)
 }
 
 // optional bytes fw_vendor_keys = 26;
@@ -3601,7 +3606,7 @@ inline void Features::clear_fw_vendor_keys() {
   clear_has_fw_vendor_keys();
 }
 inline const ::std::string& Features::fw_vendor_keys() const {
-  // @@protoc_insertion_point(field_get:Features.fw_vendor_keys)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.fw_vendor_keys)
   return *fw_vendor_keys_;
 }
 inline void Features::set_fw_vendor_keys(const ::std::string& value) {
@@ -3610,7 +3615,7 @@ inline void Features::set_fw_vendor_keys(const ::std::string& value) {
     fw_vendor_keys_ = new ::std::string;
   }
   fw_vendor_keys_->assign(value);
-  // @@protoc_insertion_point(field_set:Features.fw_vendor_keys)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.fw_vendor_keys)
 }
 inline void Features::set_fw_vendor_keys(const char* value) {
   set_has_fw_vendor_keys();
@@ -3618,7 +3623,7 @@ inline void Features::set_fw_vendor_keys(const char* value) {
     fw_vendor_keys_ = new ::std::string;
   }
   fw_vendor_keys_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Features.fw_vendor_keys)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Features.fw_vendor_keys)
 }
 inline void Features::set_fw_vendor_keys(const void* value, size_t size) {
   set_has_fw_vendor_keys();
@@ -3626,14 +3631,14 @@ inline void Features::set_fw_vendor_keys(const void* value, size_t size) {
     fw_vendor_keys_ = new ::std::string;
   }
   fw_vendor_keys_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Features.fw_vendor_keys)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Features.fw_vendor_keys)
 }
 inline ::std::string* Features::mutable_fw_vendor_keys() {
   set_has_fw_vendor_keys();
   if (fw_vendor_keys_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     fw_vendor_keys_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Features.fw_vendor_keys)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Features.fw_vendor_keys)
   return fw_vendor_keys_;
 }
 inline ::std::string* Features::release_fw_vendor_keys() {
@@ -3657,7 +3662,7 @@ inline void Features::set_allocated_fw_vendor_keys(::std::string* fw_vendor_keys
     clear_has_fw_vendor_keys();
     fw_vendor_keys_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Features.fw_vendor_keys)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Features.fw_vendor_keys)
 }
 
 // optional bool unfinished_backup = 27;
@@ -3675,13 +3680,13 @@ inline void Features::clear_unfinished_backup() {
   clear_has_unfinished_backup();
 }
 inline bool Features::unfinished_backup() const {
-  // @@protoc_insertion_point(field_get:Features.unfinished_backup)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Features.unfinished_backup)
   return unfinished_backup_;
 }
 inline void Features::set_unfinished_backup(bool value) {
   set_has_unfinished_backup();
   unfinished_backup_ = value;
-  // @@protoc_insertion_point(field_set:Features.unfinished_backup)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Features.unfinished_backup)
 }
 
 // -------------------------------------------------------------------
@@ -3709,7 +3714,7 @@ inline void ApplySettings::clear_language() {
   clear_has_language();
 }
 inline const ::std::string& ApplySettings::language() const {
-  // @@protoc_insertion_point(field_get:ApplySettings.language)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplySettings.language)
   return *language_;
 }
 inline void ApplySettings::set_language(const ::std::string& value) {
@@ -3718,7 +3723,7 @@ inline void ApplySettings::set_language(const ::std::string& value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set:ApplySettings.language)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplySettings.language)
 }
 inline void ApplySettings::set_language(const char* value) {
   set_has_language();
@@ -3726,7 +3731,7 @@ inline void ApplySettings::set_language(const char* value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set_char:ApplySettings.language)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.ApplySettings.language)
 }
 inline void ApplySettings::set_language(const char* value, size_t size) {
   set_has_language();
@@ -3734,14 +3739,14 @@ inline void ApplySettings::set_language(const char* value, size_t size) {
     language_ = new ::std::string;
   }
   language_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:ApplySettings.language)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.ApplySettings.language)
 }
 inline ::std::string* ApplySettings::mutable_language() {
   set_has_language();
   if (language_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     language_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:ApplySettings.language)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.ApplySettings.language)
   return language_;
 }
 inline ::std::string* ApplySettings::release_language() {
@@ -3765,7 +3770,7 @@ inline void ApplySettings::set_allocated_language(::std::string* language) {
     clear_has_language();
     language_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:ApplySettings.language)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.ApplySettings.language)
 }
 
 // optional string label = 2;
@@ -3785,7 +3790,7 @@ inline void ApplySettings::clear_label() {
   clear_has_label();
 }
 inline const ::std::string& ApplySettings::label() const {
-  // @@protoc_insertion_point(field_get:ApplySettings.label)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplySettings.label)
   return *label_;
 }
 inline void ApplySettings::set_label(const ::std::string& value) {
@@ -3794,7 +3799,7 @@ inline void ApplySettings::set_label(const ::std::string& value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set:ApplySettings.label)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplySettings.label)
 }
 inline void ApplySettings::set_label(const char* value) {
   set_has_label();
@@ -3802,7 +3807,7 @@ inline void ApplySettings::set_label(const char* value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set_char:ApplySettings.label)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.ApplySettings.label)
 }
 inline void ApplySettings::set_label(const char* value, size_t size) {
   set_has_label();
@@ -3810,14 +3815,14 @@ inline void ApplySettings::set_label(const char* value, size_t size) {
     label_ = new ::std::string;
   }
   label_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:ApplySettings.label)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.ApplySettings.label)
 }
 inline ::std::string* ApplySettings::mutable_label() {
   set_has_label();
   if (label_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     label_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:ApplySettings.label)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.ApplySettings.label)
   return label_;
 }
 inline ::std::string* ApplySettings::release_label() {
@@ -3841,7 +3846,7 @@ inline void ApplySettings::set_allocated_label(::std::string* label) {
     clear_has_label();
     label_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:ApplySettings.label)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.ApplySettings.label)
 }
 
 // optional bool use_passphrase = 3;
@@ -3859,13 +3864,13 @@ inline void ApplySettings::clear_use_passphrase() {
   clear_has_use_passphrase();
 }
 inline bool ApplySettings::use_passphrase() const {
-  // @@protoc_insertion_point(field_get:ApplySettings.use_passphrase)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplySettings.use_passphrase)
   return use_passphrase_;
 }
 inline void ApplySettings::set_use_passphrase(bool value) {
   set_has_use_passphrase();
   use_passphrase_ = value;
-  // @@protoc_insertion_point(field_set:ApplySettings.use_passphrase)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplySettings.use_passphrase)
 }
 
 // optional bytes homescreen = 4;
@@ -3885,7 +3890,7 @@ inline void ApplySettings::clear_homescreen() {
   clear_has_homescreen();
 }
 inline const ::std::string& ApplySettings::homescreen() const {
-  // @@protoc_insertion_point(field_get:ApplySettings.homescreen)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplySettings.homescreen)
   return *homescreen_;
 }
 inline void ApplySettings::set_homescreen(const ::std::string& value) {
@@ -3894,7 +3899,7 @@ inline void ApplySettings::set_homescreen(const ::std::string& value) {
     homescreen_ = new ::std::string;
   }
   homescreen_->assign(value);
-  // @@protoc_insertion_point(field_set:ApplySettings.homescreen)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplySettings.homescreen)
 }
 inline void ApplySettings::set_homescreen(const char* value) {
   set_has_homescreen();
@@ -3902,7 +3907,7 @@ inline void ApplySettings::set_homescreen(const char* value) {
     homescreen_ = new ::std::string;
   }
   homescreen_->assign(value);
-  // @@protoc_insertion_point(field_set_char:ApplySettings.homescreen)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.ApplySettings.homescreen)
 }
 inline void ApplySettings::set_homescreen(const void* value, size_t size) {
   set_has_homescreen();
@@ -3910,14 +3915,14 @@ inline void ApplySettings::set_homescreen(const void* value, size_t size) {
     homescreen_ = new ::std::string;
   }
   homescreen_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:ApplySettings.homescreen)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.ApplySettings.homescreen)
 }
 inline ::std::string* ApplySettings::mutable_homescreen() {
   set_has_homescreen();
   if (homescreen_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     homescreen_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:ApplySettings.homescreen)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.ApplySettings.homescreen)
   return homescreen_;
 }
 inline ::std::string* ApplySettings::release_homescreen() {
@@ -3941,10 +3946,10 @@ inline void ApplySettings::set_allocated_homescreen(::std::string* homescreen) {
     clear_has_homescreen();
     homescreen_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:ApplySettings.homescreen)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.ApplySettings.homescreen)
 }
 
-// optional .ApplySettings.PassphraseSourceType passphrase_source = 5;
+// optional .hw.trezor.messages.management.ApplySettings.PassphraseSourceType passphrase_source = 5;
 inline bool ApplySettings::has_passphrase_source() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -3958,15 +3963,15 @@ inline void ApplySettings::clear_passphrase_source() {
   passphrase_source_ = 0;
   clear_has_passphrase_source();
 }
-inline ::ApplySettings_PassphraseSourceType ApplySettings::passphrase_source() const {
-  // @@protoc_insertion_point(field_get:ApplySettings.passphrase_source)
-  return static_cast< ::ApplySettings_PassphraseSourceType >(passphrase_source_);
+inline ::hw::trezor::messages::management::ApplySettings_PassphraseSourceType ApplySettings::passphrase_source() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplySettings.passphrase_source)
+  return static_cast< ::hw::trezor::messages::management::ApplySettings_PassphraseSourceType >(passphrase_source_);
 }
-inline void ApplySettings::set_passphrase_source(::ApplySettings_PassphraseSourceType value) {
-  assert(::ApplySettings_PassphraseSourceType_IsValid(value));
+inline void ApplySettings::set_passphrase_source(::hw::trezor::messages::management::ApplySettings_PassphraseSourceType value) {
+  assert(::hw::trezor::messages::management::ApplySettings_PassphraseSourceType_IsValid(value));
   set_has_passphrase_source();
   passphrase_source_ = value;
-  // @@protoc_insertion_point(field_set:ApplySettings.passphrase_source)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplySettings.passphrase_source)
 }
 
 // optional uint32 auto_lock_delay_ms = 6;
@@ -3984,13 +3989,13 @@ inline void ApplySettings::clear_auto_lock_delay_ms() {
   clear_has_auto_lock_delay_ms();
 }
 inline ::google::protobuf::uint32 ApplySettings::auto_lock_delay_ms() const {
-  // @@protoc_insertion_point(field_get:ApplySettings.auto_lock_delay_ms)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplySettings.auto_lock_delay_ms)
   return auto_lock_delay_ms_;
 }
 inline void ApplySettings::set_auto_lock_delay_ms(::google::protobuf::uint32 value) {
   set_has_auto_lock_delay_ms();
   auto_lock_delay_ms_ = value;
-  // @@protoc_insertion_point(field_set:ApplySettings.auto_lock_delay_ms)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplySettings.auto_lock_delay_ms)
 }
 
 // -------------------------------------------------------------------
@@ -4012,13 +4017,13 @@ inline void ApplyFlags::clear_flags() {
   clear_has_flags();
 }
 inline ::google::protobuf::uint32 ApplyFlags::flags() const {
-  // @@protoc_insertion_point(field_get:ApplyFlags.flags)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ApplyFlags.flags)
   return flags_;
 }
 inline void ApplyFlags::set_flags(::google::protobuf::uint32 value) {
   set_has_flags();
   flags_ = value;
-  // @@protoc_insertion_point(field_set:ApplyFlags.flags)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ApplyFlags.flags)
 }
 
 // -------------------------------------------------------------------
@@ -4040,13 +4045,13 @@ inline void ChangePin::clear_remove() {
   clear_has_remove();
 }
 inline bool ChangePin::remove() const {
-  // @@protoc_insertion_point(field_get:ChangePin.remove)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ChangePin.remove)
   return remove_;
 }
 inline void ChangePin::set_remove(bool value) {
   set_has_remove();
   remove_ = value;
-  // @@protoc_insertion_point(field_set:ChangePin.remove)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ChangePin.remove)
 }
 
 // -------------------------------------------------------------------
@@ -4070,7 +4075,7 @@ inline void Ping::clear_message() {
   clear_has_message();
 }
 inline const ::std::string& Ping::message() const {
-  // @@protoc_insertion_point(field_get:Ping.message)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Ping.message)
   return *message_;
 }
 inline void Ping::set_message(const ::std::string& value) {
@@ -4079,7 +4084,7 @@ inline void Ping::set_message(const ::std::string& value) {
     message_ = new ::std::string;
   }
   message_->assign(value);
-  // @@protoc_insertion_point(field_set:Ping.message)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Ping.message)
 }
 inline void Ping::set_message(const char* value) {
   set_has_message();
@@ -4087,7 +4092,7 @@ inline void Ping::set_message(const char* value) {
     message_ = new ::std::string;
   }
   message_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Ping.message)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Ping.message)
 }
 inline void Ping::set_message(const char* value, size_t size) {
   set_has_message();
@@ -4095,14 +4100,14 @@ inline void Ping::set_message(const char* value, size_t size) {
     message_ = new ::std::string;
   }
   message_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Ping.message)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Ping.message)
 }
 inline ::std::string* Ping::mutable_message() {
   set_has_message();
   if (message_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     message_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Ping.message)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Ping.message)
   return message_;
 }
 inline ::std::string* Ping::release_message() {
@@ -4126,7 +4131,7 @@ inline void Ping::set_allocated_message(::std::string* message) {
     clear_has_message();
     message_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Ping.message)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Ping.message)
 }
 
 // optional bool button_protection = 2;
@@ -4144,13 +4149,13 @@ inline void Ping::clear_button_protection() {
   clear_has_button_protection();
 }
 inline bool Ping::button_protection() const {
-  // @@protoc_insertion_point(field_get:Ping.button_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Ping.button_protection)
   return button_protection_;
 }
 inline void Ping::set_button_protection(bool value) {
   set_has_button_protection();
   button_protection_ = value;
-  // @@protoc_insertion_point(field_set:Ping.button_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Ping.button_protection)
 }
 
 // optional bool pin_protection = 3;
@@ -4168,13 +4173,13 @@ inline void Ping::clear_pin_protection() {
   clear_has_pin_protection();
 }
 inline bool Ping::pin_protection() const {
-  // @@protoc_insertion_point(field_get:Ping.pin_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Ping.pin_protection)
   return pin_protection_;
 }
 inline void Ping::set_pin_protection(bool value) {
   set_has_pin_protection();
   pin_protection_ = value;
-  // @@protoc_insertion_point(field_set:Ping.pin_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Ping.pin_protection)
 }
 
 // optional bool passphrase_protection = 4;
@@ -4192,13 +4197,13 @@ inline void Ping::clear_passphrase_protection() {
   clear_has_passphrase_protection();
 }
 inline bool Ping::passphrase_protection() const {
-  // @@protoc_insertion_point(field_get:Ping.passphrase_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Ping.passphrase_protection)
   return passphrase_protection_;
 }
 inline void Ping::set_passphrase_protection(bool value) {
   set_has_passphrase_protection();
   passphrase_protection_ = value;
-  // @@protoc_insertion_point(field_set:Ping.passphrase_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Ping.passphrase_protection)
 }
 
 // -------------------------------------------------------------------
@@ -4224,13 +4229,13 @@ inline void GetEntropy::clear_size() {
   clear_has_size();
 }
 inline ::google::protobuf::uint32 GetEntropy::size() const {
-  // @@protoc_insertion_point(field_get:GetEntropy.size)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.GetEntropy.size)
   return size_;
 }
 inline void GetEntropy::set_size(::google::protobuf::uint32 value) {
   set_has_size();
   size_ = value;
-  // @@protoc_insertion_point(field_set:GetEntropy.size)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.GetEntropy.size)
 }
 
 // -------------------------------------------------------------------
@@ -4254,7 +4259,7 @@ inline void Entropy::clear_entropy() {
   clear_has_entropy();
 }
 inline const ::std::string& Entropy::entropy() const {
-  // @@protoc_insertion_point(field_get:Entropy.entropy)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.Entropy.entropy)
   return *entropy_;
 }
 inline void Entropy::set_entropy(const ::std::string& value) {
@@ -4263,7 +4268,7 @@ inline void Entropy::set_entropy(const ::std::string& value) {
     entropy_ = new ::std::string;
   }
   entropy_->assign(value);
-  // @@protoc_insertion_point(field_set:Entropy.entropy)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.Entropy.entropy)
 }
 inline void Entropy::set_entropy(const char* value) {
   set_has_entropy();
@@ -4271,7 +4276,7 @@ inline void Entropy::set_entropy(const char* value) {
     entropy_ = new ::std::string;
   }
   entropy_->assign(value);
-  // @@protoc_insertion_point(field_set_char:Entropy.entropy)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.Entropy.entropy)
 }
 inline void Entropy::set_entropy(const void* value, size_t size) {
   set_has_entropy();
@@ -4279,14 +4284,14 @@ inline void Entropy::set_entropy(const void* value, size_t size) {
     entropy_ = new ::std::string;
   }
   entropy_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:Entropy.entropy)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.Entropy.entropy)
 }
 inline ::std::string* Entropy::mutable_entropy() {
   set_has_entropy();
   if (entropy_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     entropy_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:Entropy.entropy)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.Entropy.entropy)
   return entropy_;
 }
 inline ::std::string* Entropy::release_entropy() {
@@ -4310,7 +4315,7 @@ inline void Entropy::set_allocated_entropy(::std::string* entropy) {
     clear_has_entropy();
     entropy_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:Entropy.entropy)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.Entropy.entropy)
 }
 
 // -------------------------------------------------------------------
@@ -4338,7 +4343,7 @@ inline void LoadDevice::clear_mnemonic() {
   clear_has_mnemonic();
 }
 inline const ::std::string& LoadDevice::mnemonic() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.mnemonic)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.mnemonic)
   return *mnemonic_;
 }
 inline void LoadDevice::set_mnemonic(const ::std::string& value) {
@@ -4347,7 +4352,7 @@ inline void LoadDevice::set_mnemonic(const ::std::string& value) {
     mnemonic_ = new ::std::string;
   }
   mnemonic_->assign(value);
-  // @@protoc_insertion_point(field_set:LoadDevice.mnemonic)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.mnemonic)
 }
 inline void LoadDevice::set_mnemonic(const char* value) {
   set_has_mnemonic();
@@ -4355,7 +4360,7 @@ inline void LoadDevice::set_mnemonic(const char* value) {
     mnemonic_ = new ::std::string;
   }
   mnemonic_->assign(value);
-  // @@protoc_insertion_point(field_set_char:LoadDevice.mnemonic)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.LoadDevice.mnemonic)
 }
 inline void LoadDevice::set_mnemonic(const char* value, size_t size) {
   set_has_mnemonic();
@@ -4363,14 +4368,14 @@ inline void LoadDevice::set_mnemonic(const char* value, size_t size) {
     mnemonic_ = new ::std::string;
   }
   mnemonic_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:LoadDevice.mnemonic)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.LoadDevice.mnemonic)
 }
 inline ::std::string* LoadDevice::mutable_mnemonic() {
   set_has_mnemonic();
   if (mnemonic_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     mnemonic_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:LoadDevice.mnemonic)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.LoadDevice.mnemonic)
   return mnemonic_;
 }
 inline ::std::string* LoadDevice::release_mnemonic() {
@@ -4394,10 +4399,10 @@ inline void LoadDevice::set_allocated_mnemonic(::std::string* mnemonic) {
     clear_has_mnemonic();
     mnemonic_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:LoadDevice.mnemonic)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.LoadDevice.mnemonic)
 }
 
-// optional .HDNodeType node = 2;
+// optional .hw.trezor.messages.common.HDNodeType node = 2;
 inline bool LoadDevice::has_node() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -4408,26 +4413,26 @@ inline void LoadDevice::clear_has_node() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void LoadDevice::clear_node() {
-  if (node_ != NULL) node_->::HDNodeType::Clear();
+  if (node_ != NULL) node_->::hw::trezor::messages::common::HDNodeType::Clear();
   clear_has_node();
 }
-inline const ::HDNodeType& LoadDevice::node() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.node)
+inline const ::hw::trezor::messages::common::HDNodeType& LoadDevice::node() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.node)
   return node_ != NULL ? *node_ : *default_instance_->node_;
 }
-inline ::HDNodeType* LoadDevice::mutable_node() {
+inline ::hw::trezor::messages::common::HDNodeType* LoadDevice::mutable_node() {
   set_has_node();
-  if (node_ == NULL) node_ = new ::HDNodeType;
-  // @@protoc_insertion_point(field_mutable:LoadDevice.node)
+  if (node_ == NULL) node_ = new ::hw::trezor::messages::common::HDNodeType;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.LoadDevice.node)
   return node_;
 }
-inline ::HDNodeType* LoadDevice::release_node() {
+inline ::hw::trezor::messages::common::HDNodeType* LoadDevice::release_node() {
   clear_has_node();
-  ::HDNodeType* temp = node_;
+  ::hw::trezor::messages::common::HDNodeType* temp = node_;
   node_ = NULL;
   return temp;
 }
-inline void LoadDevice::set_allocated_node(::HDNodeType* node) {
+inline void LoadDevice::set_allocated_node(::hw::trezor::messages::common::HDNodeType* node) {
   delete node_;
   node_ = node;
   if (node) {
@@ -4435,7 +4440,7 @@ inline void LoadDevice::set_allocated_node(::HDNodeType* node) {
   } else {
     clear_has_node();
   }
-  // @@protoc_insertion_point(field_set_allocated:LoadDevice.node)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.LoadDevice.node)
 }
 
 // optional string pin = 3;
@@ -4455,7 +4460,7 @@ inline void LoadDevice::clear_pin() {
   clear_has_pin();
 }
 inline const ::std::string& LoadDevice::pin() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.pin)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.pin)
   return *pin_;
 }
 inline void LoadDevice::set_pin(const ::std::string& value) {
@@ -4464,7 +4469,7 @@ inline void LoadDevice::set_pin(const ::std::string& value) {
     pin_ = new ::std::string;
   }
   pin_->assign(value);
-  // @@protoc_insertion_point(field_set:LoadDevice.pin)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.pin)
 }
 inline void LoadDevice::set_pin(const char* value) {
   set_has_pin();
@@ -4472,7 +4477,7 @@ inline void LoadDevice::set_pin(const char* value) {
     pin_ = new ::std::string;
   }
   pin_->assign(value);
-  // @@protoc_insertion_point(field_set_char:LoadDevice.pin)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.LoadDevice.pin)
 }
 inline void LoadDevice::set_pin(const char* value, size_t size) {
   set_has_pin();
@@ -4480,14 +4485,14 @@ inline void LoadDevice::set_pin(const char* value, size_t size) {
     pin_ = new ::std::string;
   }
   pin_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:LoadDevice.pin)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.LoadDevice.pin)
 }
 inline ::std::string* LoadDevice::mutable_pin() {
   set_has_pin();
   if (pin_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     pin_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:LoadDevice.pin)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.LoadDevice.pin)
   return pin_;
 }
 inline ::std::string* LoadDevice::release_pin() {
@@ -4511,7 +4516,7 @@ inline void LoadDevice::set_allocated_pin(::std::string* pin) {
     clear_has_pin();
     pin_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:LoadDevice.pin)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.LoadDevice.pin)
 }
 
 // optional bool passphrase_protection = 4;
@@ -4529,13 +4534,13 @@ inline void LoadDevice::clear_passphrase_protection() {
   clear_has_passphrase_protection();
 }
 inline bool LoadDevice::passphrase_protection() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.passphrase_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.passphrase_protection)
   return passphrase_protection_;
 }
 inline void LoadDevice::set_passphrase_protection(bool value) {
   set_has_passphrase_protection();
   passphrase_protection_ = value;
-  // @@protoc_insertion_point(field_set:LoadDevice.passphrase_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.passphrase_protection)
 }
 
 // optional string language = 5 [default = "english"];
@@ -4555,7 +4560,7 @@ inline void LoadDevice::clear_language() {
   clear_has_language();
 }
 inline const ::std::string& LoadDevice::language() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.language)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.language)
   return *language_;
 }
 inline void LoadDevice::set_language(const ::std::string& value) {
@@ -4564,7 +4569,7 @@ inline void LoadDevice::set_language(const ::std::string& value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set:LoadDevice.language)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.language)
 }
 inline void LoadDevice::set_language(const char* value) {
   set_has_language();
@@ -4572,7 +4577,7 @@ inline void LoadDevice::set_language(const char* value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set_char:LoadDevice.language)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.LoadDevice.language)
 }
 inline void LoadDevice::set_language(const char* value, size_t size) {
   set_has_language();
@@ -4580,14 +4585,14 @@ inline void LoadDevice::set_language(const char* value, size_t size) {
     language_ = new ::std::string;
   }
   language_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:LoadDevice.language)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.LoadDevice.language)
 }
 inline ::std::string* LoadDevice::mutable_language() {
   set_has_language();
   if (language_ == _default_language_) {
     language_ = new ::std::string(*_default_language_);
   }
-  // @@protoc_insertion_point(field_mutable:LoadDevice.language)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.LoadDevice.language)
   return language_;
 }
 inline ::std::string* LoadDevice::release_language() {
@@ -4611,7 +4616,7 @@ inline void LoadDevice::set_allocated_language(::std::string* language) {
     clear_has_language();
     language_ = const_cast< ::std::string*>(_default_language_);
   }
-  // @@protoc_insertion_point(field_set_allocated:LoadDevice.language)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.LoadDevice.language)
 }
 
 // optional string label = 6;
@@ -4631,7 +4636,7 @@ inline void LoadDevice::clear_label() {
   clear_has_label();
 }
 inline const ::std::string& LoadDevice::label() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.label)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.label)
   return *label_;
 }
 inline void LoadDevice::set_label(const ::std::string& value) {
@@ -4640,7 +4645,7 @@ inline void LoadDevice::set_label(const ::std::string& value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set:LoadDevice.label)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.label)
 }
 inline void LoadDevice::set_label(const char* value) {
   set_has_label();
@@ -4648,7 +4653,7 @@ inline void LoadDevice::set_label(const char* value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set_char:LoadDevice.label)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.LoadDevice.label)
 }
 inline void LoadDevice::set_label(const char* value, size_t size) {
   set_has_label();
@@ -4656,14 +4661,14 @@ inline void LoadDevice::set_label(const char* value, size_t size) {
     label_ = new ::std::string;
   }
   label_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:LoadDevice.label)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.LoadDevice.label)
 }
 inline ::std::string* LoadDevice::mutable_label() {
   set_has_label();
   if (label_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     label_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:LoadDevice.label)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.LoadDevice.label)
   return label_;
 }
 inline ::std::string* LoadDevice::release_label() {
@@ -4687,7 +4692,7 @@ inline void LoadDevice::set_allocated_label(::std::string* label) {
     clear_has_label();
     label_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:LoadDevice.label)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.LoadDevice.label)
 }
 
 // optional bool skip_checksum = 7;
@@ -4705,13 +4710,13 @@ inline void LoadDevice::clear_skip_checksum() {
   clear_has_skip_checksum();
 }
 inline bool LoadDevice::skip_checksum() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.skip_checksum)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.skip_checksum)
   return skip_checksum_;
 }
 inline void LoadDevice::set_skip_checksum(bool value) {
   set_has_skip_checksum();
   skip_checksum_ = value;
-  // @@protoc_insertion_point(field_set:LoadDevice.skip_checksum)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.skip_checksum)
 }
 
 // optional uint32 u2f_counter = 8;
@@ -4729,13 +4734,13 @@ inline void LoadDevice::clear_u2f_counter() {
   clear_has_u2f_counter();
 }
 inline ::google::protobuf::uint32 LoadDevice::u2f_counter() const {
-  // @@protoc_insertion_point(field_get:LoadDevice.u2f_counter)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.LoadDevice.u2f_counter)
   return u2f_counter_;
 }
 inline void LoadDevice::set_u2f_counter(::google::protobuf::uint32 value) {
   set_has_u2f_counter();
   u2f_counter_ = value;
-  // @@protoc_insertion_point(field_set:LoadDevice.u2f_counter)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.LoadDevice.u2f_counter)
 }
 
 // -------------------------------------------------------------------
@@ -4757,13 +4762,13 @@ inline void ResetDevice::clear_display_random() {
   clear_has_display_random();
 }
 inline bool ResetDevice::display_random() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.display_random)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.display_random)
   return display_random_;
 }
 inline void ResetDevice::set_display_random(bool value) {
   set_has_display_random();
   display_random_ = value;
-  // @@protoc_insertion_point(field_set:ResetDevice.display_random)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.display_random)
 }
 
 // optional uint32 strength = 2 [default = 256];
@@ -4781,13 +4786,13 @@ inline void ResetDevice::clear_strength() {
   clear_has_strength();
 }
 inline ::google::protobuf::uint32 ResetDevice::strength() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.strength)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.strength)
   return strength_;
 }
 inline void ResetDevice::set_strength(::google::protobuf::uint32 value) {
   set_has_strength();
   strength_ = value;
-  // @@protoc_insertion_point(field_set:ResetDevice.strength)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.strength)
 }
 
 // optional bool passphrase_protection = 3;
@@ -4805,13 +4810,13 @@ inline void ResetDevice::clear_passphrase_protection() {
   clear_has_passphrase_protection();
 }
 inline bool ResetDevice::passphrase_protection() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.passphrase_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.passphrase_protection)
   return passphrase_protection_;
 }
 inline void ResetDevice::set_passphrase_protection(bool value) {
   set_has_passphrase_protection();
   passphrase_protection_ = value;
-  // @@protoc_insertion_point(field_set:ResetDevice.passphrase_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.passphrase_protection)
 }
 
 // optional bool pin_protection = 4;
@@ -4829,13 +4834,13 @@ inline void ResetDevice::clear_pin_protection() {
   clear_has_pin_protection();
 }
 inline bool ResetDevice::pin_protection() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.pin_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.pin_protection)
   return pin_protection_;
 }
 inline void ResetDevice::set_pin_protection(bool value) {
   set_has_pin_protection();
   pin_protection_ = value;
-  // @@protoc_insertion_point(field_set:ResetDevice.pin_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.pin_protection)
 }
 
 // optional string language = 5 [default = "english"];
@@ -4855,7 +4860,7 @@ inline void ResetDevice::clear_language() {
   clear_has_language();
 }
 inline const ::std::string& ResetDevice::language() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.language)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.language)
   return *language_;
 }
 inline void ResetDevice::set_language(const ::std::string& value) {
@@ -4864,7 +4869,7 @@ inline void ResetDevice::set_language(const ::std::string& value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set:ResetDevice.language)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.language)
 }
 inline void ResetDevice::set_language(const char* value) {
   set_has_language();
@@ -4872,7 +4877,7 @@ inline void ResetDevice::set_language(const char* value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set_char:ResetDevice.language)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.ResetDevice.language)
 }
 inline void ResetDevice::set_language(const char* value, size_t size) {
   set_has_language();
@@ -4880,14 +4885,14 @@ inline void ResetDevice::set_language(const char* value, size_t size) {
     language_ = new ::std::string;
   }
   language_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:ResetDevice.language)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.ResetDevice.language)
 }
 inline ::std::string* ResetDevice::mutable_language() {
   set_has_language();
   if (language_ == _default_language_) {
     language_ = new ::std::string(*_default_language_);
   }
-  // @@protoc_insertion_point(field_mutable:ResetDevice.language)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.ResetDevice.language)
   return language_;
 }
 inline ::std::string* ResetDevice::release_language() {
@@ -4911,7 +4916,7 @@ inline void ResetDevice::set_allocated_language(::std::string* language) {
     clear_has_language();
     language_ = const_cast< ::std::string*>(_default_language_);
   }
-  // @@protoc_insertion_point(field_set_allocated:ResetDevice.language)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.ResetDevice.language)
 }
 
 // optional string label = 6;
@@ -4931,7 +4936,7 @@ inline void ResetDevice::clear_label() {
   clear_has_label();
 }
 inline const ::std::string& ResetDevice::label() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.label)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.label)
   return *label_;
 }
 inline void ResetDevice::set_label(const ::std::string& value) {
@@ -4940,7 +4945,7 @@ inline void ResetDevice::set_label(const ::std::string& value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set:ResetDevice.label)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.label)
 }
 inline void ResetDevice::set_label(const char* value) {
   set_has_label();
@@ -4948,7 +4953,7 @@ inline void ResetDevice::set_label(const char* value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set_char:ResetDevice.label)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.ResetDevice.label)
 }
 inline void ResetDevice::set_label(const char* value, size_t size) {
   set_has_label();
@@ -4956,14 +4961,14 @@ inline void ResetDevice::set_label(const char* value, size_t size) {
     label_ = new ::std::string;
   }
   label_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:ResetDevice.label)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.ResetDevice.label)
 }
 inline ::std::string* ResetDevice::mutable_label() {
   set_has_label();
   if (label_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     label_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:ResetDevice.label)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.ResetDevice.label)
   return label_;
 }
 inline ::std::string* ResetDevice::release_label() {
@@ -4987,7 +4992,7 @@ inline void ResetDevice::set_allocated_label(::std::string* label) {
     clear_has_label();
     label_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:ResetDevice.label)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.ResetDevice.label)
 }
 
 // optional uint32 u2f_counter = 7;
@@ -5005,13 +5010,13 @@ inline void ResetDevice::clear_u2f_counter() {
   clear_has_u2f_counter();
 }
 inline ::google::protobuf::uint32 ResetDevice::u2f_counter() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.u2f_counter)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.u2f_counter)
   return u2f_counter_;
 }
 inline void ResetDevice::set_u2f_counter(::google::protobuf::uint32 value) {
   set_has_u2f_counter();
   u2f_counter_ = value;
-  // @@protoc_insertion_point(field_set:ResetDevice.u2f_counter)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.u2f_counter)
 }
 
 // optional bool skip_backup = 8;
@@ -5029,13 +5034,13 @@ inline void ResetDevice::clear_skip_backup() {
   clear_has_skip_backup();
 }
 inline bool ResetDevice::skip_backup() const {
-  // @@protoc_insertion_point(field_get:ResetDevice.skip_backup)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.ResetDevice.skip_backup)
   return skip_backup_;
 }
 inline void ResetDevice::set_skip_backup(bool value) {
   set_has_skip_backup();
   skip_backup_ = value;
-  // @@protoc_insertion_point(field_set:ResetDevice.skip_backup)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.ResetDevice.skip_backup)
 }
 
 // -------------------------------------------------------------------
@@ -5067,7 +5072,7 @@ inline void EntropyAck::clear_entropy() {
   clear_has_entropy();
 }
 inline const ::std::string& EntropyAck::entropy() const {
-  // @@protoc_insertion_point(field_get:EntropyAck.entropy)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.EntropyAck.entropy)
   return *entropy_;
 }
 inline void EntropyAck::set_entropy(const ::std::string& value) {
@@ -5076,7 +5081,7 @@ inline void EntropyAck::set_entropy(const ::std::string& value) {
     entropy_ = new ::std::string;
   }
   entropy_->assign(value);
-  // @@protoc_insertion_point(field_set:EntropyAck.entropy)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.EntropyAck.entropy)
 }
 inline void EntropyAck::set_entropy(const char* value) {
   set_has_entropy();
@@ -5084,7 +5089,7 @@ inline void EntropyAck::set_entropy(const char* value) {
     entropy_ = new ::std::string;
   }
   entropy_->assign(value);
-  // @@protoc_insertion_point(field_set_char:EntropyAck.entropy)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.EntropyAck.entropy)
 }
 inline void EntropyAck::set_entropy(const void* value, size_t size) {
   set_has_entropy();
@@ -5092,14 +5097,14 @@ inline void EntropyAck::set_entropy(const void* value, size_t size) {
     entropy_ = new ::std::string;
   }
   entropy_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:EntropyAck.entropy)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.EntropyAck.entropy)
 }
 inline ::std::string* EntropyAck::mutable_entropy() {
   set_has_entropy();
   if (entropy_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     entropy_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:EntropyAck.entropy)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.EntropyAck.entropy)
   return entropy_;
 }
 inline ::std::string* EntropyAck::release_entropy() {
@@ -5123,7 +5128,7 @@ inline void EntropyAck::set_allocated_entropy(::std::string* entropy) {
     clear_has_entropy();
     entropy_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:EntropyAck.entropy)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.EntropyAck.entropy)
 }
 
 // -------------------------------------------------------------------
@@ -5145,13 +5150,13 @@ inline void RecoveryDevice::clear_word_count() {
   clear_has_word_count();
 }
 inline ::google::protobuf::uint32 RecoveryDevice::word_count() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.word_count)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.word_count)
   return word_count_;
 }
 inline void RecoveryDevice::set_word_count(::google::protobuf::uint32 value) {
   set_has_word_count();
   word_count_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.word_count)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.word_count)
 }
 
 // optional bool passphrase_protection = 2;
@@ -5169,13 +5174,13 @@ inline void RecoveryDevice::clear_passphrase_protection() {
   clear_has_passphrase_protection();
 }
 inline bool RecoveryDevice::passphrase_protection() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.passphrase_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.passphrase_protection)
   return passphrase_protection_;
 }
 inline void RecoveryDevice::set_passphrase_protection(bool value) {
   set_has_passphrase_protection();
   passphrase_protection_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.passphrase_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.passphrase_protection)
 }
 
 // optional bool pin_protection = 3;
@@ -5193,13 +5198,13 @@ inline void RecoveryDevice::clear_pin_protection() {
   clear_has_pin_protection();
 }
 inline bool RecoveryDevice::pin_protection() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.pin_protection)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.pin_protection)
   return pin_protection_;
 }
 inline void RecoveryDevice::set_pin_protection(bool value) {
   set_has_pin_protection();
   pin_protection_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.pin_protection)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.pin_protection)
 }
 
 // optional string language = 4 [default = "english"];
@@ -5219,7 +5224,7 @@ inline void RecoveryDevice::clear_language() {
   clear_has_language();
 }
 inline const ::std::string& RecoveryDevice::language() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.language)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.language)
   return *language_;
 }
 inline void RecoveryDevice::set_language(const ::std::string& value) {
@@ -5228,7 +5233,7 @@ inline void RecoveryDevice::set_language(const ::std::string& value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set:RecoveryDevice.language)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.language)
 }
 inline void RecoveryDevice::set_language(const char* value) {
   set_has_language();
@@ -5236,7 +5241,7 @@ inline void RecoveryDevice::set_language(const char* value) {
     language_ = new ::std::string;
   }
   language_->assign(value);
-  // @@protoc_insertion_point(field_set_char:RecoveryDevice.language)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.RecoveryDevice.language)
 }
 inline void RecoveryDevice::set_language(const char* value, size_t size) {
   set_has_language();
@@ -5244,14 +5249,14 @@ inline void RecoveryDevice::set_language(const char* value, size_t size) {
     language_ = new ::std::string;
   }
   language_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:RecoveryDevice.language)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.RecoveryDevice.language)
 }
 inline ::std::string* RecoveryDevice::mutable_language() {
   set_has_language();
   if (language_ == _default_language_) {
     language_ = new ::std::string(*_default_language_);
   }
-  // @@protoc_insertion_point(field_mutable:RecoveryDevice.language)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.RecoveryDevice.language)
   return language_;
 }
 inline ::std::string* RecoveryDevice::release_language() {
@@ -5275,7 +5280,7 @@ inline void RecoveryDevice::set_allocated_language(::std::string* language) {
     clear_has_language();
     language_ = const_cast< ::std::string*>(_default_language_);
   }
-  // @@protoc_insertion_point(field_set_allocated:RecoveryDevice.language)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.RecoveryDevice.language)
 }
 
 // optional string label = 5;
@@ -5295,7 +5300,7 @@ inline void RecoveryDevice::clear_label() {
   clear_has_label();
 }
 inline const ::std::string& RecoveryDevice::label() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.label)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.label)
   return *label_;
 }
 inline void RecoveryDevice::set_label(const ::std::string& value) {
@@ -5304,7 +5309,7 @@ inline void RecoveryDevice::set_label(const ::std::string& value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set:RecoveryDevice.label)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.label)
 }
 inline void RecoveryDevice::set_label(const char* value) {
   set_has_label();
@@ -5312,7 +5317,7 @@ inline void RecoveryDevice::set_label(const char* value) {
     label_ = new ::std::string;
   }
   label_->assign(value);
-  // @@protoc_insertion_point(field_set_char:RecoveryDevice.label)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.RecoveryDevice.label)
 }
 inline void RecoveryDevice::set_label(const char* value, size_t size) {
   set_has_label();
@@ -5320,14 +5325,14 @@ inline void RecoveryDevice::set_label(const char* value, size_t size) {
     label_ = new ::std::string;
   }
   label_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:RecoveryDevice.label)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.RecoveryDevice.label)
 }
 inline ::std::string* RecoveryDevice::mutable_label() {
   set_has_label();
   if (label_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     label_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:RecoveryDevice.label)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.RecoveryDevice.label)
   return label_;
 }
 inline ::std::string* RecoveryDevice::release_label() {
@@ -5351,7 +5356,7 @@ inline void RecoveryDevice::set_allocated_label(::std::string* label) {
     clear_has_label();
     label_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:RecoveryDevice.label)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.RecoveryDevice.label)
 }
 
 // optional bool enforce_wordlist = 6;
@@ -5369,16 +5374,16 @@ inline void RecoveryDevice::clear_enforce_wordlist() {
   clear_has_enforce_wordlist();
 }
 inline bool RecoveryDevice::enforce_wordlist() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.enforce_wordlist)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.enforce_wordlist)
   return enforce_wordlist_;
 }
 inline void RecoveryDevice::set_enforce_wordlist(bool value) {
   set_has_enforce_wordlist();
   enforce_wordlist_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.enforce_wordlist)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.enforce_wordlist)
 }
 
-// optional .RecoveryDevice.RecoveryDeviceType type = 8;
+// optional .hw.trezor.messages.management.RecoveryDevice.RecoveryDeviceType type = 8;
 inline bool RecoveryDevice::has_type() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
@@ -5392,15 +5397,15 @@ inline void RecoveryDevice::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::RecoveryDevice_RecoveryDeviceType RecoveryDevice::type() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.type)
-  return static_cast< ::RecoveryDevice_RecoveryDeviceType >(type_);
+inline ::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType RecoveryDevice::type() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.type)
+  return static_cast< ::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType >(type_);
 }
-inline void RecoveryDevice::set_type(::RecoveryDevice_RecoveryDeviceType value) {
-  assert(::RecoveryDevice_RecoveryDeviceType_IsValid(value));
+inline void RecoveryDevice::set_type(::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType value) {
+  assert(::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType_IsValid(value));
   set_has_type();
   type_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.type)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.type)
 }
 
 // optional uint32 u2f_counter = 9;
@@ -5418,13 +5423,13 @@ inline void RecoveryDevice::clear_u2f_counter() {
   clear_has_u2f_counter();
 }
 inline ::google::protobuf::uint32 RecoveryDevice::u2f_counter() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.u2f_counter)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.u2f_counter)
   return u2f_counter_;
 }
 inline void RecoveryDevice::set_u2f_counter(::google::protobuf::uint32 value) {
   set_has_u2f_counter();
   u2f_counter_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.u2f_counter)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.u2f_counter)
 }
 
 // optional bool dry_run = 10;
@@ -5442,20 +5447,20 @@ inline void RecoveryDevice::clear_dry_run() {
   clear_has_dry_run();
 }
 inline bool RecoveryDevice::dry_run() const {
-  // @@protoc_insertion_point(field_get:RecoveryDevice.dry_run)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.RecoveryDevice.dry_run)
   return dry_run_;
 }
 inline void RecoveryDevice::set_dry_run(bool value) {
   set_has_dry_run();
   dry_run_ = value;
-  // @@protoc_insertion_point(field_set:RecoveryDevice.dry_run)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.RecoveryDevice.dry_run)
 }
 
 // -------------------------------------------------------------------
 
 // WordRequest
 
-// optional .WordRequest.WordRequestType type = 1;
+// optional .hw.trezor.messages.management.WordRequest.WordRequestType type = 1;
 inline bool WordRequest::has_type() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -5469,15 +5474,15 @@ inline void WordRequest::clear_type() {
   type_ = 0;
   clear_has_type();
 }
-inline ::WordRequest_WordRequestType WordRequest::type() const {
-  // @@protoc_insertion_point(field_get:WordRequest.type)
-  return static_cast< ::WordRequest_WordRequestType >(type_);
+inline ::hw::trezor::messages::management::WordRequest_WordRequestType WordRequest::type() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.WordRequest.type)
+  return static_cast< ::hw::trezor::messages::management::WordRequest_WordRequestType >(type_);
 }
-inline void WordRequest::set_type(::WordRequest_WordRequestType value) {
-  assert(::WordRequest_WordRequestType_IsValid(value));
+inline void WordRequest::set_type(::hw::trezor::messages::management::WordRequest_WordRequestType value) {
+  assert(::hw::trezor::messages::management::WordRequest_WordRequestType_IsValid(value));
   set_has_type();
   type_ = value;
-  // @@protoc_insertion_point(field_set:WordRequest.type)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.WordRequest.type)
 }
 
 // -------------------------------------------------------------------
@@ -5501,7 +5506,7 @@ inline void WordAck::clear_word() {
   clear_has_word();
 }
 inline const ::std::string& WordAck::word() const {
-  // @@protoc_insertion_point(field_get:WordAck.word)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.WordAck.word)
   return *word_;
 }
 inline void WordAck::set_word(const ::std::string& value) {
@@ -5510,7 +5515,7 @@ inline void WordAck::set_word(const ::std::string& value) {
     word_ = new ::std::string;
   }
   word_->assign(value);
-  // @@protoc_insertion_point(field_set:WordAck.word)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.WordAck.word)
 }
 inline void WordAck::set_word(const char* value) {
   set_has_word();
@@ -5518,7 +5523,7 @@ inline void WordAck::set_word(const char* value) {
     word_ = new ::std::string;
   }
   word_->assign(value);
-  // @@protoc_insertion_point(field_set_char:WordAck.word)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.management.WordAck.word)
 }
 inline void WordAck::set_word(const char* value, size_t size) {
   set_has_word();
@@ -5526,14 +5531,14 @@ inline void WordAck::set_word(const char* value, size_t size) {
     word_ = new ::std::string;
   }
   word_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:WordAck.word)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.management.WordAck.word)
 }
 inline ::std::string* WordAck::mutable_word() {
   set_has_word();
   if (word_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     word_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:WordAck.word)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.management.WordAck.word)
   return word_;
 }
 inline ::std::string* WordAck::release_word() {
@@ -5557,7 +5562,7 @@ inline void WordAck::set_allocated_word(::std::string* word) {
     clear_has_word();
     word_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:WordAck.word)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.management.WordAck.word)
 }
 
 // -------------------------------------------------------------------
@@ -5579,36 +5584,41 @@ inline void SetU2FCounter::clear_u2f_counter() {
   clear_has_u2f_counter();
 }
 inline ::google::protobuf::uint32 SetU2FCounter::u2f_counter() const {
-  // @@protoc_insertion_point(field_get:SetU2FCounter.u2f_counter)
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.management.SetU2FCounter.u2f_counter)
   return u2f_counter_;
 }
 inline void SetU2FCounter::set_u2f_counter(::google::protobuf::uint32 value) {
   set_has_u2f_counter();
   u2f_counter_ = value;
-  // @@protoc_insertion_point(field_set:SetU2FCounter.u2f_counter)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.management.SetU2FCounter.u2f_counter)
 }
 
 
 // @@protoc_insertion_point(namespace_scope)
 
+}  // namespace management
+}  // namespace messages
+}  // namespace trezor
+}  // namespace hw
+
 #ifndef SWIG
 namespace google {
 namespace protobuf {
 
-template <> struct is_proto_enum< ::ApplySettings_PassphraseSourceType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::management::ApplySettings_PassphraseSourceType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::ApplySettings_PassphraseSourceType>() {
-  return ::ApplySettings_PassphraseSourceType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::management::ApplySettings_PassphraseSourceType>() {
+  return ::hw::trezor::messages::management::ApplySettings_PassphraseSourceType_descriptor();
 }
-template <> struct is_proto_enum< ::RecoveryDevice_RecoveryDeviceType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::RecoveryDevice_RecoveryDeviceType>() {
-  return ::RecoveryDevice_RecoveryDeviceType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType>() {
+  return ::hw::trezor::messages::management::RecoveryDevice_RecoveryDeviceType_descriptor();
 }
-template <> struct is_proto_enum< ::WordRequest_WordRequestType> : ::google::protobuf::internal::true_type {};
+template <> struct is_proto_enum< ::hw::trezor::messages::management::WordRequest_WordRequestType> : ::google::protobuf::internal::true_type {};
 template <>
-inline const EnumDescriptor* GetEnumDescriptor< ::WordRequest_WordRequestType>() {
-  return ::WordRequest_WordRequestType_descriptor();
+inline const EnumDescriptor* GetEnumDescriptor< ::hw::trezor::messages::management::WordRequest_WordRequestType>() {
+  return ::hw::trezor::messages::management::WordRequest_WordRequestType_descriptor();
 }
 
 }  // namespace google

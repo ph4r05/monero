@@ -16,6 +16,11 @@
 #include <google/protobuf/wire_format.h>
 // @@protoc_insertion_point(includes)
 
+namespace hw {
+namespace trezor {
+namespace messages {
+namespace common {
+
 namespace {
 
 const ::google::protobuf::Descriptor* Success_descriptor_ = NULL;
@@ -308,45 +313,48 @@ void protobuf_AddDesc_messages_2dcommon_2eproto() {
   GOOGLE_PROTOBUF_VERIFY_VERSION;
 
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
-    "\n\025messages-common.proto\"\032\n\007Success\022\017\n\007me"
-    "ssage\030\001 \001(\t\"\254\003\n\007Failure\022\"\n\004code\030\001 \001(\0162\024."
-    "Failure.FailureType\022\017\n\007message\030\002 \001(\t\"\353\002\n"
-    "\013FailureType\022\035\n\031Failure_UnexpectedMessag"
-    "e\020\001\022\032\n\026Failure_ButtonExpected\020\002\022\025\n\021Failu"
-    "re_DataError\020\003\022\033\n\027Failure_ActionCancelle"
-    "d\020\004\022\027\n\023Failure_PinExpected\020\005\022\030\n\024Failure_"
-    "PinCancelled\020\006\022\026\n\022Failure_PinInvalid\020\007\022\034"
-    "\n\030Failure_InvalidSignature\020\010\022\030\n\024Failure_"
-    "ProcessError\020\t\022\032\n\026Failure_NotEnoughFunds"
-    "\020\n\022\032\n\026Failure_NotInitialized\020\013\022\027\n\023Failur"
-    "e_PinMismatch\020\014\022\031\n\025Failure_FirmwareError"
-    "\020c\"\227\004\n\rButtonRequest\022.\n\004code\030\001 \001(\0162 .But"
-    "tonRequest.ButtonRequestType\022\014\n\004data\030\002 \001"
-    "(\t\"\307\003\n\021ButtonRequestType\022\027\n\023ButtonReques"
-    "t_Other\020\001\022\"\n\036ButtonRequest_FeeOverThresh"
-    "old\020\002\022\037\n\033ButtonRequest_ConfirmOutput\020\003\022\035"
-    "\n\031ButtonRequest_ResetDevice\020\004\022\035\n\031ButtonR"
-    "equest_ConfirmWord\020\005\022\034\n\030ButtonRequest_Wi"
-    "peDevice\020\006\022\035\n\031ButtonRequest_ProtectCall\020"
-    "\007\022\030\n\024ButtonRequest_SignTx\020\010\022\037\n\033ButtonReq"
-    "uest_FirmwareCheck\020\t\022\031\n\025ButtonRequest_Ad"
-    "dress\020\n\022\033\n\027ButtonRequest_PublicKey\020\013\022#\n\037"
-    "ButtonRequest_MnemonicWordCount\020\014\022\037\n\033But"
-    "tonRequest_MnemonicInput\020\r\022 \n\034ButtonRequ"
-    "est_PassphraseType\020\016\"\013\n\tButtonAck\"\311\001\n\020Pi"
-    "nMatrixRequest\0224\n\004type\030\001 \001(\0162&.PinMatrix"
-    "Request.PinMatrixRequestType\"\177\n\024PinMatri"
-    "xRequestType\022 \n\034PinMatrixRequestType_Cur"
-    "rent\020\001\022!\n\035PinMatrixRequestType_NewFirst\020"
-    "\002\022\"\n\036PinMatrixRequestType_NewSecond\020\003\"\033\n"
-    "\014PinMatrixAck\022\013\n\003pin\030\001 \002(\t\"&\n\021Passphrase"
-    "Request\022\021\n\ton_device\030\001 \001(\010\"2\n\rPassphrase"
-    "Ack\022\022\n\npassphrase\030\001 \001(\t\022\r\n\005state\030\002 \001(\014\"\'"
-    "\n\026PassphraseStateRequest\022\r\n\005state\030\001 \001(\014\""
-    "\024\n\022PassphraseStateAck\"\200\001\n\nHDNodeType\022\r\n\005"
-    "depth\030\001 \002(\r\022\023\n\013fingerprint\030\002 \002(\r\022\021\n\tchil"
-    "d_num\030\003 \002(\r\022\022\n\nchain_code\030\004 \002(\014\022\023\n\013priva"
-    "te_key\030\005 \001(\014\022\022\n\npublic_key\030\006 \001(\014", 1552);
+    "\n\025messages-common.proto\022\031hw.trezor.messa"
+    "ges.common\"\032\n\007Success\022\017\n\007message\030\001 \001(\t\"\306"
+    "\003\n\007Failure\022<\n\004code\030\001 \001(\0162..hw.trezor.mes"
+    "sages.common.Failure.FailureType\022\017\n\007mess"
+    "age\030\002 \001(\t\"\353\002\n\013FailureType\022\035\n\031Failure_Une"
+    "xpectedMessage\020\001\022\032\n\026Failure_ButtonExpect"
+    "ed\020\002\022\025\n\021Failure_DataError\020\003\022\033\n\027Failure_A"
+    "ctionCancelled\020\004\022\027\n\023Failure_PinExpected\020"
+    "\005\022\030\n\024Failure_PinCancelled\020\006\022\026\n\022Failure_P"
+    "inInvalid\020\007\022\034\n\030Failure_InvalidSignature\020"
+    "\010\022\030\n\024Failure_ProcessError\020\t\022\032\n\026Failure_N"
+    "otEnoughFunds\020\n\022\032\n\026Failure_NotInitialize"
+    "d\020\013\022\027\n\023Failure_PinMismatch\020\014\022\031\n\025Failure_"
+    "FirmwareError\020c\"\261\004\n\rButtonRequest\022H\n\004cod"
+    "e\030\001 \001(\0162:.hw.trezor.messages.common.Butt"
+    "onRequest.ButtonRequestType\022\014\n\004data\030\002 \001("
+    "\t\"\307\003\n\021ButtonRequestType\022\027\n\023ButtonRequest"
+    "_Other\020\001\022\"\n\036ButtonRequest_FeeOverThresho"
+    "ld\020\002\022\037\n\033ButtonRequest_ConfirmOutput\020\003\022\035\n"
+    "\031ButtonRequest_ResetDevice\020\004\022\035\n\031ButtonRe"
+    "quest_ConfirmWord\020\005\022\034\n\030ButtonRequest_Wip"
+    "eDevice\020\006\022\035\n\031ButtonRequest_ProtectCall\020\007"
+    "\022\030\n\024ButtonRequest_SignTx\020\010\022\037\n\033ButtonRequ"
+    "est_FirmwareCheck\020\t\022\031\n\025ButtonRequest_Add"
+    "ress\020\n\022\033\n\027ButtonRequest_PublicKey\020\013\022#\n\037B"
+    "uttonRequest_MnemonicWordCount\020\014\022\037\n\033Butt"
+    "onRequest_MnemonicInput\020\r\022 \n\034ButtonReque"
+    "st_PassphraseType\020\016\"\013\n\tButtonAck\"\343\001\n\020Pin"
+    "MatrixRequest\022N\n\004type\030\001 \001(\0162@.hw.trezor."
+    "messages.common.PinMatrixRequest.PinMatr"
+    "ixRequestType\"\177\n\024PinMatrixRequestType\022 \n"
+    "\034PinMatrixRequestType_Current\020\001\022!\n\035PinMa"
+    "trixRequestType_NewFirst\020\002\022\"\n\036PinMatrixR"
+    "equestType_NewSecond\020\003\"\033\n\014PinMatrixAck\022\013"
+    "\n\003pin\030\001 \002(\t\"&\n\021PassphraseRequest\022\021\n\ton_d"
+    "evice\030\001 \001(\010\"2\n\rPassphraseAck\022\022\n\npassphra"
+    "se\030\001 \001(\t\022\r\n\005state\030\002 \001(\014\"\'\n\026PassphraseSta"
+    "teRequest\022\r\n\005state\030\001 \001(\014\"\024\n\022PassphraseSt"
+    "ateAck\"\200\001\n\nHDNodeType\022\r\n\005depth\030\001 \002(\r\022\023\n\013"
+    "fingerprint\030\002 \002(\r\022\021\n\tchild_num\030\003 \002(\r\022\022\n\n"
+    "chain_code\030\004 \002(\014\022\023\n\013private_key\030\005 \001(\014\022\022\n"
+    "\npublic_key\030\006 \001(\014", 1657);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages-common.proto", &protobuf_RegisterTypes);
   Success::default_instance_ = new Success();
@@ -390,7 +398,7 @@ const int Success::kMessageFieldNumber;
 Success::Success()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:Success)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.Success)
 }
 
 void Success::InitAsDefaultInstance() {
@@ -400,7 +408,7 @@ Success::Success(const Success& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:Success)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.Success)
 }
 
 void Success::SharedCtor() {
@@ -411,7 +419,7 @@ void Success::SharedCtor() {
 }
 
 Success::~Success() {
-  // @@protoc_insertion_point(destructor:Success)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.Success)
   SharedDtor();
 }
 
@@ -458,7 +466,7 @@ bool Success::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:Success)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.Success)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -494,17 +502,17 @@ bool Success::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:Success)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.Success)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:Success)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.Success)
   return false;
 #undef DO_
 }
 
 void Success::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:Success)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.Success)
   // optional string message = 1;
   if (has_message()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -519,12 +527,12 @@ void Success::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:Success)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.Success)
 }
 
 ::google::protobuf::uint8* Success::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Success)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.Success)
   // optional string message = 1;
   if (has_message()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -540,7 +548,7 @@ void Success::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Success)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.Success)
   return target;
 }
 
@@ -677,7 +685,7 @@ const int Failure::kMessageFieldNumber;
 Failure::Failure()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:Failure)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.Failure)
 }
 
 void Failure::InitAsDefaultInstance() {
@@ -687,7 +695,7 @@ Failure::Failure(const Failure& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:Failure)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.Failure)
 }
 
 void Failure::SharedCtor() {
@@ -699,7 +707,7 @@ void Failure::SharedCtor() {
 }
 
 Failure::~Failure() {
-  // @@protoc_insertion_point(destructor:Failure)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.Failure)
   SharedDtor();
 }
 
@@ -749,21 +757,21 @@ bool Failure::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:Failure)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.Failure)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .Failure.FailureType code = 1;
+      // optional .hw.trezor.messages.common.Failure.FailureType code = 1;
       case 1: {
         if (tag == 8) {
           int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::Failure_FailureType_IsValid(value)) {
-            set_code(static_cast< ::Failure_FailureType >(value));
+          if (::hw::trezor::messages::common::Failure_FailureType_IsValid(value)) {
+            set_code(static_cast< ::hw::trezor::messages::common::Failure_FailureType >(value));
           } else {
             mutable_unknown_fields()->AddVarint(1, value);
           }
@@ -805,18 +813,18 @@ bool Failure::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:Failure)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.Failure)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:Failure)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.Failure)
   return false;
 #undef DO_
 }
 
 void Failure::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:Failure)
-  // optional .Failure.FailureType code = 1;
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.Failure)
+  // optional .hw.trezor.messages.common.Failure.FailureType code = 1;
   if (has_code()) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       1, this->code(), output);
@@ -836,13 +844,13 @@ void Failure::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:Failure)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.Failure)
 }
 
 ::google::protobuf::uint8* Failure::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:Failure)
-  // optional .Failure.FailureType code = 1;
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.Failure)
+  // optional .hw.trezor.messages.common.Failure.FailureType code = 1;
   if (has_code()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       1, this->code(), target);
@@ -863,7 +871,7 @@ void Failure::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:Failure)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.Failure)
   return target;
 }
 
@@ -871,7 +879,7 @@ int Failure::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .Failure.FailureType code = 1;
+    // optional .hw.trezor.messages.common.Failure.FailureType code = 1;
     if (has_code()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->code());
@@ -1012,7 +1020,7 @@ const int ButtonRequest::kDataFieldNumber;
 ButtonRequest::ButtonRequest()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:ButtonRequest)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.ButtonRequest)
 }
 
 void ButtonRequest::InitAsDefaultInstance() {
@@ -1022,7 +1030,7 @@ ButtonRequest::ButtonRequest(const ButtonRequest& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:ButtonRequest)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.ButtonRequest)
 }
 
 void ButtonRequest::SharedCtor() {
@@ -1034,7 +1042,7 @@ void ButtonRequest::SharedCtor() {
 }
 
 ButtonRequest::~ButtonRequest() {
-  // @@protoc_insertion_point(destructor:ButtonRequest)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.ButtonRequest)
   SharedDtor();
 }
 
@@ -1084,21 +1092,21 @@ bool ButtonRequest::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:ButtonRequest)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.ButtonRequest)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .ButtonRequest.ButtonRequestType code = 1;
+      // optional .hw.trezor.messages.common.ButtonRequest.ButtonRequestType code = 1;
       case 1: {
         if (tag == 8) {
           int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::ButtonRequest_ButtonRequestType_IsValid(value)) {
-            set_code(static_cast< ::ButtonRequest_ButtonRequestType >(value));
+          if (::hw::trezor::messages::common::ButtonRequest_ButtonRequestType_IsValid(value)) {
+            set_code(static_cast< ::hw::trezor::messages::common::ButtonRequest_ButtonRequestType >(value));
           } else {
             mutable_unknown_fields()->AddVarint(1, value);
           }
@@ -1140,18 +1148,18 @@ bool ButtonRequest::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:ButtonRequest)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.ButtonRequest)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:ButtonRequest)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.ButtonRequest)
   return false;
 #undef DO_
 }
 
 void ButtonRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:ButtonRequest)
-  // optional .ButtonRequest.ButtonRequestType code = 1;
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.ButtonRequest)
+  // optional .hw.trezor.messages.common.ButtonRequest.ButtonRequestType code = 1;
   if (has_code()) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       1, this->code(), output);
@@ -1171,13 +1179,13 @@ void ButtonRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:ButtonRequest)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.ButtonRequest)
 }
 
 ::google::protobuf::uint8* ButtonRequest::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:ButtonRequest)
-  // optional .ButtonRequest.ButtonRequestType code = 1;
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.ButtonRequest)
+  // optional .hw.trezor.messages.common.ButtonRequest.ButtonRequestType code = 1;
   if (has_code()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       1, this->code(), target);
@@ -1198,7 +1206,7 @@ void ButtonRequest::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:ButtonRequest)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.ButtonRequest)
   return target;
 }
 
@@ -1206,7 +1214,7 @@ int ButtonRequest::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .ButtonRequest.ButtonRequestType code = 1;
+    // optional .hw.trezor.messages.common.ButtonRequest.ButtonRequestType code = 1;
     if (has_code()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->code());
@@ -1300,7 +1308,7 @@ void ButtonRequest::Swap(ButtonRequest* other) {
 ButtonAck::ButtonAck()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:ButtonAck)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.ButtonAck)
 }
 
 void ButtonAck::InitAsDefaultInstance() {
@@ -1310,7 +1318,7 @@ ButtonAck::ButtonAck(const ButtonAck& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:ButtonAck)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.ButtonAck)
 }
 
 void ButtonAck::SharedCtor() {
@@ -1319,7 +1327,7 @@ void ButtonAck::SharedCtor() {
 }
 
 ButtonAck::~ButtonAck() {
-  // @@protoc_insertion_point(destructor:ButtonAck)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.ButtonAck)
   SharedDtor();
 }
 
@@ -1358,7 +1366,7 @@ bool ButtonAck::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:ButtonAck)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.ButtonAck)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -1373,32 +1381,32 @@ bool ButtonAck::MergePartialFromCodedStream(
           input, tag, mutable_unknown_fields()));
   }
 success:
-  // @@protoc_insertion_point(parse_success:ButtonAck)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.ButtonAck)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:ButtonAck)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.ButtonAck)
   return false;
 #undef DO_
 }
 
 void ButtonAck::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:ButtonAck)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.ButtonAck)
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:ButtonAck)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.ButtonAck)
 }
 
 ::google::protobuf::uint8* ButtonAck::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:ButtonAck)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.ButtonAck)
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:ButtonAck)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.ButtonAck)
   return target;
 }
 
@@ -1498,7 +1506,7 @@ const int PinMatrixRequest::kTypeFieldNumber;
 PinMatrixRequest::PinMatrixRequest()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:PinMatrixRequest)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.PinMatrixRequest)
 }
 
 void PinMatrixRequest::InitAsDefaultInstance() {
@@ -1508,7 +1516,7 @@ PinMatrixRequest::PinMatrixRequest(const PinMatrixRequest& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:PinMatrixRequest)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.PinMatrixRequest)
 }
 
 void PinMatrixRequest::SharedCtor() {
@@ -1518,7 +1526,7 @@ void PinMatrixRequest::SharedCtor() {
 }
 
 PinMatrixRequest::~PinMatrixRequest() {
-  // @@protoc_insertion_point(destructor:PinMatrixRequest)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.PinMatrixRequest)
   SharedDtor();
 }
 
@@ -1558,21 +1566,21 @@ bool PinMatrixRequest::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:PinMatrixRequest)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.PinMatrixRequest)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional .PinMatrixRequest.PinMatrixRequestType type = 1;
+      // optional .hw.trezor.messages.common.PinMatrixRequest.PinMatrixRequestType type = 1;
       case 1: {
         if (tag == 8) {
           int value;
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    int, ::google::protobuf::internal::WireFormatLite::TYPE_ENUM>(
                  input, &value)));
-          if (::PinMatrixRequest_PinMatrixRequestType_IsValid(value)) {
-            set_type(static_cast< ::PinMatrixRequest_PinMatrixRequestType >(value));
+          if (::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType_IsValid(value)) {
+            set_type(static_cast< ::hw::trezor::messages::common::PinMatrixRequest_PinMatrixRequestType >(value));
           } else {
             mutable_unknown_fields()->AddVarint(1, value);
           }
@@ -1597,18 +1605,18 @@ bool PinMatrixRequest::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:PinMatrixRequest)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.PinMatrixRequest)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:PinMatrixRequest)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.PinMatrixRequest)
   return false;
 #undef DO_
 }
 
 void PinMatrixRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:PinMatrixRequest)
-  // optional .PinMatrixRequest.PinMatrixRequestType type = 1;
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.PinMatrixRequest)
+  // optional .hw.trezor.messages.common.PinMatrixRequest.PinMatrixRequestType type = 1;
   if (has_type()) {
     ::google::protobuf::internal::WireFormatLite::WriteEnum(
       1, this->type(), output);
@@ -1618,13 +1626,13 @@ void PinMatrixRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:PinMatrixRequest)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.PinMatrixRequest)
 }
 
 ::google::protobuf::uint8* PinMatrixRequest::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:PinMatrixRequest)
-  // optional .PinMatrixRequest.PinMatrixRequestType type = 1;
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.PinMatrixRequest)
+  // optional .hw.trezor.messages.common.PinMatrixRequest.PinMatrixRequestType type = 1;
   if (has_type()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteEnumToArray(
       1, this->type(), target);
@@ -1634,7 +1642,7 @@ void PinMatrixRequest::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:PinMatrixRequest)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.PinMatrixRequest)
   return target;
 }
 
@@ -1642,7 +1650,7 @@ int PinMatrixRequest::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional .PinMatrixRequest.PinMatrixRequestType type = 1;
+    // optional .hw.trezor.messages.common.PinMatrixRequest.PinMatrixRequestType type = 1;
     if (has_type()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::EnumSize(this->type());
@@ -1726,7 +1734,7 @@ const int PinMatrixAck::kPinFieldNumber;
 PinMatrixAck::PinMatrixAck()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:PinMatrixAck)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.PinMatrixAck)
 }
 
 void PinMatrixAck::InitAsDefaultInstance() {
@@ -1736,7 +1744,7 @@ PinMatrixAck::PinMatrixAck(const PinMatrixAck& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:PinMatrixAck)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.PinMatrixAck)
 }
 
 void PinMatrixAck::SharedCtor() {
@@ -1747,7 +1755,7 @@ void PinMatrixAck::SharedCtor() {
 }
 
 PinMatrixAck::~PinMatrixAck() {
-  // @@protoc_insertion_point(destructor:PinMatrixAck)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.PinMatrixAck)
   SharedDtor();
 }
 
@@ -1794,7 +1802,7 @@ bool PinMatrixAck::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:PinMatrixAck)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.PinMatrixAck)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -1830,17 +1838,17 @@ bool PinMatrixAck::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:PinMatrixAck)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.PinMatrixAck)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:PinMatrixAck)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.PinMatrixAck)
   return false;
 #undef DO_
 }
 
 void PinMatrixAck::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:PinMatrixAck)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.PinMatrixAck)
   // required string pin = 1;
   if (has_pin()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -1855,12 +1863,12 @@ void PinMatrixAck::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:PinMatrixAck)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.PinMatrixAck)
 }
 
 ::google::protobuf::uint8* PinMatrixAck::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:PinMatrixAck)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.PinMatrixAck)
   // required string pin = 1;
   if (has_pin()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -1876,7 +1884,7 @@ void PinMatrixAck::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:PinMatrixAck)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.PinMatrixAck)
   return target;
 }
 
@@ -1970,7 +1978,7 @@ const int PassphraseRequest::kOnDeviceFieldNumber;
 PassphraseRequest::PassphraseRequest()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:PassphraseRequest)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.PassphraseRequest)
 }
 
 void PassphraseRequest::InitAsDefaultInstance() {
@@ -1980,7 +1988,7 @@ PassphraseRequest::PassphraseRequest(const PassphraseRequest& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:PassphraseRequest)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.PassphraseRequest)
 }
 
 void PassphraseRequest::SharedCtor() {
@@ -1990,7 +1998,7 @@ void PassphraseRequest::SharedCtor() {
 }
 
 PassphraseRequest::~PassphraseRequest() {
-  // @@protoc_insertion_point(destructor:PassphraseRequest)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.PassphraseRequest)
   SharedDtor();
 }
 
@@ -2030,7 +2038,7 @@ bool PassphraseRequest::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:PassphraseRequest)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.PassphraseRequest)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -2064,17 +2072,17 @@ bool PassphraseRequest::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:PassphraseRequest)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.PassphraseRequest)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:PassphraseRequest)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.PassphraseRequest)
   return false;
 #undef DO_
 }
 
 void PassphraseRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:PassphraseRequest)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.PassphraseRequest)
   // optional bool on_device = 1;
   if (has_on_device()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->on_device(), output);
@@ -2084,12 +2092,12 @@ void PassphraseRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:PassphraseRequest)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.PassphraseRequest)
 }
 
 ::google::protobuf::uint8* PassphraseRequest::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:PassphraseRequest)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.PassphraseRequest)
   // optional bool on_device = 1;
   if (has_on_device()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->on_device(), target);
@@ -2099,7 +2107,7 @@ void PassphraseRequest::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:PassphraseRequest)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.PassphraseRequest)
   return target;
 }
 
@@ -2191,7 +2199,7 @@ const int PassphraseAck::kStateFieldNumber;
 PassphraseAck::PassphraseAck()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:PassphraseAck)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.PassphraseAck)
 }
 
 void PassphraseAck::InitAsDefaultInstance() {
@@ -2201,7 +2209,7 @@ PassphraseAck::PassphraseAck(const PassphraseAck& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:PassphraseAck)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.PassphraseAck)
 }
 
 void PassphraseAck::SharedCtor() {
@@ -2213,7 +2221,7 @@ void PassphraseAck::SharedCtor() {
 }
 
 PassphraseAck::~PassphraseAck() {
-  // @@protoc_insertion_point(destructor:PassphraseAck)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.PassphraseAck)
   SharedDtor();
 }
 
@@ -2270,7 +2278,7 @@ bool PassphraseAck::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:PassphraseAck)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.PassphraseAck)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -2319,17 +2327,17 @@ bool PassphraseAck::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:PassphraseAck)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.PassphraseAck)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:PassphraseAck)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.PassphraseAck)
   return false;
 #undef DO_
 }
 
 void PassphraseAck::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:PassphraseAck)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.PassphraseAck)
   // optional string passphrase = 1;
   if (has_passphrase()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -2350,12 +2358,12 @@ void PassphraseAck::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:PassphraseAck)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.PassphraseAck)
 }
 
 ::google::protobuf::uint8* PassphraseAck::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:PassphraseAck)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.PassphraseAck)
   // optional string passphrase = 1;
   if (has_passphrase()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8StringNamedField(
@@ -2378,7 +2386,7 @@ void PassphraseAck::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:PassphraseAck)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.PassphraseAck)
   return target;
 }
 
@@ -2482,7 +2490,7 @@ const int PassphraseStateRequest::kStateFieldNumber;
 PassphraseStateRequest::PassphraseStateRequest()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:PassphraseStateRequest)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.PassphraseStateRequest)
 }
 
 void PassphraseStateRequest::InitAsDefaultInstance() {
@@ -2492,7 +2500,7 @@ PassphraseStateRequest::PassphraseStateRequest(const PassphraseStateRequest& fro
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:PassphraseStateRequest)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.PassphraseStateRequest)
 }
 
 void PassphraseStateRequest::SharedCtor() {
@@ -2503,7 +2511,7 @@ void PassphraseStateRequest::SharedCtor() {
 }
 
 PassphraseStateRequest::~PassphraseStateRequest() {
-  // @@protoc_insertion_point(destructor:PassphraseStateRequest)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.PassphraseStateRequest)
   SharedDtor();
 }
 
@@ -2550,7 +2558,7 @@ bool PassphraseStateRequest::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:PassphraseStateRequest)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.PassphraseStateRequest)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -2582,17 +2590,17 @@ bool PassphraseStateRequest::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:PassphraseStateRequest)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.PassphraseStateRequest)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:PassphraseStateRequest)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.PassphraseStateRequest)
   return false;
 #undef DO_
 }
 
 void PassphraseStateRequest::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:PassphraseStateRequest)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.PassphraseStateRequest)
   // optional bytes state = 1;
   if (has_state()) {
     ::google::protobuf::internal::WireFormatLite::WriteBytesMaybeAliased(
@@ -2603,12 +2611,12 @@ void PassphraseStateRequest::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:PassphraseStateRequest)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.PassphraseStateRequest)
 }
 
 ::google::protobuf::uint8* PassphraseStateRequest::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:PassphraseStateRequest)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.PassphraseStateRequest)
   // optional bytes state = 1;
   if (has_state()) {
     target =
@@ -2620,7 +2628,7 @@ void PassphraseStateRequest::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:PassphraseStateRequest)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.PassphraseStateRequest)
   return target;
 }
 
@@ -2712,7 +2720,7 @@ void PassphraseStateRequest::Swap(PassphraseStateRequest* other) {
 PassphraseStateAck::PassphraseStateAck()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:PassphraseStateAck)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.PassphraseStateAck)
 }
 
 void PassphraseStateAck::InitAsDefaultInstance() {
@@ -2722,7 +2730,7 @@ PassphraseStateAck::PassphraseStateAck(const PassphraseStateAck& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:PassphraseStateAck)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.PassphraseStateAck)
 }
 
 void PassphraseStateAck::SharedCtor() {
@@ -2731,7 +2739,7 @@ void PassphraseStateAck::SharedCtor() {
 }
 
 PassphraseStateAck::~PassphraseStateAck() {
-  // @@protoc_insertion_point(destructor:PassphraseStateAck)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.PassphraseStateAck)
   SharedDtor();
 }
 
@@ -2770,7 +2778,7 @@ bool PassphraseStateAck::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:PassphraseStateAck)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.PassphraseStateAck)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -2785,32 +2793,32 @@ bool PassphraseStateAck::MergePartialFromCodedStream(
           input, tag, mutable_unknown_fields()));
   }
 success:
-  // @@protoc_insertion_point(parse_success:PassphraseStateAck)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.PassphraseStateAck)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:PassphraseStateAck)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.PassphraseStateAck)
   return false;
 #undef DO_
 }
 
 void PassphraseStateAck::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:PassphraseStateAck)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.PassphraseStateAck)
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:PassphraseStateAck)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.PassphraseStateAck)
 }
 
 ::google::protobuf::uint8* PassphraseStateAck::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:PassphraseStateAck)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.PassphraseStateAck)
   if (!unknown_fields().empty()) {
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:PassphraseStateAck)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.PassphraseStateAck)
   return target;
 }
 
@@ -2892,7 +2900,7 @@ const int HDNodeType::kPublicKeyFieldNumber;
 HDNodeType::HDNodeType()
   : ::google::protobuf::Message() {
   SharedCtor();
-  // @@protoc_insertion_point(constructor:HDNodeType)
+  // @@protoc_insertion_point(constructor:hw.trezor.messages.common.HDNodeType)
 }
 
 void HDNodeType::InitAsDefaultInstance() {
@@ -2902,7 +2910,7 @@ HDNodeType::HDNodeType(const HDNodeType& from)
   : ::google::protobuf::Message() {
   SharedCtor();
   MergeFrom(from);
-  // @@protoc_insertion_point(copy_constructor:HDNodeType)
+  // @@protoc_insertion_point(copy_constructor:hw.trezor.messages.common.HDNodeType)
 }
 
 void HDNodeType::SharedCtor() {
@@ -2918,7 +2926,7 @@ void HDNodeType::SharedCtor() {
 }
 
 HDNodeType::~HDNodeType() {
-  // @@protoc_insertion_point(destructor:HDNodeType)
+  // @@protoc_insertion_point(destructor:hw.trezor.messages.common.HDNodeType)
   SharedDtor();
 }
 
@@ -2999,7 +3007,7 @@ bool HDNodeType::MergePartialFromCodedStream(
     ::google::protobuf::io::CodedInputStream* input) {
 #define DO_(EXPRESSION) if (!(EXPRESSION)) goto failure
   ::google::protobuf::uint32 tag;
-  // @@protoc_insertion_point(parse_start:HDNodeType)
+  // @@protoc_insertion_point(parse_start:hw.trezor.messages.common.HDNodeType)
   for (;;) {
     ::std::pair< ::google::protobuf::uint32, bool> p = input->ReadTagWithCutoff(127);
     tag = p.first;
@@ -3102,17 +3110,17 @@ bool HDNodeType::MergePartialFromCodedStream(
     }
   }
 success:
-  // @@protoc_insertion_point(parse_success:HDNodeType)
+  // @@protoc_insertion_point(parse_success:hw.trezor.messages.common.HDNodeType)
   return true;
 failure:
-  // @@protoc_insertion_point(parse_failure:HDNodeType)
+  // @@protoc_insertion_point(parse_failure:hw.trezor.messages.common.HDNodeType)
   return false;
 #undef DO_
 }
 
 void HDNodeType::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // @@protoc_insertion_point(serialize_start:HDNodeType)
+  // @@protoc_insertion_point(serialize_start:hw.trezor.messages.common.HDNodeType)
   // required uint32 depth = 1;
   if (has_depth()) {
     ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->depth(), output);
@@ -3150,12 +3158,12 @@ void HDNodeType::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
   }
-  // @@protoc_insertion_point(serialize_end:HDNodeType)
+  // @@protoc_insertion_point(serialize_end:hw.trezor.messages.common.HDNodeType)
 }
 
 ::google::protobuf::uint8* HDNodeType::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // @@protoc_insertion_point(serialize_to_array_start:HDNodeType)
+  // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.common.HDNodeType)
   // required uint32 depth = 1;
   if (has_depth()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->depth(), target);
@@ -3196,7 +3204,7 @@ void HDNodeType::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
         unknown_fields(), target);
   }
-  // @@protoc_insertion_point(serialize_to_array_end:HDNodeType)
+  // @@protoc_insertion_point(serialize_to_array_end:hw.trezor.messages.common.HDNodeType)
   return target;
 }
 
@@ -3337,5 +3345,10 @@ void HDNodeType::Swap(HDNodeType* other) {
 
 
 // @@protoc_insertion_point(namespace_scope)
+
+}  // namespace common
+}  // namespace messages
+}  // namespace trezor
+}  // namespace hw
 
 // @@protoc_insertion_point(global_scope)
