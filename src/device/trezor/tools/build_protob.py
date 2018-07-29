@@ -30,8 +30,6 @@ try:
         os.path.join(CWD, "pb2cpp.py"),
         "-o",
         TREZOR_MESSAGES,
-        "-n",
-        "hw.trezor.messages",
     ] + proto_srcs
 
     subprocess.check_call(exec_args)

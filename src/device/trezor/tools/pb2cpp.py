@@ -95,7 +95,8 @@ def protoc(files, out_dir, additional_includes=(), package=None):
             tmp_file = os.path.join(tmpdir_protob, bname)
 
             shutil.copy(file, tmp_file)
-            namespace_file(tmp_file, package)
+            if package is not None:
+                namespace_file(tmp_file, package)
             new_files.append(tmp_file)
 
         protoc_includes = ["-I" + dir for dir in include_dirs if dir]
@@ -358,7 +359,7 @@ if __name__ == "__main__":
     # fmt: off
     parser.add_argument("proto", nargs="+", help="Protobuf definition files")
     parser.add_argument("-o", "--out-dir", help="Directory for generated source code")
-    parser.add_argument("-n", "--namespace", default="trezor", help="Message namespace")
+    parser.add_argument("-n", "--namespace", default=None, help="Message namespace")
     parser.add_argument("-I", "--protoc-include", action="append", help="protoc include path")
     parser.add_argument("-P", "--protobuf-module", default="protobuf", help="Name of protobuf module")
     # fmt: on
