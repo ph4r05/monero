@@ -14,6 +14,8 @@
 #include <google/protobuf/generated_enum_reflection.h>
 #include "google/protobuf/descriptor.pb.h"
 
+#include "messages/messages.pb.h"
+
 namespace hw {
 namespace trezor {
 
@@ -23,7 +25,9 @@ namespace trezor {
 
       }
 
-    static ::google::protobuf::Message get_message(int wire_number);
+    static ::google::protobuf::Message * get_message(int wire_number);
+    static messages::MessageType get_message_wire_number(const google::protobuf::Message * msg);
+    static messages::MessageType get_message_wire_number(const std::string & msg_name);
   };
 
 }}
