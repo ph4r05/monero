@@ -64,7 +64,7 @@ namespace trezor
   }
 
   messages::MessageType MessageMapper::get_message_wire_number(const std::string & msg_name){
-    string enumMessageName = std::string(TYPE_PREFIX) + "_" + msg_name;
+    string enumMessageName = std::string(TYPE_PREFIX) + msg_name;
 
     messages::MessageType res;
     bool r = hw::trezor::messages::MessageType_Parse(enumMessageName, &res);
