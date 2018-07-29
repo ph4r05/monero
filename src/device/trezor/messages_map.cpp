@@ -53,7 +53,7 @@ namespace trezor
     }
 
     if (desc == nullptr){
-      throw std::runtime_error("Message descriptor not found: ");
+      throw std::runtime_error(std::string("Message not found: ") + msg_name);
     }
 
     google::protobuf::Message* message =
