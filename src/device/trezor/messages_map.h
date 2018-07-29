@@ -26,6 +26,8 @@ namespace trezor {
       }
 
     static ::google::protobuf::Message * get_message(int wire_number);
+    static ::google::protobuf::Message * get_message(messages::MessageType);
+    static ::google::protobuf::Message * get_message(const std::string & msg_name);
     static messages::MessageType get_message_wire_number(const google::protobuf::Message * msg);
     static messages::MessageType get_message_wire_number(const std::string & msg_name);
   };
