@@ -54,22 +54,55 @@ set(trezor_private_headers)
 
 
 include(FindProtobuf)
-find_package(Protobuf REQUIRED)
+find_package(Protobuf)  # REQUIRED
 
-monero_private_headers(device_trezor
-        ${device_private_headers}
-        ${PROTOBUF_INCLUDE_DIR})
 
-monero_add_library(device_trezor
-        ${trezor_sources}
-        ${trezor_headers}
-        ${trezor_private_headers})
+if(Protobuf_FOUND)
 
-target_link_libraries(device_trezor
-        PUBLIC
-        cncrypto
-        ringct_basic
-        ${OPENSSL_CRYPTO_LIBRARIES}
-        ${PROTOBUF_LIBRARY}
-        PRIVATE
-        ${EXTRA_LIBRARIES})
+    # Try to regenerate messages on cmake
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../external/trezor-common/protob/messages.proto")
+        message(WARNING "Trezor-common submodule is not loaded. "
+                        "Try running git submodule init && git submotule update.")
+    else()
+        if ("$ENV{PYTHON3}" STREQUAL "")
+            set(PYTHON3 "python3")
+        else()
+            set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
+        endif()
+
+        execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
+        if(RET)
+            message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
+                            "OUT: ${OUT}, ERR: {ERR}."
+                            "Please read src/device/trezor/tools/README.md")
+        else()
+            message(STATUS "Trezor protobuf messages regenerated ${OUT}")
+        endif()
+    endif()
+
+    monero_private_headers(device_trezor
+            ${device_private_headers}
+            ${PROTOBUF_INCLUDE_DIR})
+
+    monero_add_library(device_trezor
+            ${trezor_sources}
+            ${trezor_headers}
+            ${trezor_private_headers})
+
+    target_link_libraries(device_trezor
+            PUBLIC
+            cncrypto
+            ringct_basic
+            ${OPENSSL_CRYPTO_LIBRARIES}
+            ${PROTOBUF_LIBRARY}
+            PRIVATE
+            ${EXTRA_LIBRARIES})
+
+else()
+    message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
+                    "Please read src/device/trezor/tools/README.md")
+
+    monero_private_headers(device_trezor)
+    monero_add_library(device_trezor)
+    target_link_libraries(device_trezor PUBLIC cncrypto)
+endif()
