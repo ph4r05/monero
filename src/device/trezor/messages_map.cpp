@@ -17,13 +17,18 @@ namespace trezor
 
   const char * TYPE_PREFIX = "MessageType_";
   const char * PACKAGES[] = {
-      "hw.trezor.messages",
-      "hw.trezor.messages.common",
-      "hw.trezor.messages.management",
-      "hw.trezor.messages.monero"
+      "hw.trezor.messages.",
+      "hw.trezor.messages.common.",
+      "hw.trezor.messages.management.",
+      "hw.trezor.messages.monero."
   };
 
   google::protobuf::Message * MessageMapper::get_message(int wire_number) {
+    // Each package instantiation so lookup works
+    hw::trezor::messages::common::Success::default_instance();
+    hw::trezor::messages::management::Cancel::default_instance();
+    hw::trezor::messages::monero::MoneroGetAddress::default_instance();
+
     const string &messageTypeName = hw::trezor::messages::MessageType_Name(static_cast<messages::MessageType>(wire_number));
     if (messageTypeName.empty()){
       throw std::runtime_error(std::string("Message descriptor not found: ") + std::to_string(wire_number));
@@ -34,7 +39,7 @@ namespace trezor
 
     for(const string &text : PACKAGES){
       desc = google::protobuf::DescriptorPool::generated_pool()
-          ->FindMessageTypeByName(text + "." + messageName);
+          ->FindMessageTypeByName(text + messageName);
       if (desc != nullptr){
         break;
       }
