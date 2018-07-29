@@ -26,10 +26,26 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+set(TREZOR_PROTOB_H
+    trezor/messages/messages.pb.h
+    trezor/messages/messages-common.pb.h
+    trezor/messages/messages-management.pb.h
+    trezor/messages/messages-monero.pb.h
+)
+
+set(TREZOR_PROTOB_CPP
+    trezor/messages/messages.pb.cc
+    trezor/messages/messages-common.pb.cc
+    trezor/messages/messages-management.pb.cc
+    trezor/messages/messages-monero.pb.cc
+)
+
 set(device_sources
   device.cpp
   device_default.cpp
   log.cpp
+  trezor/messages_map.cpp
+  ${TREZOR_PROTOB_CPP}
   )
 
 if(PCSC_FOUND)
@@ -40,6 +56,8 @@ set(device_headers
   device.hpp
   device_default.hpp
   log.hpp
+  trezor/messages_map.h
+  ${TREZOR_PROTOB_H}
  )
 
 if(PCSC_FOUND)
