@@ -102,8 +102,8 @@ namespace trezor {
     virtual bool write(const google::protobuf::Message & req) =0;
     virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
 
-    virtual bool write_chunk(const std::string & buff) { return false; };
-    virtual bool read_chunk(std::string & buff) { return false; };
+    virtual bool write_chunk(const void * buff, size_t size) { return false; };
+    virtual size_t read_chunk(void * buff, size_t size) { return false; };
   };
 
   // Bridge transport
@@ -159,14 +159,15 @@ namespace trezor {
 
     bool open() override;
     bool close() override;
-    bool write_chunk(const std::string & buff) override;
-    bool read_chunk(std::string & buff) override;
+    bool write_chunk(const void * buff, size_t size) override;
+    size_t read_chunk(void * buff, size_t size) override;
 
     bool write(const google::protobuf::Message &req) override;
     bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
   private:
-    ssize_t receive(std::string & buff);
+    void require_socket();
+    ssize_t receive(void * buff, size_t size);
     void check_deadline();
     static void handle_receive(const boost::system::error_code& ec, std::size_t length,
                                boost::system::error_code* out_ec, std::size_t* out_length);

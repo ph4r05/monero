@@ -82,22 +82,6 @@ namespace trezor{
     return true;
   }
 
-  static bool serialize_message(const google::protobuf::Message &req, std::string &res) {
-    auto req_len = req.ByteSize();
-    const auto buffer_size = serialize_message_buffer_size(req_len);
-
-    std::unique_ptr<uint8_t[]> req_buff(new uint8_t[buffer_size]);
-    uint8_t * req_buff_raw = req_buff.get();
-
-    if (!serialize_message(req, req_len, req_buff_raw, buffer_size)){
-      return false;
-    }
-
-    res.assign(reinterpret_cast<char*>(req_buff_raw), buffer_size);
-    return true;
-  }
-
-
   //
   // Communication protocol
   //
@@ -133,8 +117,7 @@ namespace trezor{
         memset(chunk_buff_raw + 1 + to_copy, 0, REPLEN - 1 - to_copy);
       }
 
-      std::string chunk((char*)(chunk_buff_raw), REPLEN);
-      if (!transport.write_chunk(chunk)){
+      if (!transport.write_chunk(chunk_buff_raw, REPLEN)){
         return false;
       }
 
@@ -144,30 +127,32 @@ namespace trezor{
   }
 
   bool ProtocolV1::read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type){
-    std::string chunk;
+    char chunk[64];
 
     // Initial chunk read
-    if (!transport.read_chunk(chunk)){
+    size_t nread = transport.read_chunk(chunk, 64);
+    if (nread != 64){
       return false;
     }
 
-    if (chunk.substr(0, 3) != "?##" || chunk.size() < 3 + PROTO_HEADER_SIZE){
+    if (strncmp(chunk, "?##", 3) != 0 || nread < 3 + PROTO_HEADER_SIZE){
       return false;
     }
 
     uint16_t tag;
-    uint32_t len, nread=chunk.size() - 3 - 6;
-    deserialize_message_header(chunk.c_str() + 3, tag, len);
+    uint32_t len;
+    nread -= 3 + 6;
+    deserialize_message_header(chunk + 3, tag, len);
 
-    std::string data_acc(chunk.c_str() + 3 + 6, nread);
+    std::string data_acc(chunk + 3 + 6, nread);
     while(nread < len){
-      std::string chunk;
-      if (!transport.read_chunk(chunk)){
-        return false;
+      size_t cur = transport.read_chunk(chunk, 64);
+      if (chunk[0] != '?'){
+        throw std::runtime_error("Chunk invalid");
       }
 
-      data_acc.append(chunk);
-      nread += chunk.size();
+      data_acc.append(chunk + 1, cur - 1);
+      nread += cur - 1;
     }
 
     if (msg_type){
@@ -248,23 +233,26 @@ namespace trezor{
 
   bool BridgeTransport::write(const google::protobuf::Message &req) {
     m_response = boost::none;
-    std::string req_buff;
 
-    if (!serialize_message(req, req_buff)){
+    const auto msg_size = message_size(req);
+    const auto buff_size = serialize_message_buffer_size(msg_size);
+
+    std::unique_ptr<uint8_t[]> req_buff(new uint8_t[buff_size]);
+    uint8_t * req_buff_raw = req_buff.get();
+
+    if (!serialize_message(req, msg_size, req_buff_raw, buff_size)){
       return false;
     }
 
     std::string uri = "/call/" + m_session.get();
-    std::string req_hex = epee::string_tools::buff_to_hex_nodelimer(req_buff);
+    std::string req_hex = epee::to_hex::string(epee::span<const std::uint8_t>(req_buff_raw, buff_size));
     std::string res_hex;
 
-    std::cerr << "REQ: " << req_hex << endl;
     bool req_status = invoke_bridge_http(uri, req_hex, res_hex, m_http_client);
     if (!req_status){
       return false;
     }
 
-    std::cerr << "RES: " << res_hex << endl;
     m_response = res_hex;
     return true;
   }
@@ -331,19 +319,22 @@ namespace trezor{
     return path + m_device_host + std::to_string(m_device_port);
   }
 
-  bool UdpTransport::ping(){
+  void UdpTransport::require_socket(){
     if (!m_socket){
-      return false;
+      throw std::invalid_argument("Socket not connected");
     }
+  }
 
+  bool UdpTransport::ping(){
+    require_socket();
     try {
       std::string req = "PINGPING";
-      std::string res;
+      char res[8];
 
       auto sent = m_socket->send_to(boost::asio::buffer(req.c_str(), req.size()), m_endpoint);
-      receive(res);
+      receive(res, 8);
 
-      return res == "PONGPONG";
+      return memcmp(res, "PONGPONG", 8) == 0;
 
     } catch(...){
       return false;
@@ -394,42 +385,37 @@ namespace trezor{
     return true;
   }
 
-  bool UdpTransport::write_chunk(const std::string & buff){
-    if (!m_socket){
-      return false;
-    }
+  bool UdpTransport::write_chunk(const void * buff, size_t size){
+    require_socket();
 
-    if (buff.size() != 64){
+    if (size != 64){
       throw std::invalid_argument("Invalid chunk size");
     }
 
-    m_socket->send_to(boost::asio::buffer(buff.c_str(), buff.size()), m_endpoint);
-    return true;
+    auto written = m_socket->send_to(boost::asio::buffer(buff, size), m_endpoint);
+    return size == written;
   }
 
-  bool UdpTransport::read_chunk(std::string & buff){
-    if (!m_socket){
-      return false;
+  size_t UdpTransport::read_chunk(void * buff, size_t size){
+    require_socket();
+    if (size < 64){
+      throw std::invalid_argument("Buffer too small");
     }
 
-    ssize_t len = receive(buff);
+    ssize_t len = receive(buff, size);
     if (len != 64){
       throw std::invalid_argument("Invalid chunk size");
     }
 
-    return true;
+    return len;
   }
 
-  ssize_t UdpTransport::receive(std::string & buff){
+  ssize_t UdpTransport::receive(void * buff, size_t size){
     boost::system::error_code ec;
     boost::posix_time::seconds timeout(100);
+    boost::asio::mutable_buffer buffer = boost::asio::buffer(buff, size);
 
-    char data[2048];
-    boost::asio::mutable_buffer buffer = boost::asio::buffer(data);
-
-    if (!m_socket){
-      return -1;
-    }
+    require_socket();
 
     // Set a deadline for the asynchronous operation.
     m_deadline.expires_from_now(timeout);
@@ -452,8 +438,6 @@ namespace trezor{
       m_io_service.run_one();
     }
     while (ec == boost::asio::error::would_block);
-
-    buff.assign(boost::asio::buffer_cast<char*>(buffer), length);
     return length;
   }
 
