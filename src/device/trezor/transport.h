@@ -14,99 +14,99 @@
 
 
 namespace hw {
-  namespace trezor {
+namespace trezor {
 
-    using json = nlohmann::json;
-    namespace http = epee::net_utils::http;
+  using json = nlohmann::json;
+  namespace http = epee::net_utils::http;
 
-    const std::string DEFAULT_BRIDGE = "127.0.0.1:21325";
+  const std::string DEFAULT_BRIDGE = "127.0.0.1:21325";
 
-    // Base HTTP comm serialization.
-    bool t_serialize(const std::string & in, std::string & out);
-    bool t_serialize(const json & in, std::string & out);
+  // Base HTTP comm serialization.
+  bool t_serialize(const std::string & in, std::string & out);
+  bool t_serialize(const json & in, std::string & out);
 
-    bool t_deserialize(const std::string & in, std::string & out);
-    bool t_deserialize(const std::string & in, json & out);
+  bool t_deserialize(const std::string & in, std::string & out);
+  bool t_deserialize(const std::string & in, json & out);
 
-    // Flexible json serialization. HTTP client tailored for bridge API
-    template<class t_req, class t_res, class t_transport>
-    bool invoke_bridge_http(const boost::string_ref uri, const t_req & out_struct, t_res & result_struct, t_transport& transport, const boost::string_ref method = "POST", std::chrono::milliseconds timeout = std::chrono::seconds(15))
+  // Flexible json serialization. HTTP client tailored for bridge API
+  template<class t_req, class t_res, class t_transport>
+  bool invoke_bridge_http(const boost::string_ref uri, const t_req & out_struct, t_res & result_struct, t_transport& transport, const boost::string_ref method = "POST", std::chrono::milliseconds timeout = std::chrono::seconds(15))
+  {
+    std::string req_param;
+    t_serialize(out_struct, req_param);
+
+    http::fields_list additional_params;
+    additional_params.push_back(std::make_pair("Origin","https://python.trezor.io"));
+    additional_params.push_back(std::make_pair("Content-Type","application/json; charset=utf-8"));
+
+    const http::http_response_info* pri = NULL;
+    if(!transport.invoke(uri, method, req_param, timeout, std::addressof(pri), std::move(additional_params)))
     {
-      std::string req_param;
-      t_serialize(out_struct, req_param);
-
-      http::fields_list additional_params;
-      additional_params.push_back(std::make_pair("Origin","https://python.trezor.io"));
-      additional_params.push_back(std::make_pair("Content-Type","application/json; charset=utf-8"));
-
-      const http::http_response_info* pri = NULL;
-      if(!transport.invoke(uri, method, req_param, timeout, std::addressof(pri), std::move(additional_params)))
-      {
-        LOG_PRINT_L1("Failed to invoke http request to  " << uri);
-        return false;
-      }
-
-      if(!pri)
-      {
-        LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", internal error (null response ptr)");
-        return false;
-      }
-
-      if(pri->m_response_code != 200)
-      {
-        LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", wrong response code: " << pri->m_response_code);
-        return false;
-      }
-
-      t_deserialize(pri->m_body, result_struct);
-      return true;
+      LOG_PRINT_L1("Failed to invoke http request to  " << uri);
+      return false;
     }
 
-    // Base transport
-    class Transport;
-    typedef std::vector<std::shared_ptr<Transport>> t_transport_vect;
+    if(!pri)
+    {
+      LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", internal error (null response ptr)");
+      return false;
+    }
 
-    class Transport {
-    public:
-      Transport() = default;
+    if(pri->m_response_code != 200)
+    {
+      LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", wrong response code: " << pri->m_response_code);
+      return false;
+    }
 
-      virtual bool open(){return false;};
-      virtual bool close(){return false;};
-      virtual bool write(const google::protobuf::Message & req)= 0;
-      virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
+    t_deserialize(pri->m_body, result_struct);
+    return true;
+  }
 
-    };
+  // Base transport
+  class Transport;
+  typedef std::vector<std::shared_ptr<Transport>> t_transport_vect;
 
-    // Bridge transport
-    class BridgeTransport : public Transport {
-    public:
-      BridgeTransport(
-          const std::string & device_path="",
-          const std::string & bridge_host=DEFAULT_BRIDGE):
-          m_device_path(device_path.empty() ? boost::none : boost::make_optional(device_path)),
-          m_bridge_host(bridge_host),
-          m_response(boost::none),
-          m_session(boost::none)
-      {
-        m_http_client.set_server(m_bridge_host, boost::none, false);
-      }
+  class Transport {
+  public:
+    Transport() = default;
 
-      bool enumerate(t_transport_vect & res);
+    virtual bool open(){return false;};
+    virtual bool close(){return false;};
+    virtual bool write(const google::protobuf::Message & req)= 0;
+    virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
 
-      bool open() override;
-      bool close() override;
+  };
 
-      bool write(const google::protobuf::Message &req) override;
-      bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+  // Bridge transport
+  class BridgeTransport : public Transport {
+  public:
+    BridgeTransport(
+        const std::string & device_path="",
+        const std::string & bridge_host=DEFAULT_BRIDGE):
+        m_device_path(device_path.empty() ? boost::none : boost::make_optional(device_path)),
+        m_bridge_host(bridge_host),
+        m_response(boost::none),
+        m_session(boost::none)
+    {
+      m_http_client.set_server(m_bridge_host, boost::none, false);
+    }
 
-    private:
-      epee::net_utils::http::http_simple_client m_http_client;
-      std::string m_bridge_host;
-      boost::optional<std::string> m_device_path;
-      boost::optional<std::string> m_session;
-      boost::optional<std::string> m_response;
-    };
+    bool enumerate(t_transport_vect & res);
 
-  }}
+    bool open() override;
+    bool close() override;
+
+    bool write(const google::protobuf::Message &req) override;
+    bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+
+  private:
+    epee::net_utils::http::http_simple_client m_http_client;
+    std::string m_bridge_host;
+    boost::optional<std::string> m_device_path;
+    boost::optional<std::string> m_session;
+    boost::optional<std::string> m_response;
+  };
+
+}}
 
 #endif //MONERO_TRANSPORT_H
