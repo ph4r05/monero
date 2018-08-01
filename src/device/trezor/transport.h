@@ -83,9 +83,10 @@ namespace hw {
       BridgeTransport(
           const std::string & device_path="",
           const std::string & bridge_host=DEFAULT_BRIDGE):
-          m_device_path(device_path),
+          m_device_path(device_path.empty() ? boost::none : boost::make_optional(device_path)),
           m_bridge_host(bridge_host),
-          m_response(boost::none)
+          m_response(boost::none),
+          m_session(boost::none)
       {
         m_http_client.set_server(m_bridge_host, boost::none, false);
       }
@@ -101,8 +102,8 @@ namespace hw {
     private:
       epee::net_utils::http::http_simple_client m_http_client;
       std::string m_bridge_host;
-      std::string m_device_path;
-      std::string m_session;
+      boost::optional<std::string> m_device_path;
+      boost::optional<std::string> m_session;
       boost::optional<std::string> m_response;
     };
 

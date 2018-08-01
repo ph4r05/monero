@@ -53,11 +53,11 @@ namespace trezor{
   }
 
   bool BridgeTransport::open() {
-    if (m_device_path.empty()){
+    if (!m_device_path){
       return false;
     }
 
-    std::string uri = "/acquire/" + m_device_path + "/null";
+    std::string uri = "/acquire/" + m_device_path.get() + "/null";
     std::string req;
     json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
@@ -65,16 +65,16 @@ namespace trezor{
       return false;
     }
 
-    m_session = bridge_res["session"];
+    m_session = boost::make_optional(bridge_res["session"]);
     return true;
   }
 
   bool BridgeTransport::close() {
-    if (m_device_path.empty() || m_session.empty()){
+    if (!m_device_path || !m_session){
       return false;
     }
 
-    std::string uri = "/release/" + m_session;
+    std::string uri = "/release/" + m_session.get();
     std::string req;
     json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
@@ -82,7 +82,7 @@ namespace trezor{
       return false;
     }
 
-    m_session.clear();
+    m_session = boost::none;
     return true;
   }
 
@@ -102,7 +102,7 @@ namespace trezor{
     memcpy(req_buff_raw + 2, (void*)&wire_len, 4);
     req.SerializeToArray(req_buff_raw + 6, req_len);
 
-    std::string uri = "/call/" + m_session;
+    std::string uri = "/call/" + m_session.get();
     std::string req_hex = epee::string_tools::buff_to_hex_nodelimer(std::string(reinterpret_cast<char*>(req_buff_raw),
                                                                                 (unsigned long) buffer_size));
     std::string res_hex;
