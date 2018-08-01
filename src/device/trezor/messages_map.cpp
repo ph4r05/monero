@@ -75,6 +75,10 @@ namespace trezor
     return MessageMapper::get_message_wire_number(msg->GetDescriptor()->name());
   }
 
+  messages::MessageType MessageMapper::get_message_wire_number(const google::protobuf::Message & msg){
+    return MessageMapper::get_message_wire_number(msg.GetDescriptor()->name());
+  }
+
   messages::MessageType MessageMapper::get_message_wire_number(const std::string & msg_name){
     string enumMessageName = std::string(TYPE_PREFIX) + msg_name;
 
