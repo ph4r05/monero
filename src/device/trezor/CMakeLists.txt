@@ -100,6 +100,9 @@ if(Protobuf_FOUND)
             PRIVATE
             ${EXTRA_LIBRARIES})
 
+    set(WITH_DEVICE_TREZOR 1 PARENT_SCOPE)
+    add_definitions(-DWITH_DEVICE_TREZOR=1)
+
 else()
     message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
                     "Please read src/device/trezor/tools/README.md")
@@ -107,4 +110,7 @@ else()
     monero_private_headers(device_trezor)
     monero_add_library(device_trezor)
     target_link_libraries(device_trezor PUBLIC cncrypto)
+    set(WITH_DEVICE_TREZOR 0 PARENT_SCOPE)
+    add_definitions(-DWITH_DEVICE_TREZOR=0)
+
 endif()
