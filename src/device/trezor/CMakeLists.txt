@@ -41,12 +41,14 @@ set(TREZOR_PROTOB_CPP
 )
 
 set(trezor_headers
+        exceptions.h
         messages_map.h
         transport.h
         ${TREZOR_PROTOB_H}
 )
 
 set(trezor_sources
+        exceptions.cpp
         messages_map.cpp
         transport.cpp
         ${TREZOR_PROTOB_CPP}

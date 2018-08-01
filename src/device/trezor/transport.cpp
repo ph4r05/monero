@@ -76,7 +76,7 @@ namespace trezor{
 
     serialize_message_header(buff, msg_wire_num, msg_size);
     if (!req.SerializeToArray(buff + 6, msg_size)){
-      throw exc::CommunicationException("Message serialization error");
+      throw exc::EncodingException("Message serialization error");
     }
 
     return true;
@@ -99,7 +99,7 @@ namespace trezor{
 
     if (!serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2)){
       LOG_PRINT_L1("Message could not be serialized");
-      return false;
+      throw exc::EncodingException("Message could not be serialized");
     }
 
     size_t offset = 0;
@@ -163,7 +163,7 @@ namespace trezor{
       *msg_type = static_cast<messages::MessageType>(tag);
     }
 
-    if (nread != len){
+    if (nread < len){
       throw exc::CommunicationException("Response incomplete");
     }
 
@@ -259,7 +259,7 @@ namespace trezor{
 
     if (!serialize_message(req, msg_size, req_buff_raw, buff_size)){
       LOG_PRINT_L1("Message could not be serialized");
-      return false;
+      throw exc::EncodingException("Message could not be serialized");
     }
 
     std::string uri = "/call/" + m_session.get();
@@ -285,7 +285,7 @@ namespace trezor{
     std::string bin_data;
     if (!epee::string_tools::parse_hexstr_to_binbuff(m_response.get(), bin_data)){
       LOG_PRINT_L1("Response is not well hexcoded");
-      return false;
+      throw exc::CommunicationException("Response is not well hexcoded");
     }
 
     uint16_t msg_tag;
@@ -293,7 +293,7 @@ namespace trezor{
     deserialize_message_header(bin_data.c_str(), msg_tag, msg_len);
     if (bin_data.size() != msg_len + 6){
       LOG_PRINT_L1("Response size invalid");
-      return false;
+      throw exc::CommunicationException("Response is not well hexcoded");
     }
 
     if (msg_type){
@@ -303,7 +303,7 @@ namespace trezor{
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(msg_tag));
     if (!msg_wrap->ParseFromArray(bin_data.c_str() + 6, msg_len)){
       LOG_PRINT_L1("Message could not be parsed");
-      return false;
+      throw exc::EncodingException("Response is not well hexcoded");
     }
     msg = msg_wrap;
     return true;
