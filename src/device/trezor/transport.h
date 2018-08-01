@@ -207,9 +207,9 @@ namespace trezor {
     return std::dynamic_pointer_cast<t_transport>(t);
   }
 
+  std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t);
+  std::ostream& operator<<(std::ostream& o, std::shared_ptr<hw::trezor::Transport> const& t);
 }}
 
-std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t);
-std::ostream& operator<<(std::ostream& o, std::shared_ptr<hw::trezor::Transport> const& t);
 
 #endif //MONERO_TRANSPORT_H

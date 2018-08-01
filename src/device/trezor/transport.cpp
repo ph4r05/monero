@@ -540,17 +540,19 @@ namespace trezor{
     }
   }
 
-}
-}
-
-std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t){
-  return t.dump(o);
-}
-
-std::ostream& operator<<(std::ostream& o, std::shared_ptr<hw::trezor::Transport> const& t){
-  if (!t){
-    return o << "None";
+  std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t){
+    return t.dump(o);
   }
 
-  return t->dump(o);
+  std::ostream& operator<<(std::ostream& o, std::shared_ptr<hw::trezor::Transport> const& t){
+    if (!t){
+      return o << "None";
+    }
+
+    return t->dump(o);
+  }
+
 }
+}
+
+
