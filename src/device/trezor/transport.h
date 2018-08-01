@@ -95,7 +95,7 @@ namespace trezor {
   public:
     Transport() = default;
 
-    virtual std::string get_path() { return ""; };
+    virtual std::string get_path() const { return ""; };
     virtual bool enumerate(t_transport_vect & res){ return false; };
     virtual bool open(){return false;};
     virtual bool close(){return false;};
@@ -104,16 +104,17 @@ namespace trezor {
 
     virtual bool write_chunk(const void * buff, size_t size) { return false; };
     virtual size_t read_chunk(void * buff, size_t size) { return false; };
+    virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
   };
 
   // Bridge transport
   class BridgeTransport : public Transport {
   public:
     BridgeTransport(
-        const std::string & device_path="",
-        const std::string & bridge_host=DEFAULT_BRIDGE):
-        m_device_path(device_path.empty() ? boost::none : boost::make_optional(device_path)),
-        m_bridge_host(bridge_host),
+        boost::optional<std::string> device_path = boost::none,
+        boost::optional<std::string> bridge_host = boost::none):
+        m_device_path(device_path),
+        m_bridge_host(bridge_host ? bridge_host.get() : DEFAULT_BRIDGE),
         m_response(boost::none),
         m_session(boost::none)
     {
@@ -122,7 +123,7 @@ namespace trezor {
 
     static const char * PATH_PREFIX;
 
-    std::string get_path() override;
+    std::string get_path() const override;
     bool enumerate(t_transport_vect & res) override;
 
     bool open() override;
@@ -131,12 +132,16 @@ namespace trezor {
     bool write(const google::protobuf::Message &req) override;
     bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
+    boost::optional<json> device_info() const;
+    std::ostream& dump(std::ostream& o) const override;
+
   private:
     epee::net_utils::http::http_simple_client m_http_client;
     std::string m_bridge_host;
     boost::optional<std::string> m_device_path;
     boost::optional<std::string> m_session;
     boost::optional<std::string> m_response;
+    boost::optional<json> m_device_info;
   };
 
   // UdpTransport transport
@@ -154,16 +159,19 @@ namespace trezor {
     static const int DEFAULT_PORT;
 
     bool ping();
-    std::string get_path() override;
+    std::string get_path() const override;
     bool enumerate(t_transport_vect & res) override;
 
     bool open() override;
     bool close() override;
-    bool write_chunk(const void * buff, size_t size) override;
-    size_t read_chunk(void * buff, size_t size) override;
 
     bool write(const google::protobuf::Message &req) override;
     bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+
+    bool write_chunk(const void * buff, size_t size) override;
+    size_t read_chunk(void * buff, size_t size) override;
+
+    std::ostream& dump(std::ostream& o) const override;
 
   private:
     void require_socket();
@@ -182,6 +190,26 @@ namespace trezor {
     udp::endpoint m_endpoint;
   };
 
+  //
+  // General helpers
+  //
+
+  bool enumerate(t_transport_vect & res);
+  std::shared_ptr<Transport> transport(std::string path);
+
+  template<class t_transport>
+  std::shared_ptr<t_transport> transport_typed(std::string path){
+    auto t = transport(path);
+    if (!t){
+      return nullptr;
+    }
+
+    return std::dynamic_pointer_cast<t_transport>(t);
+  }
+
 }}
+
+std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t);
+std::ostream& operator<<(std::ostream& o, std::shared_ptr<hw::trezor::Transport> const& t);
 
 #endif //MONERO_TRANSPORT_H

@@ -173,7 +173,7 @@ namespace trezor{
 
   const char * BridgeTransport::PATH_PREFIX = "bridge:";
 
-  std::string BridgeTransport::get_path(){
+  std::string BridgeTransport::get_path() const {
     if (!m_device_path){
       return "";
     }
@@ -192,7 +192,10 @@ namespace trezor{
     }
 
     for (auto& element : bridge_res) {
-      res.push_back(std::make_shared<BridgeTransport>(element["path"].get<std::string>()));
+      auto t = std::make_shared<BridgeTransport>(element["path"].get<std::string>());
+      t->m_device_info = element;
+
+      res.push_back(t);
     }
     return true;
   }
@@ -286,6 +289,17 @@ namespace trezor{
     return true;
   }
 
+  boost::optional<json> BridgeTransport::device_info() const {
+    return m_device_info;
+  }
+
+  std::ostream& BridgeTransport::dump(std::ostream& o) const {
+    return o << "BridgeTransport<path=" << (m_device_path ? m_device_path.get() : "None")
+             << ", info=" << (m_device_info ? m_device_info.get() : "None")
+             << ", session=" << (m_session ? m_session.get() : "None")
+             << ">";
+  }
+
   //
   // UdpTransport
   //
@@ -305,7 +319,7 @@ namespace trezor{
         m_device_host = device_str;
       } else {
         m_device_host = device_str.substr(0, delim);
-        m_device_port = std::stoi(device_str.substr(delim));
+        m_device_port = std::stoi(device_str.substr(delim + 1));
       }
     } else {
       m_device_host = DEFAULT_HOST;
@@ -314,9 +328,9 @@ namespace trezor{
     m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
   }
 
-  std::string UdpTransport::get_path(){
+  std::string UdpTransport::get_path() const {
     std::string path(PATH_PREFIX);
-    return path + m_device_host + std::to_string(m_device_port);
+    return path + m_device_host + ":" + std::to_string(m_device_port);
   }
 
   void UdpTransport::require_socket(){
@@ -481,6 +495,46 @@ namespace trezor{
     *out_ec = ec;
     *out_length = length;
   }
+
+  std::ostream& UdpTransport::dump(std::ostream& o) const {
+    return o << "UdpTransport<path=" << get_path()
+             << ", socket_ok=" << (m_socket ? "1" : "0")
+             << ">";
+  }
+
+  bool enumerate(t_transport_vect & res){
+    BridgeTransport bt;
+    bt.enumerate(res);
+
+    hw::trezor::UdpTransport btu;
+    btu.enumerate(res);
+    return true;
+  }
+
+  std::shared_ptr<Transport> transport(std::string path){
+    if (boost::starts_with(path, BridgeTransport::PATH_PREFIX)){
+      return std::make_shared<BridgeTransport>(path.erase(0, strlen(BridgeTransport::PATH_PREFIX)));
+
+    } else if (boost::starts_with(path, UdpTransport::PATH_PREFIX)){
+      return std::make_shared<UdpTransport>(path.erase(0, strlen(UdpTransport::PATH_PREFIX)));
+
+    } else {
+      throw std::invalid_argument("Unknown trezor device path: " + path);
+
+    }
+  }
+
 }
 }
 
+std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t){
+  return t.dump(o);
+}
+
+std::ostream& operator<<(std::ostream& o, std::shared_ptr<hw::trezor::Transport> const& t){
+  if (!t){
+    return o << "None";
+  }
+
+  return t->dump(o);
+}
