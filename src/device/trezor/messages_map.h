@@ -33,6 +33,15 @@ namespace trezor {
     static messages::MessageType get_message_wire_number(const std::string & msg_name);
   };
 
+  template<class t_message>
+  std::shared_ptr<t_message> message_ptr_retype(std::shared_ptr<google::protobuf::Message> & in){
+    if (!in){
+      return nullptr;
+    }
+
+    return std::dynamic_pointer_cast<t_message>(in);
+  }
+
 }}
 
 #endif //MONERO_MESSAGES_MAP_H
