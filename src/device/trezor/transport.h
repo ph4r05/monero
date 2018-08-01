@@ -62,8 +62,29 @@ namespace trezor {
     return true;
   }
 
-  // Base transport
+  // Forward decl
   class Transport;
+
+  // Communication protocol
+  class Protocol {
+  public:
+    Protocol() = default;
+    virtual bool session_begin(Transport & transport){ return false; };
+    virtual bool session_end(Transport & transport){ return false; };
+    virtual bool write(Transport & transport, const google::protobuf::Message & req)= 0;
+    virtual bool read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr)= 0;
+  };
+
+  class ProtocolV1 : public Protocol {
+  public:
+    ProtocolV1() = default;
+
+    bool write(Transport & transport, const google::protobuf::Message & req) override;
+    bool read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+  };
+
+
+  // Base transport
   typedef std::vector<std::shared_ptr<Transport>> t_transport_vect;
 
   class Transport {
@@ -72,9 +93,11 @@ namespace trezor {
 
     virtual bool open(){return false;};
     virtual bool close(){return false;};
-    virtual bool write(const google::protobuf::Message & req)= 0;
+    virtual bool write(const google::protobuf::Message & req) =0;
     virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
 
+    virtual bool write_chunk(const std::string & buff) { return false; };
+    virtual bool read_chunk(std::string & buff) { return false; };
   };
 
   // Bridge transport
