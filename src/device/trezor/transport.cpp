@@ -4,6 +4,10 @@
 
 #include "transport.h"
 #include <boost/endian/conversion.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/asio/ip/udp.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <iostream>
 
 using namespace std;
 using json = nlohmann::json;
@@ -182,6 +186,17 @@ namespace trezor{
   // Bridge transport
   //
 
+  const char * BridgeTransport::PATH_PREFIX = "bridge:";
+
+  std::string BridgeTransport::get_path(){
+    if (!m_device_path){
+      return "";
+    }
+
+    std::string path(PATH_PREFIX);
+    return path + m_device_path.get();
+  }
+
   bool BridgeTransport::enumerate(t_transport_vect & res) {
     json bridge_res;
     std::string req;
@@ -192,7 +207,6 @@ namespace trezor{
     }
 
     for (auto& element : bridge_res) {
-      std::cout << element << endl;
       res.push_back(std::make_shared<BridgeTransport>(element["path"].get<std::string>()));
     }
     return true;
@@ -284,6 +298,205 @@ namespace trezor{
     return true;
   }
 
+  //
+  // UdpTransport
+  //
+  const char * UdpTransport::PATH_PREFIX = "udp:";
+  const char * UdpTransport::DEFAULT_HOST = "127.0.0.1";
+  const int UdpTransport::DEFAULT_PORT = 21324;
+
+  UdpTransport::UdpTransport(boost::optional<std::string> device_path,
+                             boost::optional<std::shared_ptr<Protocol>> proto) :
+      m_io_service(), m_deadline(m_io_service)
+  {
+    m_device_port = DEFAULT_PORT;
+    if (device_path) {
+      const std::string device_str = device_path.get();
+      auto delim = device_str.find(":");
+      if (delim == std::string::npos) {
+        m_device_host = device_str;
+      } else {
+        m_device_host = device_str.substr(0, delim);
+        m_device_port = std::stoi(device_str.substr(delim));
+      }
+    } else {
+      m_device_host = DEFAULT_HOST;
+    }
+
+    m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
+  }
+
+  std::string UdpTransport::get_path(){
+    std::string path(PATH_PREFIX);
+    return path + m_device_host + std::to_string(m_device_port);
+  }
+
+  bool UdpTransport::ping(){
+    if (!m_socket){
+      return false;
+    }
+
+    try {
+      std::string req = "PINGPING";
+      std::string res;
+
+      auto sent = m_socket->send_to(boost::asio::buffer(req.c_str(), req.size()), m_endpoint);
+      receive(res);
+
+      return res == "PONGPONG";
+
+    } catch(...){
+      return false;
+    }
+  }
+
+  bool UdpTransport::enumerate(t_transport_vect & res) {
+    std::shared_ptr<UdpTransport> t = std::make_shared<UdpTransport>();
+    bool t_works = false;
+
+    try{
+      t->open();
+      t_works = t->ping();
+    } catch(...) {
+
+    }
+    t->close();
+    if (t_works){
+      res.push_back(t);
+    }
+    return true;
+  }
+
+  bool UdpTransport::open() {
+    udp::resolver resolver(m_io_service);
+    udp::resolver::query query(udp::v4(), m_device_host, std::to_string(m_device_port));
+    m_endpoint = *resolver.resolve(query);
+
+    m_socket.reset(new udp::socket(m_io_service));
+    m_socket->open(udp::v4());
+
+    m_deadline.expires_at(boost::posix_time::pos_infin);
+    check_deadline();
+
+    m_proto->session_begin(*this);
+
+    return true;
+  }
+
+  bool UdpTransport::close() {
+    if (!m_socket){
+      return false;
+    }
+
+    m_proto->session_end(*this);
+    m_socket->close();
+    m_socket = nullptr;
+    return true;
+  }
+
+  bool UdpTransport::write_chunk(const std::string & buff){
+    if (!m_socket){
+      return false;
+    }
+
+    if (buff.size() != 64){
+      throw std::invalid_argument("Invalid chunk size");
+    }
+
+    m_socket->send_to(boost::asio::buffer(buff.c_str(), buff.size()), m_endpoint);
+    return true;
+  }
+
+  bool UdpTransport::read_chunk(std::string & buff){
+    if (!m_socket){
+      return false;
+    }
+
+    ssize_t len = receive(buff);
+    if (len != 64){
+      throw std::invalid_argument("Invalid chunk size");
+    }
+
+    return true;
+  }
+
+  ssize_t UdpTransport::receive(std::string & buff){
+    boost::system::error_code ec;
+    boost::posix_time::seconds timeout(100);
+
+    char data[2048];
+    boost::asio::mutable_buffer buffer = boost::asio::buffer(data);
+
+    if (!m_socket){
+      return -1;
+    }
+
+    // Set a deadline for the asynchronous operation.
+    m_deadline.expires_from_now(timeout);
+
+    // Set up the variables that receive the result of the asynchronous
+    // operation. The error code is set to would_block to signal that the
+    // operation is incomplete. Asio guarantees that its asynchronous
+    // operations will never fail with would_block, so any other value in
+    // ec indicates completion.
+    ec = boost::asio::error::would_block;
+    std::size_t length = 0;
+
+    // Start the asynchronous operation itself. The handle_receive function
+    // used as a callback will update the ec and length variables.
+    m_socket->async_receive_from(boost::asio::buffer(buffer), m_endpoint,
+                                 boost::bind(&UdpTransport::handle_receive, _1, _2, &ec, &length));
+
+    // Block until the asynchronous operation has completed.
+    do {
+      m_io_service.run_one();
+    }
+    while (ec == boost::asio::error::would_block);
+
+    buff.assign(boost::asio::buffer_cast<char*>(buffer), length);
+    return length;
+  }
+
+  bool UdpTransport::write(const google::protobuf::Message &req) {
+    return m_proto->write(*this, req);
+  }
+
+  bool UdpTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
+    return m_proto->read(*this, msg, msg_type);
+  }
+
+  void UdpTransport::check_deadline(){
+    if (!m_socket){
+      return;  // no active socket.
+    }
+
+    // Check whether the deadline has passed. We compare the deadline against
+    // the current time since a new asynchronous operation may have moved the
+    // deadline before this actor had a chance to run.
+    if (m_deadline.expires_at() <= boost::asio::deadline_timer::traits_type::now())
+    {
+      // The deadline has passed. The outstanding asynchronous operation needs
+      // to be cancelled so that the blocked receive() function will return.
+      //
+      // Please note that cancel() has portability issues on some versions of
+      // Microsoft Windows, and it may be necessary to use close() instead.
+      // Consult the documentation for cancel() for further information.
+      m_socket->cancel();
+
+      // There is no longer an active deadline. The expiry is set to positive
+      // infinity so that the actor takes no action until a new deadline is set.
+      m_deadline.expires_at(boost::posix_time::pos_infin);
+    }
+
+    // Put the actor back to sleep.
+    m_deadline.async_wait(boost::bind(&UdpTransport::check_deadline, this));
+  }
+
+  void UdpTransport::handle_receive(const boost::system::error_code &ec, std::size_t length,
+                                    boost::system::error_code *out_ec, std::size_t *out_length) {
+    *out_ec = ec;
+    *out_length = length;
+  }
 }
 }
 

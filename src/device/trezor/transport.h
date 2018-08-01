@@ -7,6 +7,10 @@
 
 
 #include <boost/utility/string_ref.hpp>
+#include <boost/asio.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <boost/array.hpp>
+
 #include <net/http_base.h>
 #include "net/http_client.h"
 #include "json.hpp"
@@ -91,6 +95,8 @@ namespace trezor {
   public:
     Transport() = default;
 
+    virtual std::string get_path() { return ""; };
+    virtual bool enumerate(t_transport_vect & res){ return false; };
     virtual bool open(){return false;};
     virtual bool close(){return false;};
     virtual bool write(const google::protobuf::Message & req) =0;
@@ -114,7 +120,10 @@ namespace trezor {
       m_http_client.set_server(m_bridge_host, boost::none, false);
     }
 
-    bool enumerate(t_transport_vect & res);
+    static const char * PATH_PREFIX;
+
+    std::string get_path() override;
+    bool enumerate(t_transport_vect & res) override;
 
     bool open() override;
     bool close() override;
@@ -128,6 +137,48 @@ namespace trezor {
     boost::optional<std::string> m_device_path;
     boost::optional<std::string> m_session;
     boost::optional<std::string> m_response;
+  };
+
+  // UdpTransport transport
+  using boost::asio::ip::udp;
+
+  class UdpTransport : public Transport {
+  public:
+
+    UdpTransport(
+        boost::optional<std::string> device_path=boost::none,
+        boost::optional<std::shared_ptr<Protocol>> proto=boost::none);
+
+    static const char * PATH_PREFIX;
+    static const char * DEFAULT_HOST;
+    static const int DEFAULT_PORT;
+
+    bool ping();
+    std::string get_path() override;
+    bool enumerate(t_transport_vect & res) override;
+
+    bool open() override;
+    bool close() override;
+    bool write_chunk(const std::string & buff) override;
+    bool read_chunk(std::string & buff) override;
+
+    bool write(const google::protobuf::Message &req) override;
+    bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+
+  private:
+    ssize_t receive(std::string & buff);
+    void check_deadline();
+    static void handle_receive(const boost::system::error_code& ec, std::size_t length,
+                               boost::system::error_code* out_ec, std::size_t* out_length);
+
+    std::shared_ptr<Protocol> m_proto;
+    std::string m_device_host;
+    int m_device_port;
+
+    std::unique_ptr<udp::socket> m_socket;
+    boost::asio::io_service m_io_service;
+    boost::asio::deadline_timer m_deadline;
+    udp::endpoint m_endpoint;
   };
 
 }}
