@@ -440,9 +440,9 @@ namespace trezor{
     return len;
   }
 
-  ssize_t UdpTransport::receive(void * buff, size_t size){
+  ssize_t UdpTransport::receive(void * buff, size_t size, boost::system::error_code * error_code, bool no_throw){
     boost::system::error_code ec;
-    boost::posix_time::seconds timeout(100);
+    boost::posix_time::seconds timeout(10);
     boost::asio::mutable_buffer buffer = boost::asio::buffer(buff, size);
 
     require_socket();
@@ -468,6 +468,25 @@ namespace trezor{
       m_io_service.run_one();
     }
     while (ec == boost::asio::error::would_block);
+
+    if (error_code){
+      *error_code = ec;
+    }
+
+    if (no_throw){
+      return length;
+    }
+
+    // Operation result
+    if (ec == boost::asio::error::operation_aborted){
+      throw exc::TimeoutException();
+
+    } else if (ec) {
+      LOG_PRINT_L4(std::string("Reading from UDP socket failed: ") << ec.message());
+      throw exc::CommunicationException();
+
+    }
+
     return length;
   }
 

@@ -255,7 +255,7 @@ namespace trezor {
 
   private:
     void require_socket();
-    ssize_t receive(void * buff, size_t size);
+    ssize_t receive(void * buff, size_t size, boost::system::error_code * error_code=nullptr, bool no_throw=false);
     void check_deadline();
     static void handle_receive(const boost::system::error_code& ec, std::size_t length,
                                boost::system::error_code* out_ec, std::size_t* out_length);
