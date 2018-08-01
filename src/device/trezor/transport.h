@@ -95,6 +95,7 @@ namespace trezor {
   public:
     Transport() = default;
 
+    virtual bool ping() { return false; };
     virtual std::string get_path() const { return ""; };
     virtual bool enumerate(t_transport_vect & res){ return false; };
     virtual bool open(){return false;};
@@ -103,7 +104,7 @@ namespace trezor {
     virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
 
     virtual bool write_chunk(const void * buff, size_t size) { return false; };
-    virtual size_t read_chunk(void * buff, size_t size) { return false; };
+    virtual size_t read_chunk(void * buff, size_t size) { return 0; };
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
   };
 
@@ -158,7 +159,7 @@ namespace trezor {
     static const char * DEFAULT_HOST;
     static const int DEFAULT_PORT;
 
-    bool ping();
+    bool ping() override;
     std::string get_path() const override;
     bool enumerate(t_transport_vect & res) override;
 
