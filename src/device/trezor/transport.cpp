@@ -2,7 +2,7 @@
 // Created by Dusan Klinec on 01/08/2018.
 //
 
-#include "bridge.h"
+#include "transport.h"
 #include <boost/endian/conversion.hpp>
 
 using namespace std;
@@ -31,6 +31,10 @@ namespace trezor{
     out = json::parse(in);
     return true;
   }
+
+  //
+  // Bridge transport
+  //
 
   bool BridgeTransport::enumerate(t_transport_vect & res) {
     json bridge_res;

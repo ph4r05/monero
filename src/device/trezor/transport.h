@@ -2,8 +2,9 @@
 // Created by Dusan Klinec on 01/08/2018.
 //
 
-#ifndef MONERO_BRIDGE_H
-#define MONERO_BRIDGE_H
+#ifndef MONERO_TRANSPORT_H
+#define MONERO_TRANSPORT_H
+
 
 #include <boost/utility/string_ref.hpp>
 #include <net/http_base.h>
@@ -82,9 +83,9 @@ namespace hw {
       BridgeTransport(
           const std::string & device_path="",
           const std::string & bridge_host=DEFAULT_BRIDGE):
-              m_device_path(device_path),
-              m_bridge_host(bridge_host),
-              m_response(boost::none)
+          m_device_path(device_path),
+          m_bridge_host(bridge_host),
+          m_response(boost::none)
       {
         m_http_client.set_server(m_bridge_host, boost::none, false);
       }
@@ -107,4 +108,4 @@ namespace hw {
 
   }}
 
-#endif //MONERO_BRIDGE_H
+#endif //MONERO_TRANSPORT_H
