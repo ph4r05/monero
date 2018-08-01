@@ -42,11 +42,13 @@ set(TREZOR_PROTOB_CPP
 
 set(trezor_headers
         messages_map.h
+        bridge.h
         ${TREZOR_PROTOB_H}
 )
 
 set(trezor_sources
         messages_map.cpp
+        bridge.cpp
         ${TREZOR_PROTOB_CPP}
 )
 
