@@ -76,7 +76,7 @@ namespace trezor{
 
     serialize_message_header(buff, msg_wire_num, msg_size);
     if (!req.SerializeToArray(buff + 6, msg_size)){
-      throw std::invalid_argument("Message serialization error");
+      throw exc::CommunicationException("Message serialization error");
     }
 
     return true;
@@ -152,7 +152,7 @@ namespace trezor{
     while(nread < len){
       size_t cur = transport.read_chunk(chunk, 64);
       if (chunk[0] != '?'){
-        throw std::runtime_error("Chunk invalid");
+        throw exc::CommunicationException("Chunk malformed");
       }
 
       data_acc.append(chunk + 1, cur - 1);
@@ -161,6 +161,10 @@ namespace trezor{
 
     if (msg_type){
       *msg_type = static_cast<messages::MessageType>(tag);
+    }
+
+    if (nread != len){
+      throw exc::CommunicationException("Response incomplete");
     }
 
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(tag));
@@ -351,7 +355,7 @@ namespace trezor{
 
   void UdpTransport::require_socket(){
     if (!m_socket){
-      throw std::invalid_argument("Socket not connected");
+      throw exc::NotConnectedException("Socket not connected");
     }
   }
 
@@ -419,7 +423,7 @@ namespace trezor{
     require_socket();
 
     if (size != 64){
-      throw std::invalid_argument("Invalid chunk size");
+      throw exc::CommunicationException("Invalid chunk size");
     }
 
     auto written = m_socket->send_to(boost::asio::buffer(buff, size), m_endpoint);
@@ -432,12 +436,32 @@ namespace trezor{
       throw std::invalid_argument("Buffer too small");
     }
 
-    ssize_t len = receive(buff, size);
-    if (len != 64){
-      throw std::invalid_argument("Invalid chunk size");
+    ssize_t len;
+    while(true) {
+      try {
+        boost::system::error_code ec;
+        len = receive(buff, size, &ec, true);
+        if (ec == boost::asio::error::operation_aborted) {
+          continue;
+        } else if (ec) {
+          throw exc::CommunicationException(std::string("Comm error: ") + ec.message());
+        }
+
+        if (len != 64) {
+          throw exc::CommunicationException("Invalid chunk size");
+        }
+
+        break;
+
+      } catch(exc::CommunicationException e){
+        throw e;
+      } catch(std::exception e){
+        LOG_PRINT_L2(std::string("Error reading chunk, reason: ") << e.what());
+        throw exc::CommunicationException(std::string("Chunk read error: ") + std::string(e.what()));
+      }
     }
 
-    return len;
+    return static_cast<size_t>(len);
   }
 
   ssize_t UdpTransport::receive(void * buff, size_t size, boost::system::error_code * error_code, bool no_throw){
