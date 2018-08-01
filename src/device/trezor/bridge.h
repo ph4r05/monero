@@ -9,6 +9,7 @@
 #include <net/http_base.h>
 #include "net/http_client.h"
 #include "json.hpp"
+#include "messages_map.h"
 
 
 namespace hw {
@@ -19,13 +20,14 @@ namespace hw {
 
     const std::string DEFAULT_BRIDGE = "127.0.0.1:21325";
 
+    // Base HTTP comm serialization.
     bool t_serialize(const std::string & in, std::string & out);
     bool t_serialize(const json & in, std::string & out);
 
     bool t_deserialize(const std::string & in, std::string & out);
     bool t_deserialize(const std::string & in, json & out);
 
-    // Flexible json
+    // Flexible json serialization. HTTP client tailored for bridge API
     template<class t_req, class t_res, class t_transport>
     bool invoke_bridge_http(const boost::string_ref uri, const t_req & out_struct, t_res & result_struct, t_transport& transport, const boost::string_ref method = "POST", std::chrono::milliseconds timeout = std::chrono::seconds(15))
     {
@@ -59,6 +61,7 @@ namespace hw {
       return true;
     }
 
+    // Base transport
     class Transport;
     typedef std::vector<std::shared_ptr<Transport>> t_transport_vect;
 
@@ -68,29 +71,38 @@ namespace hw {
 
       virtual bool open(){return false;};
       virtual bool close(){return false;};
+      virtual bool write(const google::protobuf::Message & req)= 0;
+      virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
+
     };
 
+    // Bridge transport
     class BridgeTransport : public Transport {
     public:
       BridgeTransport(
           const std::string & device_path="",
           const std::string & bridge_host=DEFAULT_BRIDGE):
               m_device_path(device_path),
-              m_bridge_host(bridge_host)
+              m_bridge_host(bridge_host),
+              m_response(boost::none)
       {
         m_http_client.set_server(m_bridge_host, boost::none, false);
       }
 
       bool enumerate(t_transport_vect & res);
 
-      bool open();
-      bool close();
+      bool open() override;
+      bool close() override;
+
+      bool write(const google::protobuf::Message &req) override;
+      bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
     private:
       epee::net_utils::http::http_simple_client m_http_client;
       std::string m_bridge_host;
       std::string m_device_path;
       std::string m_session;
+      boost::optional<std::string> m_response;
     };
 
   }}

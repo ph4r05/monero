@@ -3,6 +3,7 @@
 //
 
 #include "bridge.h"
+#include <boost/endian/conversion.hpp>
 
 using namespace std;
 using json = nlohmann::json;
@@ -78,6 +79,71 @@ namespace trezor{
     }
 
     m_session.clear();
+    return true;
+  }
+
+  bool BridgeTransport::write(const google::protobuf::Message &req) {
+    m_response = boost::none;
+
+    auto req_len = req.ByteSize();
+    auto msg_wire_num = MessageMapper::get_message_wire_number(req);
+    const auto buffer_size = 2 + 4 + req_len;
+
+    std::unique_ptr<uint8_t[]> req_buff(new uint8_t[buffer_size]);
+    uint8_t * req_buff_raw = req_buff.get();
+
+    uint16_t wire_tag = boost::endian::native_to_big(static_cast<uint16_t>(msg_wire_num));
+    uint32_t wire_len = boost::endian::native_to_big(static_cast<uint32_t>(req_len));
+    memcpy(req_buff_raw, (void*)&wire_tag, 2);
+    memcpy(req_buff_raw + 2, (void*)&wire_len, 4);
+    req.SerializeToArray(req_buff_raw + 6, req_len);
+
+    std::string uri = "/call/" + m_session;
+    std::string req_hex = epee::string_tools::buff_to_hex_nodelimer(std::string(reinterpret_cast<char*>(req_buff_raw),
+                                                                                (unsigned long) buffer_size));
+    std::string res_hex;
+
+    std::cerr << "REQ: " << req_hex << endl;
+    bool req_status = invoke_bridge_http(uri, req_hex, res_hex, m_http_client);
+    if (!req_status){
+      return false;
+    }
+
+    std::cerr << "RES: " << res_hex << endl;
+    m_response = res_hex;
+    return true;
+  }
+
+  bool BridgeTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
+    if (!m_response){
+      return false;
+    }
+
+    std::string bin_data;
+    if (!epee::string_tools::parse_hexstr_to_binbuff(m_response.get(), bin_data)){
+      return false;
+    }
+
+    uint16_t wire_tag;
+    uint32_t wire_len;
+    memcpy(&wire_tag, bin_data.c_str(), 2);
+    memcpy(&wire_len, bin_data.c_str() + 2, 4);
+
+    auto msg_tag = boost::endian::big_to_native(wire_tag);
+    auto msg_len = boost::endian::big_to_native(wire_len);
+    if (bin_data.size() != msg_len + 6){
+      return false;
+    }
+
+    if (msg_type){
+      *msg_type = static_cast<messages::MessageType>(msg_tag);
+    }
+
+    std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(msg_tag));
+    if (!msg_wrap->ParseFromArray(bin_data.c_str() + 6, msg_len)){
+      return false;
+    }
+    msg = msg_wrap;
     return true;
   }
 
