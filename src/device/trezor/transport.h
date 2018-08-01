@@ -62,8 +62,7 @@ namespace trezor {
       return false;
     }
 
-    t_deserialize(pri->m_body, result_struct);
-    return true;
+    return t_deserialize(pri->m_body, result_struct);
   }
 
   // Forward decl

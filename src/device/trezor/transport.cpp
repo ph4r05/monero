@@ -71,12 +71,12 @@ namespace trezor{
     auto msg_wire_num = MessageMapper::get_message_wire_number(req);
     const auto req_buffer_size = serialize_message_buffer_size(msg_size);
     if (req_buffer_size > buff_size){
-      return false;
+      throw std::invalid_argument("Buffer too small");
     }
 
     serialize_message_header(buff, msg_wire_num, msg_size);
     if (!req.SerializeToArray(buff + 6, msg_size)){
-      return false;
+      throw std::invalid_argument("Message serialization error");
     }
 
     return true;
@@ -98,6 +98,7 @@ namespace trezor{
     req_buff_raw[1] = '#';
 
     if (!serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2)){
+      LOG_PRINT_L1("Message could not be serialized");
       return false;
     }
 
@@ -118,6 +119,7 @@ namespace trezor{
       }
 
       if (!transport.write_chunk(chunk_buff_raw, REPLEN)){
+        LOG_PRINT_L1("Chunk write failed");
         return false;
       }
 
@@ -132,10 +134,12 @@ namespace trezor{
     // Initial chunk read
     size_t nread = transport.read_chunk(chunk, 64);
     if (nread != 64){
+      LOG_PRINT_L1("Read chunk has invalid size");
       return false;
     }
 
     if (strncmp(chunk, "?##", 3) != 0 || nread < 3 + PROTO_HEADER_SIZE){
+      LOG_PRINT_L1("Malformed chunk");
       return false;
     }
 
@@ -161,8 +165,10 @@ namespace trezor{
 
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(tag));
     if (!msg_wrap->ParseFromArray(data_acc.c_str(), len)){
+      LOG_PRINT_L1("Message could not be parsed");
       return false;
     }
+
     msg = msg_wrap;
     return true;
   }
@@ -188,6 +194,7 @@ namespace trezor{
 
     bool req_status = invoke_bridge_http("/enumerate", req, bridge_res, m_http_client);
     if (!req_status){
+      LOG_PRINT_L1("Bridge enumeration failed");
       return false;
     }
 
@@ -202,6 +209,7 @@ namespace trezor{
 
   bool BridgeTransport::open() {
     if (!m_device_path){
+      LOG_PRINT_L1("Coud not open, empty device path");
       return false;
     }
 
@@ -210,6 +218,7 @@ namespace trezor{
     json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
+      LOG_PRINT_L1("Failed to acquire device");
       return false;
     }
 
@@ -227,6 +236,7 @@ namespace trezor{
     json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
+      LOG_PRINT_L1("Failed to release the device");
       return false;
     }
 
@@ -244,6 +254,7 @@ namespace trezor{
     uint8_t * req_buff_raw = req_buff.get();
 
     if (!serialize_message(req, msg_size, req_buff_raw, buff_size)){
+      LOG_PRINT_L1("Message could not be serialized");
       return false;
     }
 
@@ -253,6 +264,7 @@ namespace trezor{
 
     bool req_status = invoke_bridge_http(uri, req_hex, res_hex, m_http_client);
     if (!req_status){
+      LOG_PRINT_L1("Call method failed");
       return false;
     }
 
@@ -262,11 +274,13 @@ namespace trezor{
 
   bool BridgeTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
     if (!m_response){
+      LOG_PRINT_L1("Could not read, no response stored");
       return false;
     }
 
     std::string bin_data;
     if (!epee::string_tools::parse_hexstr_to_binbuff(m_response.get(), bin_data)){
+      LOG_PRINT_L1("Response is not well hexcoded");
       return false;
     }
 
@@ -274,6 +288,7 @@ namespace trezor{
     uint32_t msg_len;
     deserialize_message_header(bin_data.c_str(), msg_tag, msg_len);
     if (bin_data.size() != msg_len + 6){
+      LOG_PRINT_L1("Response size invalid");
       return false;
     }
 
@@ -283,6 +298,7 @@ namespace trezor{
 
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(msg_tag));
     if (!msg_wrap->ParseFromArray(bin_data.c_str() + 6, msg_len)){
+      LOG_PRINT_L1("Message could not be parsed");
       return false;
     }
     msg = msg_wrap;
