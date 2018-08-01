@@ -26,6 +26,8 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+add_subdirectory(trezor)
+
 set(device_sources
   device.cpp
   device_default.cpp
@@ -35,6 +37,14 @@ set(device_sources
 if(PCSC_FOUND)
   set(device_sources ${device_sources} device_ledger.cpp)
 endif()
+
+if(WITH_DEVICE_TREZOR)
+  add_definitions(-DWITH_DEVICE_TREZOR=1)
+  set(device_sources ${device_sources} device_trezor.cpp)
+else()
+  add_definitions(-DWITH_DEVICE_TREZOR=0)
+endif()
+
 
 set(device_headers
   device.hpp
@@ -46,6 +56,10 @@ if(PCSC_FOUND)
   set(device_headers ${device_headers} device_ledger.hpp)
 endif()
 
+if(WITH_DEVICE_TREZOR)
+  set(device_sources ${device_sources} device_trezor.h)
+endif()
+
 set(device_private_headers)
 
 
@@ -54,8 +68,6 @@ if(PER_BLOCK_CHECKPOINT)
 else()
   set(Blocks "")
 endif()
-
-add_subdirectory(trezor)
 
 monero_private_headers(device
   ${device_private_headers}
