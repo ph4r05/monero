@@ -67,6 +67,77 @@ namespace trezor {
 
   // Forward decl
   class Transport;
+  class Protocol;
+
+  // Exceptions
+  namespace exc {
+  class TrezorException : public std::exception {
+    protected:
+      boost::optional<std::string> reason;
+    public:
+      TrezorException(): reason(boost::none){}
+      TrezorException(std::string & what): reason(what){}
+
+      virtual const char* what() const throw() {
+        return reason ? reason.get().c_str() : "General Trezor exception";
+      }
+  };
+
+  class CommunicationException: public TrezorException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor communication error";
+    }
+  };
+
+  class NotConnectedException : CommunicationException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor not connected";
+    }
+  };
+
+  class SessionException: public CommunicationException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor session expired";
+    }
+  };
+
+  class TimeoutException: public CommunicationException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor communication timeout";
+    }
+  };
+
+  class ProtocolException: public CommunicationException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor protocol error";
+    }
+  };
+
+  class CancelledException: public ProtocolException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor returned: cancelled operation";
+    }
+  };
+
+  class FailureException: public ProtocolException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor returned failure";
+    }
+  };
+
+  class UnexpectedResponseException: public ProtocolException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor returned unexpected response";
+    }
+  };
+
+  class FirmwareErrorException: public ProtocolException {
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor returned firmware error";
+    }
+  };
+
+  }
 
   // Communication protocol
   class Protocol {
