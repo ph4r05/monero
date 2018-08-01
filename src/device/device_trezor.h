@@ -13,6 +13,10 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 
+// TODO: propagate to all targets
+#ifndef WITH_DEVICE_TREZOR
+#define WITH_DEVICE_TREZOR 1
+#endif
 
 #if WITH_DEVICE_TREZOR
 #include "trezor/transport.h"
@@ -30,14 +34,23 @@ namespace trezor {
       // Locker for concurrent access
       mutable boost::recursive_mutex   device_locker;
       mutable boost::mutex   command_locker;
+      std::shared_ptr<Transport> m_transport;
 
       // hw running mode
       device_mode mode;
+      std::string  full_name;
 
       // To speed up blockchain parsing the view key maybe handle here.
       crypto::secret_key viewkey;
 
       bool has_view_key;
+
+      //
+      // Internal methods
+      //
+
+    // High level protocol ping
+    //bool ping();
 
     public:
       device_trezor();
@@ -70,6 +83,8 @@ namespace trezor {
       void unlock(void) override;
       bool try_lock(void) override;
 
+      // High level protocol ping
+      bool ping();
 
     };
 

@@ -4,12 +4,22 @@
 
 #include "device_trezor.h"
 
+#if WITH_DEVICE_TREZOR
+#include "trezor/messages/messages.pb.h"
+#include "trezor/messages/messages-common.pb.h"
+#include "trezor/messages/messages-management.pb.h"
+#include "trezor/messages/messages-monero.pb.h"
+#endif
+
 namespace hw {
 namespace trezor {
 
 #if WITH_DEVICE_TREZOR
 
-    static device_trezor *trezor_device = NULL;
+#undef MONERO_DEFAULT_LOG_CATEGORY
+#define MONERO_DEFAULT_LOG_CATEGORY "device.trezor"
+
+    static device_trezor *trezor_device = nullptr;
     void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
       if (!trezor_device) {
         trezor_device = new device_trezor();
@@ -26,36 +36,75 @@ namespace trezor {
 
     }
 
+    /* ======================================================================= */
+    /*                              SETUP/TEARDOWN                             */
+    /* ======================================================================= */
+
     bool device_trezor::reset(void) {
       return false;
     }
 
-    bool device_trezor::set_name(const std::string &name) {
-      return false;
+    bool device_trezor::set_name(const std::string & name) {
+      this->name = name;
+      return true;
     }
 
     const std::string device_trezor::get_name() const {
-      return std::string();
+      if (this->full_name.empty()) {
+        return std::string("<disconnected:").append(this->name).append(">");
+      }
+      return this->full_name;
     }
 
     bool device_trezor::init(void) {
-      return false;
+      release();
+      return true;
     }
 
     bool device_trezor::release() {
-      return false;
+      disconnect();
+      return true;
     }
 
     bool device_trezor::connect(void) {
-      return false;
+      disconnect();
+
+      // Enumerate all available devices
+      hw::trezor::t_transport_vect trans;
+      if (!enumerate(trans)){
+        LOG_PRINT_L1("Enumeration failed");
+        return false;
+      }
+
+      LOG_PRINT_L4("Enumeration yielded " << std::to_string(trans.size()) << " devices");
+      for(auto & cur : trans){
+        LOG_PRINT_L4(std::string("  device: ") << *(cur.get()));
+        std::string cur_path = cur->get_path();
+        if (boost::starts_with(cur_path, this->name)){
+          MDEBUG("Device Match: " << cur_path);
+          m_transport = cur;
+          break;
+        }
+      }
+
+      if (!m_transport){
+        return false;
+      }
+
+      bool r = m_transport->open();
+      return r;
     }
 
     bool device_trezor::disconnect() {
-      return false;
+      if (m_transport){
+        m_transport->close();
+      }
+      return true;
     }
 
     bool device_trezor::set_mode(device::device_mode mode) {
-      return false;
+      this->mode = mode;
+      return true;
     }
 
     /* ======================================================================= */
@@ -97,6 +146,42 @@ namespace trezor {
       }
       device_locker.unlock();
       MDEBUG( "Device "<<this->name << " UNLOCKed");
+    }
+
+    /* ======================================================================= */
+    /*  Helpers                                                                */
+    /* ======================================================================= */
+
+    bool device_trezor::ping() {
+      AUTO_LOCK_CMD();
+      if (!m_transport){
+        LOG_PRINT_L2("Ping failed, device not connected");
+        return false;
+      }
+
+      messages::management::Ping pingMsg;
+      pingMsg.set_message("PING");
+
+      try {
+        m_transport->write(pingMsg);
+
+        std::shared_ptr<google::protobuf::Message> msg_resp;
+        hw::trezor::messages::MessageType msg_resp_type;
+        m_transport->read(msg_resp, &msg_resp_type);
+
+        if (msg_resp_type == messages::MessageType_Success) {
+          auto success = message_ptr_retype<messages::common::Success>(msg_resp);
+          MDEBUG("Ping response " << success->message());
+          return true;
+        }
+
+      } catch(std::exception const& e) {
+        LOG_PRINT_L1(std::string("Ping failed, exception thrown ") << e.what());
+      } catch(...){
+        LOG_PRINT_L1(std::string("Ping failed, general exception thrown") << boost::current_exception_diagnostic_information());
+      }
+
+      return false;
     }
 
 #else //WITH_DEVICE_TREZOR
