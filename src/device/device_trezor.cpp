@@ -92,6 +92,7 @@ namespace trezor {
       }
 
       bool r = m_transport->open();
+      // TODO: load watch only credentials / address
       return r;
     }
 
@@ -160,11 +161,10 @@ namespace trezor {
       }
 
       messages::management::Ping pingMsg;
-      std::shared_ptr<messages::common::Success> success;
       pingMsg.set_message("PING");
 
       try {
-        exchange_message<messages::common::Success>(*m_transport, pingMsg, success);  // messages::MessageType_Success
+        auto success = exchange_message<messages::common::Success>(*m_transport, pingMsg);  // messages::MessageType_Success
         MDEBUG("Ping response " << success->message());
         return true;
 

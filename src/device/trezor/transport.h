@@ -258,8 +258,9 @@ namespace trezor {
    * Exception contains message type and the message itself.
    */
   template<class t_message>
-  void exchange_message(Transport & transport, const google::protobuf::Message & req, std::shared_ptr<t_message> resp,
-                        boost::optional<messages::MessageType> resp_type = boost::none)
+  std::shared_ptr<t_message>
+      exchange_message(Transport & transport, const google::protobuf::Message & req,
+                       boost::optional<messages::MessageType> resp_type = boost::none)
   {
     // Require strictly protocol buffers response in the template.
     BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
@@ -276,7 +277,7 @@ namespace trezor {
     messages::MessageType required_type = resp_type ? resp_type.get() : MessageMapper::get_message_wire_number<t_message>();
 
     if (msg_resp_type == required_type) {
-      resp = message_ptr_retype<t_message>(msg_resp);
+      return message_ptr_retype<t_message>(msg_resp);
     } else {
       throw exc::UnexpectedMessageException(msg_resp_type, msg_resp);
     }
