@@ -241,12 +241,11 @@ namespace trezor {
 
     public:
       using ProtocolException::ProtocolException;
+      UnexpectedMessageException(): ProtocolException("Trezor returned unexpected message") {};
       UnexpectedMessageException(hw::trezor::messages::MessageType recvType,
-                                 const std::shared_ptr<google::protobuf::Message> & recvMsg) : recvType(recvType),
-                                                                                               recvMsg(recvMsg) {}
-
-      virtual const char* what() const throw() {
-        return reason ? reason.get().c_str() : "Trezor returned unexpected message";
+                                 const std::shared_ptr<google::protobuf::Message> & recvMsg)
+          : recvType(recvType), recvMsg(recvMsg) {
+        reason = std::string("Trezor returned unexpected message: ") + std::to_string(recvType);
       }
     };
   }
