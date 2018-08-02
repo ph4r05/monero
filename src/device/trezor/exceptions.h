@@ -46,6 +46,13 @@ namespace exc {
     }
   };
 
+  class DeviceAcquireException : CommunicationException {
+    using CommunicationException::CommunicationException;
+    virtual const char* what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor could not be acquired";
+    }
+  };
+
   class SessionException: public CommunicationException {
     using CommunicationException::CommunicationException;
     virtual const char* what() const throw() {
@@ -67,34 +74,82 @@ namespace exc {
     }
   };
 
-  class CancelledException: public ProtocolException {
-    using ProtocolException::ProtocolException;
-    virtual const char* what() const throw() {
-      return reason ? reason.get().c_str() : "Trezor returned: cancelled operation";
-    }
-  };
+  // Communication protocol namespace
+  // Separated to distinguish between client and trezor side exceptions.
+namespace proto {
 
-  class FailureException: public ProtocolException {
+  class FailureException : public ProtocolException {
+  private:
+    boost::optional<uint32_t> code;
+    boost::optional<std::string> message;
+  public:
     using ProtocolException::ProtocolException;
-    virtual const char* what() const throw() {
+
+    FailureException(boost::optional<uint32_t> code, boost::optional<std::string> message) : code(code),
+                                                                                             message(message) {};
+
+    virtual const char *what() const throw() {
       return reason ? reason.get().c_str() : "Trezor returned failure";
     }
   };
 
-  class UnexpectedResponseException: public ProtocolException {
-    using ProtocolException::ProtocolException;
-    virtual const char* what() const throw() {
-      return reason ? reason.get().c_str() : "Trezor returned unexpected response";
+  class UnexpectedMessageException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor claims unexpected response";
     }
   };
 
-  class FirmwareErrorException: public ProtocolException {
-    using ProtocolException::ProtocolException;
-    virtual const char* what() const throw() {
+  class CancelledException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor returned: cancelled operation";
+    }
+  };
+
+  class PinExpectedException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor claims PIN is expected";
+    }
+  };
+
+  class InvalidPinException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor claims PIN is invalid";
+    }
+  };
+
+  class NotEnoughFundsException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor claims not enough funds";
+    }
+  };
+
+  class NotInitializedException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
+      return reason ? reason.get().c_str() : "Trezor claims not initialized";
+    }
+  };
+
+  class FirmwareErrorException : public FailureException {
+    using FailureException::FailureException;
+
+    virtual const char *what() const throw() {
       return reason ? reason.get().c_str() : "Trezor returned firmware error";
     }
   };
 
+}
 }
 }
 }
