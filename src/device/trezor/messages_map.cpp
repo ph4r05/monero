@@ -65,10 +65,15 @@ namespace trezor
 //    // CODEGEN way, fast
 //    switch(wire_number){
 //      case 501:
-//        return new hw::trezor::messages::monero::MoneroTransactionSignRequest();
+//        return new messages::monero::MoneroTransactionSignRequest();
 //      default:
 //        throw std::runtime_error("not implemented");
 //    }
+//
+//    // CODEGEN message -> number: specification
+//    //    messages::MessageType get_message_wire_number(const messages::monero::MoneroTransactionSignRequest * msg) { return 501; }
+//    //    messages::MessageType get_message_wire_number(const messages::management::ping * msg)
+//
   }
 
   messages::MessageType MessageMapper::get_message_wire_number(const google::protobuf::Message * msg){
