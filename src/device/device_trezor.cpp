@@ -160,20 +160,13 @@ namespace trezor {
       }
 
       messages::management::Ping pingMsg;
+      std::shared_ptr<messages::common::Success> success;
       pingMsg.set_message("PING");
 
       try {
-        m_transport->write(pingMsg);
-
-        std::shared_ptr<google::protobuf::Message> msg_resp;
-        hw::trezor::messages::MessageType msg_resp_type;
-        m_transport->read(msg_resp, &msg_resp_type);
-
-        if (msg_resp_type == messages::MessageType_Success) {
-          auto success = message_ptr_retype<messages::common::Success>(msg_resp);
-          MDEBUG("Ping response " << success->message());
-          return true;
-        }
+        exchange_message<messages::common::Success>(*m_transport, pingMsg, success);  // messages::MessageType_Success
+        MDEBUG("Ping response " << success->message());
+        return true;
 
       } catch(std::exception const& e) {
         LOG_PRINT_L1(std::string("Ping failed, exception thrown ") << e.what());
