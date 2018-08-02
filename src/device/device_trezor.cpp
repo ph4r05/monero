@@ -28,6 +28,8 @@ namespace trezor {
       registry.insert(std::make_pair("Trezor", std::unique_ptr<device>(trezor_device)));
     }
 
+    const uint32_t device_trezor::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000, 0, 0};
+
     device_trezor::device_trezor() {
 
     }

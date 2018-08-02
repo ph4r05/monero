@@ -63,6 +63,9 @@ namespace trezor {
 
       bool reset(void);
 
+      // Default derivation path for Monero
+      static const uint32_t DEFAULT_BIP44_PATH[5];
+
       /* ======================================================================= */
       /*                              SETUP/TEARDOWN                             */
       /* ======================================================================= */
