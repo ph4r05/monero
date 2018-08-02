@@ -60,6 +60,10 @@ namespace trezor {
 
     bool device_trezor::init(void) {
       release();
+      if (!m_callback){
+        m_callback = std::make_shared<trezor_callback>(*this);
+      }
+
       return true;
     }
 
@@ -155,6 +159,12 @@ namespace trezor {
     /*  Helpers                                                                */
     /* ======================================================================= */
 
+    void device_trezor::require_connected(){
+      if (!m_transport){
+        throw exc::NotConnectedException();
+      }
+    }
+
     bool device_trezor::ping() {
       AUTO_LOCK_CMD();
       if (!m_transport){
@@ -162,11 +172,11 @@ namespace trezor {
         return false;
       }
 
-      messages::management::Ping pingMsg;
-      pingMsg.set_message("PING");
+      auto pingMsg = std::make_shared<messages::management::Ping>();
+      pingMsg->set_message("PING");
 
       try {
-        auto success = exchange_message<messages::common::Success>(*m_transport, pingMsg);  // messages::MessageType_Success
+        auto success = client_exchange<messages::common::Success>(*this, pingMsg);  // messages::MessageType_Success
         MDEBUG("Ping response " << success->message());
         return true;
 
@@ -178,6 +188,35 @@ namespace trezor {
 
       return false;
     }
+
+    std::shared_ptr<messages::monero::MoneroWatchKey> device_trezor::get_watch_key(
+        boost::optional<std::vector<uint32_t>> path,
+        boost::optional<cryptonote::network_type> network_type){
+      AUTO_LOCK_CMD();
+      require_connected();
+
+      auto req = std::make_shared<messages::monero::MoneroGetWatchKey>();
+
+      if (path){
+        for(auto x : path.get()){
+          req->add_address_n(x);
+        }
+      } else {
+        for(size_t i = 0; i < sizeof(DEFAULT_BIP44_PATH)/sizeof(DEFAULT_BIP44_PATH[0]); ++i){
+          req->add_address_n(DEFAULT_BIP44_PATH[i]);
+        }
+      }
+
+      if (network_type){
+        req->set_network_type(static_cast<uint32_t>(network_type.get()));
+      }
+
+      auto response = client_exchange<messages::monero::MoneroWatchKey>(*this, req);
+      MDEBUG("Get watch key response received");
+      return response;
+    }
+
+
 
 #else //WITH_DEVICE_TREZOR
 
