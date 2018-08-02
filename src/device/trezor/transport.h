@@ -11,6 +11,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/array.hpp>
 
+#include <typeinfo>
 #include <type_traits>
 #include <net/http_base.h>
 #include "net/http_client.h"
@@ -18,6 +19,10 @@
 #include "exceptions.h"
 #include "messages_map.h"
 
+#include "messages/messages.pb.h"
+#include "messages/messages-common.pb.h"
+#include "messages/messages-management.pb.h"
+#include "messages/messages-monero.pb.h"
 
 namespace hw {
 namespace trezor {
@@ -247,6 +252,12 @@ namespace trezor {
   }
 
   /**
+   * Throws corresponding failure exception.
+   * @param failure
+   */
+  [[ noreturn ]] void throw_failure_exception(const messages::common::Failure * failure);
+
+  /**
    * Simple wrapper for write-read message exchange with expected message response type.
    *
    * @tparam t_message
@@ -278,6 +289,8 @@ namespace trezor {
 
     if (msg_resp_type == required_type) {
       return message_ptr_retype<t_message>(msg_resp);
+    } else if (msg_resp_type == messages::MessageType_Failure){
+      throw_failure_exception(dynamic_cast<messages::common::Failure*>(msg_resp.get()));
     } else {
       throw exc::UnexpectedMessageException(msg_resp_type, msg_resp);
     }

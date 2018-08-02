@@ -8,6 +8,7 @@
 #include <boost/asio/ip/udp.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <iostream>
+#include <device/trezor/messages/messages-common.pb.h>
 
 using namespace std;
 using json = nlohmann::json;
@@ -580,6 +581,37 @@ namespace trezor{
     } else {
       throw std::invalid_argument("Unknown trezor device path: " + path);
 
+    }
+  }
+
+  void throw_failure_exception(const messages::common::Failure * failure) {
+    if (failure == nullptr){
+      throw std::invalid_argument("Failure message cannot be null");
+    }
+
+    boost::optional<std::string> message = failure->has_message() ? boost::make_optional(failure->message()) : boost::none;
+    boost::optional<uint32_t> code = failure->has_code() ? boost::make_optional(static_cast<uint32_t>(failure->code())) : boost::none;
+    if (!code){
+      throw exc::proto::FailureException(code, message);
+    }
+
+    auto ecode = failure->code();
+    if (ecode == messages::common::Failure_FailureType_Failure_UnexpectedMessage){
+      throw exc::proto::UnexpectedMessageException(code, message);
+    } else if (ecode == messages::common::Failure_FailureType_Failure_ActionCancelled){
+      throw exc::proto::CancelledException(code, message);
+    } else if (ecode == messages::common::Failure_FailureType_Failure_PinExpected){
+      throw exc::proto::PinExpectedException(code, message);
+    } else if (ecode == messages::common::Failure_FailureType_Failure_PinInvalid){
+      throw exc::proto::InvalidPinException(code, message);
+    } else if (ecode == messages::common::Failure_FailureType_Failure_NotEnoughFunds){
+      throw exc::proto::NotEnoughFundsException(code, message);
+    } else if (ecode == messages::common::Failure_FailureType_Failure_NotInitialized){
+      throw exc::proto::NotInitializedException(code, message);
+    } else if (ecode == messages::common::Failure_FailureType_Failure_FirmwareError){
+      throw exc::proto::FirmwareErrorException(code, message);
+    } else {
+      throw exc::proto::FailureException(code, message);
     }
   }
 
