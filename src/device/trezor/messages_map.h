@@ -6,6 +6,7 @@
 #define MONERO_MESSAGES_MAP_H
 
 #include <string>
+#include <type_traits>
 
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/generated_message_util.h>
@@ -32,15 +33,33 @@ namespace trezor {
     static messages::MessageType get_message_wire_number(const google::protobuf::Message * msg);
     static messages::MessageType get_message_wire_number(const google::protobuf::Message & msg);
     static messages::MessageType get_message_wire_number(const std::string & msg_name);
+
+    template<class t_message>
+    static messages::MessageType get_message_wire_number() {
+      BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
+      t_message m;
+      return get_message_wire_number(m.GetDescriptor()->name());
+    }
   };
 
   template<class t_message>
   std::shared_ptr<t_message> message_ptr_retype(std::shared_ptr<google::protobuf::Message> & in){
+    BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
     if (!in){
       return nullptr;
     }
 
     return std::dynamic_pointer_cast<t_message>(in);
+  }
+
+  template<class t_message>
+  std::shared_ptr<t_message> message_ptr_retype_static(std::shared_ptr<google::protobuf::Message> & in){
+    BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
+    if (!in){
+      return nullptr;
+    }
+
+    return std::static_pointer_cast<t_message>(in);
   }
 
 }}
