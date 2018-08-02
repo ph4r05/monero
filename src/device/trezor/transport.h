@@ -11,6 +11,7 @@
 #include <boost/asio/deadline_timer.hpp>
 #include <boost/array.hpp>
 
+#include <type_traits>
 #include <net/http_base.h>
 #include "net/http_client.h"
 #include "json.hpp"
@@ -196,9 +197,26 @@ namespace trezor {
   // General helpers
   //
 
+  /**
+   * Enumerates all transports
+   * @param res
+   * @return
+   */
   bool enumerate(t_transport_vect & res);
+
+  /**
+   * Transforms path to the transport
+   * @param path
+   * @return
+   */
   std::shared_ptr<Transport> transport(std::string path);
 
+  /**
+   * Transforms path to the particular transport
+   * @tparam t_transport
+   * @param path
+   * @return
+   */
   template<class t_transport>
   std::shared_ptr<t_transport> transport_typed(std::string path){
     auto t = transport(path);
@@ -207,6 +225,61 @@ namespace trezor {
     }
 
     return std::dynamic_pointer_cast<t_transport>(t);
+  }
+
+  // Exception carries unexpected message being received
+  namespace exc {
+    class UnexpectedMessageException: public ProtocolException {
+    protected:
+      hw::trezor::messages::MessageType recvType;
+      std::shared_ptr<google::protobuf::Message> recvMsg;
+
+    public:
+      using ProtocolException::ProtocolException;
+      UnexpectedMessageException(hw::trezor::messages::MessageType recvType,
+                                 const std::shared_ptr<google::protobuf::Message> & recvMsg) : recvType(recvType),
+                                                                                               recvMsg(recvMsg) {}
+
+      virtual const char* what() const throw() {
+        return reason ? reason.get().c_str() : "Trezor returned unexpected message";
+      }
+    };
+  }
+
+  /**
+   * Simple wrapper for write-read message exchange with expected message response type.
+   *
+   * @tparam t_message
+   * @param transport
+   * @param req
+   * @param resp
+   * @param resp_type
+   * @throws UnexpectedMessageException if the response message type is different than expected.
+   * Exception contains message type and the message itself.
+   */
+  template<class t_message>
+  void exchange_message(Transport & transport, const google::protobuf::Message & req, std::shared_ptr<t_message> resp,
+                        boost::optional<messages::MessageType> resp_type = boost::none)
+  {
+    // Require strictly protocol buffers response in the template.
+    BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
+
+    // Write the request
+    transport.write(req);
+
+    // Read the response
+    std::shared_ptr<google::protobuf::Message> msg_resp;
+    hw::trezor::messages::MessageType msg_resp_type;
+    transport.read(msg_resp, &msg_resp_type);
+
+    // Determine type of expected message response
+    messages::MessageType required_type = resp_type ? resp_type.get() : MessageMapper::get_message_wire_number<t_message>();
+
+    if (msg_resp_type == required_type) {
+      resp = message_ptr_retype<t_message>(msg_resp);
+    } else {
+      throw exc::UnexpectedMessageException(msg_resp_type, msg_resp);
+    }
   }
 
   std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t);

@@ -269,7 +269,7 @@ namespace trezor{
     bool req_status = invoke_bridge_http(uri, req_hex, res_hex, m_http_client);
     if (!req_status){
       LOG_PRINT_L1("Call method failed");
-      return false;
+      throw exc::CommunicationException("Call method failed");
     }
 
     m_response = res_hex;
