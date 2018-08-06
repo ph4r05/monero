@@ -32,6 +32,7 @@
 #ifdef HAVE_PCSC
 #include "device_ledger.hpp"
 #endif
+#include "device_trezor.h"
 #include "misc_log_ex.h"
 
 
@@ -49,6 +50,8 @@ namespace hw {
                 #ifdef HAVE_PCSC
                 hw::ledger::register_all(registry); 
                 #endif
+                hw::trezor::register_all(registry);
+
            };
         };
         
