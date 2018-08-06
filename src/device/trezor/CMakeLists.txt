@@ -43,6 +43,7 @@ set(TREZOR_PROTOB_CPP
 set(trezor_headers
         exceptions.h
         messages_map.h
+        protocol.h
         transport.h
         ${TREZOR_PROTOB_H}
 )
@@ -50,6 +51,7 @@ set(trezor_headers
 set(trezor_sources
         exceptions.cpp
         messages_map.cpp
+        protocol.cpp
         transport.cpp
         ${TREZOR_PROTOB_CPP}
 )
