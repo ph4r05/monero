@@ -7,9 +7,18 @@
 
 #include <stddef.h>
 
+#if defined(__cplusplus)
+#include <memory.h>
+#include "memwipe.h"
+#include "hash.h"
+
+namespace crypto {
+  extern "C" {
+#endif
+
 typedef struct poly1305_context {
-	size_t aligner;
-	unsigned char opaque[136];
+  size_t aligner;
+  unsigned char opaque[136];
 } poly1305_context;
 
 void poly1305_init(poly1305_context *ctx, const unsigned char key[32]);
@@ -20,5 +29,9 @@ void poly1305_auth(unsigned char mac[16], const unsigned char *m, size_t bytes, 
 int poly1305_verify(const unsigned char mac1[16], const unsigned char mac2[16]);
 int poly1305_power_on_self_test(void);
 
+#if defined(__cplusplus)
+}
+}
+#endif
 
 #endif //MONERO_POLY1305_H
