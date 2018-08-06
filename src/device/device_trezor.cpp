@@ -176,7 +176,7 @@ namespace trezor {
       pingMsg->set_message("PING");
 
       try {
-        auto success = client_exchange<messages::common::Success>(*this, pingMsg);  // messages::MessageType_Success
+        auto success = this->client_exchange<messages::common::Success>(pingMsg);  // messages::MessageType_Success
         MDEBUG("Ping response " << success->message());
         return true;
 
@@ -211,11 +211,14 @@ namespace trezor {
         req->set_network_type(static_cast<uint32_t>(network_type.get()));
       }
 
-      auto response = client_exchange<messages::monero::MoneroWatchKey>(*this, req);
+      auto response = this->client_exchange<messages::monero::MoneroWatchKey>(req);
       MDEBUG("Get watch key response received");
       return response;
     }
 
+    void device_trezor::ki_sync(){
+
+    }
 
 
 #else //WITH_DEVICE_TREZOR

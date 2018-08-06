@@ -10,6 +10,7 @@
 #include <string>
 #include "device.hpp"
 #include "device_default.hpp"
+#include <boost/scope_exit.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include "cryptonote_config.h"
@@ -92,6 +93,74 @@ namespace trezor {
 
       void require_connected();
 
+
+
+      /**
+       * Client communication wrapper, handles specific Trezor protocol.
+       *
+       * @tparam t_message
+       * @param transport
+       * @param req
+       * @param resp
+       * @param resp_type
+       * @throws UnexpectedMessageException if the response message type is different than expected.
+       * Exception contains message type and the message itself.
+       */
+      template<class t_message>
+      std::shared_ptr<t_message>
+      client_exchange(std::shared_ptr<const google::protobuf::Message> req,
+                      boost::optional<messages::MessageType> resp_type = boost::none,
+                      bool open_session = false,
+                      unsigned depth=0)
+      {
+        // Require strictly protocol buffers response in the template.
+        BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
+
+        // Scoped session closer
+        BOOST_SCOPE_EXIT_ALL(&, this) {
+          if (open_session && depth == 0){
+            this->getTransport()->close();
+          }
+        };
+
+        // Open session if required
+        if (open_session && depth == 0){
+          bool r = m_transport->open();
+          if (!r){
+            throw exc::SessionException("Could not open session");
+          }
+        }
+
+        // Write the request
+        this->getTransport()->write(*req);
+
+        // Read the response
+        std::shared_ptr<google::protobuf::Message> msg_resp;
+        hw::trezor::messages::MessageType msg_resp_type;
+
+        // We may have several roundtrips with the handler
+        this->getTransport()->read(msg_resp, &msg_resp_type);
+
+        // Determine type of expected message response
+        messages::MessageType required_type = resp_type ? resp_type.get()
+                                                        : MessageMapper::get_message_wire_number<t_message>();
+
+        if (msg_resp_type == messages::MessageType_Failure) {
+          throw_failure_exception(dynamic_cast<messages::common::Failure *>(msg_resp.get()));
+
+        } else if (msg_resp_type == required_type) {
+          return message_ptr_retype<t_message>(msg_resp);
+
+        } else {
+          auto resp = this->getCallback()->on_message(msg_resp.get(), msg_resp_type);
+          if (resp){
+            return this->client_exchange<t_message>(resp, boost::none, depth + 1);
+          } else {
+            throw exc::UnexpectedMessageException(msg_resp_type, msg_resp);
+          }
+        }
+      }
+
     // High level protocol ping
     //bool ping();
 
@@ -152,59 +221,9 @@ namespace trezor {
       std::shared_ptr<messages::monero::MoneroWatchKey> get_watch_key(
           boost::optional<std::vector<uint32_t>> path = boost::none,
           boost::optional<cryptonote::network_type> network_type = boost::none);
+
+      void ki_sync();
     };
-
-    /**
-     * Client communication wrapper, handles specific Trezor protocol.
-     *
-     * @tparam t_message
-     * @param transport
-     * @param req
-     * @param resp
-     * @param resp_type
-     * @throws UnexpectedMessageException if the response message type is different than expected.
-     * Exception contains message type and the message itself.
-     */
-    template<class t_message>
-    std::shared_ptr<t_message>
-    client_exchange(device_trezor & device,
-                    std::shared_ptr<const google::protobuf::Message> req,
-                    boost::optional<messages::MessageType> resp_type = boost::none,
-                    unsigned depth=0)
-    {
-      // Require strictly protocol buffers response in the template.
-      BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
-
-      // TODO: maybe with transport.session():
-      // Write the request
-      device.getTransport()->write(*req.get());
-
-      // Read the response
-      std::shared_ptr<google::protobuf::Message> msg_resp;
-      hw::trezor::messages::MessageType msg_resp_type;
-
-      // We may have several roundtrips with the handler
-      device.getTransport()->read(msg_resp, &msg_resp_type);
-
-      // Determine type of expected message response
-      messages::MessageType required_type = resp_type ? resp_type.get()
-                                                      : MessageMapper::get_message_wire_number<t_message>();
-
-      if (msg_resp_type == required_type) {
-        return message_ptr_retype<t_message>(msg_resp);
-
-      } else if (msg_resp_type == messages::MessageType_Failure) {
-        throw_failure_exception(dynamic_cast<messages::common::Failure *>(msg_resp.get()));
-
-      } else {
-        auto resp = device.getCallback()->on_message(msg_resp.get(), msg_resp_type);
-        if (resp){
-          return client_exchange<t_message>(device, resp, boost::none, depth + 1);
-        } else {
-          throw exc::UnexpectedMessageException(msg_resp_type, msg_resp);
-        }
-      }
-    }
 
 #endif
 
