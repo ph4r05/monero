@@ -27,6 +27,7 @@
 #include "trezor/messages/messages-common.pb.h"
 #include "trezor/messages/messages-management.pb.h"
 #include "trezor/messages/messages-monero.pb.h"
+#include "trezor/protocol.h"
 #endif
 
 namespace hw {
@@ -260,7 +261,8 @@ namespace trezor {
           boost::optional<cryptonote::network_type> network_type = boost::none);
 
       void ki_sync(::tools::wallet2 * wallet,
-                   const std::vector<tools::wallet2::transfer_details> & transfers);
+                   const std::vector<tools::wallet2::transfer_details> & transfers,
+                   protocol::exported_key_image & ski);
     };
 
 #endif

@@ -17,6 +17,8 @@ namespace protocol{
   using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
   using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
 
+  using exported_key_image = std::vector<std::pair<crypto::key_image, crypto::signature>>;
+
   std::string key_to_string(const ::crypto::ec_point & key);
   std::string key_to_string(const ::crypto::ec_scalar & key);
 

@@ -205,8 +205,12 @@ namespace trezor {
     }
 
     void device_trezor::ki_sync(tools::wallet2 * wallet,
-                                const std::vector<tools::wallet2::transfer_details> & transfers)
+                                const std::vector<tools::wallet2::transfer_details> & transfers,
+                                protocol::exported_key_image & ski)
     {
+      AUTO_LOCK_CMD();
+      require_connected();
+
       std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> req;
 
       std::vector<protocol::MoneroTransferDetails> mtds;
@@ -246,8 +250,19 @@ namespace trezor {
       env->set_allocated_final_msg(final_req.get());
       auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(env);
 
-      // TODO: decrypt
+      for(auto & sub : kis){
+        char buff[32*3];
+        protocol::crypto::chacha::decrypt(sub.blob().data(), sub.blob().size(),
+                                          reinterpret_cast<const uint8_t *>(final_ack->enc_key().data()),
+                                          reinterpret_cast<const uint8_t *>(sub.iv().data()), buff);
 
+        ::crypto::signature sig;
+        ::crypto::key_image ki;
+        memcpy(ki.data, buff, 32);
+        memcpy(sig.c.data, buff + 32, 32);
+        memcpy(sig.r.data, buff + 64, 32);
+        ski.push_back(std::make_pair(ki, sig));
+      }
     }
 
 
