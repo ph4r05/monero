@@ -196,20 +196,7 @@ namespace trezor {
       require_connected();
 
       auto req = std::make_shared<messages::monero::MoneroGetWatchKey>();
-
-      if (path){
-        for(auto x : path.get()){
-          req->add_address_n(x);
-        }
-      } else {
-        for(size_t i = 0; i < sizeof(DEFAULT_BIP44_PATH)/sizeof(DEFAULT_BIP44_PATH[0]); ++i){
-          req->add_address_n(DEFAULT_BIP44_PATH[i]);
-        }
-      }
-
-      if (network_type){
-        req->set_network_type(static_cast<uint32_t>(network_type.get()));
-      }
+      this->set_msg_addr(*req, path, network_type);
 
       auto response = this->client_exchange<messages::monero::MoneroWatchKey>(req);
       MDEBUG("Get watch key response received");

@@ -173,6 +173,30 @@ namespace trezor {
         }
       }
 
+      /**
+       * Utility method to set address_n and network type to the message requets.
+       */
+      template<class t_message>
+      void set_msg_addr(t_message * msg,
+                        boost::optional<std::vector<uint32_t>> path,
+                        boost::optional<cryptonote::network_type> network_type)
+      {
+        msg->clear_address_n();
+        if (path){
+          for(auto x : path.get()){
+            msg->add_address_n(x);
+          }
+        } else {
+          for(size_t i = 0; i < sizeof(DEFAULT_BIP44_PATH)/sizeof(DEFAULT_BIP44_PATH[0]); ++i){
+            msg->add_address_n(DEFAULT_BIP44_PATH[i]);
+          }
+        }
+
+        if (network_type){
+          msg->set_network_type(static_cast<uint32_t>(network_type.get()));
+        }
+      }
+
     // High level protocol ping
     //bool ping();
 
