@@ -13,6 +13,25 @@ namespace hw {
 namespace trezor {
 namespace exc {
 
+  class SecurityException : public std::exception {
+  protected:
+    boost::optional<std::string> reason;
+
+  public:
+    SecurityException(): reason("General Security exception"){}
+    explicit SecurityException(std::string what): reason(what){}
+
+    virtual const char* what() const throw() {
+      return reason.get().c_str();
+    }
+  };
+
+  class Poly1305TagInvalid: public SecurityException {
+  public:
+    using SecurityException::SecurityException;
+    Poly1305TagInvalid(): SecurityException("Poly1305 authentication tag invalid"){}
+  };
+
   class TrezorException : public std::exception {
   protected:
     boost::optional<std::string> reason;
