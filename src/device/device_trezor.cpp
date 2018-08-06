@@ -196,7 +196,7 @@ namespace trezor {
       require_connected();
 
       auto req = std::make_shared<messages::monero::MoneroGetWatchKey>();
-      this->set_msg_addr(*req, path, network_type);
+      this->set_msg_addr<messages::monero::MoneroGetWatchKey>(req.get(), path, network_type);
 
       auto response = this->client_exchange<messages::monero::MoneroWatchKey>(req);
       MDEBUG("Get watch key response received");
