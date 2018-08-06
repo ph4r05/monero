@@ -23,7 +23,7 @@ namespace ki {
 
   bool key_image_data(tools::wallet2 * wallet,
                       const std::vector<tools::wallet2::transfer_details> & transfers,
-                      std::vector<messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails> & res)
+                      std::vector<MoneroTransferDetails> & res)
   {
     using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
 
@@ -49,7 +49,7 @@ namespace ki {
     return true;
   }
 
-  std::string compute_hash(const messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails & rr){
+  std::string compute_hash(const MoneroTransferDetails & rr){
     KECCAK_CTX kck;
     uint8_t md[32];
 
@@ -66,23 +66,17 @@ namespace ki {
     return std::string(reinterpret_cast<const char*>(md), 32);
   }
 
-  bool generate_commitment(tools::wallet2 * wallet,
+  bool generate_commitment(std::vector<MoneroTransferDetails> & mtds,
                            const std::vector<tools::wallet2::transfer_details> & transfers,
                            std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> & req)
   {
-    using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
-    using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
-
     req = std::make_shared<messages::monero::MoneroKeyImageExportInitRequest>();
 
     KECCAK_CTX kck;
-    std::vector<MoneroTransferDetails> tres;
     uint8_t final_hash[32];
-
     keccak_init(&kck);
-    key_image_data(wallet, transfers, tres);
 
-    for(auto &cur : tres){
+    for(auto &cur : mtds){
       auto hash = compute_hash(cur);
       keccak_update(&kck, reinterpret_cast<const uint8_t *>(hash.data()), hash.size());
     }

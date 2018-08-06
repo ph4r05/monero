@@ -9,6 +9,7 @@
 #include "trezor/messages/messages-common.pb.h"
 #include "trezor/messages/messages-management.pb.h"
 #include "trezor/messages/messages-monero.pb.h"
+#include "trezor/protocol.h"
 #endif
 
 namespace hw {
@@ -203,7 +204,49 @@ namespace trezor {
       return response;
     }
 
-    void device_trezor::ki_sync(){
+    void device_trezor::ki_sync(tools::wallet2 * wallet,
+                                const std::vector<tools::wallet2::transfer_details> & transfers)
+    {
+      std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> req;
+
+      std::vector<protocol::MoneroTransferDetails> mtds;
+      std::vector<protocol::MoneroExportedKeyImage> kis;
+      protocol::ki::key_image_data(wallet, transfers, mtds);
+
+      bool res = protocol::ki::generate_commitment(mtds, transfers, req);
+      this->set_msg_addr<messages::monero::MoneroKeyImageExportInitRequest>(req.get());
+
+      auto env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
+      env->set_allocated_init(req.get());
+      auto ack1 = this->client_exchange<messages::monero::MoneroKeyImageExportInitAck>(env);
+
+      const auto batch_size = 10;
+      const auto num_batches = static_cast<uint64_t>(ceil(mtds.size() / static_cast<double>(batch_size)));
+      for(uint64_t cur = 0; cur < num_batches; ++cur){
+        auto step_req = std::make_shared<messages::monero::MoneroKeyImageSyncStepRequest>();
+        auto idx_finish = std::min(static_cast<uint64_t>((cur + 1) * batch_size), static_cast<uint64_t>(mtds.size()));
+        for(uint64_t idx = cur * batch_size; idx < idx_finish; ++idx){
+          auto added_tdis = step_req->add_tdis();
+          *added_tdis = mtds[idx];
+        }
+
+        env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
+        env->set_allocated_step(step_req.get());
+
+        auto step_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncStepAck>(env);
+        auto kis_size = step_ack->kis_size();
+        for(int i = 0; i < kis_size; ++i){
+          auto ckis = step_ack->kis(i);
+          kis.push_back(ckis);
+        }
+      }
+
+      auto final_req = std::make_shared<messages::monero::MoneroKeyImageSyncFinalRequest>();
+      env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
+      env->set_allocated_final_msg(final_req.get());
+      auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(env);
+
+      // TODO: decrypt
 
     }
 

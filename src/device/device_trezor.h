@@ -14,6 +14,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include "cryptonote_config.h"
+#include "wallet/wallet2.h"
 
 // TODO: propagate to all targets
 #ifndef WITH_DEVICE_TREZOR
@@ -178,8 +179,8 @@ namespace trezor {
        */
       template<class t_message>
       void set_msg_addr(t_message * msg,
-                        boost::optional<std::vector<uint32_t>> path,
-                        boost::optional<cryptonote::network_type> network_type)
+                        boost::optional<std::vector<uint32_t>> path = boost::none,
+                        boost::optional<cryptonote::network_type> network_type = boost::none)
       {
         msg->clear_address_n();
         if (path){
@@ -258,7 +259,8 @@ namespace trezor {
           boost::optional<std::vector<uint32_t>> path = boost::none,
           boost::optional<cryptonote::network_type> network_type = boost::none);
 
-      void ki_sync();
+      void ki_sync(::tools::wallet2 * wallet,
+                   const std::vector<tools::wallet2::transfer_details> & transfers);
     };
 
 #endif
