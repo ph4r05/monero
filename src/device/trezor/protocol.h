@@ -17,8 +17,18 @@ namespace protocol{
   using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
   using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
 
-  std::string key_to_string(const crypto::ec_point & key);
-  std::string key_to_string(const crypto::ec_scalar & key);
+  std::string key_to_string(const ::crypto::ec_point & key);
+  std::string key_to_string(const ::crypto::ec_scalar & key);
+
+// Crypto / encryption
+namespace crypto {
+namespace chacha{
+
+  void decrypt(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher);
+
+}
+}
+
 
 // Key image sync
 namespace ki {

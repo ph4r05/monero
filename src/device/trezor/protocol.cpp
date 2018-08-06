@@ -3,20 +3,70 @@
 //
 
 #include "protocol.h"
+#include "crypto/poly1305.h"
 #include <unordered_map>
 #include <set>
+#include <boost/endian/conversion.hpp>
 
 namespace hw{
 namespace trezor{
 namespace protocol{
 
-  std::string key_to_string(const crypto::ec_point & key){
+  std::string key_to_string(const ::crypto::ec_point & key){
     return std::string(key.data, 32);
   }
 
-  std::string key_to_string(const crypto::ec_scalar & key){
+  std::string key_to_string(const ::crypto::ec_scalar & key){
     return std::string(key.data, 32);
   }
+
+namespace crypto {
+namespace chacha {
+
+  static void poly1305_key(const uint8_t* key, const uint8_t* iv, char* poly_key){
+    uint8_t zeros[32] = {0};
+    ::crypto::chacha20(zeros, 32, key, iv, poly_key);
+  }
+
+  void decrypt(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher){
+    if (length < 16){
+      throw std::invalid_argument("Ciphertext lentgh too small");
+    }
+
+    auto cip_data = reinterpret_cast<const char*>(data);
+    unsigned char zeros[32] = {0};
+    const char * tag = cip_data + (length - 16);
+    char expected_tag[16] = {0};
+    length -= 16;
+
+    // generate poly key
+    char poly_key[32];
+    poly1305_context poly_ctx;
+    poly1305_key(key, iv, poly_key);
+    poly1305_init(&poly_ctx, reinterpret_cast<const unsigned char *>(poly_key));
+    poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(cip_data), length);
+    if (length % 16 != 0){
+      poly1305_update(&poly_ctx, zeros, 16 - (length % 16));
+    }
+
+    uint64_t len_ciphertext_small = boost::endian::native_to_little(static_cast<uint64_t>(length));
+    poly1305_update(&poly_ctx, zeros, 8);  // authenticated data length
+    poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(&len_ciphertext_small), 8);
+    poly1305_finish(&poly_ctx, reinterpret_cast<unsigned char *>(expected_tag));
+
+    memset(&poly_ctx, 0, sizeof(poly1305_context));
+    memset(poly_key, 0, 32);
+    if (!poly1305_verify(reinterpret_cast<const unsigned char *>(tag),
+                         reinterpret_cast<const unsigned char *>(expected_tag))){
+      throw exc::Poly1305TagInvalid();
+    }
+
+    ::crypto::chacha20(cip_data, length, key, iv, cipher);
+  }
+
+}
+}
+
 
 // Key image sync
 namespace ki {
@@ -32,8 +82,8 @@ namespace ki {
         throw std::invalid_argument("Tx with no outputs");
       }
 
-      crypto::public_key tx_pub_key = wallet->get_tx_pub_key_from_received_outs(td);
-      const std::vector<crypto::public_key> additional_tx_pub_keys = cryptonote::get_additional_tx_pub_keys_from_extra(td.m_tx);
+      ::crypto::public_key tx_pub_key = wallet->get_tx_pub_key_from_received_outs(td);
+      const std::vector<::crypto::public_key> additional_tx_pub_keys = cryptonote::get_additional_tx_pub_keys_from_extra(td.m_tx);
 
       res.emplace_back();
       auto & cres = res.back();
