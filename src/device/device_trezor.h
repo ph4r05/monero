@@ -93,8 +93,6 @@ namespace trezor {
 
       void require_connected();
 
-
-
       /**
        * Client communication wrapper, handles specific Trezor protocol.
        *
@@ -108,13 +106,19 @@ namespace trezor {
        */
       template<class t_message>
       std::shared_ptr<t_message>
-      client_exchange(std::shared_ptr<const google::protobuf::Message> req,
+      client_exchange(const std::shared_ptr<const google::protobuf::Message> &req,
                       boost::optional<messages::MessageType> resp_type = boost::none,
+                      boost::optional<std::vector<messages::MessageType>> resp_types = boost::none,
+                      boost::optional<messages::MessageType*> resp_type_ptr = boost::none,
                       bool open_session = false,
                       unsigned depth=0)
       {
         // Require strictly protocol buffers response in the template.
         BOOST_STATIC_ASSERT(boost::is_base_of<google::protobuf::Message, t_message>::value);
+        const bool accepting_base = boost::is_same<google::protobuf::Message, t_message>::value;
+        if (resp_types && !accepting_base){
+          throw std::invalid_argument("Cannot specify list of accepted types and not using generic response");
+        }
 
         // Scoped session closer
         BOOST_SCOPE_EXIT_ALL(&, this) {
@@ -140,21 +144,29 @@ namespace trezor {
 
         // We may have several roundtrips with the handler
         this->getTransport()->read(msg_resp, &msg_resp_type);
+        if (resp_type_ptr){
+          *(resp_type_ptr.get()) = msg_resp_type;
+        }
 
         // Determine type of expected message response
-        messages::MessageType required_type = resp_type ? resp_type.get()
-                                                        : MessageMapper::get_message_wire_number<t_message>();
+        messages::MessageType required_type = accepting_base ? messages::MessageType_Success :
+            (resp_type ? resp_type.get() : MessageMapper::get_message_wire_number<t_message>());
 
         if (msg_resp_type == messages::MessageType_Failure) {
           throw_failure_exception(dynamic_cast<messages::common::Failure *>(msg_resp.get()));
 
-        } else if (msg_resp_type == required_type) {
+        } else if (!accepting_base && msg_resp_type == required_type) {
           return message_ptr_retype<t_message>(msg_resp);
 
         } else {
           auto resp = this->getCallback()->on_message(msg_resp.get(), msg_resp_type);
-          if (resp){
-            return this->client_exchange<t_message>(resp, boost::none, depth + 1);
+          if (resp) {
+            return this->client_exchange<t_message>(resp, boost::none, resp_types, resp_type_ptr, false, depth + 1);
+
+          } else if (accepting_base && (!resp_types ||
+                     std::find(resp_types.get().begin(), resp_types.get().end(), msg_resp_type) != resp_types.get().end())) {
+            return message_ptr_retype<t_message>(msg_resp);
+
           } else {
             throw exc::UnexpectedMessageException(msg_resp_type, msg_resp);
           }
