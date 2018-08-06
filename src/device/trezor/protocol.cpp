@@ -41,23 +41,23 @@ namespace chacha {
 
     // generate poly key
     char poly_key[32];
-    poly1305_context poly_ctx;
     poly1305_key(key, iv, poly_key);
-    poly1305_init(&poly_ctx, reinterpret_cast<const unsigned char *>(poly_key));
-    poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(cip_data), length);
+    ::crypto::poly1305_context poly_ctx;
+    ::crypto::poly1305_init(&poly_ctx, reinterpret_cast<const unsigned char *>(poly_key));
+    ::crypto::poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(cip_data), length);
     if (length % 16 != 0){
-      poly1305_update(&poly_ctx, zeros, 16 - (length % 16));
+      ::crypto::poly1305_update(&poly_ctx, zeros, 16 - (length % 16));
     }
 
     uint64_t len_ciphertext_small = boost::endian::native_to_little(static_cast<uint64_t>(length));
-    poly1305_update(&poly_ctx, zeros, 8);  // authenticated data length
-    poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(&len_ciphertext_small), 8);
-    poly1305_finish(&poly_ctx, reinterpret_cast<unsigned char *>(expected_tag));
+    ::crypto::poly1305_update(&poly_ctx, zeros, 8);  // authenticated data length
+    ::crypto::poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(&len_ciphertext_small), 8);
+    ::crypto::poly1305_finish(&poly_ctx, reinterpret_cast<unsigned char *>(expected_tag));
 
-    memset(&poly_ctx, 0, sizeof(poly1305_context));
+    memset(&poly_ctx, 0, sizeof(::crypto::poly1305_context));
     memset(poly_key, 0, 32);
-    if (!poly1305_verify(reinterpret_cast<const unsigned char *>(tag),
-                         reinterpret_cast<const unsigned char *>(expected_tag))){
+    if (!::crypto::poly1305_verify(reinterpret_cast<const unsigned char *>(tag),
+                                   reinterpret_cast<const unsigned char *>(expected_tag))){
       throw exc::Poly1305TagInvalid();
     }
 
@@ -75,8 +75,6 @@ namespace ki {
                       const std::vector<tools::wallet2::transfer_details> & transfers,
                       std::vector<MoneroTransferDetails> & res)
   {
-    using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
-
     for(auto & td : transfers){
       if (td.m_tx.vout.empty()){
         throw std::invalid_argument("Tx with no outputs");
