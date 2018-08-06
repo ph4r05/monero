@@ -157,6 +157,40 @@ namespace trezor {
     }
 
     /* ======================================================================= */
+    /*                             WALLET & ADDRESS                            */
+    /* ======================================================================= */
+
+    bool device_trezor::get_public_address(cryptonote::account_public_address &pubkey) {
+      auto res = get_address();
+
+      cryptonote::address_parse_info info;
+      bool r = cryptonote::get_account_address_from_str(info, this->network_type, res->address());
+      if (!r){
+        LOG_PRINT_L2("Returned address parse fail: " + res->address());
+        throw std::runtime_error("Could not parse returned address");
+      }
+
+      if (info.is_subaddress){
+        throw std::runtime_error("Trezor returned runtime address");
+      }
+
+      pubkey = info.address;
+      return true;
+    }
+
+    bool  device_trezor::get_secret_keys(crypto::secret_key &viewkey , crypto::secret_key &spendkey) {
+      auto res = get_watch_key();
+      if (res->watch_key().size() != 32){
+        throw std::runtime_error("Trezor returned invalid view key");
+      }
+
+      spendkey = crypto::null_skey; // not given
+      memcpy(viewkey.data, res->watch_key().data(), 32);
+
+      return true;
+    }
+
+    /* ======================================================================= */
     /*  Helpers                                                                */
     /* ======================================================================= */
 
@@ -165,6 +199,10 @@ namespace trezor {
         throw exc::NotConnectedException();
       }
     }
+
+    /* ======================================================================= */
+    /*                              TREZOR PROTOCOL                            */
+    /* ======================================================================= */
 
     bool device_trezor::ping() {
       AUTO_LOCK_CMD();
@@ -188,6 +226,20 @@ namespace trezor {
       }
 
       return false;
+    }
+
+    std::shared_ptr<messages::monero::MoneroAddress> device_trezor::get_address(
+        boost::optional<std::vector<uint32_t>> path,
+        boost::optional<cryptonote::network_type> network_type){
+      AUTO_LOCK_CMD();
+      require_connected();
+
+      auto req = std::make_shared<messages::monero::MoneroGetAddress>();
+      this->set_msg_addr<messages::monero::MoneroGetAddress>(req.get(), path, network_type);
+
+      auto response = this->client_exchange<messages::monero::MoneroAddress>(req);
+      MDEBUG("Get address response received");
+      return response;
     }
 
     std::shared_ptr<messages::monero::MoneroWatchKey> device_trezor::get_watch_key(

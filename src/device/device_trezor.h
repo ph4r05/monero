@@ -196,6 +196,8 @@ namespace trezor {
 
         if (network_type){
           msg->set_network_type(static_cast<uint32_t>(network_type.get()));
+        } else {
+          msg->set_network_type(static_cast<uint32_t>(this->network_type));
         }
       }
 
@@ -244,11 +246,31 @@ namespace trezor {
       void unlock(void) override;
       bool try_lock(void) override;
 
+      /* ======================================================================= */
+      /*                             WALLET & ADDRESS                            */
+      /* ======================================================================= */
+      bool  get_public_address(cryptonote::account_public_address &pubkey) override;
+      bool  get_secret_keys(crypto::secret_key &viewkey , crypto::secret_key &spendkey) override;
+
+      /* ======================================================================= */
+      /*                              TREZOR PROTOCOL                            */
+      /* ======================================================================= */
+
       /**
        * Device ping, no-throw
        * @return
        */
       bool ping();
+
+      /**
+       * Get address. Throws.
+       * @param path
+       * @param network_type
+       * @return
+       */
+      std::shared_ptr<messages::monero::MoneroAddress> get_address(
+          boost::optional<std::vector<uint32_t>> path = boost::none,
+          boost::optional<cryptonote::network_type> network_type = boost::none);
 
       /**
        * Get watch key from device. Throws.
