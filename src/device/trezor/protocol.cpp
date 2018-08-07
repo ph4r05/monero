@@ -151,8 +151,23 @@ namespace ki {
     return true;
   }
 
+}
+
+// Transaction signing
+namespace tx {
+
+  Signer::Signer(tools::wallet2 *wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx) {
+    m_wallet2 = wallet2;
+    m_unsigned_tx = unsigned_tx;
+  }
+
+  void Signer::sign(){
+
+  }
 
 }
+
+
 
 }
 }

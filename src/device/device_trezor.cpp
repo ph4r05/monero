@@ -318,6 +318,14 @@ namespace trezor {
     }
 
 
+    void device_trezor::tx_sign(::tools::wallet2 * wallet, const tools::wallet2::unsigned_tx_set & unsigned_tx){
+      std::shared_ptr<const tools::wallet2::unsigned_tx_set> unsigned_tx_ptr(std::addressof(unsigned_tx));
+      auto signer = std::make_shared<protocol::tx::Signer>(wallet, unsigned_tx_ptr);
+
+      signer->sign();
+
+    }
+
 #else //WITH_DEVICE_TREZOR
 
     void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {

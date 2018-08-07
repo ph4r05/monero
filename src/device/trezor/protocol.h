@@ -74,6 +74,47 @@ namespace ki {
 
 }
 
+namespace tx {
+  using TsxData = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData;
+  using tx_construction_data = tools::wallet2::tx_construction_data;
+  using unsigned_tx_set = tools::wallet2::unsigned_tx_set;
+  typedef std::string hmac_t;
+
+  class TData {
+  public:
+    TsxData tsx_data;
+    tx_construction_data tx_data;
+    cryptonote::transaction tx;
+    std::vector<hmac_t> tx_in_hmacs;
+    std::vector<hmac_t> tx_out_entr_hmacs;
+    std::vector<hmac_t> tx_out_hmacs;
+    std::vector<hmac_t> tx_out_rsigs;
+    std::vector<hmac_t> tx_out_pk;
+    std::vector<hmac_t> tx_out_ecdh;
+    std::vector<int> source_permutation;
+    std::vector<std::string> alphas;
+    std::vector<std::string> spend_encs;
+    std::vector<std::string> pseudo_outs;
+    std::vector<std::string> couts;
+    std::string tx_prefix_hash;
+    std::string enc_salt1;
+    std::string enc_salt2;
+    std::vector<std::string> enc_keys;
+  };
+
+  class Signer {
+  private:
+    TData m_ct;
+    tools::wallet2 * m_wallet2;
+    std::shared_ptr<const unsigned_tx_set> m_unsigned_tx;
+
+  public:
+    Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx);
+    void sign();
+  };
+
+}
+
 }
 }
 }
