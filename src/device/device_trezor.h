@@ -282,9 +282,23 @@ namespace trezor {
           boost::optional<std::vector<uint32_t>> path = boost::none,
           boost::optional<cryptonote::network_type> network_type = boost::none);
 
+      /**
+       * Key image sync with the Trezor.
+       * @param wallet
+       * @param transfers
+       * @param ski
+       */
       void ki_sync(::tools::wallet2 * wallet,
                    const std::vector<tools::wallet2::transfer_details> & transfers,
                    protocol::exported_key_image & ski);
+
+      /**
+       * Signs unsigned transaction with the Trezor.
+       * @param wallet
+       * @param unsigned_tx
+       */
+      void tx_sign(::tools::wallet2 * wallet,
+                   const tools::wallet2::unsigned_tx_set & unsigned_tx);
     };
 
 #endif
