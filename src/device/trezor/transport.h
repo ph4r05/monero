@@ -65,7 +65,8 @@ namespace trezor {
 
     if(pri->m_response_code != 200)
     {
-      LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", wrong response code: " << pri->m_response_code);
+      LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", wrong response code: " << pri->m_response_code
+                                                        << " Response Body: " << pri->m_body);
       return false;
     }
 
