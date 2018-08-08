@@ -320,20 +320,39 @@ namespace trezor {
 
     void device_trezor::tx_sign(::tools::wallet2 * wallet, const tools::wallet2::unsigned_tx_set & unsigned_tx){
       std::shared_ptr<const tools::wallet2::unsigned_tx_set> unsigned_tx_ptr(std::addressof(unsigned_tx));
-      auto signer = std::make_shared<protocol::tx::Signer>(wallet, unsigned_tx_ptr);
+      size_t num_tx = unsigned_tx.txes.size();
 
-      // Step: Init
-      auto init_msg = signer->step_init();
-      this->set_msg_addr(init_msg.get());
-      auto req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-      req_msg->mutable_init()->CopyFrom(*init_msg);
+      for(size_t tx_idx = 0; tx_idx < num_tx; ++tx_idx) {
+        auto signer = std::make_shared<protocol::tx::Signer>(wallet, unsigned_tx_ptr, tx_idx);
+        auto & cur_tx = unsigned_tx.txes[tx_idx];
+        auto num_sources = cur_tx.sources.size();
+        auto num_outputs = cur_tx.splitted_dsts.size();
 
-      auto response = this->client_exchange<messages::monero::MoneroTransactionInitAck>(req_msg);
-      signer->step_init_ack(response);
+        // Step: Init
+        auto init_msg = signer->step_init();
+        this->set_msg_addr(init_msg.get());
+        auto req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+        req_msg->mutable_init()->CopyFrom(*init_msg);
 
-      // Step: Set transaction inputs
+        auto response = this->client_exchange<messages::monero::MoneroTransactionInitAck>(req_msg);
+        signer->step_init_ack(response);
 
-      signer->sign();
+        // Step: Set transaction inputs
+        for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
+          auto src = signer->step_set_input(cur_src);
+          auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+          req->mutable_set_input()->CopyFrom(*src);
+
+          auto ack = this->client_exchange<messages::monero::MoneroTransactionSetInputAck>(req);
+          signer->step_set_input_ack(ack);
+        }
+
+        // Step: Permute
+
+      }
+
+
+
 
     }
 

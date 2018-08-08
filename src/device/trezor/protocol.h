@@ -37,6 +37,15 @@ namespace protocol{
     }
   };
 
+  template<typename T>
+  bool cn_deserialize(const void * buff, size_t len, T & dst){
+    std::stringstream ss;
+    ss.write(static_cast<const char *>(buff), len);  //ss << tx_blob;
+    binary_archive<false> ba(ss);
+    bool r = ::serialization::serialize(ba, dst);
+    return r;
+  }
+
 // Crypto / encryption
 namespace crypto {
 namespace chacha{
@@ -108,6 +117,9 @@ namespace tx {
     tx_construction_data tx_data;
     cryptonote::transaction tx;
     bool in_memory;
+    size_t cur_input_idx;
+    size_t cur_output_idx;
+
     std::vector<hmac_t> tx_in_hmacs;
     std::vector<hmac_t> tx_out_entr_hmacs;
     std::vector<hmac_t> tx_out_hmacs;
@@ -118,6 +130,7 @@ namespace tx {
     std::vector<std::string> alphas;
     std::vector<std::string> spend_encs;
     std::vector<std::string> pseudo_outs;
+    std::vector<std::string> pseudo_outs_hmac;
     std::vector<std::string> couts;
     std::string tx_prefix_hash;
     std::string enc_salt1;
@@ -130,7 +143,7 @@ namespace tx {
     TData m_ct;
     tools::wallet2 * m_wallet2;
 
-    int m_tx_idx;
+    size_t m_tx_idx;
     std::shared_ptr<const unsigned_tx_set> m_unsigned_tx;
 
     const tx_construction_data & cur_tx(){
@@ -141,10 +154,13 @@ namespace tx {
 
 
   public:
-    Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx);
+    Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx, size_t tx_idx = 0);
 
     std::shared_ptr<messages::monero::MoneroTransactionInitRequest> step_init();
     void step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack);
+
+    std::shared_ptr<messages::monero::MoneroTransactionSetInputRequest> step_set_input(size_t idx);
+    void step_set_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetInputAck> ack);
 
     void sign();
   };
