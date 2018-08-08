@@ -322,6 +322,17 @@ namespace trezor {
       std::shared_ptr<const tools::wallet2::unsigned_tx_set> unsigned_tx_ptr(std::addressof(unsigned_tx));
       auto signer = std::make_shared<protocol::tx::Signer>(wallet, unsigned_tx_ptr);
 
+      // Step: Init
+      auto init_msg = signer->step_init();
+      this->set_msg_addr(init_msg.get());
+      auto req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+      req_msg->mutable_init()->CopyFrom(*init_msg);
+
+      auto response = this->client_exchange<messages::monero::MoneroTransactionInitAck>(req_msg);
+      signer->step_init_ack(response);
+
+      // Step: Set transaction inputs
+
       signer->sign();
 
     }

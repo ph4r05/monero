@@ -197,7 +197,7 @@ namespace tx {
     }
   }
 
-  void Signer::step_init(){
+  std::shared_ptr<messages::monero::MoneroTransactionInitRequest> Signer::step_init(){
     // extract payment ID from construction data
     auto & tsx_data = m_ct.tsx_data;
     auto & tx = cur_tx();
@@ -234,10 +234,15 @@ namespace tx {
     tsx_data.set_fee(static_cast<google::protobuf::uint64>(fee));
     this->extract_payment_id();
 
-    // TODO: init roundtrip
     auto init_req = std::make_shared<messages::monero::MoneroTransactionInitRequest>();
     init_req->set_version(0);
-    
+    init_req->mutable_tsx_data()->CopyFrom(tsx_data);
+    return init_req;
+  }
+
+  void Signer::step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack){
+    m_ct.in_memory = ack->in_memory();
+    assign_from_repeatable(std::addressof(m_ct.tx_out_entr_hmacs), ack->hmacs().begin(), ack->hmacs().end());
   }
 
   void Signer::sign(){

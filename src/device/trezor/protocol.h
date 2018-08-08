@@ -30,6 +30,13 @@ namespace protocol{
     }
   }
 
+  template<class sub_t, class InputIterator>
+  void assign_from_repeatable(std::vector<sub_t> * dst, const InputIterator begin, const InputIterator end){
+    for (InputIterator it = begin; it != end; it++) {
+      dst->push_back(*it);
+    }
+  };
+
 // Crypto / encryption
 namespace crypto {
 namespace chacha{
@@ -100,6 +107,7 @@ namespace tx {
     TsxData tsx_data;
     tx_construction_data tx_data;
     cryptonote::transaction tx;
+    bool in_memory;
     std::vector<hmac_t> tx_in_hmacs;
     std::vector<hmac_t> tx_out_entr_hmacs;
     std::vector<hmac_t> tx_out_hmacs;
@@ -130,10 +138,14 @@ namespace tx {
     }
 
     void extract_payment_id();
-    void step_init();
+
 
   public:
     Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx);
+
+    std::shared_ptr<messages::monero::MoneroTransactionInitRequest> step_init();
+    void step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack);
+
     void sign();
   };
 
