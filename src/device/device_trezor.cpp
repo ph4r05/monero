@@ -273,7 +273,7 @@ namespace trezor {
       this->set_msg_addr<messages::monero::MoneroKeyImageExportInitRequest>(req.get());
 
       auto env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
-      env->set_allocated_init(req.get());
+      env->mutable_init()->CopyFrom(*req);
       auto ack1 = this->client_exchange<messages::monero::MoneroKeyImageExportInitAck>(env);
 
       const auto batch_size = 10;
@@ -287,7 +287,7 @@ namespace trezor {
         }
 
         env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
-        env->set_allocated_step(step_req.get());
+        env->mutable_step()->CopyFrom(*step_req);
 
         auto step_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncStepAck>(env);
         auto kis_size = step_ack->kis_size();
@@ -299,7 +299,7 @@ namespace trezor {
 
       auto final_req = std::make_shared<messages::monero::MoneroKeyImageSyncFinalRequest>();
       env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
-      env->set_allocated_final_msg(final_req.get());
+      env->mutable_final_msg()->CopyFrom(*final_req);
       auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(env);
 
       for(auto & sub : kis){

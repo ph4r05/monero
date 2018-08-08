@@ -182,10 +182,10 @@ namespace tx {
     cryptonote::parse_tx_extra(tx_extra, tx_extra_fields); // ok if partially parsed
     cryptonote::tx_extra_nonce extra_nonce;
 
-    ::crypto::hash payment_id;
+    ::crypto::hash payment_id{};
     if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
     {
-      ::crypto::hash8 payment_id8;
+      ::crypto::hash8 payment_id8{};
       if(cryptonote::get_encrypted_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id8))
       {
         m_ct.tsx_data.set_payment_id(std::string(payment_id8.data, 8));
@@ -261,7 +261,7 @@ namespace tx {
       throw exc::ProtocolException("Cannot deserialize vin[i]");
     }
 
-    m_ct.tx.vin.push_back(vini);
+    m_ct.tx.vin.emplace_back(vini);
     m_ct.tx_in_hmacs.push_back(ack->vini_hmac());
     m_ct.pseudo_outs.push_back(ack->pseudo_out());
     m_ct.pseudo_outs_hmac.push_back(ack->pseudo_out_hmac());
