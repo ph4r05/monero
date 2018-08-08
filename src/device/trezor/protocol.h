@@ -22,6 +22,14 @@ namespace protocol{
   std::string key_to_string(const ::crypto::ec_point & key);
   std::string key_to_string(const ::crypto::ec_scalar & key);
 
+  template<class sub_t, class InputIterator>
+  void assign_to_repeatable(::google::protobuf::RepeatedField<sub_t> * dst, const InputIterator begin, const InputIterator end){
+    for (InputIterator it = begin; it != end; it++) {
+      auto s = dst->Add();
+      *s = *it;
+    }
+  }
+
 // Crypto / encryption
 namespace crypto {
 namespace chacha{
@@ -76,9 +84,16 @@ namespace ki {
 
 namespace tx {
   using TsxData = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData;
+  using MoneroTransactionDestinationEntry = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry;
+  using MoneroAccountPublicAddress = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
+
   using tx_construction_data = tools::wallet2::tx_construction_data;
   using unsigned_tx_set = tools::wallet2::unsigned_tx_set;
+
   typedef std::string hmac_t;
+
+  void translate_address(MoneroAccountPublicAddress * dst, const cryptonote::account_public_address * src);
+  void translate_dst_entry(MoneroTransactionDestinationEntry * dst, const cryptonote::tx_destination_entry * src);
 
   class TData {
   public:
@@ -106,7 +121,16 @@ namespace tx {
   private:
     TData m_ct;
     tools::wallet2 * m_wallet2;
+
+    int m_tx_idx;
     std::shared_ptr<const unsigned_tx_set> m_unsigned_tx;
+
+    const tx_construction_data & cur_tx(){
+      return m_unsigned_tx->txes[m_tx_idx];
+    }
+
+    void extract_payment_id();
+    void step_init();
 
   public:
     Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx);

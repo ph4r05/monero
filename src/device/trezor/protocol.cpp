@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <set>
 #include <boost/endian/conversion.hpp>
+#include <utility>
 
 namespace hw{
 namespace trezor{
@@ -156,12 +157,91 @@ namespace ki {
 // Transaction signing
 namespace tx {
 
+  void translate_address(MoneroAccountPublicAddress * dst, const cryptonote::account_public_address * src){
+    dst->set_view_public_key(key_to_string(src->m_view_public_key));
+    dst->set_spend_public_key(key_to_string(src->m_spend_public_key));
+  }
+
+  void translate_dst_entry(MoneroTransactionDestinationEntry * dst, const cryptonote::tx_destination_entry * src){
+    dst->set_amount(src->amount);
+    dst->set_is_subaddress(src->is_subaddress);
+    translate_address(dst->mutable_addr(), std::addressof(src->addr));
+  }
+
   Signer::Signer(tools::wallet2 *wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx) {
     m_wallet2 = wallet2;
-    m_unsigned_tx = unsigned_tx;
+    m_unsigned_tx = std::move(unsigned_tx);
+    m_tx_idx = 0;
+  }
+
+  void Signer::extract_payment_id(){
+    const std::vector<uint8_t>& tx_extra = cur_tx().extra;
+    m_ct.tsx_data.clear_payment_id();
+
+    std::vector<cryptonote::tx_extra_field> tx_extra_fields;
+    cryptonote::parse_tx_extra(tx_extra, tx_extra_fields); // ok if partially parsed
+    cryptonote::tx_extra_nonce extra_nonce;
+
+    ::crypto::hash payment_id;
+    if (find_tx_extra_field_by_type(tx_extra_fields, extra_nonce))
+    {
+      ::crypto::hash8 payment_id8;
+      if(cryptonote::get_encrypted_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id8))
+      {
+        m_ct.tsx_data.set_payment_id(std::string(payment_id8.data, 8));
+      }
+      else if (cryptonote::get_payment_id_from_tx_extra_nonce(extra_nonce.nonce, payment_id))
+      {
+        m_ct.tsx_data.set_payment_id(std::string(payment_id.data, 32));
+      }
+    }
+  }
+
+  void Signer::step_init(){
+    // extract payment ID from construction data
+    auto & tsx_data = m_ct.tsx_data;
+    auto & tx = cur_tx();
+
+    m_ct.tx.version = 2;
+    m_ct.tx.unlock_time = tx.unlock_time;
+
+    tsx_data.set_version(1);
+    tsx_data.set_unlock_time(tx.unlock_time);
+    tsx_data.set_num_inputs(static_cast<google::protobuf::uint32>(tx.sources.size()));
+    tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size()));
+    tsx_data.set_account(tx.subaddr_account);
+    assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
+    tsx_data.set_is_bulletproof(false);
+    tsx_data.set_is_multisig(false);
+
+    translate_dst_entry(tsx_data.mutable_change_dts(), std::addressof(tx.change_dts));
+    for(auto & cur : tx.splitted_dsts){
+      auto dst = tsx_data.mutable_outputs()->Add();
+      translate_dst_entry(dst, std::addressof(cur));
+    }
+
+    int64_t fee = 0;
+    for(auto & cur_in : tx.sources){
+      fee += cur_in.amount;
+    }
+    for(auto & cur_out : tx.splitted_dsts){
+      fee -= cur_out.amount;
+    }
+    if (fee < 0){
+      throw std::invalid_argument("Fee cannot be negative");
+    }
+
+    tsx_data.set_fee(static_cast<google::protobuf::uint64>(fee));
+    this->extract_payment_id();
+
+    // TODO: init roundtrip
+    auto init_req = std::make_shared<messages::monero::MoneroTransactionInitRequest>();
+    init_req->set_version(0);
+    
   }
 
   void Signer::sign(){
+    this->step_init();
 
   }
 
