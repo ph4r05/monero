@@ -126,7 +126,7 @@ namespace tx {
     std::vector<hmac_t> tx_out_rsigs;
     std::vector<hmac_t> tx_out_pk;
     std::vector<hmac_t> tx_out_ecdh;
-    std::vector<int> source_permutation;
+    std::vector<size_t> source_permutation;
     std::vector<std::string> alphas;
     std::vector<std::string> spend_encs;
     std::vector<std::string> pseudo_outs;
@@ -161,6 +161,8 @@ namespace tx {
 
     std::shared_ptr<messages::monero::MoneroTransactionSetInputRequest> step_set_input(size_t idx);
     void step_set_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetInputAck> ack);
+
+    void sort_ki();
 
     void sign();
   };

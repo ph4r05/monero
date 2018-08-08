@@ -6,8 +6,9 @@
 #include "crypto/poly1305.h"
 #include <unordered_map>
 #include <set>
-#include <boost/endian/conversion.hpp>
 #include <utility>
+#include <boost/endian/conversion.hpp>
+#include <common/apply_permutation.h>
 
 namespace hw{
 namespace trezor{
@@ -172,6 +173,7 @@ namespace tx {
     m_wallet2 = wallet2;
     m_unsigned_tx = std::move(unsigned_tx);
     m_tx_idx = tx_idx;
+    m_ct.tx_data = cur_tx();
   }
 
   void Signer::extract_payment_id(){
@@ -267,6 +269,29 @@ namespace tx {
     m_ct.pseudo_outs_hmac.push_back(ack->pseudo_out_hmac());
     m_ct.alphas.push_back(ack->alpha_enc());
     m_ct.spend_encs.push_back(ack->spend_enc());
+  }
+
+  void Signer::sort_ki(){
+    m_ct.source_permutation.clear();
+    for (size_t n = 0; n < cur_tx().sources.size(); ++n){
+      m_ct.source_permutation.push_back(n);
+    }
+
+    std::sort(m_ct.source_permutation.begin(), m_ct.source_permutation.end(), [&](const size_t i0, const size_t i1) {
+      const cryptonote::txin_to_key &tk0 = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[i0]);
+      const cryptonote::txin_to_key &tk1 = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[i1]);
+      return memcmp(&tk0.k_image, &tk1.k_image, sizeof(tk0.k_image)) > 0;
+    });
+
+    tools::apply_permutation(m_ct.source_permutation, [&](size_t i0, size_t i1){
+      std::swap(m_ct.tx.vin[i0], m_ct.tx.vin[i1]);
+      std::swap(m_ct.tx_in_hmacs[i0], m_ct.tx_in_hmacs[i1]);
+      std::swap(m_ct.pseudo_outs[i0], m_ct.pseudo_outs[i1]);
+      std::swap(m_ct.pseudo_outs_hmac[i0], m_ct.pseudo_outs_hmac[i1]);
+      std::swap(m_ct.alphas[i0], m_ct.alphas[i1]);
+      std::swap(m_ct.spend_encs[i0], m_ct.spend_encs[i1]);
+      std::swap(m_ct.tx_data.sources[i0], m_ct.tx_data.sources[i1]);
+    });
   }
 
   void Signer::sign(){
