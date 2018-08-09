@@ -194,6 +194,9 @@ namespace hw {
         virtual bool  mlsag_sign(const rct::key &c, const rct::keyV &xx, const rct::keyV &alpha, const size_t rows, const size_t dsRows, rct::keyV &ss) = 0;
 
         virtual bool  close_tx(void) = 0;
+
+        virtual bool  ki_cold_sync(void) const { return false; }
+        virtual bool  tx_cold_sign(void) const { return false; }
     } ;
 
     struct reset_mode {
