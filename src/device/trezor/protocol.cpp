@@ -346,7 +346,7 @@ namespace tx {
   std::shared_ptr<messages::monero::MoneroTransactionInputsPermutationRequest> Signer::step_permutation(){
     sort_ki();
 
-    if (!in_memory()){
+    if (in_memory()){
       return nullptr;
     }
 
@@ -357,13 +357,13 @@ namespace tx {
   }
 
   void Signer::step_permutation_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputsPermutationAck> ack){
-    if (!in_memory()){
+    if (in_memory()){
       return;
     }
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionInputViniRequest> Signer::step_set_vini_input(size_t idx){
-    if (!in_memory()){
+    if (in_memory()){
       return nullptr;
     }
 
@@ -382,7 +382,7 @@ namespace tx {
   }
 
   void Signer::step_set_vini_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputViniAck> ack){
-    if (!in_memory()){
+    if (in_memory()){
       return;
     }
   }
