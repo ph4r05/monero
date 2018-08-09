@@ -3067,6 +3067,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     LOG_PRINT_L0("Account on device. Initing device...");
     hw::device &hwdev = hw::get_device(m_device_name);
     hwdev.set_name(m_device_name);
+    hwdev.set_network_type(m_nettype);
     hwdev.init();
     hwdev.connect();
     m_account.set_device(hwdev);
@@ -3477,6 +3478,7 @@ void wallet2::restore(const std::string& wallet_, const epee::wipeable_string& p
   }
   m_key_on_device = true;
   m_account.create_from_device(device_name);
+  m_account.get_device().set_network_type(m_nettype);
   m_account_public_address = m_account.get_keys().m_account_address;
   m_watch_only = false;
   m_multisig = false;
