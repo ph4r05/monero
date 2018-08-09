@@ -136,6 +136,7 @@ namespace
   const command_line::arg_descriptor<bool> arg_create_address_file = {"create-address-file", sw::tr("Create an address file for new wallets"), false};
   const command_line::arg_descriptor<std::string> arg_subaddress_lookahead = {"subaddress-lookahead", tools::wallet2::tr("Set subaddress lookahead sizes to <major>:<minor>"), ""};
   const command_line::arg_descriptor<bool> arg_use_english_language_names = {"use-english-language-names", sw::tr("Display English language names"), false};
+  const command_line::arg_descriptor<std::string> arg_hw_device = {"hw-device", sw::tr("HW device to use"), ""};
 
   const command_line::arg_descriptor< std::vector<std::string> > arg_command = {"command", ""};
 
@@ -3116,7 +3117,8 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
     {
       m_wallet_file = m_generate_from_device;
       // create wallet
-      bool r = new_wallet(vm, "Ledger");
+      auto device_desc = command_line::get_arg(vm, arg_hw_device);
+      bool r = new_wallet(vm, device_desc.empty() ? "Ledger" : device_desc);
       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
       // if no block_height is specified, assume its a new account and start it "now"
       if(m_wallet->get_refresh_from_block_height() == 0) {
@@ -7699,6 +7701,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_create_address_file);
   command_line::add_arg(desc_params, arg_subaddress_lookahead);
   command_line::add_arg(desc_params, arg_use_english_language_names);
+  command_line::add_arg(desc_params, arg_hw_device);
 
   po::positional_options_description positional_options;
   positional_options.add(arg_command.name, -1);
