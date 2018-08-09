@@ -45,8 +45,16 @@
 namespace crypto {
   extern "C" {
 #endif
+    typedef struct chacha_ctx
+    {
+      uint32_t input[16];
+    } chacha_ctx;
+
     void chacha8(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher);
     void chacha20(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher);
+
+    void chacha20_init(chacha_ctx * ctx, const uint8_t * k, uint32_t kbits, const uint8_t * iv, uint32_t ivbits);
+    void chacha20_encrypt(chacha_ctx * ctx, const uint8_t * m, uint8_t * c, uint32_t bytes);
 #if defined(__cplusplus)
   }
 
