@@ -58,7 +58,7 @@ namespace hw {
         static const s_devices devices;
 
         // Device descriptor can contain further specs after first :
-        auto delim = device_descriptor.find(":");
+        auto delim = device_descriptor.find(':');
         auto device_descriptor_lookup = device_descriptor;
         if (delim != std::string::npos) {
           device_descriptor_lookup = device_descriptor.substr(0, delim);
