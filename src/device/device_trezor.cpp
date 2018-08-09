@@ -106,7 +106,6 @@ namespace trezor {
       }
 
       bool r = m_transport->open();
-      // TODO: load watch only credentials / address
       return r;
     }
 
