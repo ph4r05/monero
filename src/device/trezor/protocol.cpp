@@ -65,11 +65,6 @@ namespace crypto {
 
 namespace chacha {
 
-  static void poly1305_key(const uint8_t* key, const uint8_t* iv, char* poly_key){
-    uint8_t zeros[32] = {0};
-    ::crypto::chacha20(zeros, 32, key, iv, poly_key);
-  }
-
   void decrypt(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher){
     if (length < 16){
       throw std::invalid_argument("Ciphertext lentgh too small");
@@ -81,10 +76,17 @@ namespace chacha {
     char expected_tag[16] = {0};
     length -= 16;
 
-    // generate poly key
-    char poly_key[32];
-    poly1305_key(key, iv, poly_key);
+    // Key setup, RFC 7539
+    char poly_key[64] = {0};
+    ::crypto::chacha_ctx chacha_ctx;
     ::crypto::poly1305_context poly_ctx;
+    ::crypto::chacha20_init(&chacha_ctx, key, 256, iv, 12);
+
+    // Encrypt 64 bytes of zeros and use the first 32 bytes as the Poly1305 key.
+    ::crypto::chacha20_encrypt(&chacha_ctx,
+                               reinterpret_cast<const uint8_t *>(poly_key),
+                               reinterpret_cast<uint8_t *>(poly_key), 64);
+
     ::crypto::poly1305_init(&poly_ctx, reinterpret_cast<const unsigned char *>(poly_key));
     ::crypto::poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(cip_data), length);
     if (length % 16 != 0){
@@ -103,7 +105,11 @@ namespace chacha {
       throw exc::Poly1305TagInvalid();
     }
 
-    ::crypto::chacha20(cip_data, length, key, iv, cipher);
+    ::crypto::chacha20_encrypt(&chacha_ctx,
+                               reinterpret_cast<const uint8_t *>(cip_data),
+                               reinterpret_cast<uint8_t *>(cipher),
+                               static_cast<uint32_t>(length));
+    memset(&chacha_ctx, 0, sizeof(::crypto::chacha_ctx));
   }
 
 }
