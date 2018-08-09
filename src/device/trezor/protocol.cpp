@@ -370,8 +370,9 @@ namespace tx {
     m_ct.cur_input_idx = idx;
     auto tx = m_ct.tx_data;
     auto res = std::make_shared<messages::monero::MoneroTransactionInputViniRequest>();
+    auto vini = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[idx]);
     res->set_src_entr(cryptonote::t_serializable_object_to_blob(tx.sources[idx]));
-    res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
+    res->set_vini(cryptonote::t_serializable_object_to_blob(vini));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     if (!in_memory()) {
       res->set_pseudo_out(m_ct.pseudo_outs[idx]);
@@ -498,7 +499,7 @@ namespace tx {
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSignInputRequest>();
     res->set_src_entr(cryptonote::t_serializable_object_to_blob(m_ct.tx_data.sources[idx]));
-    res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
+    res->set_vini(cryptonote::t_serializable_object_to_blob(boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[idx])));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     res->set_alpha_enc(m_ct.alphas[idx]);
     res->set_spend_enc(m_ct.spend_encs[idx]);
