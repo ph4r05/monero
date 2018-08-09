@@ -9,6 +9,7 @@
 #include <utility>
 #include <boost/endian/conversion.hpp>
 #include <common/apply_permutation.h>
+#include <ringct/rctSigs.h>
 
 namespace hw{
 namespace trezor{
@@ -20,6 +21,35 @@ namespace protocol{
 
   std::string key_to_string(const ::crypto::ec_scalar & key){
     return std::string(key.data, 32);
+  }
+
+  std::string key_to_string(const ::crypto::hash & key){
+    return std::string(key.data, 32);
+  }
+
+  std::string key_to_string(const ::rct::key & key){
+    return std::string(reinterpret_cast<const char*>(key.bytes), 32);
+  }
+
+  void string_to_key(::crypto::ec_scalar & key, const std::string & str){
+    if (str.size() != 32){
+      throw std::invalid_argument("Key has to have 32 B");
+    }
+    memcpy(key.data, str.data(), 32);
+  }
+
+  void string_to_key(::crypto::ec_point & key, const std::string & str){
+    if (str.size() != 32){
+      throw std::invalid_argument("Key has to have 32 B");
+    }
+    memcpy(key.data, str.data(), 32);
+  }
+
+  void string_to_key(::rct::key & key, const std::string & str){
+    if (str.size() != 32){
+      throw std::invalid_argument("Key has to have 32 B");
+    }
+    memcpy(key.bytes, str.data(), 32);
   }
 
 namespace crypto {

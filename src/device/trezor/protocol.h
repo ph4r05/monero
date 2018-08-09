@@ -21,6 +21,12 @@ namespace protocol{
 
   std::string key_to_string(const ::crypto::ec_point & key);
   std::string key_to_string(const ::crypto::ec_scalar & key);
+  std::string key_to_string(const ::crypto::hash & key);
+  std::string key_to_string(const ::rct::key & key);
+
+  void string_to_key(::crypto::ec_scalar & key, const std::string & str);
+  void string_to_key(::crypto::ec_point & key, const std::string & str);
+  void string_to_key(::rct::key & key, const std::string & str);
 
   template<class sub_t, class InputIterator>
   void assign_to_repeatable(::google::protobuf::RepeatedField<sub_t> * dst, const InputIterator begin, const InputIterator end){
