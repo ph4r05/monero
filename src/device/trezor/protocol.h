@@ -205,7 +205,7 @@ namespace tx {
     std::shared_ptr<messages::monero::MoneroTransactionSignInputRequest> step_sign_input(size_t idx);
     void step_sign_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSignInputAck> ack);
 
-    std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> step_final(size_t idx);
+    std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> step_final();
     void step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack);
 
     bool in_memory(){

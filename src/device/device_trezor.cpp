@@ -406,7 +406,7 @@ namespace trezor {
         }
 
         // Step: final
-        auto final_msg = signer->step_pre_mlsag_done();
+        auto final_msg = signer->step_final();
         req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
         req_msg->mutable_final_msg()->CopyFrom(*final_msg);
 

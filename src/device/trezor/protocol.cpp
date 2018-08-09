@@ -511,7 +511,7 @@ namespace tx {
     m_ct.couts.push_back(ack->cout());
   }
 
-  std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> Signer::step_final(size_t idx){
+  std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> Signer::step_final(){
     m_ct.tx.rct_signatures = *(m_ct.rv);
     return std::make_shared<messages::monero::MoneroTransactionFinalRequest>();
   }
