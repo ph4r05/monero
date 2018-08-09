@@ -91,6 +91,12 @@ namespace exc {
   // Separated to distinguish between client and trezor side exceptions.
 namespace proto {
 
+  class SecurityException : public ProtocolException {
+  public:
+    using ProtocolException::ProtocolException;
+    SecurityException(): ProtocolException("Security assertion violated in the protocol"){}
+  };
+
   class FailureException : public ProtocolException {
   private:
     boost::optional<uint32_t> code;
