@@ -174,6 +174,7 @@ namespace ki {
 
     req = std::make_shared<messages::monero::MoneroKeyImageExportInitRequest>();
     req->set_hash(std::string(reinterpret_cast<const char*>(final_hash), 32));
+    req->set_num(transfers.size());
 
     std::unordered_map<uint32_t, std::set<uint32_t>> sub_indices;
     for (auto &cur : transfers){
