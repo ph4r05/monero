@@ -228,6 +228,7 @@ namespace trezor {
 
       bool  has_ki_cold_sync(void) const override { return true; }
       bool  has_tx_cold_sign(void) const override { return true; }
+      void  set_network_type(cryptonote::network_type network_type) override { this->network_type = network_type; }
 
       /* ======================================================================= */
       /*                              SETUP/TEARDOWN                             */

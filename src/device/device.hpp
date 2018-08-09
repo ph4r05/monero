@@ -197,6 +197,8 @@ namespace hw {
 
         virtual bool  has_ki_cold_sync(void) const { return false; }
         virtual bool  has_tx_cold_sign(void) const { return false; }
+
+        virtual void  set_network_type(cryptonote::network_type) { }
     } ;
 
     struct reset_mode {
