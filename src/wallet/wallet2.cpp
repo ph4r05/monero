@@ -3066,6 +3066,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
   if (r && m_key_on_device) {
     LOG_PRINT_L0("Account on device. Initing device...");
     hw::device &hwdev = hw::get_device(m_device_name);
+    hwdev.set_name(m_device_name);
     hwdev.init();
     hwdev.connect();
     m_account.set_device(hwdev);
@@ -3074,7 +3075,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
   const cryptonote::account_keys& keys = m_account.get_keys();
   hw::device &hwdev = m_account.get_device();
   r = r && hwdev.verify_keys(keys.m_view_secret_key,  keys.m_account_address.m_view_public_key);
-  if(!m_watch_only && !m_multisig)
+  if(!m_watch_only && !m_multisig && !hwdev.has_tx_cold_sign())
     r = r && hwdev.verify_keys(keys.m_spend_secret_key, keys.m_account_address.m_spend_public_key);
   THROW_WALLET_EXCEPTION_IF(!r, error::invalid_password);
   return true;
