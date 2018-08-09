@@ -54,7 +54,16 @@ namespace protocol{
 
 // Crypto / encryption
 namespace crypto {
-namespace chacha{
+  /**
+   * Constant time comparison.
+   * @param a
+   * @param b
+   * @param len
+   * @return
+   */
+  int ct_equal(const char *a, const char *b, size_t len);
+
+namespace chacha {
 
   /**
    * Chacha20Poly1305 decryption with tag verification.

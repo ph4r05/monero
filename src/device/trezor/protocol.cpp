@@ -53,6 +53,16 @@ namespace protocol{
   }
 
 namespace crypto {
+
+    int ct_equal(const char *a, const char *b, size_t len) {
+    size_t i;
+    unsigned int dif = 0;
+    for (i = 0; i < len; i++)
+      dif |= (a[i] ^ b[i]);
+    dif = (dif - 1) >> ((sizeof(unsigned int) * 8) - 1);
+    return (dif & 1);
+  }
+
 namespace chacha {
 
   static void poly1305_key(const uint8_t* key, const uint8_t* iv, char* poly_key){
