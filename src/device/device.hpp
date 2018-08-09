@@ -47,6 +47,7 @@
 #include "crypto/crypto.h"
 #include "crypto/chacha.h"
 #include "ringct/rctTypes.h"
+#include "cryptonote_config.h"
 
 #ifndef USE_DEVICE_LEDGER
 #define USE_DEVICE_LEDGER 1
@@ -198,7 +199,7 @@ namespace hw {
         virtual bool  has_ki_cold_sync(void) const { return false; }
         virtual bool  has_tx_cold_sign(void) const { return false; }
 
-        virtual void  set_network_type(cryptonote::network_type) { }
+        virtual void  set_network_type(cryptonote::network_type network_type) { }
     } ;
 
     struct reset_mode {
