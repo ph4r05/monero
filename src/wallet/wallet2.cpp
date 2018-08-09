@@ -68,6 +68,7 @@ using namespace epee;
 #include "common/dns_utils.h"
 #include "ringct/rctSigs.h"
 #include "ringdb.h"
+#include "device/device_trezor.h"
 
 extern "C"
 {
@@ -3084,7 +3085,7 @@ bool wallet2::verify_password(const epee::wipeable_string& password)
 {
   // this temporary unlocking is necessary for Windows (otherwise the file couldn't be loaded).
   unlock_keys_file();
-  bool r = verify_password(m_keys_file, password, m_watch_only || m_multisig, m_account.get_device());
+  bool r = verify_password(m_keys_file, password, m_account.get_device().has_tx_cold_sign() || m_watch_only || m_multisig, m_account.get_device());
   lock_keys_file();
   return r;
 }
@@ -8409,6 +8410,69 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const crypton
 
   // if we made it this far, we're OK to actually send the transactions
   return ptx_vector;
+}
+//----------------------------------------------------------------------------------------------------
+bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_set &exported_txs, std::function<bool(const signed_tx_set &)> accept_func){
+  auto & hwdev = get_account().get_device();
+  if (!hwdev.has_tx_cold_sign()){
+    throw std::invalid_argument("Device does not support cold sign protocol");
+  }
+
+  unsigned_tx_set txs;
+  for (auto &tx: ptx_vector)
+  {
+    txs.txes.push_back(get_construction_data_with_decrypted_short_payment_id(tx, m_account.get_device()));
+  }
+  txs.transfers = m_transfers;
+
+  // TODO: another cold sign interface
+  auto tdev = dynamic_cast<::hw::trezor::device_trezor*>(std::addressof(hwdev));
+  tdev->tx_sign(this, txs, exported_txs);
+
+  LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
+  for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
+
+  if (accept_func && !accept_func(exported_txs))
+  {
+    LOG_PRINT_L1("Transactions rejected by callback");
+    return false;
+  }
+
+  // import key images
+  if (exported_txs.key_images.size() > m_transfers.size())
+  {
+    LOG_PRINT_L1("More key images returned that we know outputs for");
+    return false;
+  }
+
+  for (size_t i = 0; i < exported_txs.key_images.size(); ++i)
+  {
+    transfer_details &td = m_transfers[i];
+    if (td.m_key_image_known && !td.m_key_image_partial && td.m_key_image != exported_txs.key_images[i])
+      LOG_PRINT_L0("WARNING: imported key image differs from previously known key image at index " << i << ": trusting imported one");
+    td.m_key_image = exported_txs.key_images[i];
+    m_key_images[m_transfers[i].m_key_image] = i;
+    td.m_key_image_known = true;
+    td.m_key_image_partial = false;
+    m_pub_keys[m_transfers[i].get_public_key()] = i;
+  }
+
+  ptx = exported_txs.ptx;
+}
+//----------------------------------------------------------------------------------------------------
+uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
+  auto & hwdev = get_account().get_device();
+  if (!hwdev.has_ki_cold_sync()){
+    throw std::invalid_argument("Device does not support cold ki sync protocol");
+  }
+
+  // TODO: another cold sign interface
+  auto tdev = dynamic_cast<::hw::trezor::device_trezor*>(std::addressof(hwdev));
+
+  std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
+  tdev->ki_sync(this, m_transfers, ski);
+
+  return import_key_images(ski, spent, unspent);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_hard_fork_info(uint8_t version, uint64_t &earliest_height) const

@@ -199,6 +199,7 @@ namespace cryptonote
     bool verify(const std::vector<std::string> &args);
     bool export_key_images(const std::vector<std::string> &args);
     bool import_key_images(const std::vector<std::string> &args);
+    bool hw_key_images_sync(const std::vector<std::string> &args);
     bool export_outputs(const std::vector<std::string> &args);
     bool import_outputs(const std::vector<std::string> &args);
     bool show_transfer(const std::vector<std::string> &args);

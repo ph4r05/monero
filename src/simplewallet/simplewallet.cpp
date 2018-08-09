@@ -489,7 +489,7 @@ namespace
       LOG_ERROR("internal error: " << e.to_string());
       fail_msg_writer() << tr("internal error: ") << e.what();
     }
-    catch (const std::exception& e)
+    catch (const std::exception& e) // TODO: custom wallet exception handlers
     {
       LOG_ERROR("unexpected error: " << e.what());
       fail_msg_writer() << tr("unexpected error: ") << e.what();
@@ -2381,6 +2381,10 @@ simple_wallet::simple_wallet()
                            boost::bind(&simple_wallet::import_key_images, this, _1),
                            tr("import_key_images <file>"),
                            tr("Import a signed key images list and verify their spent status."));
+  m_cmd_binder.set_handler("hw_key_images_sync",
+                           boost::bind(&simple_wallet::import_key_images, this, _1),
+                           tr("hw_key_images_sync"),
+                           tr("Synchronizes key images with the hw wallet."));
   m_cmd_binder.set_handler("export_outputs",
                            boost::bind(&simple_wallet::export_outputs, this, _1),
                            tr("export_outputs <file>"),
@@ -4848,6 +4852,28 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       else
       {
         success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_monero_tx";
+      }
+    }
+    else if (m_wallet->get_account().get_device().has_tx_cold_sign())
+    {
+      try
+      {
+        tools::wallet2::signed_tx_set signed_tx;
+        if (!m_wallet->cold_sign_tx(ptx_vector, signed_tx, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
+          fail_msg_writer() << tr("Failed to cold sign transaction with HW wallet");
+          return true;
+        }
+
+        commit_or_save(signed_tx.ptx, m_do_not_relay);
+      }
+      catch (const std::exception& e)
+      {
+        handle_transfer_exception(std::current_exception(), is_daemon_trusted());
+      }
+      catch (...)
+      {
+        LOG_ERROR("Unknown error");
+        fail_msg_writer() << tr("unknown error");
       }
     }
     else if (m_wallet->watch_only())
@@ -7384,6 +7410,46 @@ bool simple_wallet::import_key_images(const std::vector<std::string> &args)
     {
       success_msg_writer() << "Signed key images imported to height " << height << ", "
           << print_money(spent) << " spent, " << print_money(unspent) << " unspent"; 
+    } else {
+      fail_msg_writer() << "Failed to import key images";
+    }
+  }
+  catch (const std::exception &e)
+  {
+    fail_msg_writer() << "Failed to import key images: " << e.what();
+    return true;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::hw_key_images_sync(const std::vector<std::string> &args)
+{
+  if (!m_wallet->key_on_device())
+  {
+    fail_msg_writer() << tr("command only supported by HW wallet");
+    return true;
+  }
+  if (!m_wallet->get_account().get_device().has_ki_cold_sync())
+  {
+    fail_msg_writer() << tr("hw wallet does not support cold KI sync");
+    return true;
+  }
+  if (!is_daemon_trusted())
+  {
+    fail_msg_writer() << tr("this command requires a trusted daemon. Enable with --trusted-daemon");
+    return true;
+  }
+
+  LOCK_IDLE_SCOPE();
+  try
+  {
+    uint64_t spent = 0, unspent = 0;
+    uint64_t height = m_wallet->cold_key_image_sync(spent, unspent);
+    if (height > 0)
+    {
+      success_msg_writer() << "Signed key images imported to height " << height << ", "
+          << print_money(spent) << " spent, " << print_money(unspent) << " unspent";
     } else {
       fail_msg_writer() << "Failed to import key images";
     }
