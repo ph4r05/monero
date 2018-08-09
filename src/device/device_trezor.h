@@ -305,7 +305,7 @@ namespace trezor {
       void tx_sign(::tools::wallet2 * wallet,
                    const tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
-                   std::shared_ptr<protocol::tx::Signer> signer);
+                   std::shared_ptr<protocol::tx::Signer> & signer);
 
       /**
        * Signs unsigned transaction with the Trezor.
