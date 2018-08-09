@@ -2382,7 +2382,7 @@ simple_wallet::simple_wallet()
                            tr("import_key_images <file>"),
                            tr("Import a signed key images list and verify their spent status."));
   m_cmd_binder.set_handler("hw_key_images_sync",
-                           boost::bind(&simple_wallet::import_key_images, this, _1),
+                           boost::bind(&simple_wallet::hw_key_images_sync, this, _1),
                            tr("hw_key_images_sync"),
                            tr("Synchronizes key images with the hw wallet."));
   m_cmd_binder.set_handler("export_outputs",
