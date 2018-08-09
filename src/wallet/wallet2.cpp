@@ -8457,7 +8457,7 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
     m_pub_keys[m_transfers[i].get_public_key()] = i;
   }
 
-  ptx = exported_txs.ptx;
+  return true;
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
