@@ -195,8 +195,8 @@ namespace hw {
 
         virtual bool  close_tx(void) = 0;
 
-        virtual bool  ki_cold_sync(void) const { return false; }
-        virtual bool  tx_cold_sign(void) const { return false; }
+        virtual bool  has_ki_cold_sync(void) const { return false; }
+        virtual bool  has_tx_cold_sign(void) const { return false; }
     } ;
 
     struct reset_mode {

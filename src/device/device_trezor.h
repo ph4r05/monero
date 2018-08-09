@@ -226,8 +226,8 @@ namespace trezor {
         return m_callback;
       }
 
-      bool  ki_cold_sync(void) const override { return true; }
-      bool  tx_cold_sign(void) const override { return true; }
+      bool  has_ki_cold_sync(void) const override { return true; }
+      bool  has_tx_cold_sign(void) const override { return true; }
 
       /* ======================================================================= */
       /*                              SETUP/TEARDOWN                             */
