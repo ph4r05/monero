@@ -226,7 +226,7 @@ namespace tx {
 
   void Signer::extract_payment_id(){
     const std::vector<uint8_t>& tx_extra = cur_tx().extra;
-    m_ct.tsx_data.clear_payment_id();
+    m_ct.tsx_data.set_payment_id("");
 
     std::vector<cryptonote::tx_extra_field> tx_extra_fields;
     cryptonote::parse_tx_extra(tx_extra, tx_extra_fields); // ok if partially parsed
@@ -263,6 +263,7 @@ namespace tx {
     assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
     tsx_data.set_is_bulletproof(false);
     tsx_data.set_is_multisig(false);
+    tsx_data.set_exp_tx_prefix_hash("");
 
     translate_dst_entry(tsx_data.mutable_change_dts(), std::addressof(tx.change_dts));
     for(auto & cur : tx.splitted_dsts){
