@@ -57,7 +57,14 @@ namespace hw {
         
         static const s_devices devices;
 
-        auto device = devices.registry.find(device_descriptor);
+        // Device descriptor can contain further specs after first :
+        auto delim = device_descriptor.find(":");
+        auto device_descriptor_lookup = device_descriptor;
+        if (delim != std::string::npos) {
+          device_descriptor_lookup = device_descriptor.substr(0, delim);
+        }
+
+        auto device = devices.registry.find(device_descriptor_lookup);
         if (device == devices.registry.end()) {
             MERROR("device not found in registry: '" << device_descriptor << "'\n" <<
                       "known devices:");
