@@ -48,7 +48,14 @@ namespace trezor {
     }
 
     bool device_trezor::set_name(const std::string & name) {
+      this->full_name = name;
       this->name = name;
+
+      auto delim = name.find(":");
+      if (delim != std::string::npos) {
+        this->name = name.substr(delim + 1);
+      }
+
       return true;
     }
 
