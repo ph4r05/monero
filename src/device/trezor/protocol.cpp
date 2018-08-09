@@ -216,7 +216,7 @@ namespace tx {
     translate_address(dst->mutable_addr(), std::addressof(src->addr));
   }
 
-  Signer::Signer(tools::wallet2 *wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx, size_t tx_idx) {
+  Signer::Signer(tools::wallet2 *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
     m_wallet2 = wallet2;
     m_unsigned_tx = std::move(unsigned_tx);
     m_tx_idx = tx_idx;

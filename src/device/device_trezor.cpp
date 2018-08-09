@@ -383,10 +383,9 @@ namespace trezor {
       AUTO_LOCK_CMD();
       require_connected();
 
-      std::shared_ptr<const tools::wallet2::unsigned_tx_set> unsigned_tx_ptr(std::addressof(unsigned_tx));
       size_t num_tx = unsigned_tx.txes.size();
 
-      signer = std::make_shared<protocol::tx::Signer>(wallet, unsigned_tx_ptr, idx);
+      signer = std::make_shared<protocol::tx::Signer>(wallet, std::addressof(unsigned_tx), idx);
       auto & cur_tx = unsigned_tx.txes[idx];
       auto num_sources = cur_tx.sources.size();
       auto num_outputs = cur_tx.splitted_dsts.size();

@@ -167,7 +167,7 @@ namespace tx {
     tools::wallet2 * m_wallet2;
 
     size_t m_tx_idx;
-    std::shared_ptr<const unsigned_tx_set> m_unsigned_tx;
+    const unsigned_tx_set * m_unsigned_tx;
 
     bool m_multisig;
 
@@ -178,7 +178,7 @@ namespace tx {
     void extract_payment_id();
 
   public:
-    Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx, size_t tx_idx = 0);
+    Signer(tools::wallet2 * wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx = 0);
 
     std::shared_ptr<messages::monero::MoneroTransactionInitRequest> step_init();
     void step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack);
