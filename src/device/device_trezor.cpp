@@ -319,6 +319,9 @@ namespace trezor {
 
 
     void device_trezor::tx_sign(::tools::wallet2 * wallet, const tools::wallet2::unsigned_tx_set & unsigned_tx){
+      AUTO_LOCK_CMD();
+      require_connected();
+
       std::shared_ptr<const tools::wallet2::unsigned_tx_set> unsigned_tx_ptr(std::addressof(unsigned_tx));
       size_t num_tx = unsigned_tx.txes.size();
 
