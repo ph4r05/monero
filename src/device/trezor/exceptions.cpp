@@ -2,7 +2,7 @@
 // Created by Dusan Klinec on 02/08/2018.
 //
 
-#include "exceptions.h"
+#include "exceptions.hpp"
 
 namespace hw {
 namespace trezor {

@@ -2,7 +2,7 @@
 // Created by Dusan Klinec on 29/07/2018.
 //
 
-#include "messages_map.h"
+#include "messages_map.hpp"
 #include "messages/messages.pb.h"
 #include "messages/messages-common.pb.h"
 #include "messages/messages-management.pb.h"

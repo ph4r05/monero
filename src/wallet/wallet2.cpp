@@ -68,7 +68,7 @@ using namespace epee;
 #include "common/dns_utils.h"
 #include "ringct/rctSigs.h"
 #include "ringdb.h"
-#include "device/device_trezor.h"
+#include "device/device_trezor.hpp"
 
 extern "C"
 {

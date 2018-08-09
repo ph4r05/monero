@@ -2,7 +2,7 @@
 // Created by Dusan Klinec on 06/08/2018.
 //
 
-#include "protocol.h"
+#include "protocol.hpp"
 #include "crypto/poly1305.h"
 #include <unordered_map>
 #include <set>

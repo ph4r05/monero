@@ -16,7 +16,7 @@
 #include "google/protobuf/descriptor.pb.h"
 
 #include "messages/messages.pb.h"
-#include "exceptions.h"
+#include "exceptions.hpp"
 
 namespace hw {
 namespace trezor {

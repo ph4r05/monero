@@ -57,7 +57,7 @@ if(PCSC_FOUND)
 endif()
 
 if(WITH_DEVICE_TREZOR)
-  set(device_sources ${device_sources} device_trezor.h)
+  set(device_sources ${device_sources} device_trezor.hpp)
 endif()
 
 set(device_private_headers)

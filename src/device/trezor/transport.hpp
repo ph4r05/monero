@@ -16,8 +16,8 @@
 #include <net/http_base.h>
 #include "net/http_client.h"
 #include "json.hpp"
-#include "exceptions.h"
-#include "messages_map.h"
+#include "exceptions.hpp"
+#include "messages_map.hpp"
 
 #include "messages/messages.pb.h"
 #include "messages/messages-common.pb.h"

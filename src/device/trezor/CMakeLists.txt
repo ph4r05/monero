@@ -41,10 +41,10 @@ set(TREZOR_PROTOB_CPP
 )
 
 set(trezor_headers
-        exceptions.h
-        messages_map.h
-        protocol.h
-        transport.h
+        exceptions.hpp
+        messages_map.hpp
+        protocol.hpp
+        transport.hpp
         ${TREZOR_PROTOB_H}
 )
 

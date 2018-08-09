@@ -5,8 +5,8 @@
 #ifndef MONERO_PROTOCOL_H
 #define MONERO_PROTOCOL_H
 
-#include "messages_map.h"
-#include "transport.h"
+#include "messages_map.hpp"
+#include "transport.hpp"
 #include "wallet/wallet2.h"
 
 namespace hw{

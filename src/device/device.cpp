@@ -32,7 +32,7 @@
 #ifdef HAVE_PCSC
 #include "device_ledger.hpp"
 #endif
-#include "device_trezor.h"
+#include "device_trezor.hpp"
 #include "misc_log_ex.h"
 
 
