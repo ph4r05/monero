@@ -99,6 +99,7 @@ if(Protobuf_FOUND)
             PUBLIC
             cncrypto
             ringct_basic
+            wallet
             ${OPENSSL_CRYPTO_LIBRARIES}
             ${PROTOBUF_LIBRARY}
             PRIVATE
