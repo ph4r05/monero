@@ -139,7 +139,7 @@ void keccak1600(const uint8_t *in, size_t inlen, uint8_t *md)
 #define IS_ALIGNED_64(p) (0 == (7 & ((const char*)(p) - (const char*)0)))
 #define KECCAK_PROCESS_BLOCK(st, block) { \
     for (int i_ = 0; i_ < KECCAK_BLOCKLEN; i_++){ \
-        st[i_] ^= ((uint64_t *) block)[i_]; \
+        ((char*)(st))[i_] ^= ((char*) (block))[i_]; \
     }; \
     keccakf(st, KECCAK_ROUNDS); }
 
