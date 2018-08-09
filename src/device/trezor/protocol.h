@@ -208,11 +208,11 @@ namespace tx {
     std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> step_final();
     void step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack);
 
-    bool in_memory(){
+    bool in_memory() const {
       return m_ct.in_memory;
     }
 
-    bool is_simple(){
+    bool is_simple() const {
       if (!m_ct.rv){
         throw new std::invalid_argument("RV not initialized");
       }
@@ -220,7 +220,7 @@ namespace tx {
       return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;
     }
 
-    bool is_bulletproof(){
+    bool is_bulletproof() const {
       if (!m_ct.rv){
         throw new std::invalid_argument("RV not initialized");
       }
@@ -228,6 +228,9 @@ namespace tx {
       return tp == rct::RCTTypeSimpleBulletproof || tp == rct::RCTTypeFullBulletproof;
     }
 
+    const TData & tdata() const {
+      return m_ct;
+    }
   };
 
 }
