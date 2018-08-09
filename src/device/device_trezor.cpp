@@ -336,7 +336,7 @@ namespace trezor {
         std::shared_ptr<protocol::tx::Signer> signer;
         tx_sign(wallet, unsigned_tx, tx_idx, signer);
 
-        auto cdata = signer->tdata();
+        auto & cdata = signer->tdata();
         // TODO: store cdata somewhere to the wallet
 
         // Pending tx reconstruction
