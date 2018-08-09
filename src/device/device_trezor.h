@@ -296,12 +296,25 @@ namespace trezor {
                    protocol::exported_key_image & ski);
 
       /**
+       * Signs particular transaction idx in the unsigned set, keeps state in the signer
+       * @param wallet
+       * @param unsigned_tx
+       * @param idx
+       * @param signer
+       */
+      void tx_sign(::tools::wallet2 * wallet,
+                   const tools::wallet2::unsigned_tx_set & unsigned_tx,
+                   size_t idx,
+                   std::shared_ptr<protocol::tx::Signer> signer);
+
+      /**
        * Signs unsigned transaction with the Trezor.
        * @param wallet
        * @param unsigned_tx
        */
       void tx_sign(::tools::wallet2 * wallet,
-                   const tools::wallet2::unsigned_tx_set & unsigned_tx);
+                   const tools::wallet2::unsigned_tx_set & unsigned_tx,
+                   tools::wallet2::signed_tx_set & signed_tx);
     };
 
 #endif
