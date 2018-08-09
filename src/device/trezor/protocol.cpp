@@ -456,8 +456,9 @@ namespace tx {
     }
 
     // RctSig
+    auto num_sources = m_ct.tx_data.sources.size();
     if (is_simple()){
-      auto dst = m_ct.rv->pseudoOuts;
+      auto & dst = m_ct.rv->pseudoOuts;
       if (is_bulletproof()){
         dst = m_ct.rv->p.pseudoOuts;
       }
@@ -467,6 +468,11 @@ namespace tx {
         dst.emplace_back();
         string_to_key(dst.back(), m_ct.pseudo_outs[i]);
       }
+
+      m_ct.rv->mixRing.resize(num_sources);
+    } else {
+      m_ct.rv->mixRing.resize(m_ct.tsx_data.mixin());
+      m_ct.rv->mixRing[0].resize(num_sources);
     }
 
     // Range proof
