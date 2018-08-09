@@ -347,7 +347,73 @@ namespace trezor {
           signer->step_set_input_ack(ack);
         }
 
-        // Step: Permute
+        // Step: sort
+        auto perm_req = signer->step_permutation();
+        if (perm_req){
+          req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+          req_msg->mutable_input_permutation()->CopyFrom(*perm_req);
+
+          auto perm_ack = this->client_exchange<messages::monero::MoneroTransactionInputsPermutationAck>(req_msg);
+          signer->step_permutation_ack(perm_ack);
+        }
+
+        // Step: input_vini
+        if (!signer->in_memory()){
+          for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
+            auto src = signer->step_set_vini_input(cur_src);
+            auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+            req->mutable_input_vini()->CopyFrom(*src);
+
+            auto ack = this->client_exchange<messages::monero::MoneroTransactionInputViniAck>(req);
+            signer->step_set_vini_input_ack(ack);
+          }
+        }
+
+        // Step: outputs
+        for(size_t cur_dst = 0; cur_dst < num_outputs; ++cur_dst){
+          auto src = signer->step_set_output(cur_dst);
+          auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+          req->mutable_set_output()->CopyFrom(*src);
+
+          auto ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(req);
+          signer->step_set_output_ack(ack);
+        }
+
+        // Step: all outs set
+        auto all_out_set = signer->step_all_outs_set();
+        req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+        req_msg->mutable_all_out_set()->CopyFrom(*all_out_set);
+
+        auto ack_all_out_set = this->client_exchange<messages::monero::MoneroTransactionAllOutSetAck>(req_msg);
+        signer->step_all_outs_set_ack(ack_all_out_set);
+
+        // Step: MlsagDone
+        auto pre_mlsag_done = signer->step_pre_mlsag_done();
+        req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+        req_msg->mutable_mlsag_done()->CopyFrom(*pre_mlsag_done);
+
+        auto ack_pre_mlsag_done = this->client_exchange<messages::monero::MoneroTransactionMlsagDoneAck>(req_msg);
+        signer->step_pre_mlsag_done_ack(ack_pre_mlsag_done, *this);
+
+        // Step: sign each input
+        for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
+          auto src = signer->step_sign_input(cur_src);
+          auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+          req->mutable_sign_input()->CopyFrom(*src);
+
+          auto ack_sign = this->client_exchange<messages::monero::MoneroTransactionSignInputAck>(req);
+          signer->step_sign_input_ack(ack_sign);
+        }
+
+        // Step: final
+        auto final_msg = signer->step_pre_mlsag_done();
+        req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
+        req_msg->mutable_final_msg()->CopyFrom(*final_msg);
+
+        auto ack_final = this->client_exchange<messages::monero::MoneroTransactionFinalAck>(req_msg);
+        signer->step_final_ack(ack_final);
+
+        // TODO: store tsx data somewhere...
 
       }
 

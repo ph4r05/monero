@@ -52,6 +52,11 @@ namespace protocol{
     return r;
   }
 
+  template<typename T>
+  bool cn_deserialize(const std::string & str, T & dst){
+    return cn_deserialize(str.data(), str.size(), dst);
+  }
+
 // Crypto / encryption
 namespace crypto {
   /**
@@ -138,19 +143,22 @@ namespace tx {
     std::vector<hmac_t> tx_in_hmacs;
     std::vector<hmac_t> tx_out_entr_hmacs;
     std::vector<hmac_t> tx_out_hmacs;
-    std::vector<hmac_t> tx_out_rsigs;
-    std::vector<hmac_t> tx_out_pk;
-    std::vector<hmac_t> tx_out_ecdh;
+    std::vector<rct::rangeSig> tx_out_rsigs;
+    std::vector<rct::ctkey> tx_out_pk;
+    std::vector<rct::ecdhTuple> tx_out_ecdh;
     std::vector<size_t> source_permutation;
     std::vector<std::string> alphas;
     std::vector<std::string> spend_encs;
     std::vector<std::string> pseudo_outs;
     std::vector<std::string> pseudo_outs_hmac;
     std::vector<std::string> couts;
+    std::vector<std::string> couts_dec;
     std::string tx_prefix_hash;
     std::string enc_salt1;
     std::string enc_salt2;
     std::vector<std::string> enc_keys;
+
+    std::shared_ptr<rct::rctSig> rv;
   };
 
   class Signer {
@@ -161,12 +169,13 @@ namespace tx {
     size_t m_tx_idx;
     std::shared_ptr<const unsigned_tx_set> m_unsigned_tx;
 
+    bool m_multisig;
+
     const tx_construction_data & cur_tx(){
       return m_unsigned_tx->txes[m_tx_idx];
     }
 
     void extract_payment_id();
-
 
   public:
     Signer(tools::wallet2 * wallet2, std::shared_ptr<const unsigned_tx_set> unsigned_tx, size_t tx_idx = 0);
@@ -178,8 +187,47 @@ namespace tx {
     void step_set_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetInputAck> ack);
 
     void sort_ki();
+    std::shared_ptr<messages::monero::MoneroTransactionInputsPermutationRequest> step_permutation();
+    void step_permutation_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputsPermutationAck> ack);
 
-    void sign();
+    std::shared_ptr<messages::monero::MoneroTransactionInputViniRequest> step_set_vini_input(size_t idx);
+    void step_set_vini_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputViniAck> ack);
+
+    std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> step_set_output(size_t idx);
+    void step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack);
+
+    std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> step_all_outs_set();
+    void step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack);
+
+    std::shared_ptr<messages::monero::MoneroTransactionMlsagDoneRequest> step_pre_mlsag_done();
+    void step_pre_mlsag_done_ack(std::shared_ptr<const messages::monero::MoneroTransactionMlsagDoneAck> ack, hw::device &hwdev);
+
+    std::shared_ptr<messages::monero::MoneroTransactionSignInputRequest> step_sign_input(size_t idx);
+    void step_sign_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSignInputAck> ack);
+
+    std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> step_final(size_t idx);
+    void step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack);
+
+    bool in_memory(){
+      return m_ct.in_memory;
+    }
+
+    bool is_simple(){
+      if (!m_ct.rv){
+        throw new std::invalid_argument("RV not initialized");
+      }
+      auto tp = m_ct.rv->type;
+      return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;
+    }
+
+    bool is_bulletproof(){
+      if (!m_ct.rv){
+        throw new std::invalid_argument("RV not initialized");
+      }
+      auto tp = m_ct.rv->type;
+      return tp == rct::RCTTypeSimpleBulletproof || tp == rct::RCTTypeFullBulletproof;
+    }
+
   };
 
 }

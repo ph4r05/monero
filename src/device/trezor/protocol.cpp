@@ -214,6 +214,7 @@ namespace tx {
     m_unsigned_tx = std::move(unsigned_tx);
     m_tx_idx = tx_idx;
     m_ct.tx_data = cur_tx();
+    m_multisig = false;
   }
 
   void Signer::extract_payment_id(){
@@ -334,10 +335,216 @@ namespace tx {
     });
   }
 
-  void Signer::sign(){
-    this->step_init();
+  std::shared_ptr<messages::monero::MoneroTransactionInputsPermutationRequest> Signer::step_permutation(){
+    sort_ki();
 
+    if (!in_memory()){
+      return nullptr;
+    }
+
+    auto res = std::make_shared<messages::monero::MoneroTransactionInputsPermutationRequest>();
+    assign_to_repeatable(res->mutable_perm(), m_ct.source_permutation.begin(), m_ct.source_permutation.end());
+
+    return res;
   }
+
+  void Signer::step_permutation_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputsPermutationAck> ack){
+    if (!in_memory()){
+      return;
+    }
+  }
+
+  std::shared_ptr<messages::monero::MoneroTransactionInputViniRequest> Signer::step_set_vini_input(size_t idx){
+    if (!in_memory()){
+      return nullptr;
+    }
+
+    m_ct.cur_input_idx = idx;
+    auto tx = m_ct.tx_data;
+    auto res = std::make_shared<messages::monero::MoneroTransactionInputViniRequest>();
+    res->set_src_entr(cryptonote::t_serializable_object_to_blob(tx.sources[idx]));
+    res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
+    res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
+    if (!in_memory()) {
+      res->set_pseudo_out(m_ct.pseudo_outs[idx]);
+      res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
+    }
+
+    return res;
+  }
+
+  void Signer::step_set_vini_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputViniAck> ack){
+    if (!in_memory()){
+      return;
+    }
+  }
+
+
+  std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> Signer::step_set_output(size_t idx){
+    m_ct.cur_output_idx = idx;
+    auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
+    res->set_dst_entr(cryptonote::t_serializable_object_to_blob(m_ct.tx_data.splitted_dsts[idx]));
+    res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
+    return res;
+  }
+
+  void Signer::step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack){
+    cryptonote::tx_out tx_out;
+    rct::rangeSig range_sig;
+    rct::ctkey out_pk;
+    rct::ecdhTuple ecdh;
+
+    if (!cn_deserialize(ack->tx_out(), tx_out)){
+      throw exc::ProtocolException("Cannot deserialize vout[i]");
+    }
+
+    if (!cn_deserialize(ack->rsig(), range_sig)){
+      throw exc::ProtocolException("Cannot deserialize rangesig");
+    }
+
+    if (!cn_deserialize(ack->out_pk(), out_pk)){ // TODO: may be problem, does not have ser?
+      throw exc::ProtocolException("Cannot deserialize out_pk");
+    }
+
+    if (!cn_deserialize(ack->ecdh_info(), ecdh)){
+      throw exc::ProtocolException("Cannot deserialize ecdhtuple");
+    }
+
+    m_ct.tx.vout.emplace_back(tx_out);
+    m_ct.tx_out_hmacs.push_back(ack->vouti_hmac());
+    m_ct.tx_out_rsigs.emplace_back(range_sig);
+    m_ct.tx_out_pk.emplace_back(out_pk);
+    m_ct.tx_out_ecdh.emplace_back(ecdh);
+
+    if (!rct::verRange(out_pk.mask, m_ct.tx_out_rsigs.back())){
+      throw exc::ProtocolException("Returned range signature is invalid");
+    }
+  }
+
+  std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> Signer::step_all_outs_set(){
+    return std::make_shared<messages::monero::MoneroTransactionAllOutSetRequest>();
+  }
+
+  void Signer::step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack){
+    m_ct.rv = std::make_shared<rct::rctSig>();
+    m_ct.rv->txnFee = ack->rv().txn_fee();
+    m_ct.rv->type = static_cast<uint8_t>(ack->rv().rv_type());
+    string_to_key(m_ct.rv->message, ack->rv().message());
+
+    // Extra copy
+    m_ct.tx.extra.clear();
+    auto extra = ack->extra();
+    auto extra_data = extra.data();
+    for(size_t i = 0; i < extra.size(); ++i){
+      m_ct.tx.extra.push_back(static_cast<uint8_t>(extra_data[i]));
+    }
+
+    ::crypto::hash tx_prefix_hash;
+    cryptonote::get_transaction_prefix_hash(m_ct.tx, tx_prefix_hash);
+    m_ct.tx_prefix_hash = key_to_string(tx_prefix_hash);
+    if (!crypto::ct_equal(tx_prefix_hash.data, ack->tx_prefix_hash().data(), 32)){
+      throw exc::proto::SecurityException("Transaction prefix has does not match to the computed value");
+    }
+
+    // RctSig
+    if (is_simple()){
+      auto dst = m_ct.rv->pseudoOuts;
+      if (is_bulletproof()){
+        dst = m_ct.rv->p.pseudoOuts;
+      }
+
+      dst.clear();
+      for(size_t i = 0; i < m_ct.pseudo_outs.size(); ++i){
+        dst.emplace_back();
+        string_to_key(dst.back(), m_ct.pseudo_outs[i]);
+      }
+    }
+
+    // Range proof
+    for(size_t i = 0; i < m_ct.tx_out_rsigs.size(); ++i){
+      m_ct.rv->p.rangeSigs.push_back(m_ct.tx_out_rsigs[i]);
+      m_ct.rv->outPk.push_back(m_ct.tx_out_pk[i]);
+      m_ct.rv->ecdhInfo.push_back(m_ct.tx_out_ecdh[i]);
+    }
+  }
+
+  std::shared_ptr<messages::monero::MoneroTransactionMlsagDoneRequest> Signer::step_pre_mlsag_done(){
+    return std::make_shared<messages::monero::MoneroTransactionMlsagDoneRequest>();
+  }
+
+  void Signer::step_pre_mlsag_done_ack(std::shared_ptr<const messages::monero::MoneroTransactionMlsagDoneAck> ack, hw::device &hwdev){
+    rct::key hash_computed = rct::get_pre_mlsag_hash(*(m_ct.rv), hwdev);
+    auto & hash = ack->full_message_hash();
+
+    if (hash.size() != 32){
+      throw exc::ProtocolException("Returned mlsag hash has invalid size");
+    }
+
+    if (!crypto::ct_equal(reinterpret_cast<const char *>(hash_computed.bytes), hash.data(), 32)){
+      throw exc::proto::SecurityException("Computed MLSAG does not match");
+    }
+  }
+
+  std::shared_ptr<messages::monero::MoneroTransactionSignInputRequest> Signer::step_sign_input(size_t idx){
+    m_ct.cur_input_idx = idx;
+
+    auto res = std::make_shared<messages::monero::MoneroTransactionSignInputRequest>();
+    res->set_src_entr(cryptonote::t_serializable_object_to_blob(m_ct.tx_data.sources[idx]));
+    res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
+    res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
+    res->set_alpha_enc(m_ct.alphas[idx]);
+    res->set_spend_enc(m_ct.spend_encs[idx]);
+    if (!in_memory()){
+      res->set_pseudo_out(m_ct.pseudo_outs[idx]);
+      res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
+    }
+    return res;
+  }
+
+  void Signer::step_sign_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSignInputAck> ack){
+    rct::mgSig mg;
+    if (!cn_deserialize(ack->signature(), mg)){
+      throw exc::ProtocolException("Cannot deserialize mg[i]");
+    }
+
+    m_ct.rv->p.MGs.push_back(mg);
+    m_ct.couts.push_back(ack->cout());
+  }
+
+  std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> Signer::step_final(size_t idx){
+    m_ct.tx.rct_signatures = *(m_ct.rv);
+    return std::make_shared<messages::monero::MoneroTransactionFinalRequest>();
+  }
+
+  void Signer::step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack){
+    if (m_multisig){
+      auto & cout_key = ack->cout_key();
+      for(auto & cur : m_ct.couts){
+        if (cur.size() != 12 + 32){
+          throw std::invalid_argument("Encrypted cout has invalid length");
+        }
+
+        char buff[32];
+        auto data = cur.data();
+
+        crypto::chacha::decrypt(data + 12, 32, reinterpret_cast<const uint8_t *>(cout_key.data()), reinterpret_cast<const uint8_t *>(data), buff);
+        m_ct.couts_dec.emplace_back(buff, 32);
+      }
+    }
+
+    m_ct.enc_salt1 = ack->salt();
+    m_ct.enc_salt2 = ack->rand_mult();
+
+    m_ct.enc_keys.clear();
+    auto & enc_keys = ack->tx_enc_keys();
+    auto enc_keys_data = enc_keys.data();
+    size_t num_keys = enc_keys.size() / 32;
+
+    for(size_t idx = 0; idx < num_keys; ++idx){
+      m_ct.enc_keys.emplace_back(enc_keys_data + (idx*32), 32);
+    }
+  }
+
 
 }
 
