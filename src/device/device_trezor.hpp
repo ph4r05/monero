@@ -71,7 +71,7 @@ namespace trezor {
   /**
    * Main device
    */
-  class device_trezor : public hw::core::device_default, hw::device_cold {
+  class device_trezor : public hw::core::device_default, public hw::device_cold {
     private:
       // Locker for concurrent access
       mutable boost::recursive_mutex  device_locker;
