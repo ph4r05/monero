@@ -32,7 +32,6 @@
 #ifdef HAVE_PCSC
 #include "device_ledger.hpp"
 #endif
-#include "device_trezor.hpp"
 #include "misc_log_ex.h"
 
 
@@ -50,8 +49,13 @@ namespace hw {
     }
 
     bool device_registry::register_device(const std::string & device_name, device * hw_device){
-        auto res = registry.insert(std::make_pair(device_name, std::unique_ptr<device>(hw_device)));
-        return res.second;
+        auto search = registry.find(device_name);
+        if (search != registry.end()){
+            return false;
+        }
+
+        registry.insert(std::make_pair(device_name, std::unique_ptr<device>(hw_device)));
+        return true;
     }
 
     device& device_registry::get_device(const std::string & device_descriptor){
@@ -79,6 +83,14 @@ namespace hw {
         }
 
         return registry->get_device(device_descriptor);
+    }
+
+    bool register_device(const std::string & device_name, device * hw_device){
+        if (!registry){
+            registry.reset(new device_registry());
+        }
+
+        return registry->register_device(device_name, hw_device);
     }
 
 }

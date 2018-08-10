@@ -27,32 +27,34 @@
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 set(TREZOR_PROTOB_H
-        messages/messages.pb.h
-        messages/messages-common.pb.h
-        messages/messages-management.pb.h
-        messages/messages-monero.pb.h
+        trezor/messages/messages.pb.h
+        trezor/messages/messages-common.pb.h
+        trezor/messages/messages-management.pb.h
+        trezor/messages/messages-monero.pb.h
 )
 
 set(TREZOR_PROTOB_CPP
-        messages/messages.pb.cc
-        messages/messages-common.pb.cc
-        messages/messages-management.pb.cc
-        messages/messages-monero.pb.cc
+        trezor/messages/messages.pb.cc
+        trezor/messages/messages-common.pb.cc
+        trezor/messages/messages-management.pb.cc
+        trezor/messages/messages-monero.pb.cc
 )
 
 set(trezor_headers
-        exceptions.hpp
-        messages_map.hpp
-        protocol.hpp
-        transport.hpp
+        trezor/exceptions.hpp
+        trezor/messages_map.hpp
+        trezor/protocol.hpp
+        trezor/transport.hpp
+        device_trezor.hpp
         ${TREZOR_PROTOB_H}
 )
 
 set(trezor_sources
-        exceptions.cpp
-        messages_map.cpp
-        protocol.cpp
-        transport.cpp
+        trezor/exceptions.cpp
+        trezor/messages_map.cpp
+        trezor/protocol.cpp
+        trezor/transport.cpp
+        device_trezor.cpp
         ${TREZOR_PROTOB_CPP}
 )
 
@@ -66,7 +68,7 @@ find_package(Protobuf)  # REQUIRED
 if(Protobuf_FOUND)
 
     # Try to regenerate messages on cmake
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../../external/trezor-common/protob/messages.proto")
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../external/trezor-common/protob/messages.proto")
         message(WARNING "Trezor-common submodule is not loaded. "
                         "Try running git submodule init && git submotule update.")
     else()
@@ -76,10 +78,10 @@ if(Protobuf_FOUND)
             set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
         endif()
 
-        execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
+        execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
         if(RET)
             message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
-                            "OUT: ${OUT}, ERR: {ERR}."
+                            "OUT: ${OUT}, ERR: ${ERR}."
                             "Please read src/device/trezor/tools/README.md")
         else()
             message(STATUS "Trezor protobuf messages regenerated ${OUT}")
@@ -97,9 +99,12 @@ if(Protobuf_FOUND)
 
     target_link_libraries(device_trezor
             PUBLIC
+            device
             cncrypto
             ringct_basic
-            ${OPENSSL_CRYPTO_LIBRARIES}
+            cryptonote_core
+            common
+            ${Boost_CHRONO_LIBRARY}
             ${PROTOBUF_LIBRARY}
             PRIVATE
             ${EXTRA_LIBRARIES})

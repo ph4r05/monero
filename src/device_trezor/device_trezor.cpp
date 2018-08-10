@@ -20,13 +20,23 @@ namespace trezor {
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "device.trezor"
 
+#define HW_TREZOR_NAME "Trezor"
+
     static device_trezor *trezor_device = nullptr;
-    void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
+    static device_trezor *ensure_trezor_device(){
       if (!trezor_device) {
         trezor_device = new device_trezor();
-        trezor_device->set_name("Trezor");
+        trezor_device->set_name(HW_TREZOR_NAME);
       }
-      registry.insert(std::make_pair("Trezor", std::unique_ptr<device>(trezor_device)));
+      return trezor_device;
+    }
+
+    void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
+      registry.insert(std::make_pair(HW_TREZOR_NAME, std::unique_ptr<device>(ensure_trezor_device())));
+    }
+
+    void register_all() {
+      hw::register_device(HW_TREZOR_NAME, ensure_trezor_device());
     }
 
     const uint32_t device_trezor::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000, 0, 0};

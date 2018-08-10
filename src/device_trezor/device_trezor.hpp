@@ -8,9 +8,9 @@
 
 #include <cstddef>
 #include <string>
-#include "device.hpp"
-#include "device_default.hpp"
-#include "device_cold.hpp"
+#include "device/device.hpp"
+#include "device/device_default.hpp"
+#include "device/device_cold.hpp"
 #include <boost/scope_exit.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -33,6 +33,7 @@
 namespace hw {
 namespace trezor {
 
+  void register_all();
   void register_all(std::map<std::string, std::unique_ptr<device>> &registry);
 
 #if WITH_DEVICE_TREZOR

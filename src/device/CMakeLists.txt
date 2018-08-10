@@ -26,8 +26,6 @@
 # STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 # THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-add_subdirectory(trezor)
-
 set(device_sources
   device.cpp
   device_default.cpp
@@ -37,13 +35,6 @@ set(device_sources
 
 if(PCSC_FOUND)
   set(device_sources ${device_sources} device_ledger.cpp)
-endif()
-
-if(WITH_DEVICE_TREZOR)
-  add_definitions(-DWITH_DEVICE_TREZOR=1)
-  set(device_sources ${device_sources} device_trezor.cpp)
-else()
-  add_definitions(-DWITH_DEVICE_TREZOR=0)
 endif()
 
 
@@ -58,9 +49,6 @@ if(PCSC_FOUND)
   set(device_headers ${device_headers} device_ledger.hpp)
 endif()
 
-if(WITH_DEVICE_TREZOR)
-  set(device_sources ${device_sources} device_trezor.hpp)
-endif()
 
 set(device_private_headers)
 
@@ -72,8 +60,7 @@ else()
 endif()
 
 monero_private_headers(device
-  ${device_private_headers}
-  ${PROTOBUF_INCLUDE_DIR})
+  ${device_private_headers})
 
 monero_add_library(device
   ${device_sources}
@@ -85,9 +72,7 @@ target_link_libraries(device
     ${PCSC_LIBRARIES}
     cncrypto
     ringct_basic
-    device_trezor
     ${OPENSSL_CRYPTO_LIBRARIES}
-    ${PROTOBUF_LIBRARY}
   PRIVATE
     ${Blocks}
     ${EXTRA_LIBRARIES})

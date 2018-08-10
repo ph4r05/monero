@@ -1220,6 +1220,8 @@ namespace tools
     crypto::chacha_key get_ringdb_key();
     void cache_ringdb_key();
     void clear_ringdb_key();
+    void register_devices();
+    hw::device& lookup_device(const std::string & device_descriptor);
 
     bool get_output_distribution(uint64_t &start_height, std::vector<uint64_t> &distribution);
 
@@ -1323,6 +1325,7 @@ namespace tools
 
     uint64_t m_last_block_reward;
     std::unique_ptr<tools::file_locker> m_keys_file_locker;
+    bool m_devices_registered;
   };
 }
 BOOST_CLASS_VERSION(tools::wallet2, 25)

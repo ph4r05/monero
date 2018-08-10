@@ -226,6 +226,7 @@ namespace hw {
 
     static std::unique_ptr<device_registry> registry;
 
-    device& get_device(const std::string device_descriptor) ;
+    device& get_device(const std::string device_descriptor);
+    bool register_device(const std::string & device_name, device * hw_device);
 }
 

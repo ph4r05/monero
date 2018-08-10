@@ -69,6 +69,7 @@ using namespace epee;
 #include "ringct/rctSigs.h"
 #include "ringdb.h"
 #include "device/device_cold.hpp"
+#include "device_trezor/device_trezor.hpp"
 
 extern "C"
 {
@@ -881,7 +882,7 @@ bool wallet2::get_multisig_seed(std::string& seed, const epee::wipeable_string &
 bool wallet2::reconnect_device()
 {
   bool r = true;
-  hw::device &hwdev = hw::get_device(m_device_name);
+  hw::device &hwdev = lookup_device(m_device_name);
   hwdev.set_name(m_device_name);
   hwdev.set_network_type(m_nettype);
   r = hwdev.init();
@@ -3087,7 +3088,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
   r = epee::serialization::load_t_from_binary(m_account, account_data);
   if (r && m_key_on_device) {
     LOG_PRINT_L0("Account on device. Initing device...");
-    hw::device &hwdev = hw::get_device(m_device_name);
+    hw::device &hwdev = lookup_device(m_device_name);
     hwdev.set_name(m_device_name);
     hwdev.set_network_type(m_nettype);
     hwdev.init();
@@ -5891,6 +5892,19 @@ void wallet2::clear_ringdb_key()
 {
   MINFO("clearing ringdb key");
   m_ringdb_key = boost::none;
+}
+
+void wallet2::register_devices(){
+  hw::trezor::register_all();
+}
+
+hw::device& wallet2::lookup_device(const std::string & device_descriptor){
+  if (!m_devices_registered){
+    m_devices_registered = true;
+    register_devices();
+  }
+
+  return hw::get_device(device_descriptor);
 }
 
 bool wallet2::add_rings(const crypto::chacha_key &key, const cryptonote::transaction_prefix &tx)
