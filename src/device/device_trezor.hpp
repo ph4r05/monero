@@ -296,7 +296,7 @@ namespace trezor {
        * @param transfers
        * @param ski
        */
-      void ki_sync(::tools::wallet2 * wallet,
+      void ki_sync(wallet_shim * wallet,
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
 
@@ -307,7 +307,7 @@ namespace trezor {
        * @param idx
        * @param signer
        */
-      void tx_sign(::tools::wallet2 * wallet,
+      void tx_sign(wallet_shim * wallet,
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
                    std::shared_ptr<protocol::tx::Signer> & signer);
@@ -317,7 +317,7 @@ namespace trezor {
        * @param wallet
        * @param unsigned_tx
        */
-      void tx_sign(::tools::wallet2 * wallet,
+      void tx_sign(wallet_shim * wallet,
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                    ::tools::wallet2::signed_tx_set & signed_tx) override;
     };

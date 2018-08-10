@@ -6,9 +6,15 @@
 #define MONERO_DEVICE_COLD_H
 
 #include "wallet/wallet2.h"
+#include <boost/function.hpp>
 
 
 namespace hw {
+
+  typedef struct wallet_shim {
+    boost::function<crypto::public_key (const tools::wallet2::transfer_details &td)> get_tx_pub_key_from_received_outs;
+  } wallet_shim;
+
   class device_cold {
   public:
 
@@ -20,7 +26,7 @@ namespace hw {
      * @param transfers
      * @param ski
      */
-    virtual void ki_sync(::tools::wallet2 * wallet,
+    virtual void ki_sync(wallet_shim * wallet,
                  const std::vector<::tools::wallet2::transfer_details> & transfers,
                  exported_key_image & ski) =0;
 
@@ -30,7 +36,7 @@ namespace hw {
      * @param unsigned_tx
      * @param signed_tx
      */
-    virtual void tx_sign(::tools::wallet2 * wallet,
+    virtual void tx_sign(wallet_shim * wallet,
                  const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                  ::tools::wallet2::signed_tx_set & signed_tx) =0;
   };

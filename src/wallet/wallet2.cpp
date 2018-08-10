@@ -8461,7 +8461,12 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   txs.transfers = m_transfers;
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
-  dev_cold->tx_sign(this, txs, exported_txs);
+
+  hw::wallet_shim wallet_shim {
+    .get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, this, _1);
+  };
+
+  dev_cold->tx_sign(&wallet_shim, txs, exported_txs);
 
   LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
   for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
@@ -8503,7 +8508,11 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
   auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
 
   std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
-  dev_cold->ki_sync(this, m_transfers, ski);
+  hw::wallet_shim wallet_shim {
+      .get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, this, _1);
+  };
+
+  dev_cold->ki_sync(&wallet_shim, m_transfers, ski);
 
   return import_key_images(ski, spent, unspent);
 }

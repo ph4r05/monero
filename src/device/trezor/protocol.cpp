@@ -119,7 +119,7 @@ namespace chacha {
 // Key image sync
 namespace ki {
 
-  bool key_image_data(tools::wallet2 * wallet,
+  bool key_image_data(wallet_shim * wallet,
                       const std::vector<tools::wallet2::transfer_details> & transfers,
                       std::vector<MoneroTransferDetails> & res)
   {
@@ -216,7 +216,7 @@ namespace tx {
     translate_address(dst->mutable_addr(), std::addressof(src->addr));
   }
 
-  Signer::Signer(tools::wallet2 *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
+  Signer::Signer(wallet_shim *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
     m_wallet2 = wallet2;
     m_unsigned_tx = std::move(unsigned_tx);
     m_tx_idx = tx_idx;

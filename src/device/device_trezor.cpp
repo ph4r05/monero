@@ -287,7 +287,7 @@ namespace trezor {
       return response;
     }
 
-    void device_trezor::ki_sync(tools::wallet2 * wallet,
+    void device_trezor::ki_sync(wallet_shim * wallet,
                                 const std::vector<tools::wallet2::transfer_details> & transfers,
                                 hw::device_cold::exported_key_image & ski)
     {
@@ -350,7 +350,7 @@ namespace trezor {
     }
 
 
-    void device_trezor::tx_sign(::tools::wallet2 * wallet,
+    void device_trezor::tx_sign(wallet_shim * wallet,
                                 const tools::wallet2::unsigned_tx_set & unsigned_tx,
                                 tools::wallet2::signed_tx_set & signed_tx)
     {
@@ -401,7 +401,7 @@ namespace trezor {
       }
     }
 
-    void device_trezor::tx_sign(::tools::wallet2 * wallet,
+    void device_trezor::tx_sign(wallet_shim * wallet,
                    const tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
                    std::shared_ptr<protocol::tx::Signer> & signer)
