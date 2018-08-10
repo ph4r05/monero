@@ -214,6 +214,18 @@ namespace hw {
         ~reset_mode() { hwref.set_mode(hw::device::NONE);}
     };
 
+    class device_registry {
+    private:
+      std::map<std::string, std::unique_ptr<device>> registry;
+
+    public:
+      device_registry();
+      bool register_device(const std::string & device_name, device * hw_device);
+      device& get_device(const std::string & device_descriptor);
+    };
+
+    static std::unique_ptr<device_registry> registry;
+
     device& get_device(const std::string device_descriptor) ;
 }
 

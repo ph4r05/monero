@@ -40,41 +40,45 @@ namespace hw {
     
     /* ======================================================================= */
     /*  SETUP                                                                  */
-    /* ======================================================================= */   
-    device& get_device(const std::string device_descriptor) {
-        
-        struct s_devices {
-            std::map<std::string, std::unique_ptr<device>> registry;
-            s_devices() : registry() {
-                hw::core::register_all(registry);
-                #ifdef HAVE_PCSC
-                hw::ledger::register_all(registry); 
-                #endif
-                hw::trezor::register_all(registry);
+    /* ======================================================================= */
 
-           };
-        };
-        
-        static const s_devices devices;
+    device_registry::device_registry(){
+        hw::core::register_all(registry);
+        #ifdef HAVE_PCSC
+        hw::ledger::register_all(registry);
+        #endif
+    }
 
+    bool device_registry::register_device(const std::string & device_name, device * hw_device){
+        auto res = registry.insert(std::make_pair(device_name, std::unique_ptr<device>(hw_device)));
+        return res.second;
+    }
+
+    device& device_registry::get_device(const std::string & device_descriptor){
         // Device descriptor can contain further specs after first :
         auto delim = device_descriptor.find(':');
         auto device_descriptor_lookup = device_descriptor;
         if (delim != std::string::npos) {
-          device_descriptor_lookup = device_descriptor.substr(0, delim);
+            device_descriptor_lookup = device_descriptor.substr(0, delim);
         }
 
-        auto device = devices.registry.find(device_descriptor_lookup);
-        if (device == devices.registry.end()) {
-            MERROR("device not found in registry: '" << device_descriptor << "'\n" <<
-                      "known devices:");
-            
-            for( const auto& sm_pair : devices.registry ) {
+        auto device = registry.find(device_descriptor_lookup);
+        if (device == registry.end()) {
+            MERROR("device not found in registry: '" << device_descriptor << "'\n" << "known devices:");
+            for( const auto& sm_pair : registry ) {
                 MERROR(" - " << sm_pair.first);
             }
             throw std::runtime_error("device not found: "+ device_descriptor);
         }
         return *device->second;
+    }
+
+    device& get_device(const std::string device_descriptor) {
+        if (!registry){
+            registry.reset(new device_registry());
+        }
+
+        return registry->get_device(device_descriptor);
     }
 
 }
