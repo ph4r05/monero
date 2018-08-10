@@ -878,6 +878,28 @@ bool wallet2::get_multisig_seed(std::string& seed, const epee::wipeable_string &
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool wallet2::reconnect_device()
+{
+  bool r = true;
+  hw::device &hwdev = hw::get_device(m_device_name);
+  hwdev.set_name(m_device_name);
+  hwdev.set_network_type(m_nettype);
+  r = hwdev.init();
+  if (!r){
+    LOG_PRINT_L2("Could not init device");
+    return false;
+  }
+
+  r = hwdev.connect();
+  if (!r){
+    LOG_PRINT_L2("Could not connect to the device");
+    return false;
+  }
+
+  m_account.set_device(hwdev);
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 /*!
  * \brief Gets the seed language
  */
