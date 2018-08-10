@@ -143,7 +143,7 @@ namespace hw {
         bool disconnect() override;
 
         bool  set_mode(device_mode mode) override;
-        device_protocol_t device_protocol() const override { return PROTOCOL_LEDGER; };
+        device_protocol_t device_protocol() const override { return PROTOCOL_PROXY; };
 
         /* ======================================================================= */
         /*  LOCKER                                                                 */

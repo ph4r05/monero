@@ -226,7 +226,7 @@ namespace trezor {
         return m_callback;
       }
 
-      device_protocol_t device_protocol() const override { return PROTOCOL_TREZOR; };
+      device_protocol_t device_protocol() const override { return PROTOCOL_COLD; };
 
       bool  has_ki_cold_sync(void) const override { return true; }
       bool  has_tx_cold_sign(void) const override { return true; }
