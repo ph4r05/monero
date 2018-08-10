@@ -8463,7 +8463,7 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
 
   hw::wallet_shim wallet_shim {
-    .get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, this, _1);
+    .get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, this, _1)
   };
 
   dev_cold->tx_sign(&wallet_shim, txs, exported_txs);
@@ -8509,7 +8509,7 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
 
   std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
   hw::wallet_shim wallet_shim {
-      .get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, this, _1);
+      .get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, this, _1)
   };
 
   dev_cold->ki_sync(&wallet_shim, m_transfers, ski);
