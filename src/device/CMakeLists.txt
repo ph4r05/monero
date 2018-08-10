@@ -31,6 +31,7 @@ add_subdirectory(trezor)
 set(device_sources
   device.cpp
   device_default.cpp
+  device_cold.cpp
   log.cpp
   )
 
@@ -49,6 +50,7 @@ endif()
 set(device_headers
   device.hpp
   device_default.hpp
+  device_cold.hpp
   log.hpp
  )
 

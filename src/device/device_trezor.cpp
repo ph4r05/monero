@@ -264,7 +264,7 @@ namespace trezor {
 
     void device_trezor::ki_sync(tools::wallet2 * wallet,
                                 const std::vector<tools::wallet2::transfer_details> & transfers,
-                                protocol::exported_key_image & ski)
+                                hw::device_cold::exported_key_image & ski)
     {
       AUTO_LOCK_CMD();
       require_connected();

@@ -5,6 +5,7 @@
 #ifndef MONERO_PROTOCOL_H
 #define MONERO_PROTOCOL_H
 
+#include "device/device_cold.hpp"
 #include "messages_map.hpp"
 #include "transport.hpp"
 #include "wallet/wallet2.h"
@@ -17,7 +18,7 @@ namespace protocol{
   using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
   using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
 
-  using exported_key_image = std::vector<std::pair<crypto::key_image, crypto::signature>>;
+  using exported_key_image = hw::device_cold::exported_key_image;
 
   std::string key_to_string(const ::crypto::ec_point & key);
   std::string key_to_string(const ::crypto::ec_scalar & key);
@@ -71,7 +72,7 @@ namespace crypto {
 namespace chacha {
 
   /**
-   * Chacha20Poly1305 decryption with tag verification.
+   * Chacha20Poly1305 decryption with tag verification. Implements RFC 7539.
    * @param data
    * @param length
    * @param key
@@ -126,11 +127,12 @@ namespace tx {
   using tx_construction_data = tools::wallet2::tx_construction_data;
   using unsigned_tx_set = tools::wallet2::unsigned_tx_set;
 
-  typedef std::string hmac_t;
-
   void translate_address(MoneroAccountPublicAddress * dst, const cryptonote::account_public_address * src);
   void translate_dst_entry(MoneroTransactionDestinationEntry * dst, const cryptonote::tx_destination_entry * src);
 
+  /**
+   * Transaction signer state holder.
+   */
   class TData {
   public:
     TsxData tsx_data;
@@ -140,9 +142,9 @@ namespace tx {
     size_t cur_input_idx;
     size_t cur_output_idx;
 
-    std::vector<hmac_t> tx_in_hmacs;
-    std::vector<hmac_t> tx_out_entr_hmacs;
-    std::vector<hmac_t> tx_out_hmacs;
+    std::vector<std::string> tx_in_hmacs;
+    std::vector<std::string> tx_out_entr_hmacs;
+    std::vector<std::string> tx_out_hmacs;
     std::vector<rct::rangeSig> tx_out_rsigs;
     std::vector<rct::ctkey> tx_out_pk;
     std::vector<rct::ecdhTuple> tx_out_ecdh;

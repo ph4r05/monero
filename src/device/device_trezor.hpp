@@ -10,11 +10,11 @@
 #include <string>
 #include "device.hpp"
 #include "device_default.hpp"
+#include "device_cold.hpp"
 #include <boost/scope_exit.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include "cryptonote_config.h"
-#include "wallet/wallet2.h"
 
 // TODO: propagate to all targets
 #ifndef WITH_DEVICE_TREZOR
@@ -71,7 +71,7 @@ namespace trezor {
   /**
    * Main device
    */
-  class device_trezor : public hw::core::device_default {
+  class device_trezor : public hw::core::device_default, hw::device_cold {
     private:
       // Locker for concurrent access
       mutable boost::recursive_mutex  device_locker;
@@ -295,8 +295,8 @@ namespace trezor {
        * @param ski
        */
       void ki_sync(::tools::wallet2 * wallet,
-                   const std::vector<tools::wallet2::transfer_details> & transfers,
-                   protocol::exported_key_image & ski);
+                   const std::vector<::tools::wallet2::transfer_details> & transfers,
+                   hw::device_cold::exported_key_image & ski) override;
 
       /**
        * Signs particular transaction idx in the unsigned set, keeps state in the signer
@@ -306,7 +306,7 @@ namespace trezor {
        * @param signer
        */
       void tx_sign(::tools::wallet2 * wallet,
-                   const tools::wallet2::unsigned_tx_set & unsigned_tx,
+                   const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
                    std::shared_ptr<protocol::tx::Signer> & signer);
 
@@ -316,8 +316,8 @@ namespace trezor {
        * @param unsigned_tx
        */
       void tx_sign(::tools::wallet2 * wallet,
-                   const tools::wallet2::unsigned_tx_set & unsigned_tx,
-                   tools::wallet2::signed_tx_set & signed_tx);
+                   const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
+                   ::tools::wallet2::signed_tx_set & signed_tx) override;
     };
 
 #endif

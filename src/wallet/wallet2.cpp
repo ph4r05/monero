@@ -68,7 +68,7 @@ using namespace epee;
 #include "common/dns_utils.h"
 #include "ringct/rctSigs.h"
 #include "ringdb.h"
-#include "device/device_trezor.hpp"
+#include "device/device_cold.hpp"
 
 extern "C"
 {
@@ -8438,9 +8438,8 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   }
   txs.transfers = m_transfers;
 
-  // TODO: another cold sign interface
-  auto tdev = dynamic_cast<::hw::trezor::device_trezor*>(std::addressof(hwdev));
-  tdev->tx_sign(this, txs, exported_txs);
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
+  dev_cold->tx_sign(this, txs, exported_txs);
 
   LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
   for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
@@ -8479,11 +8478,10 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
     throw std::invalid_argument("Device does not support cold ki sync protocol");
   }
 
-  // TODO: another cold sign interface
-  auto tdev = dynamic_cast<::hw::trezor::device_trezor*>(std::addressof(hwdev));
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
 
   std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
-  tdev->ki_sync(this, m_transfers, ski);
+  dev_cold->ki_sync(this, m_transfers, ski);
 
   return import_key_images(ski, spent, unspent);
 }
