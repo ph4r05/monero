@@ -74,8 +74,8 @@ namespace trezor {
   class device_trezor : public hw::core::device_default {
     private:
       // Locker for concurrent access
-      mutable boost::recursive_mutex   device_locker;
-      mutable boost::mutex   command_locker;
+      mutable boost::recursive_mutex  device_locker;
+      mutable boost::mutex  command_locker;
       std::shared_ptr<Transport> m_transport;
       std::shared_ptr<trezor_callback> m_callback;
 
@@ -225,6 +225,8 @@ namespace trezor {
       std::shared_ptr<trezor_callback> getCallback(){
         return m_callback;
       }
+
+      device_protocol_t device_protocol() const override { return PROTOCOL_TREZOR; };
 
       bool  has_ki_cold_sync(void) const override { return true; }
       bool  has_tx_cold_sign(void) const override { return true; }

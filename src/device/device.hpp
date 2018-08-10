@@ -98,6 +98,12 @@ namespace hw {
             TRANSACTION_PARSE
         };
 
+        enum device_protocol_t {
+            PROTOCOL_DEFAULT,
+            PROTOCOL_LEDGER,
+            PROTOCOL_TREZOR,
+        };
+
         /* ======================================================================= */
         /*                              SETUP/TEARDOWN                             */
         /* ======================================================================= */
@@ -111,7 +117,7 @@ namespace hw {
         virtual bool disconnect(void) = 0;
 
         virtual bool  set_mode(device_mode mode) = 0;
-
+        virtual device_protocol_t device_protocol() const { return PROTOCOL_DEFAULT; };
 
         /* ======================================================================= */
         /*  LOCKER                                                                 */
