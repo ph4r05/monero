@@ -132,13 +132,13 @@ DISABLE_VS_WARNINGS(4244 4345)
   void account_base::create_from_device(const std::string &device_name)
   {
     hw::device &hwdev =  hw::get_device(device_name);
+    hwdev.set_name(device_name);
     create_from_device(hwdev);
   }
 
   void account_base::create_from_device(hw::device &hwdev)
   {
     m_keys.set_device(hwdev);
-    hwdev.set_name(device_name);
     MCDEBUG("ledger", "device type: "<<typeid(hwdev).name());
     hwdev.init();
     hwdev.connect();
