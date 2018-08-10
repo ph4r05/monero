@@ -63,6 +63,12 @@ namespace exc {
     NotConnectedException(): CommunicationException("Trezor not connected"){}
   };
 
+  class DeviceNotResponsiveException : CommunicationException {
+  public:
+    using CommunicationException::CommunicationException;
+    DeviceNotResponsiveException(): CommunicationException("Trezor does not respond to ping"){}
+  };
+
   class DeviceAcquireException : CommunicationException {
   public:
     using CommunicationException::CommunicationException;

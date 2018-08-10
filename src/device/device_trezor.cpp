@@ -206,6 +206,27 @@ namespace trezor {
       }
     }
 
+    void device_trezor::call_ping_unsafe(){
+      auto pingMsg = std::make_shared<messages::management::Ping>();
+      pingMsg->set_message("PING");
+
+      auto success = this->client_exchange<messages::common::Success>(pingMsg);  // messages::MessageType_Success
+      MDEBUG("Ping response " << success->message());
+      (void)success;
+    }
+
+    void device_trezor::test_ping(){
+      require_connected();
+
+      try {
+        this->call_ping_unsafe();
+
+      } catch(exc::TrezorException & e){
+        LOG_PRINT_L2(std::string("Trezor does not respond: ") + e.what());
+        throw exc::DeviceNotResponsiveException(std::string("Trezor not responding: ") + e.what());
+      }
+    }
+
     /* ======================================================================= */
     /*                              TREZOR PROTOCOL                            */
     /* ======================================================================= */
@@ -217,12 +238,8 @@ namespace trezor {
         return false;
       }
 
-      auto pingMsg = std::make_shared<messages::management::Ping>();
-      pingMsg->set_message("PING");
-
       try {
-        auto success = this->client_exchange<messages::common::Success>(pingMsg);  // messages::MessageType_Success
-        MDEBUG("Ping response " << success->message());
+        this->call_ping_unsafe();
         return true;
 
       } catch(std::exception const& e) {
@@ -239,6 +256,7 @@ namespace trezor {
         boost::optional<cryptonote::network_type> network_type){
       AUTO_LOCK_CMD();
       require_connected();
+      test_ping();
 
       auto req = std::make_shared<messages::monero::MoneroGetAddress>();
       this->set_msg_addr<messages::monero::MoneroGetAddress>(req.get(), path, network_type);
@@ -253,6 +271,7 @@ namespace trezor {
         boost::optional<cryptonote::network_type> network_type){
       AUTO_LOCK_CMD();
       require_connected();
+      test_ping();
 
       auto req = std::make_shared<messages::monero::MoneroGetWatchKey>();
       this->set_msg_addr<messages::monero::MoneroGetWatchKey>(req.get(), path, network_type);
@@ -268,6 +287,7 @@ namespace trezor {
     {
       AUTO_LOCK_CMD();
       require_connected();
+      test_ping();
 
       std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> req;
 
@@ -382,6 +402,7 @@ namespace trezor {
     {
       AUTO_LOCK_CMD();
       require_connected();
+      test_ping();
 
       size_t num_tx = unsigned_tx.txes.size();
 

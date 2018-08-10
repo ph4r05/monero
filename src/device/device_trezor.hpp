@@ -94,6 +94,8 @@ namespace trezor {
       //
 
       void require_connected();
+      void call_ping_unsafe();
+      void test_ping();
 
       /**
        * Client communication wrapper, handles specific Trezor protocol.
