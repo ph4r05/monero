@@ -117,6 +117,7 @@ namespace trezor {
     bool device_trezor::disconnect() {
       if (m_transport){
         m_transport->close();
+        m_transport = nullptr;
       }
       return true;
     }
