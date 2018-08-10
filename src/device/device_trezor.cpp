@@ -36,7 +36,12 @@ namespace trezor {
     }
 
     device_trezor::~device_trezor() {
-
+      try {
+        disconnect();
+        release();
+      } catch(std::exception & e){
+        LOG_PRINT_L1(std::string("Could not disconnect and release: ") + e.what());
+      }
     }
 
     /* ======================================================================= */
