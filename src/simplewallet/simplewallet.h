@@ -138,6 +138,7 @@ namespace cryptonote
     bool set_subaddress_lookahead(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_segregation_height(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_ignore_fractional_outputs(const std::vector<std::string> &args = std::vector<std::string>());
+    bool set_device_name(const std::vector<std::string> &args = std::vector<std::string>());
     bool help(const std::vector<std::string> &args = std::vector<std::string>());
     bool start_mining(const std::vector<std::string> &args);
     bool stop_mining(const std::vector<std::string> &args);
@@ -200,6 +201,7 @@ namespace cryptonote
     bool export_key_images(const std::vector<std::string> &args);
     bool import_key_images(const std::vector<std::string> &args);
     bool hw_key_images_sync(const std::vector<std::string> &args);
+    bool hw_reconnect(const std::vector<std::string> &args);
     bool export_outputs(const std::vector<std::string> &args);
     bool import_outputs(const std::vector<std::string> &args);
     bool show_transfer(const std::vector<std::string> &args);
