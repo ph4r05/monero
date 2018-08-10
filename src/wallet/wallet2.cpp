@@ -3500,7 +3500,11 @@ void wallet2::restore(const std::string& wallet_, const epee::wipeable_string& p
     THROW_WALLET_EXCEPTION_IF(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, m_keys_file);
   }
   m_key_on_device = true;
-  m_account.create_from_device(device_name);
+
+  auto &hwdev = lookup_device(m_device_name);
+  hwdev.set_name(m_device_name);
+
+  m_account.create_from_device(hwdev);
   m_account.get_device().set_network_type(m_nettype);
   m_account_public_address = m_account.get_keys().m_account_address;
   m_watch_only = false;
