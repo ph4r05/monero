@@ -7,6 +7,7 @@
 
 #include <string>
 #include <type_traits>
+#include <memory>
 
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/generated_message_util.h>
