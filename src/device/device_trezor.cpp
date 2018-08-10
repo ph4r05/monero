@@ -56,7 +56,7 @@ namespace trezor {
       this->full_name = name;
       this->name = name;
 
-      auto delim = name.find(":");
+      auto delim = name.find(':');
       if (delim != std::string::npos) {
         this->name = name.substr(delim + 1);
       }
@@ -340,7 +340,7 @@ namespace trezor {
                                           reinterpret_cast<const uint8_t *>(final_ack->enc_key().data()),
                                           reinterpret_cast<const uint8_t *>(sub.iv().data()), buff);
 
-        ::crypto::signature sig;
+        ::crypto::signature sig{};
         ::crypto::key_image ki;
         memcpy(ki.data, buff, 32);
         memcpy(sig.c.data, buff + 32, 32);

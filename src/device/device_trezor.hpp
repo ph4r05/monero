@@ -191,8 +191,8 @@ namespace trezor {
             msg->add_address_n(x);
           }
         } else {
-          for(size_t i = 0; i < sizeof(DEFAULT_BIP44_PATH)/sizeof(DEFAULT_BIP44_PATH[0]); ++i){
-            msg->add_address_n(DEFAULT_BIP44_PATH[i]);
+          for (unsigned int i : DEFAULT_BIP44_PATH) {
+            msg->add_address_n(i);
           }
         }
 
