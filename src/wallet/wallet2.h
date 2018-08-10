@@ -932,6 +932,8 @@ namespace tools
     void ignore_fractional_outputs(bool value) { m_ignore_fractional_outputs = value; }
     bool confirm_non_default_ring_size() const { return m_confirm_non_default_ring_size; }
     void confirm_non_default_ring_size(bool always) { m_confirm_non_default_ring_size = always; }
+    std::string device_name() const { return m_device_name; }
+    void device_name(const std::string & device_name) { m_device_name = device_name; }
 
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key, std::vector<crypto::secret_key> &additional_tx_keys) const;
     void check_tx_key(const crypto::hash &txid, const crypto::secret_key &tx_key, const std::vector<crypto::secret_key> &additional_tx_keys, const cryptonote::account_public_address &address, uint64_t &received, bool &in_pool, uint64_t &confirmations);
