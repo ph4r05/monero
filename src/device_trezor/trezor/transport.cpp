@@ -2,13 +2,12 @@
 // Created by Dusan Klinec on 01/08/2018.
 //
 
-#include "transport.hpp"
 #include <boost/endian/conversion.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
-#include <iostream>
-#include <device/trezor/messages/messages-common.pb.h>
+#include "transport.hpp"
+#include "messages/messages-common.pb.h"
 
 using namespace std;
 using json = nlohmann::json;
