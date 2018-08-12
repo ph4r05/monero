@@ -518,5 +518,8 @@ namespace trezor {
     void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
     }
 
+    void register_all() {
+    }
+
 #endif //WITH_DEVICE_TREZOR
 }}
