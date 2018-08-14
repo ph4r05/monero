@@ -216,6 +216,38 @@ namespace tx {
     translate_address(dst->mutable_addr(), std::addressof(src->addr));
   }
 
+  void translate_src_entry(MoneroTransactionSourceEntry * dst, const cryptonote::tx_source_entry * src){
+    for(auto & cur : src->outputs){
+      auto out = dst->add_outputs();
+      out->set_amount(cur.first);
+      translate_rct_key(out->mutable_key(), std::addressof(cur.second));
+    }
+
+    dst->set_real_output(src->real_output);
+    dst->set_real_out_tx_key(key_to_string(src->real_out_tx_key));
+    for(auto & cur : src->real_out_additional_tx_keys){
+      dst->add_real_out_additional_tx_keys(key_to_string(cur));
+    }
+
+    dst->set_real_output_in_tx_index(src->real_output_in_tx_index);
+    dst->set_amount(src->amount);
+    dst->set_rct(src->rct);
+    dst->set_mask(key_to_string(src->mask));
+    translate_klrki(dst->mutable_multisig_klrki(), std::addressof(src->multisig_kLRki));
+  }
+
+  void translate_klrki(MoneroMultisigKLRki * dst, const rct::multisig_kLRki * src){
+    dst->set_k(key_to_string(src->k));
+    dst->set_l(key_to_string(src->L));
+    dst->set_r(key_to_string(src->R));
+    dst->set_ki(key_to_string(src->ki));
+  }
+
+  void translate_rct_key(MoneroRctKey * dst, const rct::ctkey * src){
+    dst->set_dest(key_to_string(src->dest));
+    dst->set_mask(key_to_string(src->mask));
+  }
+
   Signer::Signer(wallet_shim *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
     m_wallet2 = wallet2;
     m_unsigned_tx = std::move(unsigned_tx);

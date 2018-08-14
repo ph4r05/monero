@@ -123,12 +123,19 @@ namespace tx {
   using TsxData = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData;
   using MoneroTransactionDestinationEntry = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry;
   using MoneroAccountPublicAddress = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
+  using MoneroTransactionSourceEntry = messages::monero::MoneroTransactionSourceEntry;
+  using MoneroMultisigKLRki = messages::monero::MoneroTransactionSourceEntry_MoneroMultisigKLRki;
+  using MoneroOutputEntry = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry;
+  using MoneroRctKey = messages::monero::MoneroTransactionSourceEntry_MoneroRctKey;
 
   using tx_construction_data = tools::wallet2::tx_construction_data;
   using unsigned_tx_set = tools::wallet2::unsigned_tx_set;
 
   void translate_address(MoneroAccountPublicAddress * dst, const cryptonote::account_public_address * src);
   void translate_dst_entry(MoneroTransactionDestinationEntry * dst, const cryptonote::tx_destination_entry * src);
+  void translate_src_entry(MoneroTransactionSourceEntry * dst, const cryptonote::tx_source_entry * src);
+  void translate_klrki(MoneroMultisigKLRki * dst, const rct::multisig_kLRki * src);
+  void translate_rct_key(MoneroRctKey * dst, const rct::ctkey * src);
 
   /**
    * Transaction signer state holder.
