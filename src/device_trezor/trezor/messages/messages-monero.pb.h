@@ -40,10 +40,10 @@ class MoneroGetAddress;
 class MoneroAddress;
 class MoneroGetWatchKey;
 class MoneroWatchKey;
+class MoneroTransactionDestinationEntry;
+class MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
 class MoneroTransactionInitRequest;
 class MoneroTransactionInitRequest_MoneroTransactionData;
-class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry;
-class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
 class MoneroTransactionInitAck;
 class MoneroTransactionSourceEntry;
 class MoneroTransactionSourceEntry_MoneroRctKey;
@@ -479,14 +479,14 @@ class MoneroWatchKey : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress : public ::google::protobuf::Message {
+class MoneroTransactionDestinationEntry_MoneroAccountPublicAddress : public ::google::protobuf::Message {
  public:
-  MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress();
-  virtual ~MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress();
+  MoneroTransactionDestinationEntry_MoneroAccountPublicAddress();
+  virtual ~MoneroTransactionDestinationEntry_MoneroAccountPublicAddress();
 
-  MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from);
+  MoneroTransactionDestinationEntry_MoneroAccountPublicAddress(const MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from);
 
-  inline MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& operator=(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from) {
+  inline MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& operator=(const MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from) {
     CopyFrom(from);
     return *this;
   }
@@ -500,17 +500,17 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& default_instance();
+  static const MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& default_instance();
 
-  void Swap(MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* other);
+  void Swap(MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* other);
 
   // implements Message ----------------------------------------------
 
-  MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* New() const;
+  MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from);
-  void MergeFrom(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from);
+  void CopyFrom(const MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from);
+  void MergeFrom(const MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -556,7 +556,7 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   inline ::std::string* release_view_public_key();
   inline void set_allocated_view_public_key(::std::string* view_public_key);
 
-  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress)
  private:
   inline void set_has_spend_public_key();
   inline void clear_has_spend_public_key();
@@ -574,18 +574,18 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
 
   void InitAsDefaultInstance();
-  static MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* default_instance_;
+  static MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* default_instance_;
 };
 // -------------------------------------------------------------------
 
-class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry : public ::google::protobuf::Message {
+class MoneroTransactionDestinationEntry : public ::google::protobuf::Message {
  public:
-  MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry();
-  virtual ~MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry();
+  MoneroTransactionDestinationEntry();
+  virtual ~MoneroTransactionDestinationEntry();
 
-  MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& from);
+  MoneroTransactionDestinationEntry(const MoneroTransactionDestinationEntry& from);
 
-  inline MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& operator=(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& from) {
+  inline MoneroTransactionDestinationEntry& operator=(const MoneroTransactionDestinationEntry& from) {
     CopyFrom(from);
     return *this;
   }
@@ -599,17 +599,17 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   }
 
   static const ::google::protobuf::Descriptor* descriptor();
-  static const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& default_instance();
+  static const MoneroTransactionDestinationEntry& default_instance();
 
-  void Swap(MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* other);
+  void Swap(MoneroTransactionDestinationEntry* other);
 
   // implements Message ----------------------------------------------
 
-  MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* New() const;
+  MoneroTransactionDestinationEntry* New() const;
   void CopyFrom(const ::google::protobuf::Message& from);
   void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& from);
-  void MergeFrom(const MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& from);
+  void CopyFrom(const MoneroTransactionDestinationEntry& from);
+  void MergeFrom(const MoneroTransactionDestinationEntry& from);
   void Clear();
   bool IsInitialized() const;
 
@@ -629,7 +629,7 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
 
   // nested types ----------------------------------------------------
 
-  typedef MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress MoneroAccountPublicAddress;
+  typedef MoneroTransactionDestinationEntry_MoneroAccountPublicAddress MoneroAccountPublicAddress;
 
   // accessors -------------------------------------------------------
 
@@ -640,14 +640,14 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   inline ::google::protobuf::uint64 amount() const;
   inline void set_amount(::google::protobuf::uint64 value);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress addr = 2;
+  // optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress addr = 2;
   inline bool has_addr() const;
   inline void clear_addr();
   static const int kAddrFieldNumber = 2;
-  inline const ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& addr() const;
-  inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* mutable_addr();
-  inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* release_addr();
-  inline void set_allocated_addr(::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* addr);
+  inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& addr() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* mutable_addr();
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* release_addr();
+  inline void set_allocated_addr(::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* addr);
 
   // optional bool is_subaddress = 3;
   inline bool has_is_subaddress() const;
@@ -656,7 +656,7 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   inline bool is_subaddress() const;
   inline void set_is_subaddress(bool value);
 
-  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry)
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionDestinationEntry)
  private:
   inline void set_has_amount();
   inline void clear_has_amount();
@@ -670,14 +670,14 @@ class MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestin
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
   ::google::protobuf::uint64 amount_;
-  ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* addr_;
+  ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* addr_;
   bool is_subaddress_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
   friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
 
   void InitAsDefaultInstance();
-  static MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* default_instance_;
+  static MoneroTransactionDestinationEntry* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -732,8 +732,6 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
 
   // nested types ----------------------------------------------------
 
-  typedef MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry MoneroTransactionDestinationEntry;
-
   // accessors -------------------------------------------------------
 
   // optional uint32 version = 1;
@@ -762,26 +760,26 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   inline ::google::protobuf::uint64 unlock_time() const;
   inline void set_unlock_time(::google::protobuf::uint64 value);
 
-  // repeated .hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry outputs = 4;
+  // repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 4;
   inline int outputs_size() const;
   inline void clear_outputs();
   static const int kOutputsFieldNumber = 4;
-  inline const ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& outputs(int index) const;
-  inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* mutable_outputs(int index);
-  inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* add_outputs();
-  inline const ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry >&
+  inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& outputs(int index) const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* mutable_outputs(int index);
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* add_outputs();
+  inline const ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >&
       outputs() const;
-  inline ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry >*
+  inline ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >*
       mutable_outputs();
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry change_dts = 5;
+  // optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry change_dts = 5;
   inline bool has_change_dts() const;
   inline void clear_change_dts();
   static const int kChangeDtsFieldNumber = 5;
-  inline const ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& change_dts() const;
-  inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* mutable_change_dts();
-  inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* release_change_dts();
-  inline void set_allocated_change_dts(::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* change_dts);
+  inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& change_dts() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* mutable_change_dts();
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* release_change_dts();
+  inline void set_allocated_change_dts(::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* change_dts);
 
   // optional uint32 num_inputs = 6;
   inline bool has_num_inputs() const;
@@ -898,8 +896,8 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   ::google::protobuf::uint64 unlock_time_;
   ::google::protobuf::uint32 version_;
   ::google::protobuf::uint32 num_inputs_;
-  ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry > outputs_;
-  ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* change_dts_;
+  ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry > outputs_;
+  ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* change_dts_;
   ::google::protobuf::uint64 fee_;
   ::google::protobuf::uint32 mixin_;
   ::google::protobuf::uint32 account_;
@@ -1733,26 +1731,14 @@ class MoneroTransactionSetInputRequest : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 version() const;
   inline void set_version(::google::protobuf::uint32 value);
 
-  // optional bytes src_entr = 2;
+  // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr = 2;
   inline bool has_src_entr() const;
   inline void clear_src_entr();
   static const int kSrcEntrFieldNumber = 2;
-  inline const ::std::string& src_entr() const;
-  inline void set_src_entr(const ::std::string& value);
-  inline void set_src_entr(const char* value);
-  inline void set_src_entr(const void* value, size_t size);
-  inline ::std::string* mutable_src_entr();
-  inline ::std::string* release_src_entr();
-  inline void set_allocated_src_entr(::std::string* src_entr);
-
-  // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr_obj = 3;
-  inline bool has_src_entr_obj() const;
-  inline void clear_src_entr_obj();
-  static const int kSrcEntrObjFieldNumber = 3;
-  inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& src_entr_obj() const;
-  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* mutable_src_entr_obj();
-  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* release_src_entr_obj();
-  inline void set_allocated_src_entr_obj(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj);
+  inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& src_entr() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* mutable_src_entr();
+  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* release_src_entr();
+  inline void set_allocated_src_entr(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr);
 
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionSetInputRequest)
  private:
@@ -1760,15 +1746,12 @@ class MoneroTransactionSetInputRequest : public ::google::protobuf::Message {
   inline void clear_has_version();
   inline void set_has_src_entr();
   inline void clear_has_src_entr();
-  inline void set_has_src_entr_obj();
-  inline void clear_has_src_entr_obj();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* src_entr_;
-  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj_;
+  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_;
   ::google::protobuf::uint32 version_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
@@ -2142,26 +2125,14 @@ class MoneroTransactionInputViniRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bytes src_entr = 1;
+  // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr = 1;
   inline bool has_src_entr() const;
   inline void clear_src_entr();
   static const int kSrcEntrFieldNumber = 1;
-  inline const ::std::string& src_entr() const;
-  inline void set_src_entr(const ::std::string& value);
-  inline void set_src_entr(const char* value);
-  inline void set_src_entr(const void* value, size_t size);
-  inline ::std::string* mutable_src_entr();
-  inline ::std::string* release_src_entr();
-  inline void set_allocated_src_entr(::std::string* src_entr);
-
-  // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr_obj = 6;
-  inline bool has_src_entr_obj() const;
-  inline void clear_src_entr_obj();
-  static const int kSrcEntrObjFieldNumber = 6;
-  inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& src_entr_obj() const;
-  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* mutable_src_entr_obj();
-  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* release_src_entr_obj();
-  inline void set_allocated_src_entr_obj(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj);
+  inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& src_entr() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* mutable_src_entr();
+  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* release_src_entr();
+  inline void set_allocated_src_entr(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr);
 
   // optional bytes vini = 2;
   inline bool has_vini() const;
@@ -2215,8 +2186,6 @@ class MoneroTransactionInputViniRequest : public ::google::protobuf::Message {
  private:
   inline void set_has_src_entr();
   inline void clear_has_src_entr();
-  inline void set_has_src_entr_obj();
-  inline void clear_has_src_entr_obj();
   inline void set_has_vini();
   inline void clear_has_vini();
   inline void set_has_vini_hmac();
@@ -2230,8 +2199,7 @@ class MoneroTransactionInputViniRequest : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* src_entr_;
-  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj_;
+  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_;
   ::std::string* vini_;
   ::std::string* vini_hmac_;
   ::std::string* pseudo_out_;
@@ -2367,17 +2335,14 @@ class MoneroTransactionSetOutputRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bytes dst_entr = 1;
+  // optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry dst_entr = 1;
   inline bool has_dst_entr() const;
   inline void clear_dst_entr();
   static const int kDstEntrFieldNumber = 1;
-  inline const ::std::string& dst_entr() const;
-  inline void set_dst_entr(const ::std::string& value);
-  inline void set_dst_entr(const char* value);
-  inline void set_dst_entr(const void* value, size_t size);
-  inline ::std::string* mutable_dst_entr();
-  inline ::std::string* release_dst_entr();
-  inline void set_allocated_dst_entr(::std::string* dst_entr);
+  inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& dst_entr() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* mutable_dst_entr();
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* release_dst_entr();
+  inline void set_allocated_dst_entr(::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* dst_entr);
 
   // optional bytes dst_entr_hmac = 2;
   inline bool has_dst_entr_hmac() const;
@@ -2402,7 +2367,7 @@ class MoneroTransactionSetOutputRequest : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* dst_entr_;
+  ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* dst_entr_;
   ::std::string* dst_entr_hmac_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
@@ -3049,26 +3014,14 @@ class MoneroTransactionSignInputRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bytes src_entr = 1;
+  // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr = 1;
   inline bool has_src_entr() const;
   inline void clear_src_entr();
   static const int kSrcEntrFieldNumber = 1;
-  inline const ::std::string& src_entr() const;
-  inline void set_src_entr(const ::std::string& value);
-  inline void set_src_entr(const char* value);
-  inline void set_src_entr(const void* value, size_t size);
-  inline ::std::string* mutable_src_entr();
-  inline ::std::string* release_src_entr();
-  inline void set_allocated_src_entr(::std::string* src_entr);
-
-  // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr_obj = 8;
-  inline bool has_src_entr_obj() const;
-  inline void clear_src_entr_obj();
-  static const int kSrcEntrObjFieldNumber = 8;
-  inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& src_entr_obj() const;
-  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* mutable_src_entr_obj();
-  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* release_src_entr_obj();
-  inline void set_allocated_src_entr_obj(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj);
+  inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& src_entr() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* mutable_src_entr();
+  inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* release_src_entr();
+  inline void set_allocated_src_entr(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr);
 
   // optional bytes vini = 2;
   inline bool has_vini() const;
@@ -3146,8 +3099,6 @@ class MoneroTransactionSignInputRequest : public ::google::protobuf::Message {
  private:
   inline void set_has_src_entr();
   inline void clear_has_src_entr();
-  inline void set_has_src_entr_obj();
-  inline void clear_has_src_entr_obj();
   inline void set_has_vini();
   inline void clear_has_vini();
   inline void set_has_vini_hmac();
@@ -3165,8 +3116,7 @@ class MoneroTransactionSignInputRequest : public ::google::protobuf::Message {
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::std::string* src_entr_;
-  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj_;
+  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_;
   ::std::string* vini_;
   ::std::string* vini_hmac_;
   ::std::string* pseudo_out_;
@@ -5326,61 +5276,61 @@ inline void MoneroWatchKey::set_allocated_address(::std::string* address) {
 
 // -------------------------------------------------------------------
 
-// MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress
+// MoneroTransactionDestinationEntry_MoneroAccountPublicAddress
 
 // optional bytes spend_public_key = 1;
-inline bool MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::has_spend_public_key() const {
+inline bool MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::has_spend_public_key() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_has_spend_public_key() {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_has_spend_public_key() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_has_spend_public_key() {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_has_spend_public_key() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_spend_public_key() {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_spend_public_key() {
   if (spend_public_key_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     spend_public_key_->clear();
   }
   clear_has_spend_public_key();
 }
-inline const ::std::string& MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::spend_public_key() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
+inline const ::std::string& MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::spend_public_key() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
   return *spend_public_key_;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_spend_public_key(const ::std::string& value) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_spend_public_key(const ::std::string& value) {
   set_has_spend_public_key();
   if (spend_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     spend_public_key_ = new ::std::string;
   }
   spend_public_key_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_spend_public_key(const char* value) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_spend_public_key(const char* value) {
   set_has_spend_public_key();
   if (spend_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     spend_public_key_ = new ::std::string;
   }
   spend_public_key_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_spend_public_key(const void* value, size_t size) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_spend_public_key(const void* value, size_t size) {
   set_has_spend_public_key();
   if (spend_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     spend_public_key_ = new ::std::string;
   }
   spend_public_key_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
 }
-inline ::std::string* MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::mutable_spend_public_key() {
+inline ::std::string* MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::mutable_spend_public_key() {
   set_has_spend_public_key();
   if (spend_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     spend_public_key_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
   return spend_public_key_;
 }
-inline ::std::string* MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::release_spend_public_key() {
+inline ::std::string* MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::release_spend_public_key() {
   clear_has_spend_public_key();
   if (spend_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
@@ -5390,7 +5340,7 @@ inline ::std::string* MoneroTransactionInitRequest_MoneroTransactionData_MoneroT
     return temp;
   }
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_allocated_spend_public_key(::std::string* spend_public_key) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_allocated_spend_public_key(::std::string* spend_public_key) {
   if (spend_public_key_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete spend_public_key_;
   }
@@ -5401,62 +5351,62 @@ inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransaction
     clear_has_spend_public_key();
     spend_public_key_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.spend_public_key)
 }
 
 // optional bytes view_public_key = 2;
-inline bool MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::has_view_public_key() const {
+inline bool MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::has_view_public_key() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_has_view_public_key() {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_has_view_public_key() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_has_view_public_key() {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_has_view_public_key() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_view_public_key() {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::clear_view_public_key() {
   if (view_public_key_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     view_public_key_->clear();
   }
   clear_has_view_public_key();
 }
-inline const ::std::string& MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::view_public_key() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
+inline const ::std::string& MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::view_public_key() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
   return *view_public_key_;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_view_public_key(const ::std::string& value) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_view_public_key(const ::std::string& value) {
   set_has_view_public_key();
   if (view_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     view_public_key_ = new ::std::string;
   }
   view_public_key_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_view_public_key(const char* value) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_view_public_key(const char* value) {
   set_has_view_public_key();
   if (view_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     view_public_key_ = new ::std::string;
   }
   view_public_key_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_view_public_key(const void* value, size_t size) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_view_public_key(const void* value, size_t size) {
   set_has_view_public_key();
   if (view_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     view_public_key_ = new ::std::string;
   }
   view_public_key_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
 }
-inline ::std::string* MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::mutable_view_public_key() {
+inline ::std::string* MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::mutable_view_public_key() {
   set_has_view_public_key();
   if (view_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     view_public_key_ = new ::std::string;
   }
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
   return view_public_key_;
 }
-inline ::std::string* MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::release_view_public_key() {
+inline ::std::string* MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::release_view_public_key() {
   clear_has_view_public_key();
   if (view_public_key_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     return NULL;
@@ -5466,7 +5416,7 @@ inline ::std::string* MoneroTransactionInitRequest_MoneroTransactionData_MoneroT
     return temp;
   }
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_allocated_view_public_key(::std::string* view_public_key) {
+inline void MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::set_allocated_view_public_key(::std::string* view_public_key) {
   if (view_public_key_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
     delete view_public_key_;
   }
@@ -5477,68 +5427,68 @@ inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransaction
     clear_has_view_public_key();
     view_public_key_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress.view_public_key)
 }
 
 // -------------------------------------------------------------------
 
-// MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry
+// MoneroTransactionDestinationEntry
 
 // optional uint64 amount = 1;
-inline bool MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::has_amount() const {
+inline bool MoneroTransactionDestinationEntry::has_amount() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::set_has_amount() {
+inline void MoneroTransactionDestinationEntry::set_has_amount() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::clear_has_amount() {
+inline void MoneroTransactionDestinationEntry::clear_has_amount() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::clear_amount() {
+inline void MoneroTransactionDestinationEntry::clear_amount() {
   amount_ = GOOGLE_ULONGLONG(0);
   clear_has_amount();
 }
-inline ::google::protobuf::uint64 MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::amount() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.amount)
+inline ::google::protobuf::uint64 MoneroTransactionDestinationEntry::amount() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.amount)
   return amount_;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::set_amount(::google::protobuf::uint64 value) {
+inline void MoneroTransactionDestinationEntry::set_amount(::google::protobuf::uint64 value) {
   set_has_amount();
   amount_ = value;
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.amount)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.amount)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress addr = 2;
-inline bool MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::has_addr() const {
+// optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry.MoneroAccountPublicAddress addr = 2;
+inline bool MoneroTransactionDestinationEntry::has_addr() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::set_has_addr() {
+inline void MoneroTransactionDestinationEntry::set_has_addr() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::clear_has_addr() {
+inline void MoneroTransactionDestinationEntry::clear_has_addr() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::clear_addr() {
-  if (addr_ != NULL) addr_->::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::Clear();
+inline void MoneroTransactionDestinationEntry::clear_addr() {
+  if (addr_ != NULL) addr_->::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress::Clear();
   clear_has_addr();
 }
-inline const ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::addr() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.addr)
+inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress& MoneroTransactionDestinationEntry::addr() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.addr)
   return addr_ != NULL ? *addr_ : *default_instance_->addr_;
 }
-inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::mutable_addr() {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* MoneroTransactionDestinationEntry::mutable_addr() {
   set_has_addr();
-  if (addr_ == NULL) addr_ = new ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.addr)
+  if (addr_ == NULL) addr_ = new ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.addr)
   return addr_;
 }
-inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::release_addr() {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* MoneroTransactionDestinationEntry::release_addr() {
   clear_has_addr();
-  ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* temp = addr_;
+  ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* temp = addr_;
   addr_ = NULL;
   return temp;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::set_allocated_addr(::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* addr) {
+inline void MoneroTransactionDestinationEntry::set_allocated_addr(::hw::trezor::messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress* addr) {
   delete addr_;
   addr_ = addr;
   if (addr) {
@@ -5546,31 +5496,31 @@ inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransaction
   } else {
     clear_has_addr();
   }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.addr)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.addr)
 }
 
 // optional bool is_subaddress = 3;
-inline bool MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::has_is_subaddress() const {
+inline bool MoneroTransactionDestinationEntry::has_is_subaddress() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::set_has_is_subaddress() {
+inline void MoneroTransactionDestinationEntry::set_has_is_subaddress() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::clear_has_is_subaddress() {
+inline void MoneroTransactionDestinationEntry::clear_has_is_subaddress() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::clear_is_subaddress() {
+inline void MoneroTransactionDestinationEntry::clear_is_subaddress() {
   is_subaddress_ = false;
   clear_has_is_subaddress();
 }
-inline bool MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::is_subaddress() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.is_subaddress)
+inline bool MoneroTransactionDestinationEntry::is_subaddress() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.is_subaddress)
   return is_subaddress_;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::set_is_subaddress(bool value) {
+inline void MoneroTransactionDestinationEntry::set_is_subaddress(bool value) {
   set_has_is_subaddress();
   is_subaddress_ = value;
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry.is_subaddress)
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionDestinationEntry.is_subaddress)
 }
 
 // -------------------------------------------------------------------
@@ -5701,37 +5651,37 @@ inline void MoneroTransactionInitRequest_MoneroTransactionData::set_unlock_time(
   // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.unlock_time)
 }
 
-// repeated .hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry outputs = 4;
+// repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 4;
 inline int MoneroTransactionInitRequest_MoneroTransactionData::outputs_size() const {
   return outputs_.size();
 }
 inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_outputs() {
   outputs_.Clear();
 }
-inline const ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& MoneroTransactionInitRequest_MoneroTransactionData::outputs(int index) const {
+inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& MoneroTransactionInitRequest_MoneroTransactionData::outputs(int index) const {
   // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.outputs)
   return outputs_.Get(index);
 }
-inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::mutable_outputs(int index) {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::mutable_outputs(int index) {
   // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.outputs)
   return outputs_.Mutable(index);
 }
-inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::add_outputs() {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::add_outputs() {
   // @@protoc_insertion_point(field_add:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.outputs)
   return outputs_.Add();
 }
-inline const ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry >&
+inline const ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >&
 MoneroTransactionInitRequest_MoneroTransactionData::outputs() const {
   // @@protoc_insertion_point(field_list:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.outputs)
   return outputs_;
 }
-inline ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry >*
+inline ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >*
 MoneroTransactionInitRequest_MoneroTransactionData::mutable_outputs() {
   // @@protoc_insertion_point(field_mutable_list:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.outputs)
   return &outputs_;
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.MoneroTransactionDestinationEntry change_dts = 5;
+// optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry change_dts = 5;
 inline bool MoneroTransactionInitRequest_MoneroTransactionData::has_change_dts() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
@@ -5742,26 +5692,26 @@ inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_has_change
   _has_bits_[0] &= ~0x00000010u;
 }
 inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_change_dts() {
-  if (change_dts_ != NULL) change_dts_->::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry::Clear();
+  if (change_dts_ != NULL) change_dts_->::hw::trezor::messages::monero::MoneroTransactionDestinationEntry::Clear();
   clear_has_change_dts();
 }
-inline const ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry& MoneroTransactionInitRequest_MoneroTransactionData::change_dts() const {
+inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& MoneroTransactionInitRequest_MoneroTransactionData::change_dts() const {
   // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.change_dts)
   return change_dts_ != NULL ? *change_dts_ : *default_instance_->change_dts_;
 }
-inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::mutable_change_dts() {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::mutable_change_dts() {
   set_has_change_dts();
-  if (change_dts_ == NULL) change_dts_ = new ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry;
+  if (change_dts_ == NULL) change_dts_ = new ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry;
   // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.change_dts)
   return change_dts_;
 }
-inline ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::release_change_dts() {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionInitRequest_MoneroTransactionData::release_change_dts() {
   clear_has_change_dts();
-  ::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* temp = change_dts_;
+  ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* temp = change_dts_;
   change_dts_ = NULL;
   return temp;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData::set_allocated_change_dts(::hw::trezor::messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry* change_dts) {
+inline void MoneroTransactionInitRequest_MoneroTransactionData::set_allocated_change_dts(::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* change_dts) {
   delete change_dts_;
   change_dts_ = change_dts;
   if (change_dts) {
@@ -7315,7 +7265,7 @@ inline void MoneroTransactionSetInputRequest::set_version(::google::protobuf::ui
   // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.version)
 }
 
-// optional bytes src_entr = 2;
+// optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr = 2;
 inline bool MoneroTransactionSetInputRequest::has_src_entr() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
@@ -7326,110 +7276,34 @@ inline void MoneroTransactionSetInputRequest::clear_has_src_entr() {
   _has_bits_[0] &= ~0x00000002u;
 }
 inline void MoneroTransactionSetInputRequest::clear_src_entr() {
-  if (src_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_->clear();
-  }
+  if (src_entr_ != NULL) src_entr_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry::Clear();
   clear_has_src_entr();
 }
-inline const ::std::string& MoneroTransactionSetInputRequest::src_entr() const {
+inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& MoneroTransactionSetInputRequest::src_entr() const {
   // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
-  return *src_entr_;
+  return src_entr_ != NULL ? *src_entr_ : *default_instance_->src_entr_;
 }
-inline void MoneroTransactionSetInputRequest::set_src_entr(const ::std::string& value) {
+inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSetInputRequest::mutable_src_entr() {
   set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
-}
-inline void MoneroTransactionSetInputRequest::set_src_entr(const char* value) {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
-}
-inline void MoneroTransactionSetInputRequest::set_src_entr(const void* value, size_t size) {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
-}
-inline ::std::string* MoneroTransactionSetInputRequest::mutable_src_entr() {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
+  if (src_entr_ == NULL) src_entr_ = new ::hw::trezor::messages::monero::MoneroTransactionSourceEntry;
   // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
   return src_entr_;
 }
-inline ::std::string* MoneroTransactionSetInputRequest::release_src_entr() {
+inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSetInputRequest::release_src_entr() {
   clear_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = src_entr_;
-    src_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
-}
-inline void MoneroTransactionSetInputRequest::set_allocated_src_entr(::std::string* src_entr) {
-  if (src_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete src_entr_;
-  }
-  if (src_entr) {
-    set_has_src_entr();
-    src_entr_ = src_entr;
-  } else {
-    clear_has_src_entr();
-    src_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
-}
-
-// optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr_obj = 3;
-inline bool MoneroTransactionSetInputRequest::has_src_entr_obj() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void MoneroTransactionSetInputRequest::set_has_src_entr_obj() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void MoneroTransactionSetInputRequest::clear_has_src_entr_obj() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void MoneroTransactionSetInputRequest::clear_src_entr_obj() {
-  if (src_entr_obj_ != NULL) src_entr_obj_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry::Clear();
-  clear_has_src_entr_obj();
-}
-inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& MoneroTransactionSetInputRequest::src_entr_obj() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr_obj)
-  return src_entr_obj_ != NULL ? *src_entr_obj_ : *default_instance_->src_entr_obj_;
-}
-inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSetInputRequest::mutable_src_entr_obj() {
-  set_has_src_entr_obj();
-  if (src_entr_obj_ == NULL) src_entr_obj_ = new ::hw::trezor::messages::monero::MoneroTransactionSourceEntry;
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr_obj)
-  return src_entr_obj_;
-}
-inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSetInputRequest::release_src_entr_obj() {
-  clear_has_src_entr_obj();
-  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* temp = src_entr_obj_;
-  src_entr_obj_ = NULL;
+  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* temp = src_entr_;
+  src_entr_ = NULL;
   return temp;
 }
-inline void MoneroTransactionSetInputRequest::set_allocated_src_entr_obj(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj) {
-  delete src_entr_obj_;
-  src_entr_obj_ = src_entr_obj;
-  if (src_entr_obj) {
-    set_has_src_entr_obj();
+inline void MoneroTransactionSetInputRequest::set_allocated_src_entr(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr) {
+  delete src_entr_;
+  src_entr_ = src_entr;
+  if (src_entr) {
+    set_has_src_entr();
   } else {
-    clear_has_src_entr_obj();
+    clear_has_src_entr();
   }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr_obj)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetInputRequest.src_entr)
 }
 
 // -------------------------------------------------------------------
@@ -7934,7 +7808,7 @@ MoneroTransactionInputsPermutationRequest::mutable_perm() {
 
 // MoneroTransactionInputViniRequest
 
-// optional bytes src_entr = 1;
+// optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr = 1;
 inline bool MoneroTransactionInputViniRequest::has_src_entr() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -7945,121 +7819,45 @@ inline void MoneroTransactionInputViniRequest::clear_has_src_entr() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void MoneroTransactionInputViniRequest::clear_src_entr() {
-  if (src_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_->clear();
-  }
+  if (src_entr_ != NULL) src_entr_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry::Clear();
   clear_has_src_entr();
 }
-inline const ::std::string& MoneroTransactionInputViniRequest::src_entr() const {
+inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& MoneroTransactionInputViniRequest::src_entr() const {
   // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr)
-  return *src_entr_;
+  return src_entr_ != NULL ? *src_entr_ : *default_instance_->src_entr_;
 }
-inline void MoneroTransactionInputViniRequest::set_src_entr(const ::std::string& value) {
+inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionInputViniRequest::mutable_src_entr() {
   set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr)
-}
-inline void MoneroTransactionInputViniRequest::set_src_entr(const char* value) {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr)
-}
-inline void MoneroTransactionInputViniRequest::set_src_entr(const void* value, size_t size) {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr)
-}
-inline ::std::string* MoneroTransactionInputViniRequest::mutable_src_entr() {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
+  if (src_entr_ == NULL) src_entr_ = new ::hw::trezor::messages::monero::MoneroTransactionSourceEntry;
   // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr)
   return src_entr_;
 }
-inline ::std::string* MoneroTransactionInputViniRequest::release_src_entr() {
+inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionInputViniRequest::release_src_entr() {
   clear_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = src_entr_;
-    src_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
+  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* temp = src_entr_;
+  src_entr_ = NULL;
+  return temp;
 }
-inline void MoneroTransactionInputViniRequest::set_allocated_src_entr(::std::string* src_entr) {
-  if (src_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete src_entr_;
-  }
+inline void MoneroTransactionInputViniRequest::set_allocated_src_entr(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr) {
+  delete src_entr_;
+  src_entr_ = src_entr;
   if (src_entr) {
     set_has_src_entr();
-    src_entr_ = src_entr;
   } else {
     clear_has_src_entr();
-    src_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr_obj = 6;
-inline bool MoneroTransactionInputViniRequest::has_src_entr_obj() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void MoneroTransactionInputViniRequest::set_has_src_entr_obj() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void MoneroTransactionInputViniRequest::clear_has_src_entr_obj() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void MoneroTransactionInputViniRequest::clear_src_entr_obj() {
-  if (src_entr_obj_ != NULL) src_entr_obj_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry::Clear();
-  clear_has_src_entr_obj();
-}
-inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& MoneroTransactionInputViniRequest::src_entr_obj() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr_obj)
-  return src_entr_obj_ != NULL ? *src_entr_obj_ : *default_instance_->src_entr_obj_;
-}
-inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionInputViniRequest::mutable_src_entr_obj() {
-  set_has_src_entr_obj();
-  if (src_entr_obj_ == NULL) src_entr_obj_ = new ::hw::trezor::messages::monero::MoneroTransactionSourceEntry;
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr_obj)
-  return src_entr_obj_;
-}
-inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionInputViniRequest::release_src_entr_obj() {
-  clear_has_src_entr_obj();
-  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* temp = src_entr_obj_;
-  src_entr_obj_ = NULL;
-  return temp;
-}
-inline void MoneroTransactionInputViniRequest::set_allocated_src_entr_obj(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj) {
-  delete src_entr_obj_;
-  src_entr_obj_ = src_entr_obj;
-  if (src_entr_obj) {
-    set_has_src_entr_obj();
-  } else {
-    clear_has_src_entr_obj();
-  }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInputViniRequest.src_entr_obj)
-}
-
 // optional bytes vini = 2;
 inline bool MoneroTransactionInputViniRequest::has_vini() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void MoneroTransactionInputViniRequest::set_has_vini() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void MoneroTransactionInputViniRequest::clear_has_vini() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void MoneroTransactionInputViniRequest::clear_vini() {
   if (vini_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8129,13 +7927,13 @@ inline void MoneroTransactionInputViniRequest::set_allocated_vini(::std::string*
 
 // optional bytes vini_hmac = 3;
 inline bool MoneroTransactionInputViniRequest::has_vini_hmac() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void MoneroTransactionInputViniRequest::set_has_vini_hmac() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void MoneroTransactionInputViniRequest::clear_has_vini_hmac() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void MoneroTransactionInputViniRequest::clear_vini_hmac() {
   if (vini_hmac_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8205,13 +8003,13 @@ inline void MoneroTransactionInputViniRequest::set_allocated_vini_hmac(::std::st
 
 // optional bytes pseudo_out = 4;
 inline bool MoneroTransactionInputViniRequest::has_pseudo_out() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void MoneroTransactionInputViniRequest::set_has_pseudo_out() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void MoneroTransactionInputViniRequest::clear_has_pseudo_out() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void MoneroTransactionInputViniRequest::clear_pseudo_out() {
   if (pseudo_out_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8281,13 +8079,13 @@ inline void MoneroTransactionInputViniRequest::set_allocated_pseudo_out(::std::s
 
 // optional bytes pseudo_out_hmac = 5;
 inline bool MoneroTransactionInputViniRequest::has_pseudo_out_hmac() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void MoneroTransactionInputViniRequest::set_has_pseudo_out_hmac() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void MoneroTransactionInputViniRequest::clear_has_pseudo_out_hmac() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void MoneroTransactionInputViniRequest::clear_pseudo_out_hmac() {
   if (pseudo_out_hmac_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -8363,7 +8161,7 @@ inline void MoneroTransactionInputViniRequest::set_allocated_pseudo_out_hmac(::s
 
 // MoneroTransactionSetOutputRequest
 
-// optional bytes dst_entr = 1;
+// optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry dst_entr = 1;
 inline bool MoneroTransactionSetOutputRequest::has_dst_entr() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -8374,67 +8172,32 @@ inline void MoneroTransactionSetOutputRequest::clear_has_dst_entr() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void MoneroTransactionSetOutputRequest::clear_dst_entr() {
-  if (dst_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    dst_entr_->clear();
-  }
+  if (dst_entr_ != NULL) dst_entr_->::hw::trezor::messages::monero::MoneroTransactionDestinationEntry::Clear();
   clear_has_dst_entr();
 }
-inline const ::std::string& MoneroTransactionSetOutputRequest::dst_entr() const {
+inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& MoneroTransactionSetOutputRequest::dst_entr() const {
   // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr)
-  return *dst_entr_;
+  return dst_entr_ != NULL ? *dst_entr_ : *default_instance_->dst_entr_;
 }
-inline void MoneroTransactionSetOutputRequest::set_dst_entr(const ::std::string& value) {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionSetOutputRequest::mutable_dst_entr() {
   set_has_dst_entr();
-  if (dst_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    dst_entr_ = new ::std::string;
-  }
-  dst_entr_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr)
-}
-inline void MoneroTransactionSetOutputRequest::set_dst_entr(const char* value) {
-  set_has_dst_entr();
-  if (dst_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    dst_entr_ = new ::std::string;
-  }
-  dst_entr_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr)
-}
-inline void MoneroTransactionSetOutputRequest::set_dst_entr(const void* value, size_t size) {
-  set_has_dst_entr();
-  if (dst_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    dst_entr_ = new ::std::string;
-  }
-  dst_entr_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr)
-}
-inline ::std::string* MoneroTransactionSetOutputRequest::mutable_dst_entr() {
-  set_has_dst_entr();
-  if (dst_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    dst_entr_ = new ::std::string;
-  }
+  if (dst_entr_ == NULL) dst_entr_ = new ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry;
   // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr)
   return dst_entr_;
 }
-inline ::std::string* MoneroTransactionSetOutputRequest::release_dst_entr() {
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionSetOutputRequest::release_dst_entr() {
   clear_has_dst_entr();
-  if (dst_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = dst_entr_;
-    dst_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
+  ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* temp = dst_entr_;
+  dst_entr_ = NULL;
+  return temp;
 }
-inline void MoneroTransactionSetOutputRequest::set_allocated_dst_entr(::std::string* dst_entr) {
-  if (dst_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete dst_entr_;
-  }
+inline void MoneroTransactionSetOutputRequest::set_allocated_dst_entr(::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* dst_entr) {
+  delete dst_entr_;
+  dst_entr_ = dst_entr;
   if (dst_entr) {
     set_has_dst_entr();
-    dst_entr_ = dst_entr;
   } else {
     clear_has_dst_entr();
-    dst_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr)
 }
@@ -9316,7 +9079,7 @@ inline void MoneroTransactionMlsagDoneAck::set_allocated_full_message_hash(::std
 
 // MoneroTransactionSignInputRequest
 
-// optional bytes src_entr = 1;
+// optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr = 1;
 inline bool MoneroTransactionSignInputRequest::has_src_entr() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
@@ -9327,121 +9090,45 @@ inline void MoneroTransactionSignInputRequest::clear_has_src_entr() {
   _has_bits_[0] &= ~0x00000001u;
 }
 inline void MoneroTransactionSignInputRequest::clear_src_entr() {
-  if (src_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_->clear();
-  }
+  if (src_entr_ != NULL) src_entr_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry::Clear();
   clear_has_src_entr();
 }
-inline const ::std::string& MoneroTransactionSignInputRequest::src_entr() const {
+inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& MoneroTransactionSignInputRequest::src_entr() const {
   // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr)
-  return *src_entr_;
+  return src_entr_ != NULL ? *src_entr_ : *default_instance_->src_entr_;
 }
-inline void MoneroTransactionSignInputRequest::set_src_entr(const ::std::string& value) {
+inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSignInputRequest::mutable_src_entr() {
   set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr)
-}
-inline void MoneroTransactionSignInputRequest::set_src_entr(const char* value) {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr)
-}
-inline void MoneroTransactionSignInputRequest::set_src_entr(const void* value, size_t size) {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
-  src_entr_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr)
-}
-inline ::std::string* MoneroTransactionSignInputRequest::mutable_src_entr() {
-  set_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    src_entr_ = new ::std::string;
-  }
+  if (src_entr_ == NULL) src_entr_ = new ::hw::trezor::messages::monero::MoneroTransactionSourceEntry;
   // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr)
   return src_entr_;
 }
-inline ::std::string* MoneroTransactionSignInputRequest::release_src_entr() {
+inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSignInputRequest::release_src_entr() {
   clear_has_src_entr();
-  if (src_entr_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
-  } else {
-    ::std::string* temp = src_entr_;
-    src_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
-  }
+  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* temp = src_entr_;
+  src_entr_ = NULL;
+  return temp;
 }
-inline void MoneroTransactionSignInputRequest::set_allocated_src_entr(::std::string* src_entr) {
-  if (src_entr_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete src_entr_;
-  }
+inline void MoneroTransactionSignInputRequest::set_allocated_src_entr(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr) {
+  delete src_entr_;
+  src_entr_ = src_entr;
   if (src_entr) {
     set_has_src_entr();
-    src_entr_ = src_entr;
   } else {
     clear_has_src_entr();
-    src_entr_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry src_entr_obj = 8;
-inline bool MoneroTransactionSignInputRequest::has_src_entr_obj() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void MoneroTransactionSignInputRequest::set_has_src_entr_obj() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void MoneroTransactionSignInputRequest::clear_has_src_entr_obj() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void MoneroTransactionSignInputRequest::clear_src_entr_obj() {
-  if (src_entr_obj_ != NULL) src_entr_obj_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry::Clear();
-  clear_has_src_entr_obj();
-}
-inline const ::hw::trezor::messages::monero::MoneroTransactionSourceEntry& MoneroTransactionSignInputRequest::src_entr_obj() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr_obj)
-  return src_entr_obj_ != NULL ? *src_entr_obj_ : *default_instance_->src_entr_obj_;
-}
-inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSignInputRequest::mutable_src_entr_obj() {
-  set_has_src_entr_obj();
-  if (src_entr_obj_ == NULL) src_entr_obj_ = new ::hw::trezor::messages::monero::MoneroTransactionSourceEntry;
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr_obj)
-  return src_entr_obj_;
-}
-inline ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* MoneroTransactionSignInputRequest::release_src_entr_obj() {
-  clear_has_src_entr_obj();
-  ::hw::trezor::messages::monero::MoneroTransactionSourceEntry* temp = src_entr_obj_;
-  src_entr_obj_ = NULL;
-  return temp;
-}
-inline void MoneroTransactionSignInputRequest::set_allocated_src_entr_obj(::hw::trezor::messages::monero::MoneroTransactionSourceEntry* src_entr_obj) {
-  delete src_entr_obj_;
-  src_entr_obj_ = src_entr_obj;
-  if (src_entr_obj) {
-    set_has_src_entr_obj();
-  } else {
-    clear_has_src_entr_obj();
-  }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignInputRequest.src_entr_obj)
-}
-
 // optional bytes vini = 2;
 inline bool MoneroTransactionSignInputRequest::has_vini() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void MoneroTransactionSignInputRequest::set_has_vini() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void MoneroTransactionSignInputRequest::clear_has_vini() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void MoneroTransactionSignInputRequest::clear_vini() {
   if (vini_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9511,13 +9198,13 @@ inline void MoneroTransactionSignInputRequest::set_allocated_vini(::std::string*
 
 // optional bytes vini_hmac = 3;
 inline bool MoneroTransactionSignInputRequest::has_vini_hmac() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void MoneroTransactionSignInputRequest::set_has_vini_hmac() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void MoneroTransactionSignInputRequest::clear_has_vini_hmac() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void MoneroTransactionSignInputRequest::clear_vini_hmac() {
   if (vini_hmac_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9587,13 +9274,13 @@ inline void MoneroTransactionSignInputRequest::set_allocated_vini_hmac(::std::st
 
 // optional bytes pseudo_out = 4;
 inline bool MoneroTransactionSignInputRequest::has_pseudo_out() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void MoneroTransactionSignInputRequest::set_has_pseudo_out() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void MoneroTransactionSignInputRequest::clear_has_pseudo_out() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void MoneroTransactionSignInputRequest::clear_pseudo_out() {
   if (pseudo_out_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9663,13 +9350,13 @@ inline void MoneroTransactionSignInputRequest::set_allocated_pseudo_out(::std::s
 
 // optional bytes pseudo_out_hmac = 5;
 inline bool MoneroTransactionSignInputRequest::has_pseudo_out_hmac() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000010u) != 0;
 }
 inline void MoneroTransactionSignInputRequest::set_has_pseudo_out_hmac() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000010u;
 }
 inline void MoneroTransactionSignInputRequest::clear_has_pseudo_out_hmac() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void MoneroTransactionSignInputRequest::clear_pseudo_out_hmac() {
   if (pseudo_out_hmac_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9739,13 +9426,13 @@ inline void MoneroTransactionSignInputRequest::set_allocated_pseudo_out_hmac(::s
 
 // optional bytes alpha_enc = 6;
 inline bool MoneroTransactionSignInputRequest::has_alpha_enc() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void MoneroTransactionSignInputRequest::set_has_alpha_enc() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void MoneroTransactionSignInputRequest::clear_has_alpha_enc() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void MoneroTransactionSignInputRequest::clear_alpha_enc() {
   if (alpha_enc_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
@@ -9815,13 +9502,13 @@ inline void MoneroTransactionSignInputRequest::set_allocated_alpha_enc(::std::st
 
 // optional bytes spend_enc = 7;
 inline bool MoneroTransactionSignInputRequest::has_spend_enc() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void MoneroTransactionSignInputRequest::set_has_spend_enc() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void MoneroTransactionSignInputRequest::clear_has_spend_enc() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void MoneroTransactionSignInputRequest::clear_spend_enc() {
   if (spend_enc_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
