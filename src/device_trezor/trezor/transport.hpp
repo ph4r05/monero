@@ -43,7 +43,7 @@ namespace trezor {
   std::string t_serialize(const json_val & in);
 
   bool t_deserialize(const std::string & in, std::string & out);
-  bool t_deserialize(const std::string & in, json_val & out);
+  bool t_deserialize(const std::string & in, json & out);
 
   // Flexible json serialization. HTTP client tailored for bridge API
   template<class t_req, class t_res, class t_transport>

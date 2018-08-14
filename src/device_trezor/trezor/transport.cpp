@@ -40,12 +40,10 @@ namespace trezor{
     return true;
   }
 
-  bool t_deserialize(const std::string & in, json_val & out){
-    json doc;
-    if (doc.Parse(in.c_str()).HasParseError()) {
+  bool t_deserialize(const std::string & in, json & out){
+    if (out.Parse(in.c_str()).HasParseError()) {
       throw exc::CommunicationException("JSON parse error");
     }
-    out = doc.GetObject();
     return true;
   }
 
@@ -210,7 +208,7 @@ namespace trezor{
   }
 
   bool BridgeTransport::enumerate(t_transport_vect & res) {
-    json_val bridge_res;
+    json bridge_res;
     std::string req;
 
     bool req_status = invoke_bridge_http("/enumerate", req, bridge_res, m_http_client);
@@ -222,11 +220,7 @@ namespace trezor{
     for(rapidjson::Value::ConstValueIterator itr = bridge_res.Begin(); itr != bridge_res.End(); ++itr){
       auto element = itr->GetObject();
       auto t = std::make_shared<BridgeTransport>(boost::make_optional(json_get_string(element["path"])));
-      json d;
-      json_val tmp;
-//      json_val tmp(*itr, d.GetAllocator());
-      t->m_device_info.emplace(*itr, d.GetAllocator());// = boost::make_optional<json_val>(tmp);
-
+      t->m_device_info.emplace(*itr, bridge_res.GetAllocator());
       res.push_back(t);
     }
     return true;
@@ -240,7 +234,7 @@ namespace trezor{
 
     std::string uri = "/acquire/" + m_device_path.get() + "/null";
     std::string req;
-    json_val bridge_res;
+    json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
       LOG_PRINT_L1("Failed to acquire device");
@@ -258,7 +252,7 @@ namespace trezor{
 
     std::string uri = "/release/" + m_session.get();
     std::string req;
-    json_val bridge_res;
+    json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
       LOG_PRINT_L1("Failed to release the device");
