@@ -368,7 +368,7 @@ void protobuf_AssignDesc_messages_2dmonero_2eproto() {
       sizeof(MoneroTransactionSourceEntry_MoneroRctKey));
   MoneroTransactionSourceEntry_MoneroOutputEntry_descriptor_ = MoneroTransactionSourceEntry_descriptor_->nested_type(1);
   static const int MoneroTransactionSourceEntry_MoneroOutputEntry_offsets_[2] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MoneroTransactionSourceEntry_MoneroOutputEntry, amount_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MoneroTransactionSourceEntry_MoneroOutputEntry, idx_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MoneroTransactionSourceEntry_MoneroOutputEntry, key_),
   };
   MoneroTransactionSourceEntry_MoneroOutputEntry_reflection_ =
@@ -1133,7 +1133,7 @@ void protobuf_AddDesc_messages_2dmonero_2eproto() {
     "roTransactionInitAck\022\017\n\007version\030\001 \001(\r\022\016\n"
     "\006status\030\002 \001(\r\022\021\n\tin_memory\030\003 \001(\010\022\r\n\005hmac"
     "s\030\004 \003(\014\022\023\n\013many_inputs\030\005 \001(\010\022\024\n\014many_out"
-    "puts\030\006 \001(\010\"\346\004\n\034MoneroTransactionSourceEn"
+    "puts\030\006 \001(\010\"\343\004\n\034MoneroTransactionSourceEn"
     "try\022Z\n\007outputs\030\001 \003(\0132I.hw.trezor.message"
     "s.monero.MoneroTransactionSourceEntry.Mo"
     "neroOutputEntry\022\023\n\013real_output\030\002 \001(\004\022\027\n\017"
@@ -1144,105 +1144,105 @@ void protobuf_AddDesc_messages_2dmonero_2eproto() {
     ".hw.trezor.messages.monero.MoneroTransac"
     "tionSourceEntry.MoneroMultisigKLRki\032*\n\014M"
     "oneroRctKey\022\014\n\004dest\030\001 \001(\014\022\014\n\004mask\030\002 \001(\014\032"
-    "v\n\021MoneroOutputEntry\022\016\n\006amount\030\001 \001(\004\022Q\n\003"
-    "key\030\002 \001(\0132D.hw.trezor.messages.monero.Mo"
-    "neroTransactionSourceEntry.MoneroRctKey\032"
-    "B\n\023MoneroMultisigKLRki\022\t\n\001K\030\001 \001(\014\022\t\n\001L\030\002"
-    " \001(\014\022\t\n\001R\030\003 \001(\014\022\n\n\002ki\030\004 \001(\014\"~\n MoneroTra"
-    "nsactionSetInputRequest\022\017\n\007version\030\001 \001(\r"
-    "\022I\n\010src_entr\030\002 \001(\01327.hw.trezor.messages."
-    "monero.MoneroTransactionSourceEntry\"\222\001\n\034"
-    "MoneroTransactionSetInputAck\022\014\n\004vini\030\001 \001"
-    "(\014\022\021\n\tvini_hmac\030\002 \001(\014\022\022\n\npseudo_out\030\003 \001("
-    "\014\022\027\n\017pseudo_out_hmac\030\004 \001(\014\022\021\n\talpha_enc\030"
-    "\005 \001(\014\022\021\n\tspend_enc\030\006 \001(\014\"9\n)MoneroTransa"
-    "ctionInputsPermutationRequest\022\014\n\004perm\030\001 "
-    "\003(\r\"\'\n%MoneroTransactionInputsPermutatio"
-    "nAck\"\274\001\n!MoneroTransactionInputViniReque"
-    "st\022I\n\010src_entr\030\001 \001(\01327.hw.trezor.message"
-    "s.monero.MoneroTransactionSourceEntry\022\014\n"
-    "\004vini\030\002 \001(\014\022\021\n\tvini_hmac\030\003 \001(\014\022\022\n\npseudo"
-    "_out\030\004 \001(\014\022\027\n\017pseudo_out_hmac\030\005 \001(\014\"\037\n\035M"
-    "oneroTransactionInputViniAck\"\212\001\n!MoneroT"
-    "ransactionSetOutputRequest\022N\n\010dst_entr\030\001"
-    " \001(\0132<.hw.trezor.messages.monero.MoneroT"
-    "ransactionDestinationEntry\022\025\n\rdst_entr_h"
-    "mac\030\002 \001(\014\"t\n\035MoneroTransactionSetOutputA"
-    "ck\022\016\n\006tx_out\030\001 \001(\014\022\022\n\nvouti_hmac\030\002 \001(\014\022\014"
-    "\n\004rsig\030\003 \001(\014\022\016\n\006out_pk\030\004 \001(\014\022\021\n\tecdh_inf"
-    "o\030\005 \001(\014\"#\n!MoneroTransactionAllOutSetReq"
-    "uest\"\342\001\n\035MoneroTransactionAllOutSetAck\022\r"
-    "\n\005extra\030\001 \001(\014\022\026\n\016tx_prefix_hash\030\002 \001(\014\022T\n"
-    "\002rv\030\003 \001(\0132H.hw.trezor.messages.monero.Mo"
-    "neroTransactionAllOutSetAck.MoneroRingCt"
-    "Sig\032D\n\017MoneroRingCtSig\022\017\n\007txn_fee\030\001 \001(\004\022"
-    "\017\n\007message\030\002 \001(\014\022\017\n\007rv_type\030\003 \001(\r\"#\n!Mon"
-    "eroTransactionMlsagDoneRequest\":\n\035Monero"
-    "TransactionMlsagDoneAck\022\031\n\021full_message_"
-    "hash\030\001 \001(\014\"\342\001\n!MoneroTransactionSignInpu"
-    "tRequest\022I\n\010src_entr\030\001 \001(\01327.hw.trezor.m"
-    "essages.monero.MoneroTransactionSourceEn"
-    "try\022\014\n\004vini\030\002 \001(\014\022\021\n\tvini_hmac\030\003 \001(\014\022\022\n\n"
-    "pseudo_out\030\004 \001(\014\022\027\n\017pseudo_out_hmac\030\005 \001("
-    "\014\022\021\n\talpha_enc\030\006 \001(\014\022\021\n\tspend_enc\030\007 \001(\014\""
-    "@\n\035MoneroTransactionSignInputAck\022\021\n\tsign"
-    "ature\030\001 \001(\014\022\014\n\004cout\030\002 \001(\014\"\037\n\035MoneroTrans"
-    "actionFinalRequest\"c\n\031MoneroTransactionF"
-    "inalAck\022\020\n\010cout_key\030\001 \001(\014\022\014\n\004salt\030\002 \001(\014\022"
-    "\021\n\trand_mult\030\003 \001(\014\022\023\n\013tx_enc_keys\030\004 \001(\014\""
-    "\376\005\n\034MoneroTransactionSignRequest\022E\n\004init"
-    "\030\001 \001(\01327.hw.trezor.messages.monero.Moner"
-    "oTransactionInitRequest\022N\n\tset_input\030\002 \001"
-    "(\0132;.hw.trezor.messages.monero.MoneroTra"
-    "nsactionSetInputRequest\022_\n\021input_permuta"
-    "tion\030\003 \001(\0132D.hw.trezor.messages.monero.M"
-    "oneroTransactionInputsPermutationRequest"
-    "\022P\n\ninput_vini\030\004 \001(\0132<.hw.trezor.message"
-    "s.monero.MoneroTransactionInputViniReque"
-    "st\022P\n\nset_output\030\005 \001(\0132<.hw.trezor.messa"
-    "ges.monero.MoneroTransactionSetOutputReq"
-    "uest\022Q\n\013all_out_set\030\006 \001(\0132<.hw.trezor.me"
-    "ssages.monero.MoneroTransactionAllOutSet"
-    "Request\022P\n\nmlsag_done\030\007 \001(\0132<.hw.trezor."
-    "messages.monero.MoneroTransactionMlsagDo"
-    "neRequest\022P\n\nsign_input\030\010 \001(\0132<.hw.trezo"
-    "r.messages.monero.MoneroTransactionSignI"
-    "nputRequest\022K\n\tfinal_msg\030\t \001(\01328.hw.trez"
-    "or.messages.monero.MoneroTransactionFina"
-    "lRequest\"\222\002\n\037MoneroKeyImageExportInitReq"
-    "uest\022\013\n\003num\030\001 \001(\004\022\014\n\004hash\030\002 \001(\014\022\021\n\taddre"
-    "ss_n\030\003 \003(\r\022\024\n\014network_type\030\004 \001(\r\022d\n\004subs"
-    "\030\005 \003(\0132V.hw.trezor.messages.monero.Moner"
-    "oKeyImageExportInitRequest.MoneroSubAddr"
-    "essIndicesList\032E\n\033MoneroSubAddressIndice"
-    "sList\022\017\n\007account\030\001 \001(\r\022\025\n\rminor_indices\030"
-    "\002 \003(\r\"\035\n\033MoneroKeyImageExportInitAck\"\372\001\n"
-    "\035MoneroKeyImageSyncStepRequest\022\\\n\004tdis\030\001"
-    " \003(\0132N.hw.trezor.messages.monero.MoneroK"
-    "eyImageSyncStepRequest.MoneroTransferDet"
-    "ails\032{\n\025MoneroTransferDetails\022\017\n\007out_key"
-    "\030\001 \001(\014\022\022\n\ntx_pub_key\030\002 \001(\014\022\036\n\026additional"
-    "_tx_pub_keys\030\003 \003(\014\022\035\n\025internal_output_in"
-    "dex\030\004 \001(\004\"\266\001\n\031MoneroKeyImageSyncStepAck\022"
-    "X\n\003kis\030\001 \003(\0132K.hw.trezor.messages.monero"
-    ".MoneroKeyImageSyncStepAck.MoneroExporte"
-    "dKeyImage\032\?\n\026MoneroExportedKeyImage\022\n\n\002i"
-    "v\030\001 \001(\014\022\013\n\003tag\030\002 \001(\014\022\014\n\004blob\030\003 \001(\014\" \n\036Mo"
-    "neroKeyImageSyncFinalRequest\"-\n\032MoneroKe"
-    "yImageSyncFinalAck\022\017\n\007enc_key\030\001 \001(\014\"\373\001\n\031"
-    "MoneroKeyImageSyncRequest\022H\n\004init\030\001 \001(\0132"
-    ":.hw.trezor.messages.monero.MoneroKeyIma"
-    "geExportInitRequest\022F\n\004step\030\002 \001(\01328.hw.t"
-    "rezor.messages.monero.MoneroKeyImageSync"
-    "StepRequest\022L\n\tfinal_msg\030\003 \001(\01329.hw.trez"
-    "or.messages.monero.MoneroKeyImageSyncFin"
-    "alRequest\"g\n\026DebugMoneroDiagRequest\022\013\n\003i"
-    "ns\030\001 \001(\004\022\n\n\002p1\030\002 \001(\004\022\n\n\002p2\030\003 \001(\004\022\n\n\002pd\030\004"
-    " \003(\004\022\r\n\005data1\030\005 \001(\014\022\r\n\005data2\030\006 \001(\014\"c\n\022De"
-    "bugMoneroDiagAck\022\013\n\003ins\030\001 \001(\004\022\n\n\002p1\030\002 \001("
-    "\004\022\n\n\002p2\030\003 \001(\004\022\n\n\002pd\030\004 \003(\004\022\r\n\005data1\030\005 \001(\014"
-    "\022\r\n\005data2\030\006 \001(\014B:\n#com.satoshilabs.trezo"
-    "r.lib.protobufB\023TrezorMessageMonero", 5715);
+    "s\n\021MoneroOutputEntry\022\013\n\003idx\030\001 \001(\004\022Q\n\003key"
+    "\030\002 \001(\0132D.hw.trezor.messages.monero.Moner"
+    "oTransactionSourceEntry.MoneroRctKey\032B\n\023"
+    "MoneroMultisigKLRki\022\t\n\001K\030\001 \001(\014\022\t\n\001L\030\002 \001("
+    "\014\022\t\n\001R\030\003 \001(\014\022\n\n\002ki\030\004 \001(\014\"~\n MoneroTransa"
+    "ctionSetInputRequest\022\017\n\007version\030\001 \001(\r\022I\n"
+    "\010src_entr\030\002 \001(\01327.hw.trezor.messages.mon"
+    "ero.MoneroTransactionSourceEntry\"\222\001\n\034Mon"
+    "eroTransactionSetInputAck\022\014\n\004vini\030\001 \001(\014\022"
+    "\021\n\tvini_hmac\030\002 \001(\014\022\022\n\npseudo_out\030\003 \001(\014\022\027"
+    "\n\017pseudo_out_hmac\030\004 \001(\014\022\021\n\talpha_enc\030\005 \001"
+    "(\014\022\021\n\tspend_enc\030\006 \001(\014\"9\n)MoneroTransacti"
+    "onInputsPermutationRequest\022\014\n\004perm\030\001 \003(\r"
+    "\"\'\n%MoneroTransactionInputsPermutationAc"
+    "k\"\274\001\n!MoneroTransactionInputViniRequest\022"
+    "I\n\010src_entr\030\001 \001(\01327.hw.trezor.messages.m"
+    "onero.MoneroTransactionSourceEntry\022\014\n\004vi"
+    "ni\030\002 \001(\014\022\021\n\tvini_hmac\030\003 \001(\014\022\022\n\npseudo_ou"
+    "t\030\004 \001(\014\022\027\n\017pseudo_out_hmac\030\005 \001(\014\"\037\n\035Mone"
+    "roTransactionInputViniAck\"\212\001\n!MoneroTran"
+    "sactionSetOutputRequest\022N\n\010dst_entr\030\001 \001("
+    "\0132<.hw.trezor.messages.monero.MoneroTran"
+    "sactionDestinationEntry\022\025\n\rdst_entr_hmac"
+    "\030\002 \001(\014\"t\n\035MoneroTransactionSetOutputAck\022"
+    "\016\n\006tx_out\030\001 \001(\014\022\022\n\nvouti_hmac\030\002 \001(\014\022\014\n\004r"
+    "sig\030\003 \001(\014\022\016\n\006out_pk\030\004 \001(\014\022\021\n\tecdh_info\030\005"
+    " \001(\014\"#\n!MoneroTransactionAllOutSetReques"
+    "t\"\342\001\n\035MoneroTransactionAllOutSetAck\022\r\n\005e"
+    "xtra\030\001 \001(\014\022\026\n\016tx_prefix_hash\030\002 \001(\014\022T\n\002rv"
+    "\030\003 \001(\0132H.hw.trezor.messages.monero.Moner"
+    "oTransactionAllOutSetAck.MoneroRingCtSig"
+    "\032D\n\017MoneroRingCtSig\022\017\n\007txn_fee\030\001 \001(\004\022\017\n\007"
+    "message\030\002 \001(\014\022\017\n\007rv_type\030\003 \001(\r\"#\n!Monero"
+    "TransactionMlsagDoneRequest\":\n\035MoneroTra"
+    "nsactionMlsagDoneAck\022\031\n\021full_message_has"
+    "h\030\001 \001(\014\"\342\001\n!MoneroTransactionSignInputRe"
+    "quest\022I\n\010src_entr\030\001 \001(\01327.hw.trezor.mess"
+    "ages.monero.MoneroTransactionSourceEntry"
+    "\022\014\n\004vini\030\002 \001(\014\022\021\n\tvini_hmac\030\003 \001(\014\022\022\n\npse"
+    "udo_out\030\004 \001(\014\022\027\n\017pseudo_out_hmac\030\005 \001(\014\022\021"
+    "\n\talpha_enc\030\006 \001(\014\022\021\n\tspend_enc\030\007 \001(\014\"@\n\035"
+    "MoneroTransactionSignInputAck\022\021\n\tsignatu"
+    "re\030\001 \001(\014\022\014\n\004cout\030\002 \001(\014\"\037\n\035MoneroTransact"
+    "ionFinalRequest\"c\n\031MoneroTransactionFina"
+    "lAck\022\020\n\010cout_key\030\001 \001(\014\022\014\n\004salt\030\002 \001(\014\022\021\n\t"
+    "rand_mult\030\003 \001(\014\022\023\n\013tx_enc_keys\030\004 \001(\014\"\376\005\n"
+    "\034MoneroTransactionSignRequest\022E\n\004init\030\001 "
+    "\001(\01327.hw.trezor.messages.monero.MoneroTr"
+    "ansactionInitRequest\022N\n\tset_input\030\002 \001(\0132"
+    ";.hw.trezor.messages.monero.MoneroTransa"
+    "ctionSetInputRequest\022_\n\021input_permutatio"
+    "n\030\003 \001(\0132D.hw.trezor.messages.monero.Mone"
+    "roTransactionInputsPermutationRequest\022P\n"
+    "\ninput_vini\030\004 \001(\0132<.hw.trezor.messages.m"
+    "onero.MoneroTransactionInputViniRequest\022"
+    "P\n\nset_output\030\005 \001(\0132<.hw.trezor.messages"
+    ".monero.MoneroTransactionSetOutputReques"
+    "t\022Q\n\013all_out_set\030\006 \001(\0132<.hw.trezor.messa"
+    "ges.monero.MoneroTransactionAllOutSetReq"
+    "uest\022P\n\nmlsag_done\030\007 \001(\0132<.hw.trezor.mes"
+    "sages.monero.MoneroTransactionMlsagDoneR"
+    "equest\022P\n\nsign_input\030\010 \001(\0132<.hw.trezor.m"
+    "essages.monero.MoneroTransactionSignInpu"
+    "tRequest\022K\n\tfinal_msg\030\t \001(\01328.hw.trezor."
+    "messages.monero.MoneroTransactionFinalRe"
+    "quest\"\222\002\n\037MoneroKeyImageExportInitReques"
+    "t\022\013\n\003num\030\001 \001(\004\022\014\n\004hash\030\002 \001(\014\022\021\n\taddress_"
+    "n\030\003 \003(\r\022\024\n\014network_type\030\004 \001(\r\022d\n\004subs\030\005 "
+    "\003(\0132V.hw.trezor.messages.monero.MoneroKe"
+    "yImageExportInitRequest.MoneroSubAddress"
+    "IndicesList\032E\n\033MoneroSubAddressIndicesLi"
+    "st\022\017\n\007account\030\001 \001(\r\022\025\n\rminor_indices\030\002 \003"
+    "(\r\"\035\n\033MoneroKeyImageExportInitAck\"\372\001\n\035Mo"
+    "neroKeyImageSyncStepRequest\022\\\n\004tdis\030\001 \003("
+    "\0132N.hw.trezor.messages.monero.MoneroKeyI"
+    "mageSyncStepRequest.MoneroTransferDetail"
+    "s\032{\n\025MoneroTransferDetails\022\017\n\007out_key\030\001 "
+    "\001(\014\022\022\n\ntx_pub_key\030\002 \001(\014\022\036\n\026additional_tx"
+    "_pub_keys\030\003 \003(\014\022\035\n\025internal_output_index"
+    "\030\004 \001(\004\"\266\001\n\031MoneroKeyImageSyncStepAck\022X\n\003"
+    "kis\030\001 \003(\0132K.hw.trezor.messages.monero.Mo"
+    "neroKeyImageSyncStepAck.MoneroExportedKe"
+    "yImage\032\?\n\026MoneroExportedKeyImage\022\n\n\002iv\030\001"
+    " \001(\014\022\013\n\003tag\030\002 \001(\014\022\014\n\004blob\030\003 \001(\014\" \n\036Moner"
+    "oKeyImageSyncFinalRequest\"-\n\032MoneroKeyIm"
+    "ageSyncFinalAck\022\017\n\007enc_key\030\001 \001(\014\"\373\001\n\031Mon"
+    "eroKeyImageSyncRequest\022H\n\004init\030\001 \001(\0132:.h"
+    "w.trezor.messages.monero.MoneroKeyImageE"
+    "xportInitRequest\022F\n\004step\030\002 \001(\01328.hw.trez"
+    "or.messages.monero.MoneroKeyImageSyncSte"
+    "pRequest\022L\n\tfinal_msg\030\003 \001(\01329.hw.trezor."
+    "messages.monero.MoneroKeyImageSyncFinalR"
+    "equest\"g\n\026DebugMoneroDiagRequest\022\013\n\003ins\030"
+    "\001 \001(\004\022\n\n\002p1\030\002 \001(\004\022\n\n\002p2\030\003 \001(\004\022\n\n\002pd\030\004 \003("
+    "\004\022\r\n\005data1\030\005 \001(\014\022\r\n\005data2\030\006 \001(\014\"c\n\022Debug"
+    "MoneroDiagAck\022\013\n\003ins\030\001 \001(\004\022\n\n\002p1\030\002 \001(\004\022\n"
+    "\n\002p2\030\003 \001(\004\022\n\n\002pd\030\004 \003(\004\022\r\n\005data1\030\005 \001(\014\022\r\n"
+    "\005data2\030\006 \001(\014B:\n#com.satoshilabs.trezor.l"
+    "ib.protobufB\023TrezorMessageMonero", 5712);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages-monero.proto", &protobuf_RegisterTypes);
   MoneroGetAddress::default_instance_ = new MoneroGetAddress();
@@ -4939,7 +4939,7 @@ void MoneroTransactionSourceEntry_MoneroRctKey::Swap(MoneroTransactionSourceEntr
 // -------------------------------------------------------------------
 
 #ifndef _MSC_VER
-const int MoneroTransactionSourceEntry_MoneroOutputEntry::kAmountFieldNumber;
+const int MoneroTransactionSourceEntry_MoneroOutputEntry::kIdxFieldNumber;
 const int MoneroTransactionSourceEntry_MoneroOutputEntry::kKeyFieldNumber;
 #endif  // !_MSC_VER
 
@@ -4962,7 +4962,7 @@ MoneroTransactionSourceEntry_MoneroOutputEntry::MoneroTransactionSourceEntry_Mon
 
 void MoneroTransactionSourceEntry_MoneroOutputEntry::SharedCtor() {
   _cached_size_ = 0;
-  amount_ = GOOGLE_ULONGLONG(0);
+  idx_ = GOOGLE_ULONGLONG(0);
   key_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
@@ -5001,7 +5001,7 @@ MoneroTransactionSourceEntry_MoneroOutputEntry* MoneroTransactionSourceEntry_Mon
 
 void MoneroTransactionSourceEntry_MoneroOutputEntry::Clear() {
   if (_has_bits_[0 / 32] & 3) {
-    amount_ = GOOGLE_ULONGLONG(0);
+    idx_ = GOOGLE_ULONGLONG(0);
     if (has_key()) {
       if (key_ != NULL) key_->::hw::trezor::messages::monero::MoneroTransactionSourceEntry_MoneroRctKey::Clear();
     }
@@ -5020,13 +5020,13 @@ bool MoneroTransactionSourceEntry_MoneroOutputEntry::MergePartialFromCodedStream
     tag = p.first;
     if (!p.second) goto handle_unusual;
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional uint64 amount = 1;
+      // optional uint64 idx = 1;
       case 1: {
         if (tag == 8) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
-                 input, &amount_)));
-          set_has_amount();
+                 input, &idx_)));
+          set_has_idx();
         } else {
           goto handle_unusual;
         }
@@ -5072,9 +5072,9 @@ failure:
 void MoneroTransactionSourceEntry_MoneroOutputEntry::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
   // @@protoc_insertion_point(serialize_start:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry)
-  // optional uint64 amount = 1;
-  if (has_amount()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->amount(), output);
+  // optional uint64 idx = 1;
+  if (has_idx()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt64(1, this->idx(), output);
   }
 
   // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroRctKey key = 2;
@@ -5093,9 +5093,9 @@ void MoneroTransactionSourceEntry_MoneroOutputEntry::SerializeWithCachedSizes(
 ::google::protobuf::uint8* MoneroTransactionSourceEntry_MoneroOutputEntry::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
   // @@protoc_insertion_point(serialize_to_array_start:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry)
-  // optional uint64 amount = 1;
-  if (has_amount()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->amount(), target);
+  // optional uint64 idx = 1;
+  if (has_idx()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(1, this->idx(), target);
   }
 
   // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroRctKey key = 2;
@@ -5117,11 +5117,11 @@ int MoneroTransactionSourceEntry_MoneroOutputEntry::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional uint64 amount = 1;
-    if (has_amount()) {
+    // optional uint64 idx = 1;
+    if (has_idx()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt64Size(
-          this->amount());
+          this->idx());
     }
 
     // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroRctKey key = 2;
@@ -5158,8 +5158,8 @@ void MoneroTransactionSourceEntry_MoneroOutputEntry::MergeFrom(const ::google::p
 void MoneroTransactionSourceEntry_MoneroOutputEntry::MergeFrom(const MoneroTransactionSourceEntry_MoneroOutputEntry& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_amount()) {
-      set_amount(from.amount());
+    if (from.has_idx()) {
+      set_idx(from.idx());
     }
     if (from.has_key()) {
       mutable_key()->::hw::trezor::messages::monero::MoneroTransactionSourceEntry_MoneroRctKey::MergeFrom(from.key());
@@ -5187,7 +5187,7 @@ bool MoneroTransactionSourceEntry_MoneroOutputEntry::IsInitialized() const {
 
 void MoneroTransactionSourceEntry_MoneroOutputEntry::Swap(MoneroTransactionSourceEntry_MoneroOutputEntry* other) {
   if (other != this) {
-    std::swap(amount_, other->amount_);
+    std::swap(idx_, other->idx_);
     std::swap(key_, other->key_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);

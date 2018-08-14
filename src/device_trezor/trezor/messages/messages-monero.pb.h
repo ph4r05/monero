@@ -1319,12 +1319,12 @@ class MoneroTransactionSourceEntry_MoneroOutputEntry : public ::google::protobuf
 
   // accessors -------------------------------------------------------
 
-  // optional uint64 amount = 1;
-  inline bool has_amount() const;
-  inline void clear_amount();
-  static const int kAmountFieldNumber = 1;
-  inline ::google::protobuf::uint64 amount() const;
-  inline void set_amount(::google::protobuf::uint64 value);
+  // optional uint64 idx = 1;
+  inline bool has_idx() const;
+  inline void clear_idx();
+  static const int kIdxFieldNumber = 1;
+  inline ::google::protobuf::uint64 idx() const;
+  inline void set_idx(::google::protobuf::uint64 value);
 
   // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroRctKey key = 2;
   inline bool has_key() const;
@@ -1337,8 +1337,8 @@ class MoneroTransactionSourceEntry_MoneroOutputEntry : public ::google::protobuf
 
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry)
  private:
-  inline void set_has_amount();
-  inline void clear_has_amount();
+  inline void set_has_idx();
+  inline void clear_has_idx();
   inline void set_has_key();
   inline void clear_has_key();
 
@@ -1346,7 +1346,7 @@ class MoneroTransactionSourceEntry_MoneroOutputEntry : public ::google::protobuf
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
-  ::google::protobuf::uint64 amount_;
+  ::google::protobuf::uint64 idx_;
   ::hw::trezor::messages::monero::MoneroTransactionSourceEntry_MoneroRctKey* key_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
@@ -6487,28 +6487,28 @@ inline void MoneroTransactionSourceEntry_MoneroRctKey::set_allocated_mask(::std:
 
 // MoneroTransactionSourceEntry_MoneroOutputEntry
 
-// optional uint64 amount = 1;
-inline bool MoneroTransactionSourceEntry_MoneroOutputEntry::has_amount() const {
+// optional uint64 idx = 1;
+inline bool MoneroTransactionSourceEntry_MoneroOutputEntry::has_idx() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void MoneroTransactionSourceEntry_MoneroOutputEntry::set_has_amount() {
+inline void MoneroTransactionSourceEntry_MoneroOutputEntry::set_has_idx() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void MoneroTransactionSourceEntry_MoneroOutputEntry::clear_has_amount() {
+inline void MoneroTransactionSourceEntry_MoneroOutputEntry::clear_has_idx() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void MoneroTransactionSourceEntry_MoneroOutputEntry::clear_amount() {
-  amount_ = GOOGLE_ULONGLONG(0);
-  clear_has_amount();
+inline void MoneroTransactionSourceEntry_MoneroOutputEntry::clear_idx() {
+  idx_ = GOOGLE_ULONGLONG(0);
+  clear_has_idx();
 }
-inline ::google::protobuf::uint64 MoneroTransactionSourceEntry_MoneroOutputEntry::amount() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry.amount)
-  return amount_;
+inline ::google::protobuf::uint64 MoneroTransactionSourceEntry_MoneroOutputEntry::idx() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry.idx)
+  return idx_;
 }
-inline void MoneroTransactionSourceEntry_MoneroOutputEntry::set_amount(::google::protobuf::uint64 value) {
-  set_has_amount();
-  amount_ = value;
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry.amount)
+inline void MoneroTransactionSourceEntry_MoneroOutputEntry::set_idx(::google::protobuf::uint64 value) {
+  set_has_idx();
+  idx_ = value;
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroOutputEntry.idx)
 }
 
 // optional .hw.trezor.messages.monero.MoneroTransactionSourceEntry.MoneroRctKey key = 2;
