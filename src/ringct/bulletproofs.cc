@@ -410,23 +410,25 @@ void bulletproof_PROVE_s1(const rct::key &sv, const rct::key &gamma,
   PERF_TIMER_STOP(PROVE_step1);
 
   PERF_TIMER_START_BP(PROVE_step2);
-  auto HyNsR = hadamard(yN, sR);
-  auto vp2zsq = vector_scalar(twoN, zsq);
   auto vpIz = vector_scalar(oneN, z);
   auto aL_vpIz = vector_subtract(aL, vpIz);
+  aL.clear();
+
   auto aR_vpIz = vector_add(aR, vpIz);
+  aR.clear();
   vpIz.clear();
 
+  auto HyNsR = hadamard(yN, sR);
   rct::key ip1 = inner_product(aL_vpIz, HyNsR);
+  rct::key ip3 = inner_product(sL, HyNsR);
+  HyNsR.clear();
+
   sc_add(t1.bytes, t1.bytes, ip1.bytes);
 
+  auto vp2zsq = vector_scalar(twoN, zsq);
   rct::key ip2 = inner_product(sL, vector_add(hadamard(yN, aR_vpIz), vp2zsq));
   sc_add(t1.bytes, t1.bytes, ip2.bytes);
-
-  rct::key ip3 = inner_product(sL, HyNsR);
   sc_add(t2.bytes, t2.bytes, ip3.bytes);
-
-  HyNsR.clear();
 
   // PAPER LINES 47-48
   rct::key tau1 = rct::skGen(), tau2 = rct::skGen();
@@ -448,9 +450,11 @@ void bulletproof_PROVE_s1(const rct::key &sv, const rct::key &gamma,
 
   // PAPER LINES 54-57
   l = vector_add(aL_vpIz, vector_scalar(sL, x));
+  sL.clear();
   aL_vpIz.clear();
 
   r = vector_add(hadamard(yN, vector_add(aR_vpIz, vector_scalar(sR, x))), vp2zsq);
+  sR.clear();
   aR_vpIz.clear();
   vp2zsq.clear();
   PERF_TIMER_STOP(PROVE_step2);
