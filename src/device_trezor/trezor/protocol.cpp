@@ -3,13 +3,14 @@
 //
 
 #include "protocol.hpp"
-#include "crypto/poly1305.h"
 #include <unordered_map>
 #include <set>
 #include <utility>
 #include <boost/endian/conversion.hpp>
 #include <common/apply_permutation.h>
 #include <ringct/rctSigs.h>
+#include "sodium.h"
+#include "sodium/crypto_aead_chacha20poly1305.h"
 
 namespace hw{
 namespace trezor{
@@ -71,45 +72,14 @@ namespace chacha {
     }
 
     auto cip_data = reinterpret_cast<const char*>(data);
-    unsigned char zeros[32] = {0};
-    const char * tag = cip_data + (length - 16);
-    char expected_tag[16] = {0};
-    length -= 16;
+    unsigned long long int cip_len = length;
+    auto r = crypto_aead_chacha20poly1305_ietf_decrypt(
+        reinterpret_cast<unsigned char *>(cipher), &cip_len, nullptr,
+        static_cast<const unsigned char *>(data), length, nullptr, 0, iv, key);
 
-    // Key setup, RFC 7539
-    char poly_key[64] = {0};
-    ::crypto::chacha_ctx chacha_ctx;
-    ::crypto::poly1305_context poly_ctx;
-    ::crypto::chacha20_init(&chacha_ctx, key, 256, iv, 12);
-
-    // Encrypt 64 bytes of zeros and use the first 32 bytes as the Poly1305 key.
-    ::crypto::chacha20_encrypt(&chacha_ctx,
-                               reinterpret_cast<const uint8_t *>(poly_key),
-                               reinterpret_cast<uint8_t *>(poly_key), 64);
-
-    ::crypto::poly1305_init(&poly_ctx, reinterpret_cast<const unsigned char *>(poly_key));
-    ::crypto::poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(cip_data), length);
-    if (length % 16 != 0){
-      ::crypto::poly1305_update(&poly_ctx, zeros, 16 - (length % 16));
-    }
-
-    uint64_t len_ciphertext_small = boost::endian::native_to_little(static_cast<uint64_t>(length));
-    ::crypto::poly1305_update(&poly_ctx, zeros, 8);  // authenticated data length
-    ::crypto::poly1305_update(&poly_ctx, reinterpret_cast<const unsigned char *>(&len_ciphertext_small), 8);
-    ::crypto::poly1305_finish(&poly_ctx, reinterpret_cast<unsigned char *>(expected_tag));
-
-    memset(&poly_ctx, 0, sizeof(::crypto::poly1305_context));
-    memset(poly_key, 0, 32);
-    if (!::crypto::poly1305_verify(reinterpret_cast<const unsigned char *>(tag),
-                                   reinterpret_cast<const unsigned char *>(expected_tag))){
+    if (r != 0){
       throw exc::Poly1305TagInvalid();
     }
-
-    ::crypto::chacha20_encrypt(&chacha_ctx,
-                               reinterpret_cast<const uint8_t *>(cip_data),
-                               reinterpret_cast<uint8_t *>(cipher),
-                               static_cast<uint32_t>(length));
-    memset(&chacha_ctx, 0, sizeof(::crypto::chacha_ctx));
   }
 
 }

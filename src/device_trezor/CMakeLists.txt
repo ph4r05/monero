@@ -104,6 +104,7 @@ if(Protobuf_FOUND)
             ringct_basic
             cryptonote_core
             common
+            sodium
             ${Boost_CHRONO_LIBRARY}
             ${PROTOBUF_LIBRARY}
             PRIVATE
