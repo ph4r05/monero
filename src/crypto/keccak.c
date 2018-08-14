@@ -151,16 +151,16 @@ void keccak_init(KECCAK_CTX * ctx){
 void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen){
     size_t idx = (size_t)ctx->rest;
 
-    if (ctx->rest & KECCAK_FINALIZED) return; /* too late for additional input */
+    if (ctx->rest & KECCAK_FINALIZED) return; // too late for additional input
     ctx->rest = (unsigned)((ctx->rest + inlen) % KECCAK_BLOCKLEN);
 
-    /* fill partial block */
+    // fill partial block
     if (idx) {
         size_t left = KECCAK_BLOCKLEN - idx;
         memcpy((char*)ctx->message + idx, in, (inlen < left ? inlen : left));
         if (inlen < left) return;
 
-        /* process partial block */
+        // process partial block
         KECCAK_PROCESS_BLOCK(ctx->hash, ctx->message);
 
         in  += left;
@@ -169,8 +169,8 @@ void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen){
     while (inlen >= KECCAK_BLOCKLEN) {
         uint64_t* aligned_message_block;
         if (IS_ALIGNED_64(in)) {
-            /* the most common case is processing of an already aligned message
-            without copying it */
+            // the most common case is processing of an already aligned message
+            // without copying it
             aligned_message_block = (uint64_t*)(void*)in;
         } else {
             memcpy(ctx->message, in, KECCAK_BLOCKLEN);
@@ -182,21 +182,21 @@ void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen){
         inlen -= KECCAK_BLOCKLEN;
     }
     if (inlen) {
-        memcpy(ctx->message, in, inlen); /* save leftovers */
+        memcpy(ctx->message, in, inlen); // save leftovers
     }
 }
 
 void keccak_finish(KECCAK_CTX * ctx, uint8_t *md){
     if (!(ctx->rest & KECCAK_FINALIZED))
     {
-        /* clear the rest of the data queue */
+        // clear the rest of the data queue
         memset((char*)ctx->message + ctx->rest, 0, KECCAK_BLOCKLEN - ctx->rest);
         ((char*)ctx->message)[ctx->rest] |= 0x01;
         ((char*)ctx->message)[KECCAK_BLOCKLEN - 1] |= 0x80;
 
-        /* process final block */
+        // process final block
         KECCAK_PROCESS_BLOCK(ctx->hash, ctx->message);
-        ctx->rest = KECCAK_FINALIZED; /* mark context as finalized */
+        ctx->rest = KECCAK_FINALIZED; // mark context as finalized
     }
 
     static_assert(KECCAK_BLOCKLEN > KECCAK_DIGESTSIZE, "");
