@@ -219,7 +219,7 @@ namespace tx {
   void translate_src_entry(MoneroTransactionSourceEntry * dst, const cryptonote::tx_source_entry * src){
     for(auto & cur : src->outputs){
       auto out = dst->add_outputs();
-      out->set_amount(cur.first);
+      out->set_idx(cur.first);
       translate_rct_key(out->mutable_key(), std::addressof(cur.second));
     }
 
@@ -250,7 +250,7 @@ namespace tx {
 
   Signer::Signer(wallet_shim *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
     m_wallet2 = wallet2;
-    m_unsigned_tx = std::move(unsigned_tx);
+    m_unsigned_tx = unsigned_tx;
     m_tx_idx = tx_idx;
     m_ct.tx_data = cur_tx();
     m_multisig = false;
@@ -331,8 +331,7 @@ namespace tx {
   std::shared_ptr<messages::monero::MoneroTransactionSetInputRequest> Signer::step_set_input(size_t idx){
     m_ct.cur_input_idx = idx;
     auto res = std::make_shared<messages::monero::MoneroTransactionSetInputRequest>();
-    auto src_bin = cryptonote::t_serializable_object_to_blob(cur_tx().sources[idx]);
-    res->set_src_entr(src_bin);
+    translate_src_entry(res->mutable_src_entr(), std::addressof(cur_tx().sources[idx]));
     return res;
   }
 
@@ -403,7 +402,7 @@ namespace tx {
     auto tx = m_ct.tx_data;
     auto res = std::make_shared<messages::monero::MoneroTransactionInputViniRequest>();
     auto vini = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[idx]);
-    res->set_src_entr(cryptonote::t_serializable_object_to_blob(tx.sources[idx]));
+    translate_src_entry(res->mutable_src_entr(), std::addressof(tx.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(vini));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     if (!in_memory()) {
@@ -424,16 +423,16 @@ namespace tx {
   std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> Signer::step_set_output(size_t idx){
     m_ct.cur_output_idx = idx;
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
-    res->set_dst_entr(cryptonote::t_serializable_object_to_blob(m_ct.tx_data.splitted_dsts[idx]));
+    translate_dst_entry(res->mutable_dst_entr(), std::addressof(m_ct.tx_data.splitted_dsts[idx]));
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
     return res;
   }
 
   void Signer::step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack){
     cryptonote::tx_out tx_out;
-    rct::rangeSig range_sig;
-    rct::ctkey out_pk;
-    rct::ecdhTuple ecdh;
+    rct::rangeSig range_sig{};
+    rct::ctkey out_pk{};
+    rct::ecdhTuple ecdh{};
 
     if (!cn_deserialize(ack->tx_out(), tx_out)){
       throw exc::ProtocolException("Cannot deserialize vout[i]");
@@ -443,7 +442,7 @@ namespace tx {
       throw exc::ProtocolException("Cannot deserialize rangesig");
     }
 
-    if (!cn_deserialize(ack->out_pk(), out_pk)){ // TODO: may be problem, does not have ser?
+    if (!cn_deserialize(ack->out_pk(), out_pk)){
       throw exc::ProtocolException("Cannot deserialize out_pk");
     }
 
@@ -496,9 +495,9 @@ namespace tx {
       }
 
       dst.clear();
-      for(size_t i = 0; i < m_ct.pseudo_outs.size(); ++i){
+      for (const auto &pseudo_out : m_ct.pseudo_outs) {
         dst.emplace_back();
-        string_to_key(dst.back(), m_ct.pseudo_outs[i]);
+        string_to_key(dst.back(), pseudo_out);
       }
 
       m_ct.rv->mixRing.resize(num_sources);
@@ -536,7 +535,7 @@ namespace tx {
     m_ct.cur_input_idx = idx;
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSignInputRequest>();
-    res->set_src_entr(cryptonote::t_serializable_object_to_blob(m_ct.tx_data.sources[idx]));
+    translate_src_entry(res->mutable_src_entr(), std::addressof(m_ct.tx_data.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[idx])));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     res->set_alpha_enc(m_ct.alphas[idx]);

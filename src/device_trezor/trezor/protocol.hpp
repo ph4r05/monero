@@ -121,8 +121,8 @@ namespace ki {
 
 namespace tx {
   using TsxData = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData;
-  using MoneroTransactionDestinationEntry = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry;
-  using MoneroAccountPublicAddress = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData_MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
+  using MoneroTransactionDestinationEntry = messages::monero::MoneroTransactionDestinationEntry;
+  using MoneroAccountPublicAddress = messages::monero::MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
   using MoneroTransactionSourceEntry = messages::monero::MoneroTransactionSourceEntry;
   using MoneroMultisigKLRki = messages::monero::MoneroTransactionSourceEntry_MoneroMultisigKLRki;
   using MoneroOutputEntry = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry;
