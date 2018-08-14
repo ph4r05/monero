@@ -15,7 +15,11 @@
 #include <type_traits>
 #include <net/http_base.h>
 #include "net/http_client.h"
-#include "json.hpp"
+
+#include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
+
 #include "exceptions.hpp"
 #include "messages_map.hpp"
 
@@ -27,17 +31,19 @@
 namespace hw {
 namespace trezor {
 
-  using json = nlohmann::json;
+  using json = rapidjson::Document;
+  using json_val = rapidjson::Value;
   namespace http = epee::net_utils::http;
 
   const std::string DEFAULT_BRIDGE = "127.0.0.1:21325";
 
   // Base HTTP comm serialization.
   bool t_serialize(const std::string & in, std::string & out);
-  bool t_serialize(const json & in, std::string & out);
+  bool t_serialize(const json_val & in, std::string & out);
+  std::string t_serialize(const json_val & in);
 
   bool t_deserialize(const std::string & in, std::string & out);
-  bool t_deserialize(const std::string & in, json & out);
+  bool t_deserialize(const std::string & in, json_val & out);
 
   // Flexible json serialization. HTTP client tailored for bridge API
   template<class t_req, class t_res, class t_transport>
@@ -141,7 +147,7 @@ namespace trezor {
     bool write(const google::protobuf::Message &req) override;
     bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
-    boost::optional<json> device_info() const;
+    const boost::optional<json_val> & device_info() const;
     std::ostream& dump(std::ostream& o) const override;
 
   private:
@@ -150,7 +156,7 @@ namespace trezor {
     boost::optional<std::string> m_device_path;
     boost::optional<std::string> m_session;
     boost::optional<std::string> m_response;
-    boost::optional<json> m_device_info;
+    boost::optional<json_val> m_device_info;
   };
 
   // UdpTransport transport
@@ -159,7 +165,7 @@ namespace trezor {
   class UdpTransport : public Transport {
   public:
 
-    UdpTransport(
+    explicit UdpTransport(
         boost::optional<std::string> device_path=boost::none,
         boost::optional<std::shared_ptr<Protocol>> proto=boost::none);
 

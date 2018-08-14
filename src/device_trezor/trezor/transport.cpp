@@ -10,7 +10,7 @@
 #include "messages/messages-common.pb.h"
 
 using namespace std;
-using json = nlohmann::json;
+using json = rapidjson::Document;
 
 
 namespace hw{
@@ -21,9 +21,18 @@ namespace trezor{
     return true;
   }
 
-  bool t_serialize(const json & in, std::string & out){
-    out = in.dump();
+  bool t_serialize(const json_val & in, std::string & out){
+    rapidjson::StringBuffer sb;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
+    in.Accept(writer);
+    out = sb.GetString();
     return true;
+  }
+
+  std::string t_serialize(const json_val & in){
+    std::string ret;
+    t_serialize(in, ret);
+    return ret;
   }
 
   bool t_deserialize(const std::string & in, std::string & out){
@@ -31,9 +40,17 @@ namespace trezor{
     return true;
   }
 
-  bool t_deserialize(const std::string & in, json & out){
-    out = json::parse(in);
+  bool t_deserialize(const std::string & in, json_val & out){
+    json doc;
+    if (doc.Parse(in.c_str()).HasParseError()) {
+      throw exc::CommunicationException("JSON parse error");
+    }
+    out = doc.GetObject();
     return true;
+  }
+
+  static std::string json_get_string(const rapidjson::Value & in){
+    return std::string(in.GetString());
   }
 
   //
@@ -43,7 +60,7 @@ namespace trezor{
 #define PROTO_HEADER_SIZE 6
 
   static size_t message_size(const google::protobuf::Message &req){
-    return req.ByteSize();
+    return static_cast<size_t>(req.ByteSize());
   }
 
   static size_t serialize_message_buffer_size(size_t msg_size) {
@@ -193,7 +210,7 @@ namespace trezor{
   }
 
   bool BridgeTransport::enumerate(t_transport_vect & res) {
-    json bridge_res;
+    json_val bridge_res;
     std::string req;
 
     bool req_status = invoke_bridge_http("/enumerate", req, bridge_res, m_http_client);
@@ -202,9 +219,13 @@ namespace trezor{
       return false;
     }
 
-    for (auto& element : bridge_res) {
-      auto t = std::make_shared<BridgeTransport>(element["path"].get<std::string>());
-      t->m_device_info = element;
+    for(rapidjson::Value::ConstValueIterator itr = bridge_res.Begin(); itr != bridge_res.End(); ++itr){
+      auto element = itr->GetObject();
+      auto t = std::make_shared<BridgeTransport>(boost::make_optional(json_get_string(element["path"])));
+      json d;
+      json_val tmp;
+//      json_val tmp(*itr, d.GetAllocator());
+      t->m_device_info.emplace(*itr, d.GetAllocator());// = boost::make_optional<json_val>(tmp);
 
       res.push_back(t);
     }
@@ -219,14 +240,14 @@ namespace trezor{
 
     std::string uri = "/acquire/" + m_device_path.get() + "/null";
     std::string req;
-    json bridge_res;
+    json_val bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
       LOG_PRINT_L1("Failed to acquire device");
       return false;
     }
 
-    m_session = boost::make_optional(bridge_res["session"]);
+    m_session = boost::make_optional(json_get_string(bridge_res["session"]));
     return true;
   }
 
@@ -237,7 +258,7 @@ namespace trezor{
 
     std::string uri = "/release/" + m_session.get();
     std::string req;
-    json bridge_res;
+    json_val bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
       LOG_PRINT_L1("Failed to release the device");
@@ -309,13 +330,13 @@ namespace trezor{
     return true;
   }
 
-  boost::optional<json> BridgeTransport::device_info() const {
+  const boost::optional<json_val> & BridgeTransport::device_info() const {
     return m_device_info;
   }
 
   std::ostream& BridgeTransport::dump(std::ostream& o) const {
     return o << "BridgeTransport<path=" << (m_device_path ? m_device_path.get() : "None")
-             << ", info=" << (m_device_info ? m_device_info.get() : "None")
+             << ", info=" << (m_device_info ? t_serialize(m_device_info.get()) : "None")
              << ", session=" << (m_session ? m_session.get() : "None")
              << ">";
   }
