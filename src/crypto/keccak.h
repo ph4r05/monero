@@ -20,10 +20,10 @@ typedef struct KECCAK_CTX
 {
   // 1600 bits algorithm hashing state
   uint64_t hash[25];
-  // 1536-bit buffer for leftovers
-  uint64_t message[24];
-  // count of bytes in the message[] buffer, block size = 136 for 256-bit keccak
-  unsigned rest;
+  // 1088-bit buffer for leftovers, block size = 136 B for 256-bit keccak
+  uint64_t message[17];
+  // count of bytes in the message[] buffer
+  size_t rest;
 } KECCAK_CTX;
 
 // compute a keccak hash (md) of given byte length from "in"

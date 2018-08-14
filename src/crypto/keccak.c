@@ -135,11 +135,12 @@ void keccak1600(const uint8_t *in, size_t inlen, uint8_t *md)
 
 #define KECCAK_FINALIZED 0x80000000
 #define KECCAK_BLOCKLEN 136
+#define KECCAK_WORDS 17
 #define KECCAK_DIGESTSIZE 32
 #define IS_ALIGNED_64(p) (0 == (7 & ((const char*)(p) - (const char*)0)))
 #define KECCAK_PROCESS_BLOCK(st, block) { \
-    for (int i_ = 0; i_ < KECCAK_BLOCKLEN; i_++){ \
-        ((char*)(st))[i_] ^= ((char*) (block))[i_]; \
+    for (int i_ = 0; i_ < KECCAK_WORDS; i_++){ \
+        ((st))[i_] ^= ((block))[i_]; \
     }; \
     keccakf(st, KECCAK_ROUNDS); }
 
@@ -149,10 +150,12 @@ void keccak_init(KECCAK_CTX * ctx){
 }
 
 void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen){
-    size_t idx = (size_t)ctx->rest;
+    if (ctx->rest & KECCAK_FINALIZED) {
+        local_abort("Bad keccak use");
+    }
 
-    if (ctx->rest & KECCAK_FINALIZED) return; // too late for additional input
-    ctx->rest = (unsigned)((ctx->rest + inlen) % KECCAK_BLOCKLEN);
+    const size_t idx = ctx->rest;
+    ctx->rest = (ctx->rest + inlen) % KECCAK_BLOCKLEN;
 
     // fill partial block
     if (idx) {
@@ -160,18 +163,17 @@ void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen){
         memcpy((char*)ctx->message + idx, in, (inlen < left ? inlen : left));
         if (inlen < left) return;
 
-        // process partial block
         KECCAK_PROCESS_BLOCK(ctx->hash, ctx->message);
 
         in  += left;
         inlen -= left;
     }
+
+    const bool is_aligned = IS_ALIGNED_64(in);
     while (inlen >= KECCAK_BLOCKLEN) {
-        uint64_t* aligned_message_block;
-        if (IS_ALIGNED_64(in)) {
-            // the most common case is processing of an already aligned message
-            // without copying it
-            aligned_message_block = (uint64_t*)(void*)in;
+        const uint64_t* aligned_message_block;
+        if (is_aligned) {
+            aligned_message_block = (uint64_t*)in;
         } else {
             memcpy(ctx->message, in, KECCAK_BLOCKLEN);
             aligned_message_block = ctx->message;
@@ -182,7 +184,7 @@ void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen){
         inlen -= KECCAK_BLOCKLEN;
     }
     if (inlen) {
-        memcpy(ctx->message, in, inlen); // save leftovers
+        memcpy(ctx->message, in, inlen);
     }
 }
 
