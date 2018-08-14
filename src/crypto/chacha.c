@@ -13,7 +13,6 @@ Public domain.
 #include "chacha.h"
 #include "common/int-util.h"
 #include "warnings.h"
-#include <assert.h>
 
 /*
  * The following macros are used to obtain exact-width results.
@@ -40,73 +39,34 @@ Public domain.
   c = PLUS(c,d); b = ROTATE(XOR(b,c), 7);
 
 static const char sigma[] = "expand 32-byte k";
-static const char tau[] = "expand 16-byte k";
 
 DISABLE_GCC_AND_CLANG_WARNING(strict-aliasing)
 
-
-void chacha20_init(chacha_ctx * ctx, const uint8_t * k, uint32_t kbits, const uint8_t * iv, uint32_t ivbits){
-  (void)ivbits;
-  const char *constants;
-
-  ctx->input[4] = U8TO32_LITTLE(k + 0);
-  ctx->input[5] = U8TO32_LITTLE(k + 4);
-  ctx->input[6] = U8TO32_LITTLE(k + 8);
-  ctx->input[7] = U8TO32_LITTLE(k + 12);
-  if (kbits == 256) { /* recommended */
-    k += 16;
-    constants = sigma;
-  } else { /* kbits == 128 */
-    constants = tau;
-  }
-  ctx->input[8] = U8TO32_LITTLE(k + 0);
-  ctx->input[9] = U8TO32_LITTLE(k + 4);
-  ctx->input[10] = U8TO32_LITTLE(k + 8);
-  ctx->input[11] = U8TO32_LITTLE(k + 12);
-  ctx->input[0] = U8TO32_LITTLE(constants + 0);
-  ctx->input[1] = U8TO32_LITTLE(constants + 4);
-  ctx->input[2] = U8TO32_LITTLE(constants + 8);
-  ctx->input[3] = U8TO32_LITTLE(constants + 12);
-
-  assert(ivbits == 0 || ivbits == 8 || ivbits == 12);
-  if (ivbits == 8){
-    ctx->input[12] = 0;
-    ctx->input[13] = 0;
-    ctx->input[14] = U8TO32_LITTLE(iv + 0);
-    ctx->input[15] = U8TO32_LITTLE(iv + 4);
-  } else if (ivbits == 12){
-    ctx->input[12] = 0;
-    ctx->input[13] = U8TO32_LITTLE(iv + 0);
-    ctx->input[14] = U8TO32_LITTLE(iv + 4);
-    ctx->input[15] = U8TO32_LITTLE(iv + 8);
-  }
-}
-
-static void chacha_encrypt(chacha_ctx * ctx, const uint8_t * data, uint8_t * cipher, uint32_t length, unsigned rounds){
+static void chacha(unsigned rounds, const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher) {
   uint32_t x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15;
   uint32_t j0, j1, j2, j3, j4, j5, j6, j7, j8, j9, j10, j11, j12, j13, j14, j15;
-  uint8_t *ctarget = 0;
-  uint8_t tmp[64];
+  char* ctarget = 0;
+  char tmp[64];
   int i;
 
   if (!length) return;
 
-  j0 = ctx->input[0];
-  j1 = ctx->input[1];
-  j2 = ctx->input[2];
-  j3 = ctx->input[3];
-  j4 = ctx->input[4];
-  j5 = ctx->input[5];
-  j6 = ctx->input[6];
-  j7 = ctx->input[7];
-  j8 = ctx->input[8];
-  j9 = ctx->input[9];
-  j10 = ctx->input[10];
-  j11 = ctx->input[11];
-  j12 = ctx->input[12];
-  j13 = ctx->input[13];
-  j14 = ctx->input[14];
-  j15 = ctx->input[15];
+  j0  = U8TO32_LITTLE(sigma + 0);
+  j1  = U8TO32_LITTLE(sigma + 4);
+  j2  = U8TO32_LITTLE(sigma + 8);
+  j3  = U8TO32_LITTLE(sigma + 12);
+  j4  = U8TO32_LITTLE(key + 0);
+  j5  = U8TO32_LITTLE(key + 4);
+  j6  = U8TO32_LITTLE(key + 8);
+  j7  = U8TO32_LITTLE(key + 12);
+  j8  = U8TO32_LITTLE(key + 16);
+  j9  = U8TO32_LITTLE(key + 20);
+  j10 = U8TO32_LITTLE(key + 24);
+  j11 = U8TO32_LITTLE(key + 28);
+  j12 = 0;
+  j13 = 0;
+  j14 = U8TO32_LITTLE(iv + 0);
+  j15 = U8TO32_LITTLE(iv + 4);
 
   for (;;) {
     if (length < 64) {
@@ -158,22 +118,22 @@ static void chacha_encrypt(chacha_ctx * ctx, const uint8_t * data, uint8_t * cip
     x14 = PLUS(x14,j14);
     x15 = PLUS(x15,j15);
 
-    x0  = XOR( x0,U8TO32_LITTLE(data + 0));
-    x1  = XOR( x1,U8TO32_LITTLE(data + 4));
-    x2  = XOR( x2,U8TO32_LITTLE(data + 8));
-    x3  = XOR( x3,U8TO32_LITTLE(data + 12));
-    x4  = XOR( x4,U8TO32_LITTLE(data + 16));
-    x5  = XOR( x5,U8TO32_LITTLE(data + 20));
-    x6  = XOR( x6,U8TO32_LITTLE(data + 24));
-    x7  = XOR( x7,U8TO32_LITTLE(data + 28));
-    x8  = XOR( x8,U8TO32_LITTLE(data + 32));
-    x9  = XOR( x9,U8TO32_LITTLE(data + 36));
-    x10 = XOR(x10,U8TO32_LITTLE(data + 40));
-    x11 = XOR(x11,U8TO32_LITTLE(data + 44));
-    x12 = XOR(x12,U8TO32_LITTLE(data + 48));
-    x13 = XOR(x13,U8TO32_LITTLE(data + 52));
-    x14 = XOR(x14,U8TO32_LITTLE(data + 56));
-    x15 = XOR(x15,U8TO32_LITTLE(data + 60));
+    x0  = XOR( x0,U8TO32_LITTLE((uint8_t*)data +  0));
+    x1  = XOR( x1,U8TO32_LITTLE((uint8_t*)data +  4));
+    x2  = XOR( x2,U8TO32_LITTLE((uint8_t*)data +  8));
+    x3  = XOR( x3,U8TO32_LITTLE((uint8_t*)data + 12));
+    x4  = XOR( x4,U8TO32_LITTLE((uint8_t*)data + 16));
+    x5  = XOR( x5,U8TO32_LITTLE((uint8_t*)data + 20));
+    x6  = XOR( x6,U8TO32_LITTLE((uint8_t*)data + 24));
+    x7  = XOR( x7,U8TO32_LITTLE((uint8_t*)data + 28));
+    x8  = XOR( x8,U8TO32_LITTLE((uint8_t*)data + 32));
+    x9  = XOR( x9,U8TO32_LITTLE((uint8_t*)data + 36));
+    x10 = XOR(x10,U8TO32_LITTLE((uint8_t*)data + 40));
+    x11 = XOR(x11,U8TO32_LITTLE((uint8_t*)data + 44));
+    x12 = XOR(x12,U8TO32_LITTLE((uint8_t*)data + 48));
+    x13 = XOR(x13,U8TO32_LITTLE((uint8_t*)data + 52));
+    x14 = XOR(x14,U8TO32_LITTLE((uint8_t*)data + 56));
+    x15 = XOR(x15,U8TO32_LITTLE((uint8_t*)data + 60));
 
     j12 = PLUSONE(j12);
     if (!j12)
@@ -201,26 +161,14 @@ static void chacha_encrypt(chacha_ctx * ctx, const uint8_t * data, uint8_t * cip
 
     if (length <= 64) {
       if (length < 64) {
-        for (i = 0;i < (int)length;++i) ctarget[i] = cipher[i];
+        memcpy(ctarget, cipher, length);
       }
-      ctx->input[12] = j12;
-      ctx->input[13] = j13;
       return;
     }
     length -= 64;
     cipher += 64;
-    data += 64;
+    data = (uint8_t*)data + 64;
   }
-}
-
-void chacha20_encrypt(chacha_ctx * ctx, const uint8_t * m, uint8_t * c, uint32_t bytes){
-  chacha_encrypt(ctx, m, c, bytes, 20);
-}
-
-static void chacha(unsigned rounds, const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher) {
-  chacha_ctx ctx;
-  chacha20_init(&ctx, key, 256, iv, 8);
-  chacha_encrypt(&ctx, data, (uint8_t *) cipher, (uint32_t) length, rounds);
 }
 
 void chacha8(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher)
