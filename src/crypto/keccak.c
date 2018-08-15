@@ -205,6 +205,4 @@ void keccak_finish(KECCAK_CTX * ctx, uint8_t *md){
     if (md) {
         memcpy(md, ctx->hash, KECCAK_DIGESTSIZE);
     }
-
-    memset(ctx, 0, sizeof(KECCAK_CTX));
 }
