@@ -62,7 +62,7 @@ void protobuf_AddDesc_messages_2eproto() {
   ::google::protobuf::protobuf_AddDesc_google_2fprotobuf_2fdescriptor_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\016messages.proto\022\022hw.trezor.messages\032 go"
-    "ogle/protobuf/descriptor.proto*\3401\n\013Messa"
+    "ogle/protobuf/descriptor.proto*\250.\n\013Messa"
     "geType\022$\n\026MessageType_Initialize\020\000\032\010\220\265\030\001"
     "\260\265\030\001\022\032\n\020MessageType_Ping\020\001\032\004\220\265\030\001\022\035\n\023Mess"
     "ageType_Success\020\002\032\004\230\265\030\001\022\035\n\023MessageType_F"
@@ -182,18 +182,7 @@ void protobuf_AddDesc_messages_2eproto() {
     "ss\020\263\002\032\004\220\265\030\001\022%\n\032MessageType_CardanoAddres"
     "s\020\264\002\032\004\230\265\030\001\022#\n\030MessageType_CardanoTxAck\020\265"
     "\002\032\004\220\265\030\001\022/\n$MessageType_CardanoSignedTran"
-    "saction\020\266\002\032\004\230\265\030\001\022)\n\036MessageType_Ontology"
-    "GetAddress\020\336\002\032\004\220\265\030\001\022&\n\033MessageType_Ontol"
-    "ogyAddress\020\337\002\032\004\230\265\030\001\022+\n MessageType_Ontol"
-    "ogyGetPublicKey\020\340\002\032\004\220\265\030\001\022(\n\035MessageType_"
-    "OntologyPublicKey\020\341\002\032\004\230\265\030\001\022%\n\032MessageTyp"
-    "e_OntologySignTx\020\342\002\032\004\220\265\030\001\022\'\n\034MessageType"
-    "_OntologySignedTx\020\343\002\032\004\230\265\030\001\022+\n MessageTyp"
-    "e_OntologySignTransfer\020\344\002\032\004\220\265\030\001\022-\n\"Messa"
-    "geType_OntologySignedTransfer\020\345\002\032\004\230\265\030\001\022."
-    "\n#MessageType_OntologySignWithdrawOng\020\346\002"
-    "\032\004\220\265\030\001\0220\n%MessageType_OntologySignedWith"
-    "drawOng\020\347\002\032\004\230\265\030\001\022\'\n\034MessageType_RippleGe"
+    "saction\020\266\002\032\004\230\265\030\001\022\'\n\034MessageType_RippleGe"
     "tAddress\020\220\003\032\004\220\265\030\001\022$\n\031MessageType_RippleA"
     "ddress\020\221\003\032\004\230\265\030\001\022#\n\030MessageType_RippleSig"
     "nTx\020\222\003\032\004\220\265\030\001\022%\n\032MessageType_RippleSigned"
@@ -233,7 +222,7 @@ void protobuf_AddDesc_messages_2eproto() {
     "obuf.EnumValueOptions\030\327\206\003 \001(\010:8\n\013wire_no"
     "_fsm\022!.google.protobuf.EnumValueOptions\030"
     "\330\206\003 \001(\010B4\n#com.satoshilabs.trezor.lib.pr"
-    "otobufB\rTrezorMessage", 6901);
+    "otobufB\rTrezorMessage", 6461);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   ::google::protobuf::internal::ExtensionSet::RegisterExtension(
@@ -394,16 +383,6 @@ bool MessageType_IsValid(int value) {
     case 308:
     case 309:
     case 310:
-    case 350:
-    case 351:
-    case 352:
-    case 353:
-    case 354:
-    case 355:
-    case 356:
-    case 357:
-    case 358:
-    case 359:
     case 400:
     case 401:
     case 402:
