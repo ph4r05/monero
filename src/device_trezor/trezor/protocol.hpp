@@ -126,7 +126,7 @@ namespace tx {
   using MoneroTransactionSourceEntry = messages::monero::MoneroTransactionSourceEntry;
   using MoneroMultisigKLRki = messages::monero::MoneroTransactionSourceEntry_MoneroMultisigKLRki;
   using MoneroOutputEntry = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry;
-  using MoneroRctKey = messages::monero::MoneroTransactionSourceEntry_MoneroRctKey;
+  using MoneroRctKey = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry_MoneroRctKey;
 
   using tx_construction_data = tools::wallet2::tx_construction_data;
   using unsigned_tx_set = tools::wallet2::unsigned_tx_set;
