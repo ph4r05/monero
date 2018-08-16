@@ -166,9 +166,9 @@ namespace tools
     //! Just parses variables.
     static std::unique_ptr<wallet2> make_dummy(const boost::program_options::variables_map& vm, const std::function<boost::optional<password_container>(const char *, bool)> &password_prompter);
 
-    static bool verify_password(const std::string& keys_file_name, const epee::wipeable_string& password, bool no_spend_key, hw::device &hwdev);
+    static bool verify_password(const std::string& keys_file_name, const epee::wipeable_string& password, bool no_spend_key, hw::device &hwdev, uint64_t kdf_rounds);
 
-    wallet2(cryptonote::network_type nettype = cryptonote::MAINNET, bool restricted = false);
+    wallet2(cryptonote::network_type nettype = cryptonote::MAINNET, uint64_t kdf_rounds = 1);
     ~wallet2();
 
     struct multisig_info
@@ -261,12 +261,12 @@ namespace tools
       uint64_t m_block_height;
       uint64_t m_unlock_time;
       uint64_t m_timestamp;
+      bool m_coinbase;
       cryptonote::subaddress_index m_subaddr_index;
     };
 
     struct address_tx : payment_details
     {
-      bool m_coinbase;
       bool m_mempool;
       bool m_incoming;
     };
@@ -660,6 +660,7 @@ namespace tools
     // Subaddress scheme
     cryptonote::account_public_address get_subaddress(const cryptonote::subaddress_index& index) const;
     cryptonote::account_public_address get_address() const { return get_subaddress({0,0}); }
+    boost::optional<cryptonote::subaddress_index> get_subaddress_index(const cryptonote::account_public_address& address) const;
     crypto::public_key get_subaddress_spend_public_key(const cryptonote::subaddress_index& index) const;
     std::vector<crypto::public_key> get_subaddress_spend_public_keys(uint32_t account, uint32_t begin, uint32_t end) const;
     std::string get_subaddress_as_str(const cryptonote::subaddress_index& index) const;
@@ -687,7 +688,6 @@ namespace tools
     RefreshType get_refresh_type() const { return m_refresh_type; }
 
     cryptonote::network_type nettype() const { return m_nettype; }
-    bool restricted() const { return m_restricted; }
     bool watch_only() const { return m_watch_only; }
     bool multisig(bool *ready = NULL, uint32_t *threshold = NULL, uint32_t *total = NULL) const;
     bool has_multisig_partial_key_images() const;
@@ -937,6 +937,7 @@ namespace tools
     void device_name(const std::string & device_name) { m_device_name = device_name; }
 
     bool get_tx_key(const crypto::hash &txid, crypto::secret_key &tx_key, std::vector<crypto::secret_key> &additional_tx_keys) const;
+    void set_tx_key(const crypto::hash &txid, const crypto::secret_key &tx_key, const std::vector<crypto::secret_key> &additional_tx_keys);
     void check_tx_key(const crypto::hash &txid, const crypto::secret_key &tx_key, const std::vector<crypto::secret_key> &additional_tx_keys, const cryptonote::account_public_address &address, uint64_t &received, bool &in_pool, uint64_t &confirmations);
     void check_tx_key_helper(const crypto::hash &txid, const crypto::key_derivation &derivation, const std::vector<crypto::key_derivation> &additional_derivations, const cryptonote::account_public_address &address, uint64_t &received, bool &in_pool, uint64_t &confirmations);
     std::string get_tx_proof(const crypto::hash &txid, const cryptonote::account_public_address &address, bool is_subaddress, const std::string &message);
@@ -1223,7 +1224,7 @@ namespace tools
     void register_devices();
     hw::device& lookup_device(const std::string & device_descriptor);
 
-    bool get_output_distribution(uint64_t &start_height, std::vector<uint64_t> &distribution);
+    bool get_rct_distribution(uint64_t &start_height, std::vector<uint64_t> &distribution);
 
     uint64_t get_segregation_fork_height() const;
 
@@ -1265,7 +1266,7 @@ namespace tools
     i_wallet2_callback* m_callback;
     bool m_key_on_device;
     cryptonote::network_type m_nettype;
-    bool m_restricted;
+    uint64_t m_kdf_rounds;
     std::string seed_language; /*!< Language of the mnemonics (seed). */
     bool is_old_file_format; /*!< Whether the wallet file is of an old file format */
     bool m_watch_only; /*!< no spend key */
@@ -1333,7 +1334,7 @@ BOOST_CLASS_VERSION(tools::wallet2::transfer_details, 9)
 BOOST_CLASS_VERSION(tools::wallet2::multisig_info, 1)
 BOOST_CLASS_VERSION(tools::wallet2::multisig_info::LR, 0)
 BOOST_CLASS_VERSION(tools::wallet2::multisig_tx_set, 1)
-BOOST_CLASS_VERSION(tools::wallet2::payment_details, 3)
+BOOST_CLASS_VERSION(tools::wallet2::payment_details, 4)
 BOOST_CLASS_VERSION(tools::wallet2::pool_payment_details, 1)
 BOOST_CLASS_VERSION(tools::wallet2::unconfirmed_transfer_details, 8)
 BOOST_CLASS_VERSION(tools::wallet2::confirmed_transfer_details, 6)
@@ -1600,16 +1601,24 @@ namespace boost
       a & x.m_timestamp;
       if (ver < 2)
       {
+        x.m_coinbase = false;
         x.m_subaddr_index = {};
         return;
       }
       a & x.m_subaddr_index;
       if (ver < 3)
       {
+        x.m_coinbase = false;
         x.m_fee = 0;
         return;
       }
       a & x.m_fee;
+      if (ver < 4)
+      {
+        x.m_coinbase = false;
+        return;
+      }
+      a & x.m_coinbase;
     }
 
     template <class Archive>

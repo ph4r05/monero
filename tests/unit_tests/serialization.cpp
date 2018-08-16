@@ -672,8 +672,7 @@ TEST(Serialization, serializes_ringct_types)
 TEST(Serialization, portability_wallet)
 {
   const cryptonote::network_type nettype = cryptonote::TESTNET;
-  const bool restricted = false;
-  tools::wallet2 w(nettype, restricted);
+  tools::wallet2 w(nettype);
   const boost::filesystem::path wallet_file = unit_test::data_dir / "wallet_9svHk1";
   string password = "test";
   bool r = false;
@@ -811,7 +810,7 @@ TEST(Serialization, portability_outputs)
     if(ciphertext.size() < prefix_size)
       return {};
     crypto::chacha_key key;
-    crypto::generate_chacha_key(&skey, sizeof(skey), key);
+    crypto::generate_chacha_key(&skey, sizeof(skey), key, 1);
     const crypto::chacha_iv &iv = *(const crypto::chacha_iv*)&ciphertext[0];
     std::string plaintext;
     plaintext.resize(ciphertext.size() - prefix_size);
