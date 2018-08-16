@@ -40,6 +40,9 @@ namespace rct
 
 Bulletproof bulletproof_PROVE(const rct::key &v, const rct::key &gamma);
 Bulletproof bulletproof_PROVE(uint64_t v, const rct::key &gamma);
+Bulletproof bulletproof_PROVE_s(const rct::key &sv, const rct::key &gamma);
+Bulletproof bulletproof_PROVE_s(uint64_t v, const rct::key &gamma);
+Bulletproof bulletproof_PROVE_s(uint64_t v, uint64_t mask);
 bool bulletproof_VERIFY(const Bulletproof &proof);
 
 }

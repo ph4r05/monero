@@ -519,10 +519,20 @@ void bulletproof_PROVE_s2(const rct::key &x_ip, const rct::key &y, rct::key &has
     rct::key cR = inner_product(slice(aprime, nprime, aprime.size()), slice(bprime, 0, nprime));
 
     // PAPER LINES 18-19
-    L[round] = vector_exponent_custom(slice(Gprime, nprime, Gprime.size()), slice(Hprime, 0, nprime), slice(aprime, 0, nprime), slice(bprime, nprime, bprime.size()));
+    L[round] = vector_exponent_custom(
+        slice(Gprime, nprime, Gprime.size()),
+        slice(Hprime, 0, nprime),
+        slice(aprime, 0, nprime),
+        slice(bprime, nprime, bprime.size()));
+
     sc_mul(tmp.bytes, cL.bytes, x_ip.bytes);
     rct::addKeys(L[round], L[round], rct::scalarmultKey(rct::H, tmp));
-    R[round] = vector_exponent_custom(slice(Gprime, 0, nprime), slice(Hprime, nprime, Hprime.size()), slice(aprime, nprime, aprime.size()), slice(bprime, 0, nprime));
+
+    R[round] = vector_exponent_custom(
+        slice(Gprime, 0, nprime),
+        slice(Hprime, nprime, Hprime.size()),
+        slice(aprime, nprime, aprime.size()),
+        slice(bprime, 0, nprime));
     sc_mul(tmp.bytes, cR.bytes, x_ip.bytes);
     rct::addKeys(R[round], R[round], rct::scalarmultKey(rct::H, tmp));
 
@@ -531,12 +541,22 @@ void bulletproof_PROVE_s2(const rct::key &x_ip, const rct::key &y, rct::key &has
 
     // PAPER LINES 24-25
     const rct::key winv = invert(w[round]);
-    Gprime = hadamard2(vector_scalar2(slice(Gprime, 0, nprime), winv), vector_scalar2(slice(Gprime, nprime, Gprime.size()), w[round]));
-    Hprime = hadamard2(vector_scalar2(slice(Hprime, 0, nprime), w[round]), vector_scalar2(slice(Hprime, nprime, Hprime.size()), winv));
+    Gprime = hadamard2(
+        vector_scalar2(slice(Gprime, 0, nprime), winv),
+        vector_scalar2(slice(Gprime, nprime, Gprime.size()), w[round]));
+
+    Hprime = hadamard2(
+        vector_scalar2(slice(Hprime, 0, nprime), w[round]),
+        vector_scalar2(slice(Hprime, nprime, Hprime.size()), winv));
 
     // PAPER LINES 28-29
-    aprime = vector_add(vector_scalar(slice(aprime, 0, nprime), w[round]), vector_scalar(slice(aprime, nprime, aprime.size()), winv));
-    bprime = vector_add(vector_scalar(slice(bprime, 0, nprime), winv), vector_scalar(slice(bprime, nprime, bprime.size()), w[round]));
+    aprime = vector_add(
+        vector_scalar(slice(aprime, 0, nprime), w[round]),
+        vector_scalar(slice(aprime, nprime, aprime.size()), winv));
+
+    bprime = vector_add(
+        vector_scalar(slice(bprime, 0, nprime), winv),
+        vector_scalar(slice(bprime, nprime, bprime.size()), w[round]));
 
     ++round;
   }
@@ -557,6 +577,32 @@ Bulletproof bulletproof_PROVE_s(const rct::key &sv, const rct::key &gamma){
   bulletproof_PROVE_s1(sv, gamma, V, A, S, T1, T2, taux, mu, t, x_ip, y, hash_cache, l, r);
   bulletproof_PROVE_s2(x_ip, y, hash_cache, l, r, L, R, aprime0, bprime0);
   return Bulletproof(V, A, S, T1, T2, taux, mu, L, R, aprime0, bprime0, t);
+}
+
+Bulletproof bulletproof_PROVE_s(uint64_t v, const rct::key &gamma) {
+  rct::key sv = rct::zero();
+  sv.bytes[0] = v & 255;
+  sv.bytes[1] = (v >> 8) & 255;
+  sv.bytes[2] = (v >> 16) & 255;
+  sv.bytes[3] = (v >> 24) & 255;
+  sv.bytes[4] = (v >> 32) & 255;
+  sv.bytes[5] = (v >> 40) & 255;
+  sv.bytes[6] = (v >> 48) & 255;
+  sv.bytes[7] = (v >> 56) & 255;
+  return bulletproof_PROVE_s(sv, gamma);
+}
+
+Bulletproof bulletproof_PROVE_s(uint64_t v, uint64_t mask) {
+  rct::key gamma = rct::zero();
+  gamma.bytes[0] = mask & 255;
+  gamma.bytes[1] = (mask >> 8) & 255;
+  gamma.bytes[2] = (mask >> 16) & 255;
+  gamma.bytes[3] = (mask >> 24) & 255;
+  gamma.bytes[4] = (mask >> 32) & 255;
+  gamma.bytes[5] = (mask >> 40) & 255;
+  gamma.bytes[6] = (mask >> 48) & 255;
+  gamma.bytes[7] = (mask >> 56) & 255;
+  return bulletproof_PROVE_s(v, gamma);
 }
 
 /* Given a value v (0..2^N-1) and a mask gamma, construct a range proof */
