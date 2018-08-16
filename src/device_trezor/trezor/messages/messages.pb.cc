@@ -62,7 +62,7 @@ void protobuf_AddDesc_messages_2eproto() {
   ::google::protobuf::protobuf_AddDesc_google_2fprotobuf_2fdescriptor_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\016messages.proto\022\022hw.trezor.messages\032 go"
-    "ogle/protobuf/descriptor.proto*\250.\n\013Messa"
+    "ogle/protobuf/descriptor.proto*\3462\n\013Messa"
     "geType\022$\n\026MessageType_Initialize\020\000\032\010\220\265\030\001"
     "\260\265\030\001\022\032\n\020MessageType_Ping\020\001\032\004\220\265\030\001\022\035\n\023Mess"
     "ageType_Success\020\002\032\004\230\265\030\001\022\035\n\023MessageType_F"
@@ -182,47 +182,61 @@ void protobuf_AddDesc_messages_2eproto() {
     "ss\020\263\002\032\004\220\265\030\001\022%\n\032MessageType_CardanoAddres"
     "s\020\264\002\032\004\230\265\030\001\022#\n\030MessageType_CardanoTxAck\020\265"
     "\002\032\004\220\265\030\001\022/\n$MessageType_CardanoSignedTran"
-    "saction\020\266\002\032\004\230\265\030\001\022\'\n\034MessageType_RippleGe"
-    "tAddress\020\220\003\032\004\220\265\030\001\022$\n\031MessageType_RippleA"
-    "ddress\020\221\003\032\004\230\265\030\001\022#\n\030MessageType_RippleSig"
-    "nTx\020\222\003\032\004\220\265\030\001\022%\n\032MessageType_RippleSigned"
-    "Tx\020\223\003\032\004\220\265\030\001\0223\n(MessageType_MoneroTransac"
-    "tionSignRequest\020\365\003\032\004\220\265\030\001\022/\n$MessageType_"
-    "MoneroTransactionInitAck\020\366\003\032\004\230\265\030\001\0223\n(Mes"
-    "sageType_MoneroTransactionSetInputAck\020\367\003"
-    "\032\004\230\265\030\001\022<\n1MessageType_MoneroTransactionI"
-    "nputsPermutationAck\020\370\003\032\004\230\265\030\001\0224\n)MessageT"
-    "ype_MoneroTransactionInputViniAck\020\371\003\032\004\230\265"
-    "\030\001\0224\n)MessageType_MoneroTransactionSetOu"
-    "tputAck\020\372\003\032\004\230\265\030\001\0224\n)MessageType_MoneroTr"
-    "ansactionAllOutSetAck\020\373\003\032\004\230\265\030\001\0224\n)Messag"
-    "eType_MoneroTransactionMlsagDoneAck\020\374\003\032\004"
-    "\230\265\030\001\0224\n)MessageType_MoneroTransactionSig"
-    "nInputAck\020\375\003\032\004\230\265\030\001\0220\n%MessageType_Monero"
-    "TransactionFinalAck\020\376\003\032\004\230\265\030\001\0220\n%MessageT"
-    "ype_MoneroKeyImageSyncRequest\020\377\003\032\004\220\265\030\001\0222"
-    "\n\'MessageType_MoneroKeyImageExportInitAc"
-    "k\020\210\004\032\004\230\265\030\001\0220\n%MessageType_MoneroKeyImage"
-    "SyncStepAck\020\211\004\032\004\230\265\030\001\0221\n&MessageType_Mone"
-    "roKeyImageSyncFinalAck\020\212\004\032\004\230\265\030\001\022\'\n\034Messa"
-    "geType_MoneroGetAddress\020\222\004\032\004\220\265\030\001\022$\n\031Mess"
-    "ageType_MoneroAddress\020\223\004\032\004\230\265\030\001\022(\n\035Messag"
-    "eType_MoneroGetWatchKey\020\224\004\032\004\220\265\030\001\022%\n\032Mess"
-    "ageType_MoneroWatchKey\020\225\004\032\004\230\265\030\001\022-\n\"Messa"
-    "geType_DebugMoneroDiagRequest\020\230\004\032\004\220\265\030\001\022)"
-    "\n\036MessageType_DebugMoneroDiagAck\020\231\004\032\004\230\265\030"
-    "\001:4\n\007wire_in\022!.google.protobuf.EnumValue"
-    "Options\030\322\206\003 \001(\010:5\n\010wire_out\022!.google.pro"
-    "tobuf.EnumValueOptions\030\323\206\003 \001(\010::\n\rwire_d"
-    "ebug_in\022!.google.protobuf.EnumValueOptio"
-    "ns\030\324\206\003 \001(\010:;\n\016wire_debug_out\022!.google.pr"
-    "otobuf.EnumValueOptions\030\325\206\003 \001(\010:6\n\twire_"
-    "tiny\022!.google.protobuf.EnumValueOptions\030"
-    "\326\206\003 \001(\010:<\n\017wire_bootloader\022!.google.prot"
-    "obuf.EnumValueOptions\030\327\206\003 \001(\010:8\n\013wire_no"
-    "_fsm\022!.google.protobuf.EnumValueOptions\030"
-    "\330\206\003 \001(\010B4\n#com.satoshilabs.trezor.lib.pr"
-    "otobufB\rTrezorMessage", 6461);
+    "saction\020\266\002\032\004\230\265\030\001\022)\n\036MessageType_Ontology"
+    "GetAddress\020\336\002\032\004\220\265\030\001\022&\n\033MessageType_Ontol"
+    "ogyAddress\020\337\002\032\004\230\265\030\001\022+\n MessageType_Ontol"
+    "ogyGetPublicKey\020\340\002\032\004\220\265\030\001\022(\n\035MessageType_"
+    "OntologyPublicKey\020\341\002\032\004\230\265\030\001\022+\n MessageTyp"
+    "e_OntologySignTransfer\020\342\002\032\004\220\265\030\001\022-\n\"Messa"
+    "geType_OntologySignedTransfer\020\343\002\032\004\230\265\030\001\022."
+    "\n#MessageType_OntologySignWithdrawOng\020\344\002"
+    "\032\004\220\265\030\001\0220\n%MessageType_OntologySignedWith"
+    "drawOng\020\345\002\032\004\230\265\030\001\0220\n%MessageType_Ontology"
+    "SignOntIdRegister\020\346\002\032\004\220\265\030\001\0222\n\'MessageTyp"
+    "e_OntologySignedOntIdRegister\020\347\002\032\004\230\265\030\001\0225"
+    "\n*MessageType_OntologySignOntIdAddAttrib"
+    "utes\020\350\002\032\004\220\265\030\001\0227\n,MessageType_OntologySig"
+    "nedOntIdAddAttributes\020\351\002\032\004\230\265\030\001\022\'\n\034Messag"
+    "eType_RippleGetAddress\020\220\003\032\004\220\265\030\001\022$\n\031Messa"
+    "geType_RippleAddress\020\221\003\032\004\230\265\030\001\022#\n\030Message"
+    "Type_RippleSignTx\020\222\003\032\004\220\265\030\001\022%\n\032MessageTyp"
+    "e_RippleSignedTx\020\223\003\032\004\220\265\030\001\0223\n(MessageType"
+    "_MoneroTransactionSignRequest\020\365\003\032\004\220\265\030\001\022/"
+    "\n$MessageType_MoneroTransactionInitAck\020\366"
+    "\003\032\004\230\265\030\001\0223\n(MessageType_MoneroTransaction"
+    "SetInputAck\020\367\003\032\004\230\265\030\001\022<\n1MessageType_Mone"
+    "roTransactionInputsPermutationAck\020\370\003\032\004\230\265"
+    "\030\001\0224\n)MessageType_MoneroTransactionInput"
+    "ViniAck\020\371\003\032\004\230\265\030\001\0224\n)MessageType_MoneroTr"
+    "ansactionSetOutputAck\020\372\003\032\004\230\265\030\001\0224\n)Messag"
+    "eType_MoneroTransactionAllOutSetAck\020\373\003\032\004"
+    "\230\265\030\001\0224\n)MessageType_MoneroTransactionMls"
+    "agDoneAck\020\374\003\032\004\230\265\030\001\0224\n)MessageType_Monero"
+    "TransactionSignInputAck\020\375\003\032\004\230\265\030\001\0220\n%Mess"
+    "ageType_MoneroTransactionFinalAck\020\376\003\032\004\230\265"
+    "\030\001\0220\n%MessageType_MoneroKeyImageSyncRequ"
+    "est\020\377\003\032\004\220\265\030\001\0222\n\'MessageType_MoneroKeyIma"
+    "geExportInitAck\020\210\004\032\004\230\265\030\001\0220\n%MessageType_"
+    "MoneroKeyImageSyncStepAck\020\211\004\032\004\230\265\030\001\0221\n&Me"
+    "ssageType_MoneroKeyImageSyncFinalAck\020\212\004\032"
+    "\004\230\265\030\001\022\'\n\034MessageType_MoneroGetAddress\020\222\004"
+    "\032\004\220\265\030\001\022$\n\031MessageType_MoneroAddress\020\223\004\032\004"
+    "\230\265\030\001\022(\n\035MessageType_MoneroGetWatchKey\020\224\004"
+    "\032\004\220\265\030\001\022%\n\032MessageType_MoneroWatchKey\020\225\004\032"
+    "\004\230\265\030\001\022-\n\"MessageType_DebugMoneroDiagRequ"
+    "est\020\230\004\032\004\220\265\030\001\022)\n\036MessageType_DebugMoneroD"
+    "iagAck\020\231\004\032\004\230\265\030\001:4\n\007wire_in\022!.google.prot"
+    "obuf.EnumValueOptions\030\322\206\003 \001(\010:5\n\010wire_ou"
+    "t\022!.google.protobuf.EnumValueOptions\030\323\206\003"
+    " \001(\010::\n\rwire_debug_in\022!.google.protobuf."
+    "EnumValueOptions\030\324\206\003 \001(\010:;\n\016wire_debug_o"
+    "ut\022!.google.protobuf.EnumValueOptions\030\325\206"
+    "\003 \001(\010:6\n\twire_tiny\022!.google.protobuf.Enu"
+    "mValueOptions\030\326\206\003 \001(\010:<\n\017wire_bootloader"
+    "\022!.google.protobuf.EnumValueOptions\030\327\206\003 "
+    "\001(\010:8\n\013wire_no_fsm\022!.google.protobuf.Enu"
+    "mValueOptions\030\330\206\003 \001(\010B4\n#com.satoshilabs"
+    ".trezor.lib.protobufB\rTrezorMessage", 7035);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   ::google::protobuf::internal::ExtensionSet::RegisterExtension(
@@ -383,6 +397,18 @@ bool MessageType_IsValid(int value) {
     case 308:
     case 309:
     case 310:
+    case 350:
+    case 351:
+    case 352:
+    case 353:
+    case 354:
+    case 355:
+    case 356:
+    case 357:
+    case 358:
+    case 359:
+    case 360:
+    case 361:
     case 400:
     case 401:
     case 402:
