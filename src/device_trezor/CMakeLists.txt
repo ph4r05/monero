@@ -46,6 +46,7 @@ set(trezor_headers
         trezor/protocol.hpp
         trezor/transport.hpp
         device_trezor.hpp
+        trezor.hpp
         ${TREZOR_PROTOB_H}
 )
 
@@ -64,9 +65,8 @@ set(trezor_private_headers)
 include(FindProtobuf)
 find_package(Protobuf)  # REQUIRED
 
-
-if(Protobuf_FOUND)
-
+# Test for HAVE_PROTOBUF from the parent
+if(Protobuf_FOUND AND HAVE_PROTOBUF)
     # Try to regenerate messages on cmake
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../external/trezor-common/protob/messages.proto")
         message(WARNING "Trezor-common submodule is not loaded. "
@@ -110,8 +110,8 @@ if(Protobuf_FOUND)
             PRIVATE
             ${EXTRA_LIBRARIES})
 
-    set(WITH_DEVICE_TREZOR 1 PARENT_SCOPE)
-    add_definitions(-DWITH_DEVICE_TREZOR=1)
+    # set(WITH_DEVICE_TREZOR 1 PARENT_SCOPE)
+    # add_definitions(-DWITH_DEVICE_TREZOR=1)
 
 else()
     message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
@@ -120,7 +120,5 @@ else()
     monero_private_headers(device_trezor)
     monero_add_library(device_trezor device_trezor.cpp)
     target_link_libraries(device_trezor PUBLIC cncrypto)
-    set(WITH_DEVICE_TREZOR 0 PARENT_SCOPE)
-    add_definitions(-DWITH_DEVICE_TREZOR=0)
 
 endif()

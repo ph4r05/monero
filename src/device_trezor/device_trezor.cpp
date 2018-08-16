@@ -4,14 +4,6 @@
 
 #include "device_trezor.hpp"
 
-#if WITH_DEVICE_TREZOR
-#include "trezor/messages/messages.pb.h"
-#include "trezor/messages/messages-common.pb.h"
-#include "trezor/messages/messages-management.pb.h"
-#include "trezor/messages/messages-monero.pb.h"
-#include "trezor/protocol.hpp"
-#endif
-
 namespace hw {
 namespace trezor {
 

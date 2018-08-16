@@ -15,20 +15,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
 #include "cryptonote_config.h"
-
-// TODO: propagate to all targets
-#ifndef WITH_DEVICE_TREZOR
-#define WITH_DEVICE_TREZOR 1
-#endif
-
-#if WITH_DEVICE_TREZOR
-#include "trezor/transport.hpp"
-#include "trezor/messages/messages.pb.h"
-#include "trezor/messages/messages-common.pb.h"
-#include "trezor/messages/messages-management.pb.h"
-#include "trezor/messages/messages-monero.pb.h"
-#include "trezor/protocol.hpp"
-#endif
+#include "trezor.hpp"
 
 namespace hw {
 namespace trezor {
