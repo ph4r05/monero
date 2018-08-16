@@ -118,7 +118,7 @@ else()
                     "Please read src/device/trezor/tools/README.md")
 
     monero_private_headers(device_trezor)
-    monero_add_library(device_trezor)
+    monero_add_library(device_trezor device_trezor.cpp)
     target_link_libraries(device_trezor PUBLIC cncrypto)
     set(WITH_DEVICE_TREZOR 0 PARENT_SCOPE)
     add_definitions(-DWITH_DEVICE_TREZOR=0)
