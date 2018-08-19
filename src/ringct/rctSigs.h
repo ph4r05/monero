@@ -87,6 +87,7 @@ namespace rct {
     //verRange verifies that \sum Ci = C and that each Ci is a commitment to 0 or 2^i
     rangeSig proveRange(key & C, key & mask, const xmr_amount & amount);
     bool verRange(const key & C, const rangeSig & as);
+    bool verBulletproof(const Bulletproof &proof);
 
     //Ring-ct MG sigs
     //Prove:

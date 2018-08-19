@@ -263,7 +263,7 @@ namespace tx {
     tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size()));
     tsx_data.set_account(tx.subaddr_account);
     assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
-    tsx_data.set_is_bulletproof(false);
+    tsx_data.set_is_bulletproof(tx.use_bulletproofs);
     tsx_data.set_is_multisig(false);
     tsx_data.set_exp_tx_prefix_hash("");
 
@@ -401,6 +401,7 @@ namespace tx {
   void Signer::step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack){
     cryptonote::tx_out tx_out;
     rct::rangeSig range_sig{};
+    rct::Bulletproof bproof{};
     rct::ctkey out_pk{};
     rct::ecdhTuple ecdh{};
 
@@ -408,8 +409,12 @@ namespace tx {
       throw exc::ProtocolException("Cannot deserialize vout[i]");
     }
 
-    if (!cn_deserialize(ack->rsig(), range_sig)){
+    if (!is_req_bulletproof() && !cn_deserialize(ack->rsig(), range_sig)){
       throw exc::ProtocolException("Cannot deserialize rangesig");
+    }
+
+    if (is_req_bulletproof() && !cn_deserialize(ack->rsig(), bproof)){
+      throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
     }
 
     if (!cn_deserialize(ack->out_pk(), out_pk)){
@@ -422,12 +427,24 @@ namespace tx {
 
     m_ct.tx.vout.emplace_back(tx_out);
     m_ct.tx_out_hmacs.push_back(ack->vouti_hmac());
-    m_ct.tx_out_rsigs.emplace_back(range_sig);
     m_ct.tx_out_pk.emplace_back(out_pk);
     m_ct.tx_out_ecdh.emplace_back(ecdh);
 
-    if (!rct::verRange(out_pk.mask, m_ct.tx_out_rsigs.back())){
-      throw exc::ProtocolException("Returned range signature is invalid");
+    if (is_req_bulletproof()){
+      bproof.V.push_back(out_pk.mask);
+      m_ct.tx_out_rsigs.emplace_back(bproof);
+    } else {
+      m_ct.tx_out_rsigs.emplace_back(range_sig);
+    }
+
+    if (is_req_bulletproof()){
+      if (!rct::verBulletproof(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs.back()))) {
+        throw exc::ProtocolException("Returned range signature is invalid");
+      }
+    } else {
+      if (!rct::verRange(out_pk.mask, boost::get<rct::rangeSig>(m_ct.tx_out_rsigs.back()))) {
+        throw exc::ProtocolException("Returned range signature is invalid");
+      }
     }
   }
 
@@ -478,9 +495,13 @@ namespace tx {
 
     // Range proof
     for(size_t i = 0; i < m_ct.tx_out_rsigs.size(); ++i){
-      m_ct.rv->p.rangeSigs.push_back(m_ct.tx_out_rsigs[i]);
       m_ct.rv->outPk.push_back(m_ct.tx_out_pk[i]);
       m_ct.rv->ecdhInfo.push_back(m_ct.tx_out_ecdh[i]);
+      if (is_bulletproof()){
+        m_ct.rv->p.bulletproofs.push_back(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs[i]));
+      } else {
+        m_ct.rv->p.rangeSigs.push_back(boost::get<rct::rangeSig>(m_ct.tx_out_rsigs[i]));
+      }
     }
   }
 

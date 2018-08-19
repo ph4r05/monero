@@ -137,6 +137,8 @@ namespace tx {
   void translate_klrki(MoneroMultisigKLRki * dst, const rct::multisig_kLRki * src);
   void translate_rct_key(MoneroRctKey * dst, const rct::ctkey * src);
 
+  typedef boost::variant<rct::rangeSig, rct::Bulletproof> rsig_v;
+
   /**
    * Transaction signer state holder.
    */
@@ -152,7 +154,7 @@ namespace tx {
     std::vector<std::string> tx_in_hmacs;
     std::vector<std::string> tx_out_entr_hmacs;
     std::vector<std::string> tx_out_hmacs;
-    std::vector<rct::rangeSig> tx_out_rsigs;
+    std::vector<rsig_v> tx_out_rsigs;
     std::vector<rct::ctkey> tx_out_pk;
     std::vector<rct::ecdhTuple> tx_out_ecdh;
     std::vector<size_t> source_permutation;
@@ -227,6 +229,10 @@ namespace tx {
       }
       auto tp = m_ct.rv->type;
       return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;
+    }
+
+    bool is_req_bulletproof() const {
+      return m_ct.tx_data.use_bulletproofs;
     }
 
     bool is_bulletproof() const {
