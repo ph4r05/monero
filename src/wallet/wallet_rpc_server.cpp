@@ -2509,7 +2509,7 @@ namespace tools
   bool wallet_rpc_server::on_refresh(const wallet_rpc::COMMAND_RPC_REFRESH::request& req, wallet_rpc::COMMAND_RPC_REFRESH::response& res, epee::json_rpc::error& er)
   {
     if (!m_wallet) return not_open(er);
-    if (m_wallet->restricted())
+    if (m_restricted)
     {
       er.code = WALLET_RPC_ERROR_CODE_DENIED;
       er.message = "Command unavailable in restricted mode.";
