@@ -2875,8 +2875,8 @@ bool wallet2::store_keys(const std::string& keys_file_name, const epee::wipeable
   value2.SetUint(m_subaddress_lookahead_minor);
   json.AddMember("subaddress_lookahead_minor", value2, json.GetAllocator());
 
-  value2.SetString(m_device_name.c_str(), m_device_name.size());
-  json.AddMember("device_name", value2, json.GetAllocator());
+  value.SetString(m_device_name.c_str(), m_device_name.size());
+  json.AddMember("device_name", value, json.GetAllocator());
 
   // Serialize the JSON object
   rapidjson::StringBuffer buffer;
