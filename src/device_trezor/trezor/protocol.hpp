@@ -167,7 +167,7 @@ namespace tx {
     std::string tx_prefix_hash;
     std::string enc_salt1;
     std::string enc_salt2;
-    std::vector<std::string> enc_keys;
+    std::string enc_keys;
 
     std::shared_ptr<rct::rctSig> rv;
   };
@@ -218,6 +218,8 @@ namespace tx {
 
     std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> step_final();
     void step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack);
+
+    std::string store_tx_aux_info();
 
     bool in_memory() const {
       return m_ct.in_memory;

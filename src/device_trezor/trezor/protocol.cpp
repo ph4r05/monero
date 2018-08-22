@@ -571,15 +571,33 @@ namespace tx {
 
     m_ct.enc_salt1 = ack->salt();
     m_ct.enc_salt2 = ack->rand_mult();
+    m_ct.enc_keys = ack->tx_enc_keys();
+  }
 
-    m_ct.enc_keys.clear();
-    auto & enc_keys = ack->tx_enc_keys();
-    auto enc_keys_data = enc_keys.data();
-    size_t num_keys = enc_keys.size() / 32;
+  std::string Signer::store_tx_aux_info(){
+    rapidjson::StringBuffer sb;
+    rapidjson::Writer<rapidjson::StringBuffer> writer(sb);
 
-    for(size_t idx = 0; idx < num_keys; ++idx){
-      m_ct.enc_keys.emplace_back(enc_keys_data + (idx*32), 32);
-    }
+    rapidjson::Document json;
+    json.SetObject();
+
+    rapidjson::Value valueS(rapidjson::kStringType);
+    rapidjson::Value valueI(rapidjson::kNumberType);
+
+    valueI.SetInt(1);
+    json.AddMember("version", valueI, json.GetAllocator());
+
+    valueS.SetString(m_ct.enc_salt1.c_str(), m_ct.enc_salt1.size());
+    json.AddMember("salt1", valueS, json.GetAllocator());
+
+    valueS.SetString(m_ct.enc_salt2.c_str(), m_ct.enc_salt2.size());
+    json.AddMember("salt2", valueS, json.GetAllocator());
+
+    valueS.SetString(m_ct.enc_keys.c_str(), m_ct.enc_keys.size());
+    json.AddMember("enc_keys", valueS, json.GetAllocator());
+
+    json.Accept(writer);
+    return sb.GetString();
   }
 
 
