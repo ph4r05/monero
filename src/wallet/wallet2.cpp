@@ -8582,10 +8582,11 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
 
+  std::vector<std::string> aux_info;
   hw::wallet_shim wallet_shim;
   setup_shim(&wallet_shim, this);
 
-  dev_cold->tx_sign(&wallet_shim, txs, exported_txs);
+  dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_info);
 
   LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
   for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
@@ -8594,6 +8595,15 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   {
     LOG_PRINT_L1("Transactions rejected by callback");
     return false;
+  }
+
+  // aux info
+  for (size_t i = 0; i < exported_txs.ptx.size(); ++i){
+    crypto::hash txid;
+    auto & ptx = exported_txs.ptx[i];
+
+    txid = get_transaction_hash(ptx.tx);
+    set_tx_device_aux(txid, aux_info[i]);
   }
 
   // import key images

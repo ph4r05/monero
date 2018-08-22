@@ -354,7 +354,8 @@ namespace trezor {
 
     void device_trezor::tx_sign(wallet_shim * wallet,
                                 const tools::wallet2::unsigned_tx_set & unsigned_tx,
-                                tools::wallet2::signed_tx_set & signed_tx)
+                                tools::wallet2::signed_tx_set & signed_tx,
+                                std::vector<std::string> & aux_info)
     {
       size_t num_tx = unsigned_tx.txes.size();
       signed_tx.key_images.clear();
@@ -365,7 +366,8 @@ namespace trezor {
         tx_sign(wallet, unsigned_tx, tx_idx, signer);
 
         auto & cdata = signer->tdata();
-        // TODO: store cdata somewhere to the wallet
+        auto aux_info_cur = signer->store_tx_aux_info();
+        aux_info.emplace_back(aux_info_cur);
 
         // Pending tx reconstruction
         signed_tx.ptx.emplace_back();
@@ -411,8 +413,6 @@ namespace trezor {
       AUTO_LOCK_CMD();
       require_connected();
       test_ping();
-
-      size_t num_tx = unsigned_tx.txes.size();
 
       signer = std::make_shared<protocol::tx::Signer>(wallet, std::addressof(unsigned_tx), idx);
       auto & cur_tx = unsigned_tx.txes[idx];

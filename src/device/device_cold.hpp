@@ -35,10 +35,12 @@ namespace hw {
      * @param wallet
      * @param unsigned_tx
      * @param signed_tx
+     * @param aux_info
      */
     virtual void tx_sign(wallet_shim * wallet,
                  const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
-                 ::tools::wallet2::signed_tx_set & signed_tx) =0;
+                 ::tools::wallet2::signed_tx_set & signed_tx,
+                 std::vector<std::string> & aux_info) =0;
   };
 }
 
