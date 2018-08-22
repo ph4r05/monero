@@ -29,8 +29,6 @@
 // Adapted from Java code by Sarang Noether
 
 #include <stdlib.h>
-#include <openssl/ssl.h>
-#include <openssl/bn.h>
 #include <boost/thread/mutex.hpp>
 #include "misc_log_ex.h"
 #include "common/perf_timer.h"
@@ -311,37 +309,19 @@ static rct::keyV vector_dup(const rct::key &x, size_t N)
   return rct::keyV(N, x);
 }
 
-static rct::key switch_endianness(rct::key k)
-{
-  std::reverse(k.bytes, k.bytes + sizeof(k));
-  return k;
-}
-
-/* Compute the inverse of a scalar, the stupid way */
+/* Compute the inverse of a scalar, the naive way */
 static rct::key invert(const rct::key &x)
 {
-  rct::key inv;
+  static const rct::key l_minus_2 = { {0xeb, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10 } };
 
-  BN_CTX *ctx = BN_CTX_new();
-  BIGNUM *X = BN_new();
-  BIGNUM *L = BN_new();
-  BIGNUM *I = BN_new();
-
-  BN_bin2bn(switch_endianness(x).bytes, sizeof(rct::key), X);
-  BN_bin2bn(switch_endianness(rct::curveOrder()).bytes, sizeof(rct::key), L);
-
-  CHECK_AND_ASSERT_THROW_MES(BN_mod_inverse(I, X, L, ctx), "Failed to invert");
-
-  const int len = BN_num_bytes(I);
-  CHECK_AND_ASSERT_THROW_MES((size_t)len <= sizeof(rct::key), "Invalid number length");
-  inv = rct::zero();
-  BN_bn2bin(I, inv.bytes);
-  std::reverse(inv.bytes, inv.bytes + len);
-
-  BN_free(I);
-  BN_free(L);
-  BN_free(X);
-  BN_CTX_free(ctx);
+  rct::key inv = x;
+  rct::key tmp = x;
+  for (int n = 1; n < 253; ++n)
+  {
+    sc_mul(tmp.bytes, tmp.bytes, tmp.bytes);
+    if (l_minus_2[n>>3] & (1<<(n&7)))
+      sc_mul(inv.bytes, inv.bytes, tmp.bytes);
+  }
 
 #ifdef DEBUG_BP
   rct::key tmp;
