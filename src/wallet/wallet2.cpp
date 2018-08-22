@@ -9787,6 +9787,19 @@ std::string wallet2::get_tx_note(const crypto::hash &txid) const
   return i->second;
 }
 
+void wallet2::set_tx_device_aux(const crypto::hash &txid, const std::string &aux)
+{
+  m_tx_device[txid] = aux;
+}
+
+std::string wallet2::get_tx_device_aux(const crypto::hash &txid) const
+{
+  std::unordered_map<crypto::hash, std::string>::const_iterator i = m_tx_device.find(txid);
+  if (i == m_tx_device.end())
+    return std::string();
+  return i->second;
+}
+
 void wallet2::set_attribute(const std::string &key, const std::string &value)
 {
   m_attributes[key] = value;

@@ -874,6 +874,9 @@ namespace tools
       if(ver < 25)
         return;
       a & m_last_block_reward;
+      if(ver < 26)
+        return;
+      a & m_tx_device;
     }
 
     /*!
@@ -1001,6 +1004,9 @@ namespace tools
 
     void set_tx_note(const crypto::hash &txid, const std::string &note);
     std::string get_tx_note(const crypto::hash &txid) const;
+
+    void set_tx_device_aux(const crypto::hash &txid, const std::string &aux);
+    std::string get_tx_device_aux(const crypto::hash &txid) const;
 
     void set_description(const std::string &description);
     std::string get_description() const;
@@ -1305,6 +1311,9 @@ namespace tools
     size_t m_subaddress_lookahead_major, m_subaddress_lookahead_minor;
     std::string m_device_name;
 
+    // Aux transaction data from device
+    std::unordered_map<crypto::hash, std::string> m_tx_device;
+
     // Light wallet
     bool m_light_wallet; /* sends view key to daemon for scanning */
     uint64_t m_light_wallet_scanned_block_height;
@@ -1329,7 +1338,7 @@ namespace tools
     bool m_devices_registered;
   };
 }
-BOOST_CLASS_VERSION(tools::wallet2, 25)
+BOOST_CLASS_VERSION(tools::wallet2, 26)
 BOOST_CLASS_VERSION(tools::wallet2::transfer_details, 9)
 BOOST_CLASS_VERSION(tools::wallet2::multisig_info, 1)
 BOOST_CLASS_VERSION(tools::wallet2::multisig_info::LR, 0)
