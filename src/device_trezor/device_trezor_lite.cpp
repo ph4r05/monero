@@ -120,7 +120,7 @@ namespace trezor {
     }
 
     void device_trezor_lite::send_simple(uint8_t ins, uint8_t p1, uint8_t p2){
-      comm.set_header(ins, p1, p2);
+      comm.set_header_noopt(ins, p1, p2);
       this->exchange_lite();
     }
 
@@ -146,7 +146,7 @@ namespace trezor {
       switch(mode) {
         case TRANSACTION_CREATE_REAL:
         case TRANSACTION_CREATE_FAKE:
-          comm.set_header(INS_SET_SIGNATURE_MODE, 1);
+          comm.set_header_noopt(INS_SET_SIGNATURE_MODE, 1);
 
           //account
           comm.insert_u8(mode);
@@ -231,7 +231,7 @@ namespace trezor {
         crypto::derive_subaddress_public_key(pub, derivation, output_index, derived_pub);
       } else {
 
-        comm.set_header(INS_DERIVE_SUBADDRESS_PUBLIC_KEY);
+        comm.set_header_noopt(INS_DERIVE_SUBADDRESS_PUBLIC_KEY);
         comm.insert(pub.data);
         comm.insert(derivation.data);
         comm.insert_u32((uint32_t) output_index);
@@ -251,7 +251,7 @@ namespace trezor {
         D = keys.m_account_address.m_spend_public_key;
 
       } else {
-        comm.set_header(INS_GET_SUBADDRESS_SPEND_PUBLIC_KEY);
+        comm.set_header_noopt(INS_GET_SUBADDRESS_SPEND_PUBLIC_KEY);
 
         static_assert(sizeof(cryptonote::subaddress_index) == 8, "cryptonote::subaddress_index shall be 8 bytes length");
         comm.insert(&index, sizeof(cryptonote::subaddress_index));
@@ -282,7 +282,7 @@ namespace trezor {
       if (index.is_zero()) {
         address = keys.m_account_address;
       } else {
-        comm.set_header(INS_GET_SUBADDRESS);
+        comm.set_header_noopt(INS_GET_SUBADDRESS);
 
         static_assert(sizeof(cryptonote::subaddress_index) == 8, "cryptonote::subaddress_index shall be 8 bytes length");
         comm.insert(&index, sizeof(cryptonote::subaddress_index));
@@ -299,7 +299,7 @@ namespace trezor {
       AUTO_LOCK_CMD();
       crypto::secret_key sub_sec;
 
-      comm.set_header(INS_GET_SUBADDRESS_SECRET_KEY);
+      comm.set_header_noopt(INS_GET_SUBADDRESS_SECRET_KEY);
       comm.insert(sec.data);
 
       static_assert(sizeof(cryptonote::subaddress_index) == 8, "cryptonote::subaddress_index shall be 8 bytes length");
@@ -317,7 +317,7 @@ namespace trezor {
     bool  device_trezor_lite::verify_keys(const crypto::secret_key &secret_key, const crypto::public_key &public_key) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_VERIFY_KEY);
+      comm.set_header_noopt(INS_VERIFY_KEY);
       comm.insert(secret_key.data);
       comm.insert(public_key.data);
       this->exchange_lite();
@@ -329,7 +329,7 @@ namespace trezor {
     bool device_trezor_lite::scalarmultKey(rct::key & aP, const rct::key &P, const rct::key &a) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_SECRET_SCAL_MUL_KEY);
+      comm.set_header_noopt(INS_SECRET_SCAL_MUL_KEY);
       comm.insert(P.bytes);
       comm.insert(a.bytes);
       this->exchange_lite();
@@ -341,7 +341,7 @@ namespace trezor {
     bool device_trezor_lite::scalarmultBase(rct::key &aG, const rct::key &a) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_SECRET_SCAL_MUL_BASE);
+      comm.set_header_noopt(INS_SECRET_SCAL_MUL_BASE);
       comm.insert(a.bytes);
       this->exchange_lite();
 
@@ -352,7 +352,7 @@ namespace trezor {
     bool device_trezor_lite::sc_secret_add( crypto::secret_key &r, const crypto::secret_key &a, const crypto::secret_key &b) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_SECRET_KEY_ADD);
+      comm.set_header_noopt(INS_SECRET_KEY_ADD);
       comm.insert(a.data);
       comm.insert(b.data);
       this->exchange_lite();
@@ -376,7 +376,7 @@ namespace trezor {
 
     bool device_trezor_lite::generate_key_derivation(const crypto::public_key &pub, const crypto::secret_key &sec, crypto::key_derivation &derivation) {
       AUTO_LOCK_CMD();
-      bool r = false;
+      bool r;
 
       if ((this->mode == TRANSACTION_PARSE)  && has_view_key) {
         //A derivation is resquested in PASRE mode and we have the view key,
@@ -387,7 +387,7 @@ namespace trezor {
         r = crypto::generate_key_derivation(pub, this->viewkey, derivation);
         
       } else {
-        comm.set_header(INS_GEN_KEY_DERIVATION);
+        comm.set_header_noopt(INS_GEN_KEY_DERIVATION);
         comm.insert(pub.data);
         comm.insert(sec.data);
         this->exchange_lite();
@@ -422,7 +422,7 @@ namespace trezor {
     bool device_trezor_lite::derivation_to_scalar(const crypto::key_derivation &derivation, const size_t output_index, crypto::ec_scalar &res) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_DERIVATION_TO_SCALAR);
+      comm.set_header_noopt(INS_DERIVATION_TO_SCALAR);
       comm.insert(derivation.data);
       comm.insert_u32((uint32_t) output_index);
       this->exchange_lite();
@@ -435,7 +435,7 @@ namespace trezor {
     bool device_trezor_lite::derive_secret_key(const crypto::key_derivation &derivation, const std::size_t output_index, const crypto::secret_key &sec, crypto::secret_key &derived_sec) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_DERIVE_SECRET_KEY);
+      comm.set_header_noopt(INS_DERIVE_SECRET_KEY);
       comm.insert(derivation.data);
       comm.insert_u32((uint32_t) output_index);
       comm.insert(sec.data);
@@ -449,7 +449,7 @@ namespace trezor {
     bool device_trezor_lite::derive_public_key(const crypto::key_derivation &derivation, const std::size_t output_index, const crypto::public_key &pub, crypto::public_key &derived_pub){
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_DERIVE_PUBLIC_KEY);
+      comm.set_header_noopt(INS_DERIVE_PUBLIC_KEY);
       comm.insert(derivation.data);
       comm.insert_u32((uint32_t) output_index);
       comm.insert(pub.data);
@@ -463,7 +463,7 @@ namespace trezor {
     bool device_trezor_lite::secret_key_to_public_key(const crypto::secret_key &sec, crypto::public_key &pub) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_SECRET_KEY_TO_PUBLIC_KEY);
+      comm.set_header_noopt(INS_SECRET_KEY_TO_PUBLIC_KEY);
       comm.insert(sec.data);
       this->exchange_lite();
 
@@ -474,7 +474,7 @@ namespace trezor {
     bool device_trezor_lite::generate_key_image(const crypto::public_key &pub, const crypto::secret_key &sec, crypto::key_image &image){
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_GEN_KEY_IMAGE);
+      comm.set_header_noopt(INS_GEN_KEY_IMAGE);
       comm.insert(pub.data);
       comm.insert(sec.data);
       this->exchange_lite();
@@ -492,7 +492,7 @@ namespace trezor {
       AUTO_LOCK_CMD();
 
       key_map.clear();
-      comm.set_header(INS_OPEN_TX, 0x01);
+      comm.set_header_noopt(INS_OPEN_TX, 0x01);
 
       //account
       comm.insert_u32(0);
@@ -506,7 +506,7 @@ namespace trezor {
     bool device_trezor_lite::encrypt_payment_id(crypto::hash8 &payment_id, const crypto::public_key &public_key, const crypto::secret_key &secret_key) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_STEALTH);
+      comm.set_header_noopt(INS_STEALTH);
       comm.insert(public_key.data);
       comm.insert(secret_key.data);
       comm.insert(payment_id.data, 8);
@@ -526,7 +526,7 @@ namespace trezor {
     bool  device_trezor_lite::ecdhEncode(rct::ecdhTuple & unmasked, const rct::key & AKout) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_BLIND);
+      comm.set_header_noopt(INS_BLIND);
       comm.insert(AKout.bytes);
       comm.insert(unmasked.mask.bytes);
       comm.insert(unmasked.amount.bytes);
@@ -540,7 +540,7 @@ namespace trezor {
     bool  device_trezor_lite::ecdhDecode(rct::ecdhTuple & masked, const rct::key & AKout) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_UNBLIND);
+      comm.set_header_noopt(INS_UNBLIND);
       comm.insert(AKout.bytes);
       comm.insert(masked.mask.bytes);
       comm.insert(masked.amount.bytes);
@@ -571,10 +571,10 @@ namespace trezor {
       //txnfee
       data_offset = 1;
       while (data[data_offset] & 0x80) {
-        comm.insert_u8(data[data_offset]);
+        comm.insert_u8((uint8_t) data[data_offset]);
         data_offset += 1;
       }
-      comm.insert_u8(data[data_offset]);
+      comm.insert_u8((uint8_t) data[data_offset]);
       data_offset += 1;
       this->exchange_lite();
 
@@ -639,7 +639,7 @@ namespace trezor {
         this->exchange_lite();
       }
 
-      comm.set_header(INS_VALIDATE, 0x03, static_cast<uint8_t>(i + 1));
+      comm.set_header_noopt(INS_VALIDATE, 0x03, static_cast<uint8_t>(i + 1));
       comm.insert(hashes[0].bytes);
       comm.insert(hashes[2].bytes);
       this->exchange_lite();
@@ -653,7 +653,7 @@ namespace trezor {
                                       rct::key &a, rct::key &aG, rct::key &aHP, rct::key &II) {
       AUTO_LOCK_CMD();
 
-      comm.set_header(INS_MLSAG, 0x01);
+      comm.set_header_noopt(INS_MLSAG, 0x01);
       comm.insert(H.bytes);
       comm.insert(xx.bytes);
       this->exchange_lite();
@@ -680,8 +680,8 @@ namespace trezor {
 
       cnt = long_message.size();
       for (size_t i = 0; i<cnt; i++) {
-        comm.set_header(INS_MLSAG, 0x02, i+1);
-        comm.insert_u8((i==(cnt-1))?0x00:0x80); // options, last
+        comm.set_header(INS_MLSAG, 0x02, static_cast<uint8_t>(i + 1));
+        comm.insert_u8(static_cast<uint8_t>((i == (cnt - 1)) ? 0x00 : 0x80)); // options, last
         comm.insert(long_message[i].bytes);
         this->exchange_lite();
       }
@@ -721,7 +721,7 @@ namespace trezor {
       return true;
     }
 
-    bool device_trezor_lite::connect(void) {
+    bool device_trezor_lite::connect() {
       bool r = device_trezor_base::connect();
       this->init_load_keys();
       return r;
