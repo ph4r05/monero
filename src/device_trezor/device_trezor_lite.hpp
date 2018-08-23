@@ -68,6 +68,9 @@ namespace trezor {
     void exchange_lite(bool check_init = true, bool check_keys = true);
     void send_simple(uint8_t ins = 0, uint8_t p1 = 0, uint8_t p2 = 0);
 
+    bool connect(void) override;
+    bool disconnect() override;
+
     /* ======================================================================= */
     /*                             WALLET & ADDRESS                            */
     /* ======================================================================= */

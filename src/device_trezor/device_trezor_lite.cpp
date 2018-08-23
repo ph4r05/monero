@@ -108,10 +108,6 @@ namespace trezor {
         this->init_lite();
       }
 
-      if (check_keys && comm.get_ins() != INS_GET_KEY && !m_lite_sec_keys_loaded){
-        this->init_load_keys();
-      }
-
       auto req = comm.build_request();
       auto ack = this->client_exchange<messages::monero::MoneroLiteAck>(req);
       comm.on_msg_received(ack.get());
@@ -226,7 +222,7 @@ namespace trezor {
         //If we are in TRANSACTION_PARSE, the given derivation has been retrieved uncrypted (wihtout the help
         //of the device), so continue that way.
         MDEBUG( "derive_subaddress_public_key  : PARSE mode with known viewkey");
-        crypto::derive_subaddress_public_key(pub, derivation, output_index,derived_pub);
+        crypto::derive_subaddress_public_key(pub, derivation, output_index, derived_pub);
       } else {
 
         comm.set_header(INS_DERIVE_SUBADDRESS_PUBLIC_KEY);
@@ -718,8 +714,17 @@ namespace trezor {
       send_simple(INS_CLOSE_TX);
       return true;
     }
-      
-      
+
+    bool device_trezor_lite::connect(void) {
+      bool r = device_trezor_base::connect();
+      this->init_load_keys();
+      return r;
+    }
+
+    bool device_trezor_lite::disconnect() {
+      bool r = device_trezor_base::disconnect();
+      return r;
+    }
 
     /* ======================================================================= */
     /*                              TREZOR PROTOCOL                            */
