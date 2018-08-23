@@ -14,12 +14,6 @@ namespace hw{
 namespace trezor{
 namespace protocol{
 
-  using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
-  using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
-  using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
-
-  using exported_key_image = hw::device_cold::exported_key_image;
-
   std::string key_to_string(const ::crypto::ec_point & key);
   std::string key_to_string(const ::crypto::ec_scalar & key);
   std::string key_to_string(const ::crypto::hash & key);
@@ -87,6 +81,11 @@ namespace chacha {
 
 // Key image sync
 namespace ki {
+
+  using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
+  using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
+  using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
+  using exported_key_image = hw::device_cold::exported_key_image;
 
   /**
    * Converts transfer details to the MoneroTransferDetails required for KI sync
