@@ -2468,6 +2468,10 @@ simple_wallet::simple_wallet()
                            boost::bind(&simple_wallet::import_key_images, this, _1),
                            tr("import_key_images <file>"),
                            tr("Import a signed key images list and verify their spent status."));
+  m_cmd_binder.set_handler("hw_reconnect",
+                           boost::bind(&simple_wallet::hw_reconnect, this, _1),
+                           tr("hw_reconnect"),
+                           tr("Attempts to reconnect HW wallet."));
   m_cmd_binder.set_handler("export_outputs",
                            boost::bind(&simple_wallet::export_outputs, this, _1),
                            tr("export_outputs <file>"),
@@ -2584,6 +2588,7 @@ bool simple_wallet::set_variable(const std::vector<std::string> &args)
     success_msg_writer() << "subaddress-lookahead = " << lookahead.first << ":" << lookahead.second;
     success_msg_writer() << "segregation-height = " << m_wallet->segregation_height();
     success_msg_writer() << "ignore-fractional-outputs = " << m_wallet->ignore_fractional_outputs();
+    success_msg_writer() << "device_name = " << m_wallet->device_name();
     return true;
   }
   else
@@ -3229,7 +3234,7 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
     {
       m_wallet_file = m_generate_from_device;
       // create wallet
-      auto r = new_wallet(vm, "Ledger");
+      auto r = new_wallet(vm);
       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
       password = *r;
       // if no block_height is specified, assume its a new account and start it "now"
@@ -3656,8 +3661,8 @@ boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::pr
 }
 
 //----------------------------------------------------------------------------------------------------
-boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::program_options::variables_map& vm,
-                               const std::string &device_name) {
+boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::program_options::variables_map& vm)
+{
   auto rc = tools::wallet2::make_new(vm, false, password_prompter);
   m_wallet = std::move(rc.first);
   if (!m_wallet)
@@ -3676,9 +3681,10 @@ boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::pr
   if (m_restore_height)
     m_wallet->set_refresh_from_block_height(m_restore_height);
 
+  auto device_desc = tools::wallet2::device_name_option(vm);
   try
   {
-    m_wallet->restore(m_wallet_file, std::move(rc.second).password(), device_name);
+    m_wallet->restore(m_wallet_file, std::move(rc.second).password(), device_desc.empty() ? "Ledger" : device_desc);
     message_writer(console_color_white, true) << tr("Generated new wallet on hw device: ")
       << m_wallet->get_account().get_public_address_str(m_wallet->nettype());
   }
@@ -7620,6 +7626,31 @@ bool simple_wallet::import_key_images(const std::vector<std::string> &args)
   catch (const std::exception &e)
   {
     fail_msg_writer() << "Failed to import key images: " << e.what();
+    return true;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::hw_reconnect(const std::vector<std::string> &args)
+{
+  if (!m_wallet->key_on_device())
+  {
+    fail_msg_writer() << tr("command only supported by HW wallet");
+    return true;
+  }
+
+  LOCK_IDLE_SCOPE();
+  try
+  {
+    bool r = m_wallet->reconnect_device();
+    if (!r){
+      fail_msg_writer() << tr("Failed to reconnect device");
+    }
+  }
+  catch (const std::exception &e)
+  {
+    fail_msg_writer() << tr("Failed to reconnect device: ") << tr(e.what());
     return true;
   }
 
