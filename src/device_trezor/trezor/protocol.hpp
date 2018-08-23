@@ -14,12 +14,6 @@ namespace hw{
 namespace trezor{
 namespace protocol{
 
-  using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
-  using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
-  using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
-
-  using exported_key_image = hw::device_cold::exported_key_image;
-
   std::string key_to_string(const ::crypto::ec_point & key);
   std::string key_to_string(const ::crypto::ec_scalar & key);
   std::string key_to_string(const ::crypto::hash & key);
@@ -85,8 +79,13 @@ namespace chacha {
 }
 
 
-// Key image sync
+// Cold Key image sync
 namespace ki {
+
+  using MoneroTransferDetails = messages::monero::MoneroKeyImageSyncStepRequest_MoneroTransferDetails;
+  using MoneroSubAddressIndicesList = messages::monero::MoneroKeyImageExportInitRequest_MoneroSubAddressIndicesList;
+  using MoneroExportedKeyImage = messages::monero::MoneroKeyImageSyncStepAck_MoneroExportedKeyImage;
+  using exported_key_image = hw::device_cold::exported_key_image;
 
   /**
    * Converts transfer details to the MoneroTransferDetails required for KI sync
@@ -119,6 +118,7 @@ namespace ki {
 
 }
 
+// Cold transaction signing
 namespace tx {
   using TsxData = messages::monero::MoneroTransactionInitRequest_MoneroTransactionData;
   using MoneroTransactionDestinationEntry = messages::monero::MoneroTransactionDestinationEntry;
@@ -248,6 +248,67 @@ namespace tx {
     const TData & tdata() const {
       return m_ct;
     }
+  };
+
+}
+
+// Lite/proxy protocol
+namespace lite {
+  class LiteComm {
+  protected:
+    // Result buffer
+    size_t        m_r_len;
+    uint8_t       m_r_buff[512];
+    uint8_t       m_ins;
+    uint8_t       m_p1;
+    uint8_t       m_p2;
+
+    // Received buffer
+    size_t        m_c_offset;
+    size_t        m_c_len;
+    uint8_t       m_c_msg[512];
+    uint16_t      m_c_sw;
+
+    void assert_enough_read_data(size_t nbytes);
+    void assert_enough_write_buff(size_t nbytes);
+
+  public:
+    LiteComm();
+    ~LiteComm();
+
+    /**
+     * Loads received message to the buffers, for parsing
+     * @param res
+     */
+    LiteComm * on_msg_received(const messages::monero::MoneroLiteAck * res);
+
+    /**
+     * Builds request message for sending
+     * @return
+     */
+    std::shared_ptr<messages::monero::MoneroLiteRequest> build_request();
+
+    uint8_t get_ins() const;
+    LiteComm * set_ins(uint8_t m_ins);
+    uint8_t get_p1() const;
+    LiteComm * set_p1(uint8_t m_p1);
+    uint8_t get_p2() const;
+    LiteComm * set_p2(uint8_t m_p2);
+    LiteComm * set_header(uint8_t ins = 0, uint8_t p1 = 0, uint8_t p2 = 0);
+    LiteComm * set_header_noopt(uint8_t ins = 0, uint8_t p1 = 0, uint8_t p2 = 0);
+
+    LiteComm * read_skip(size_t nbytes);
+    LiteComm * fetch(void * dst, size_t nbytes = 32);
+    uint8_t fetch_u8(uint8_t * dst = nullptr);
+    uint16_t fetch_u16(uint16_t * dst = nullptr);
+    uint32_t fetch_u32(uint32_t * dst = nullptr);
+
+    LiteComm * insert_zero(size_t nbytes);
+    LiteComm * insert(const void * src, size_t nbytes = 32);
+    LiteComm * insert_u8(uint8_t x);
+    LiteComm * insert_u16(uint16_t x);
+    LiteComm * insert_u32(uint32_t x);
+
   };
 
 }
