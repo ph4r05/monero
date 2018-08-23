@@ -299,8 +299,8 @@ namespace trezor {
 
       std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> req;
 
-      std::vector<protocol::MoneroTransferDetails> mtds;
-      std::vector<protocol::MoneroExportedKeyImage> kis;
+      std::vector<protocol::ki::MoneroTransferDetails> mtds;
+      std::vector<protocol::ki::MoneroExportedKeyImage> kis;
       protocol::ki::key_image_data(wallet, transfers, mtds);
 
       bool res = protocol::ki::generate_commitment(mtds, transfers, req);
