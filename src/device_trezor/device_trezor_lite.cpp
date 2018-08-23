@@ -571,10 +571,10 @@ namespace trezor {
       //txnfee
       data_offset = 1;
       while (data[data_offset] & 0x80) {
-        comm.insert(&data[data_offset]);
+        comm.insert_u8(&data[data_offset]);
         data_offset += 1;
       }
-      comm.insert(&data[data_offset]);
+      comm.insert_u8(&data[data_offset]);
       data_offset += 1;
       this->exchange_lite();
 
@@ -612,7 +612,7 @@ namespace trezor {
           comm.insert(outKeys.AKout.bytes);
         } else {
           // dummy: is_subaddress Aout Bout AKout
-          comm.insert_skip(1+32*3);
+          comm.insert_zero(1+32*3);
         }
 
         //C
