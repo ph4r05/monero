@@ -191,12 +191,16 @@ enum MessageType {
   MessageType_MoneroAddress = 531,
   MessageType_MoneroGetWatchKey = 532,
   MessageType_MoneroWatchKey = 533,
+  MessageType_MoneroLiteInitRequest = 540,
+  MessageType_MoneroLiteInitAck = 541,
+  MessageType_MoneroLiteRequest = 542,
+  MessageType_MoneroLiteAck = 543,
   MessageType_DebugMoneroDiagRequest = 536,
   MessageType_DebugMoneroDiagAck = 537
 };
 bool MessageType_IsValid(int value);
 const MessageType MessageType_MIN = MessageType_Initialize;
-const MessageType MessageType_MAX = MessageType_DebugMoneroDiagAck;
+const MessageType MessageType_MAX = MessageType_MoneroLiteAck;
 const int MessageType_ARRAYSIZE = MessageType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* MessageType_descriptor();

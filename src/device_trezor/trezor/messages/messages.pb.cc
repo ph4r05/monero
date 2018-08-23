@@ -62,7 +62,7 @@ void protobuf_AddDesc_messages_2eproto() {
   ::google::protobuf::protobuf_AddDesc_google_2fprotobuf_2fdescriptor_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\016messages.proto\022\022hw.trezor.messages\032 go"
-    "ogle/protobuf/descriptor.proto*\3771\n\013Messa"
+    "ogle/protobuf/descriptor.proto*\2473\n\013Messa"
     "geType\022$\n\026MessageType_Initialize\020\000\032\010\220\265\030\001"
     "\260\265\030\001\022\032\n\020MessageType_Ping\020\001\032\004\220\265\030\001\022\035\n\023Mess"
     "ageType_Success\020\002\032\004\230\265\030\001\022\035\n\023MessageType_F"
@@ -220,21 +220,25 @@ void protobuf_AddDesc_messages_2eproto() {
     "neroGetAddress\020\222\004\032\004\220\265\030\001\022$\n\031MessageType_M"
     "oneroAddress\020\223\004\032\004\230\265\030\001\022(\n\035MessageType_Mon"
     "eroGetWatchKey\020\224\004\032\004\220\265\030\001\022%\n\032MessageType_M"
-    "oneroWatchKey\020\225\004\032\004\230\265\030\001\022-\n\"MessageType_De"
-    "bugMoneroDiagRequest\020\230\004\032\004\220\265\030\001\022)\n\036Message"
-    "Type_DebugMoneroDiagAck\020\231\004\032\004\230\265\030\001:4\n\007wire"
-    "_in\022!.google.protobuf.EnumValueOptions\030\322"
-    "\206\003 \001(\010:5\n\010wire_out\022!.google.protobuf.Enu"
-    "mValueOptions\030\323\206\003 \001(\010::\n\rwire_debug_in\022!"
-    ".google.protobuf.EnumValueOptions\030\324\206\003 \001("
-    "\010:;\n\016wire_debug_out\022!.google.protobuf.En"
-    "umValueOptions\030\325\206\003 \001(\010:6\n\twire_tiny\022!.go"
-    "ogle.protobuf.EnumValueOptions\030\326\206\003 \001(\010:<"
-    "\n\017wire_bootloader\022!.google.protobuf.Enum"
-    "ValueOptions\030\327\206\003 \001(\010:8\n\013wire_no_fsm\022!.go"
-    "ogle.protobuf.EnumValueOptions\030\330\206\003 \001(\010B4"
-    "\n#com.satoshilabs.trezor.lib.protobufB\rT"
-    "rezorMessage", 6932);
+    "oneroWatchKey\020\225\004\032\004\230\265\030\001\022,\n!MessageType_Mo"
+    "neroLiteInitRequest\020\234\004\032\004\220\265\030\001\022(\n\035MessageT"
+    "ype_MoneroLiteInitAck\020\235\004\032\004\230\265\030\001\022(\n\035Messag"
+    "eType_MoneroLiteRequest\020\236\004\032\004\220\265\030\001\022$\n\031Mess"
+    "ageType_MoneroLiteAck\020\237\004\032\004\230\265\030\001\022-\n\"Messag"
+    "eType_DebugMoneroDiagRequest\020\230\004\032\004\220\265\030\001\022)\n"
+    "\036MessageType_DebugMoneroDiagAck\020\231\004\032\004\230\265\030\001"
+    ":4\n\007wire_in\022!.google.protobuf.EnumValueO"
+    "ptions\030\322\206\003 \001(\010:5\n\010wire_out\022!.google.prot"
+    "obuf.EnumValueOptions\030\323\206\003 \001(\010::\n\rwire_de"
+    "bug_in\022!.google.protobuf.EnumValueOption"
+    "s\030\324\206\003 \001(\010:;\n\016wire_debug_out\022!.google.pro"
+    "tobuf.EnumValueOptions\030\325\206\003 \001(\010:6\n\twire_t"
+    "iny\022!.google.protobuf.EnumValueOptions\030\326"
+    "\206\003 \001(\010:<\n\017wire_bootloader\022!.google.proto"
+    "buf.EnumValueOptions\030\327\206\003 \001(\010:8\n\013wire_no_"
+    "fsm\022!.google.protobuf.EnumValueOptions\030\330"
+    "\206\003 \001(\010B4\n#com.satoshilabs.trezor.lib.pro"
+    "tobufB\rTrezorMessage", 7100);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   ::google::protobuf::internal::ExtensionSet::RegisterExtension(
@@ -429,6 +433,10 @@ bool MessageType_IsValid(int value) {
     case 533:
     case 536:
     case 537:
+    case 540:
+    case 541:
+    case 542:
+    case 543:
       return true;
     default:
       return false;
