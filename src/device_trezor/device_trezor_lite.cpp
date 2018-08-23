@@ -571,10 +571,10 @@ namespace trezor {
       //txnfee
       data_offset = 1;
       while (data[data_offset] & 0x80) {
-        comm.insert_u8(&data[data_offset]);
+        comm.insert_u8(data[data_offset]);
         data_offset += 1;
       }
-      comm.insert_u8(&data[data_offset]);
+      comm.insert_u8(data[data_offset]);
       data_offset += 1;
       this->exchange_lite();
 
@@ -606,7 +606,7 @@ namespace trezor {
         comm.insert_u8(static_cast<uint8_t>((i == outputs_size - 1) ? 0x00 : 0x80));
 
         if (found) {
-          comm.insert_u8(outKeys.is_subaddress);
+          comm.insert_u8(static_cast<uint8_t>(outKeys.is_subaddress));
           comm.insert(outKeys.Aout.bytes);
           comm.insert(outKeys.Bout.bytes);
           comm.insert(outKeys.AKout.bytes);
@@ -729,6 +729,8 @@ namespace trezor {
 
     bool device_trezor_lite::disconnect() {
       bool r = device_trezor_base::disconnect();
+      m_lite_initialized = false;
+      m_lite_sec_keys_loaded = false;
       return r;
     }
 
