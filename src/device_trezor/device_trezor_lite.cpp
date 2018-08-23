@@ -103,13 +103,19 @@ namespace trezor {
       }
     }
 
-    void device_trezor_lite::exchange_lite(bool check_init, bool check_keys){
-      if (check_init && !m_lite_initialized){
+    void device_trezor_lite::exchange_lite(){
+      if (!m_lite_initialized){
         this->init_lite();
       }
 
       auto req = comm.build_request();
       auto ack = this->client_exchange<messages::monero::MoneroLiteAck>(req);
+
+      if (ack->sw() != 0x9000){
+        throw exc::ProtocolException(std::string("Card returned error: ") + std::to_string(ack->sw())
+        + " for ins: " + std::to_string(comm.get_ins()));
+      }
+
       comm.on_msg_received(ack.get());
     }
 
