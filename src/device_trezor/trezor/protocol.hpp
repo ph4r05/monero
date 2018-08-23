@@ -302,7 +302,7 @@ namespace lite {
     uint16_t fetch_u16(uint16_t * dst = nullptr);
     uint32_t fetch_u32(uint32_t * dst = nullptr);
 
-    LiteComm * insert_skip(size_t nbytes);
+    LiteComm * insert_zero(size_t nbytes);
     LiteComm * insert(const void * src, size_t nbytes = 32);
     LiteComm * insert_u8(uint8_t x);
     LiteComm * insert_u16(uint16_t x);

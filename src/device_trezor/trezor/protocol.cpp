@@ -750,9 +750,12 @@ namespace lite {
     return res;
   }
 
-  LiteComm * LiteComm::insert_skip(size_t nbytes){
+  LiteComm * LiteComm::insert_zero(size_t nbytes){
     assert_enough_write_buff(nbytes);
-    m_r_len += nbytes;
+    if (nbytes > 0) {
+      memset(m_r_buff + m_r_len, 0, nbytes);
+      m_r_len += nbytes;
+    }
     return this;
   }
 
