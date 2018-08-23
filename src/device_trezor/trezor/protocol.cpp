@@ -649,6 +649,12 @@ namespace lite {
     return this;
   }
 
+  LiteComm * LiteComm::set_header_noopt(uint8_t ins, uint8_t p1, uint8_t p2){
+    set_header(ins, p1, p2);
+    insert_u8(0);  // options
+    return this;
+  }
+
   LiteComm * LiteComm::on_msg_received(const messages::monero::MoneroLiteAck *res) {
     m_c_sw = res->sw();
     m_c_offset = 0;

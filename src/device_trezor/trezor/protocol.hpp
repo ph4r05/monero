@@ -295,6 +295,7 @@ namespace lite {
     uint8_t get_p2() const;
     LiteComm * set_p2(uint8_t m_p2);
     LiteComm * set_header(uint8_t ins = 0, uint8_t p1 = 0, uint8_t p2 = 0);
+    LiteComm * set_header_noopt(uint8_t ins = 0, uint8_t p1 = 0, uint8_t p2 = 0);
 
     LiteComm * read_skip(size_t nbytes);
     LiteComm * fetch(void * dst, size_t nbytes = 32);
