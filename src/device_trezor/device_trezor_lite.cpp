@@ -63,9 +63,11 @@ namespace trezor {
       return !memcmp(&d0, &d1, sizeof(d0));
     }
 
-
     device_trezor_lite::device_trezor_lite() {
-
+      this->mode = NONE;
+      this->has_view_key = false;
+      this->m_lite_initialized = false;
+      this->m_lite_sec_keys_loaded = false;
     }
 
     device_trezor_lite::~device_trezor_lite() {
@@ -88,9 +90,26 @@ namespace trezor {
       m_lite_initialized = true;
     }
 
-    void device_trezor_lite::exchange_lite(){
-      if (!m_lite_initialized){
+    void device_trezor_lite::init_load_keys(){
+      crypto::secret_key vkey;
+      crypto::secret_key skey;
+      m_lite_sec_keys_loaded = true;
+      try {
+        this->get_secret_keys(vkey, skey);
+
+      } catch(std::exception & e){
+        m_lite_sec_keys_loaded = false;
+        throw e;
+      }
+    }
+
+    void device_trezor_lite::exchange_lite(bool check_init, bool check_keys){
+      if (check_init && !m_lite_initialized){
         this->init_lite();
+      }
+
+      if (check_keys && comm.get_ins() != INS_GET_KEY && !m_lite_sec_keys_loaded){
+        this->init_load_keys();
       }
 
       auto req = comm.build_request();
@@ -171,6 +190,8 @@ namespace trezor {
 
       //View key is retrievied, if allowed, to speed up blockchain parsing
       comm.fetch(this->viewkey.data);
+      m_lite_sec_keys_loaded = true;
+
       if (is_fake_view_key(this->viewkey)) {
         MDEBUG("Have Not view key");
         this->has_view_key = false;

@@ -42,6 +42,7 @@ namespace trezor {
     // communication serializer
     hw::trezor::protocol::lite::LiteComm comm;
     bool m_lite_initialized;
+    bool m_lite_sec_keys_loaded;
 
   public:
     device_trezor_lite();
@@ -62,7 +63,9 @@ namespace trezor {
     void init_lite(boost::optional<std::vector<uint32_t>> path = boost::none,
                    boost::optional<cryptonote::network_type> network_type = boost::none);
 
-    void exchange_lite();
+    void init_load_keys();
+
+    void exchange_lite(bool check_init = true, bool check_keys = true);
     void send_simple(uint8_t ins = 0, uint8_t p1 = 0, uint8_t p2 = 0);
 
     /* ======================================================================= */
