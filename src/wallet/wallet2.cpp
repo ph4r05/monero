@@ -3695,9 +3695,9 @@ void wallet2::restore(const std::string& wallet_, const epee::wipeable_string& p
 
   auto &hwdev = lookup_device(device_name);
   hwdev.set_name(device_name);
+  hwdev.set_network_type(m_nettype);
 
   m_account.create_from_device(hwdev);
-  m_account.get_device().set_network_type(m_nettype);
   m_account_public_address = m_account.get_keys().m_account_address;
   m_watch_only = false;
   m_multisig = false;
