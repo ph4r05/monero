@@ -45,6 +45,8 @@ set(trezor_headers
         trezor/messages_map.hpp
         trezor/protocol.hpp
         trezor/transport.hpp
+        device_trezor_base.hpp
+        device_trezor_lite.hpp
         device_trezor.hpp
         trezor.hpp
         ${TREZOR_PROTOB_H}
@@ -55,6 +57,8 @@ set(trezor_sources
         trezor/messages_map.cpp
         trezor/protocol.cpp
         trezor/transport.cpp
+        device_trezor_base.cpp
+        device_trezor_lite.cpp
         device_trezor.cpp
         ${TREZOR_PROTOB_CPP}
 )
