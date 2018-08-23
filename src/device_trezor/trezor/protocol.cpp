@@ -663,7 +663,7 @@ namespace lite {
       }
 
       m_c_len = data.size();
-      memcpy(m_r_buff, data.data(), m_c_len);
+      memcpy(m_c_msg, data.data(), m_c_len);
     }
 
     // Reset response
@@ -675,7 +675,7 @@ namespace lite {
   }
 
   std::shared_ptr<messages::monero::MoneroLiteRequest> LiteComm::build_request() {
-    auto res = std::shared_ptr<messages::monero::MoneroLiteRequest>();
+    auto res = std::make_shared<messages::monero::MoneroLiteRequest>();
     res->set_ins(m_ins);
     res->set_p1(m_p1);
     res->set_p2(m_p2);
