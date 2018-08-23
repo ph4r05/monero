@@ -3693,8 +3693,8 @@ void wallet2::restore(const std::string& wallet_, const epee::wipeable_string& p
   }
   m_key_on_device = true;
 
-  auto &hwdev = lookup_device(m_device_name);
-  hwdev.set_name(m_device_name);
+  auto &hwdev = lookup_device(device_name);
+  hwdev.set_name(device_name);
 
   m_account.create_from_device(hwdev);
   m_account.get_device().set_network_type(m_nettype);
