@@ -46,6 +46,7 @@ target_link_libraries(simpleserialize
     rpc_base
     cryptonote_core
     cncrypto
+    ringct
     common
     mnemonics
     epee
