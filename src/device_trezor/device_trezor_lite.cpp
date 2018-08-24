@@ -580,7 +580,7 @@ namespace trezor {
       this->exchange_lite();
 
       //pseudoOuts
-      if ((type == rct::RCTTypeSimple) || (type == rct::RCTTypeSimpleBulletproof)) {
+      if (type == rct::RCTTypeSimple) {
         for ( i = 0; i < inputs_size; i++) {
           comm.set_header(INS_VALIDATE, 0x01, static_cast<uint8_t>(i + 2));
           comm.insert_u8(static_cast<uint8_t>((i == inputs_size - 1) ? 0x00 : 0x80));

@@ -230,7 +230,7 @@ namespace tx {
         throw std::invalid_argument("RV not initialized");
       }
       auto tp = m_ct.rv->type;
-      return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;
+      return tp == rct::RCTTypeSimple || tp == rct::RCTTypeBulletproof;
     }
 
     bool is_req_bulletproof() const {
@@ -242,7 +242,7 @@ namespace tx {
         throw std::invalid_argument("RV not initialized");
       }
       auto tp = m_ct.rv->type;
-      return tp == rct::RCTTypeSimpleBulletproof || tp == rct::RCTTypeFullBulletproof;
+      return tp == rct::RCTTypeBulletproof;
     }
 
     const TData & tdata() const {
