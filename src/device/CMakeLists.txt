@@ -29,6 +29,7 @@
 set(device_sources
   device.cpp
   device_default.cpp
+  device_cold.cpp
   log.cpp
   )
 
@@ -36,15 +37,18 @@ if(PCSC_FOUND)
   set(device_sources ${device_sources} device_ledger.cpp)
 endif()
 
+
 set(device_headers
   device.hpp
   device_default.hpp
+  device_cold.hpp
   log.hpp
  )
 
 if(PCSC_FOUND)
   set(device_headers ${device_headers} device_ledger.hpp)
 endif()
+
 
 set(device_private_headers)
 
@@ -69,6 +73,7 @@ target_link_libraries(device
     cncrypto
     ringct_basic
     ${OPENSSL_CRYPTO_LIBRARIES}
+    ${Boost_SERIALIZATION_LIBRARY}
   PRIVATE
     ${Blocks}
     ${EXTRA_LIBRARIES})

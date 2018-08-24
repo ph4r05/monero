@@ -47,6 +47,7 @@
 #include "crypto/crypto.h"
 #include "crypto/chacha.h"
 #include "ringct/rctTypes.h"
+#include "cryptonote_config.h"
 
 #ifndef USE_DEVICE_LEDGER
 #define USE_DEVICE_LEDGER 1
@@ -97,6 +98,12 @@ namespace hw {
             TRANSACTION_PARSE
         };
 
+        enum device_protocol_t {
+            PROTOCOL_DEFAULT,
+            PROTOCOL_PROXY,     // Originaly defined by Ledger
+            PROTOCOL_COLD,      // Originaly defined by Trezor
+        };
+
         /* ======================================================================= */
         /*                              SETUP/TEARDOWN                             */
         /* ======================================================================= */
@@ -110,7 +117,7 @@ namespace hw {
         virtual bool disconnect(void) = 0;
 
         virtual bool  set_mode(device_mode mode) = 0;
-
+        virtual device_protocol_t device_protocol() const { return PROTOCOL_DEFAULT; };
 
         /* ======================================================================= */
         /*  LOCKER                                                                 */
@@ -194,6 +201,11 @@ namespace hw {
         virtual bool  mlsag_sign(const rct::key &c, const rct::keyV &xx, const rct::keyV &alpha, const size_t rows, const size_t dsRows, rct::keyV &ss) = 0;
 
         virtual bool  close_tx(void) = 0;
+
+        virtual bool  has_ki_cold_sync(void) const { return false; }
+        virtual bool  has_tx_cold_sign(void) const { return false; }
+
+        virtual void  set_network_type(cryptonote::network_type network_type) { }
     } ;
 
     struct reset_mode {
@@ -202,6 +214,19 @@ namespace hw {
         ~reset_mode() { hwref.set_mode(hw::device::NONE);}
     };
 
-    device& get_device(const std::string device_descriptor) ;
+    class device_registry {
+    private:
+      std::map<std::string, std::unique_ptr<device>> registry;
+
+    public:
+      device_registry();
+      bool register_device(const std::string & device_name, device * hw_device);
+      device& get_device(const std::string & device_descriptor);
+    };
+
+    static std::unique_ptr<device_registry> registry;
+
+    device& get_device(const std::string device_descriptor);
+    bool register_device(const std::string & device_name, device * hw_device);
 }
 

@@ -42,6 +42,7 @@ endif()
 cmake_minimum_required(VERSION 2.8.7)
 
 project(monero)
+set(BUILD_SHARED_LIBS OFF)
 
 function (die msg)
   if (NOT WIN32)
@@ -473,6 +474,17 @@ if (PCSC_FOUND)
   link_directories(${LIBPCSC_LIBRARY_DIRS})
 else (PCSC_FOUND)
   message(STATUS "Could not find PCSC")
+endif()
+
+# Protobuf, optional. Required for TREZOR.
+include(FindProtobuf)
+find_package(Protobuf)
+if(Protobuf_FOUND)
+  set(HAVE_PROTOBUF 1)
+  add_definitions(-DHAVE_PROTOBUF=1)
+else(Protobuf_FOUND)
+  add_definitions(-DHAVE_PROTOBUF=0)
+  message(STATUS "Could not find Protobuf")
 endif()
 
 if(MSVC)

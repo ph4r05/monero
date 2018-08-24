@@ -435,6 +435,281 @@ static rct::key hash_cache_mash(rct::key &hash_cache, const rct::key &mash0, con
   return hash_cache = rct::hash_to_scalar(data);
 }
 
+void bulletproof_PROVE_s1(const rct::key &sv, const rct::key &gamma,
+                                 rct::key &V, rct::key &A, rct::key &S,
+                                 rct::key &T1, rct::key &T2,
+                                 rct::key &taux, rct::key &mu, rct::key &t,
+                                 rct::key &x_ip, rct::key &y, rct::key &hash_cache,
+                                 rct::keyV &l, rct::keyV &r
+
+) {
+  init_exponents();
+
+  PERF_TIMER_UNIT(PROVE, 1000000);
+
+  constexpr size_t logN = 6; // log2(64)
+  constexpr size_t N = 1 << logN;
+
+  rct::keyV aL(N), aR(N);   // 2 keyv
+
+  PERF_TIMER_START_BP(PROVE_v);
+  rct::addKeys2(V, gamma, sv, rct::H);
+  PERF_TIMER_STOP(PROVE_v);
+
+  PERF_TIMER_START_BP(PROVE_aLaR);
+  for (size_t i = N; i-- > 0; )
+  {
+    if (sv[i/8] & (((uint64_t)1)<<(i%8)))
+    {
+      aL[i] = rct::identity();
+    }
+    else
+    {
+      aL[i] = rct::zero();
+    }
+    sc_sub(aR[i].bytes, aL[i].bytes, rct::identity().bytes);
+  }
+  PERF_TIMER_STOP(PROVE_aLaR);
+
+  hash_cache = rct::hash_to_scalar(V);
+
+
+  PERF_TIMER_START_BP(PROVE_step1);
+  // PAPER LINES 38-39
+  rct::key alpha = rct::skGen();
+  rct::key ve = vector_exponent(aL, aR);
+  rct::addKeys(A, ve, rct::scalarmultBase(alpha));
+
+  // PAPER LINES 40-42
+  rct::keyV sL = rct::skvGen(N), sR = rct::skvGen(N);  // 4 keyv
+  rct::key rho = rct::skGen();
+  ve = vector_exponent(sL, sR);
+  rct::addKeys(S, ve, rct::scalarmultBase(rho));
+
+  // PAPER LINES 43-45
+  y = hash_cache_mash(hash_cache, A, S);
+  rct::key z = hash_cache = rct::hash_to_scalar(y);
+
+  // Polynomial construction before PAPER LINE 46
+  rct::key t0 = rct::zero();
+  rct::key t1 = rct::zero();
+  rct::key t2 = rct::zero();
+
+  auto yN = vector_powers(y, N);  // 5 keyv
+
+  rct::key ip1y = inner_product(oneN, yN);
+  sc_muladd(t0.bytes, z.bytes, ip1y.bytes, t0.bytes);
+
+  rct::key zsq;
+  sc_mul(zsq.bytes, z.bytes, z.bytes);
+  sc_muladd(t0.bytes, zsq.bytes, sv.bytes, t0.bytes);
+
+  {
+    rct::key k = rct::zero();
+    sc_mulsub(k.bytes, zsq.bytes, ip1y.bytes, k.bytes);
+
+
+    rct::key zcu;
+    sc_mul(zcu.bytes, zsq.bytes, z.bytes);
+    sc_mulsub(k.bytes, zcu.bytes, ip12.bytes, k.bytes);
+    sc_add(t0.bytes, t0.bytes, k.bytes);
+
+    // release ip1y
+  }
+
+  PERF_TIMER_STOP(PROVE_step1);
+
+  PERF_TIMER_START_BP(PROVE_step2);
+  auto vpIz = vector_scalar(oneN, z);        //  6 keyv
+  auto aL_vpIz = vector_subtract(aL, vpIz);  //  7 keyv
+  aL.clear();                                //  6 keyv
+
+  auto aR_vpIz = vector_add(aR, vpIz);       //  7 keyv
+  aR.clear();
+  vpIz.clear();                              //  5 keyv
+
+  auto HyNsR = hadamard(yN, sR);             //  6 keyv
+  rct::key ip1 = inner_product(aL_vpIz, HyNsR);
+  rct::key ip3 = inner_product(sL, HyNsR);
+  HyNsR.clear();                             //  5 keyv
+
+  sc_add(t1.bytes, t1.bytes, ip1.bytes);
+
+  auto vp2zsq = vector_scalar(twoN, zsq);    //  6 keyv
+  rct::key ip2 = inner_product(sL, vector_add(hadamard(yN, aR_vpIz), vp2zsq)); // 1 temp keyv for comp
+  sc_add(t1.bytes, t1.bytes, ip2.bytes);
+  sc_add(t2.bytes, t2.bytes, ip3.bytes);
+
+  // PAPER LINES 47-48
+  rct::key tau1 = rct::skGen(), tau2 = rct::skGen();
+
+  T1 = rct::addKeys(rct::scalarmultKey(rct::H, t1), rct::scalarmultBase(tau1));
+  T2 = rct::addKeys(rct::scalarmultKey(rct::H, t2), rct::scalarmultBase(tau2));
+
+  // PAPER LINES 49-51
+  rct::key x = hash_cache_mash(hash_cache, z, T1, T2);
+
+  // PAPER LINES 52-53
+  taux = rct::zero();
+  sc_mul(taux.bytes, tau1.bytes, x.bytes);
+  rct::key xsq;
+  sc_mul(xsq.bytes, x.bytes, x.bytes);
+  sc_muladd(taux.bytes, tau2.bytes, xsq.bytes, taux.bytes);
+  sc_muladd(taux.bytes, gamma.bytes, zsq.bytes, taux.bytes);
+  sc_muladd(mu.bytes, x.bytes, rho.bytes, alpha.bytes);
+
+  // PAPER LINES 54-57
+  l = vector_add(aL_vpIz, vector_scalar(sL, x));  // 7 keyv + 1 temp keyv
+  sL.clear();
+  aL_vpIz.clear();  // 5 keyv
+
+  r = vector_add(hadamard(yN, vector_add(aR_vpIz, vector_scalar(sR, x))), vp2zsq); // 6 keyv + 1 temp keyv
+  yN.clear();
+  sR.clear();
+  aR_vpIz.clear();
+  vp2zsq.clear(); // 2 keyv = l, r
+  PERF_TIMER_STOP(PROVE_step2);
+
+  PERF_TIMER_START_BP(PROVE_step3);
+  t = inner_product(l, r);
+  x_ip = hash_cache_mash(hash_cache, x, taux, mu, t);
+
+  // PAPER LINES 32-33
+  PERF_TIMER_STOP(PROVE_step3);
+
+}
+
+
+void bulletproof_PROVE_s2(const rct::key &x_ip, const rct::key &y, rct::key &hash_cache,
+                                 rct::keyV &l, rct::keyV &r,
+                                 rct::keyV &L, rct::keyV &R,
+                                 rct::key &aprime0, rct::key &bprime0
+)
+{
+  // These are used in the inner product rounds
+  constexpr size_t logN = 6; // log2(64)
+  constexpr size_t N = 1 << logN;
+  size_t nprime = N;
+  rct::key tmp{};
+  rct::keyV Gprime(N);
+  rct::keyV Hprime(N);
+
+  rct::keyV & aprime = l;
+  rct::keyV & bprime = r;
+
+  const rct::key yinv = invert(y);
+  rct::key yinvpow = rct::identity();
+  for (size_t i = 0; i < N; ++i)
+  {
+    Gprime[i] = Gi[i];
+    Hprime[i] = scalarmultKey(Hi[i], yinvpow);
+    sc_mul(yinvpow.bytes, yinvpow.bytes, yinv.bytes);
+//    aprime[i] = l[i];
+//    bprime[i] = r[i];
+  }
+
+  int round = 0;
+  rct::keyV w(logN); // this is the challenge x in the inner product protocol
+
+
+  PERF_TIMER_START_BP(PROVE_step4);
+  // PAPER LINE 13
+  while (nprime > 1)
+  {
+    // PAPER LINE 15
+    nprime /= 2;
+
+    // PAPER LINES 16-17
+    rct::key cL = inner_product(slice(aprime, 0, nprime), slice(bprime, nprime, bprime.size()));
+    rct::key cR = inner_product(slice(aprime, nprime, aprime.size()), slice(bprime, 0, nprime));
+
+    // PAPER LINES 18-19
+    L[round] = vector_exponent_custom(
+        slice(Gprime, nprime, Gprime.size()),
+        slice(Hprime, 0, nprime),
+        slice(aprime, 0, nprime),
+        slice(bprime, nprime, bprime.size()));
+
+    sc_mul(tmp.bytes, cL.bytes, x_ip.bytes);
+    rct::addKeys(L[round], L[round], rct::scalarmultKey(rct::H, tmp));
+
+    R[round] = vector_exponent_custom(
+        slice(Gprime, 0, nprime),
+        slice(Hprime, nprime, Hprime.size()),
+        slice(aprime, nprime, aprime.size()),
+        slice(bprime, 0, nprime));
+    sc_mul(tmp.bytes, cR.bytes, x_ip.bytes);
+    rct::addKeys(R[round], R[round], rct::scalarmultKey(rct::H, tmp));
+
+    // PAPER LINES 21-22
+    w[round] = hash_cache_mash(hash_cache, L[round], R[round]);
+
+    // PAPER LINES 24-25
+    const rct::key winv = invert(w[round]);
+    Gprime = hadamard2(
+        vector_scalar2(slice(Gprime, 0, nprime), winv),
+        vector_scalar2(slice(Gprime, nprime, Gprime.size()), w[round]));
+
+    Hprime = hadamard2(
+        vector_scalar2(slice(Hprime, 0, nprime), w[round]),
+        vector_scalar2(slice(Hprime, nprime, Hprime.size()), winv));
+
+    // PAPER LINES 28-29
+    aprime = vector_add(
+        vector_scalar(slice(aprime, 0, nprime), w[round]),
+        vector_scalar(slice(aprime, nprime, aprime.size()), winv));
+
+    bprime = vector_add(
+        vector_scalar(slice(bprime, 0, nprime), winv),
+        vector_scalar(slice(bprime, nprime, bprime.size()), w[round]));
+
+    ++round;
+  }
+  PERF_TIMER_STOP(PROVE_step4);
+  aprime0 = aprime[0];
+  bprime0 = bprime[0];
+}
+
+Bulletproof bulletproof_PROVE_s(const rct::key &sv, const rct::key &gamma){
+  constexpr size_t logN = 6; // log2(64)
+  constexpr size_t N = 1 << logN;
+
+  rct::key V, A, S, T1, T2, taux, mu, t, x_ip, y, hash_cache, aprime0, bprime0;
+  rct::keyV L(logN);
+  rct::keyV R(logN);
+  rct::keyV l, r;
+
+  bulletproof_PROVE_s1(sv, gamma, V, A, S, T1, T2, taux, mu, t, x_ip, y, hash_cache, l, r);
+  bulletproof_PROVE_s2(x_ip, y, hash_cache, l, r, L, R, aprime0, bprime0);
+  return Bulletproof(V, A, S, T1, T2, taux, mu, L, R, aprime0, bprime0, t);
+}
+
+Bulletproof bulletproof_PROVE_s(uint64_t v, const rct::key &gamma) {
+  rct::key sv = rct::zero();
+  sv.bytes[0] = v & 255;
+  sv.bytes[1] = (v >> 8) & 255;
+  sv.bytes[2] = (v >> 16) & 255;
+  sv.bytes[3] = (v >> 24) & 255;
+  sv.bytes[4] = (v >> 32) & 255;
+  sv.bytes[5] = (v >> 40) & 255;
+  sv.bytes[6] = (v >> 48) & 255;
+  sv.bytes[7] = (v >> 56) & 255;
+  return bulletproof_PROVE_s(sv, gamma);
+}
+
+Bulletproof bulletproof_PROVE_s(uint64_t v, uint64_t mask) {
+  rct::key gamma = rct::zero();
+  gamma.bytes[0] = mask & 255;
+  gamma.bytes[1] = (mask >> 8) & 255;
+  gamma.bytes[2] = (mask >> 16) & 255;
+  gamma.bytes[3] = (mask >> 24) & 255;
+  gamma.bytes[4] = (mask >> 32) & 255;
+  gamma.bytes[5] = (mask >> 40) & 255;
+  gamma.bytes[6] = (mask >> 48) & 255;
+  gamma.bytes[7] = (mask >> 56) & 255;
+  return bulletproof_PROVE_s(v, gamma);
+}
+
 /* Given a value v (0..2^N-1) and a mask gamma, construct a range proof */
 Bulletproof bulletproof_PROVE(const rct::key &sv, const rct::key &gamma)
 {

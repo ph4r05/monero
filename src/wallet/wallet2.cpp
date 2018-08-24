@@ -68,6 +68,8 @@ using namespace epee;
 #include "common/dns_utils.h"
 #include "ringct/rctSigs.h"
 #include "ringdb.h"
+#include "device/device_cold.hpp"
+#include "device_trezor/device_trezor.hpp"
 
 extern "C"
 {
@@ -683,6 +685,11 @@ uint32_t get_subaddress_clamped_sum(uint32_t idx, uint32_t extra)
   return idx + extra;
 }
 
+static void setup_shim(hw::wallet_shim * shim, tools::wallet2 * wallet)
+{
+  shim->get_tx_pub_key_from_received_outs = boost::bind(&tools::wallet2::get_tx_pub_key_from_received_outs, wallet, _1);
+}
+
   //-----------------------------------------------------------------
 } //namespace
 
@@ -951,6 +958,28 @@ bool wallet2::get_multisig_seed(epee::wipeable_string& seed, const epee::wipeabl
     }
   }
 
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool wallet2::reconnect_device()
+{
+  bool r = true;
+  hw::device &hwdev = lookup_device(m_device_name);
+  hwdev.set_name(m_device_name);
+  hwdev.set_network_type(m_nettype);
+  r = hwdev.init();
+  if (!r){
+    LOG_PRINT_L2("Could not init device");
+    return false;
+  }
+
+  r = hwdev.connect();
+  if (!r){
+    LOG_PRINT_L2("Could not connect to the device");
+    return false;
+  }
+
+  m_account.set_device(hwdev);
   return true;
 }
 //----------------------------------------------------------------------------------------------------
@@ -2972,6 +3001,9 @@ bool wallet2::store_keys(const std::string& keys_file_name, const epee::wipeable
   value2.SetUint(1);
   json.AddMember("encrypted_secret_keys", value2, json.GetAllocator());
 
+  value.SetString(m_device_name.c_str(), m_device_name.size());
+  json.AddMember("device_name", value, json.GetAllocator());
+
   // Serialize the JSON object
   rapidjson::StringBuffer buffer;
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
@@ -3080,6 +3112,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     m_ignore_fractional_outputs = true;
     m_subaddress_lookahead_major = SUBADDRESS_LOOKAHEAD_MAJOR;
     m_subaddress_lookahead_minor = SUBADDRESS_LOOKAHEAD_MINOR;
+    m_device_name = "";
     m_key_on_device = false;
     encrypted_secret_keys = false;
   }
@@ -3211,8 +3244,15 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     m_subaddress_lookahead_major = field_subaddress_lookahead_major;
     GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, subaddress_lookahead_minor, uint32_t, Uint, false, SUBADDRESS_LOOKAHEAD_MINOR);
     m_subaddress_lookahead_minor = field_subaddress_lookahead_minor;
+
     GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, encrypted_secret_keys, uint32_t, Uint, false, false);
     encrypted_secret_keys = field_encrypted_secret_keys;
+
+    GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, device_name, std::string, String, false, std::string());
+    if (field_device_name_found)
+    {
+      m_device_name = field_device_name;
+    }
   }
   else
   {
@@ -3223,7 +3263,9 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
   r = epee::serialization::load_t_from_binary(m_account, account_data);
   if (r && m_key_on_device) {
     LOG_PRINT_L0("Account on device. Initing device...");
-    hw::device &hwdev = hw::get_device("Ledger");
+    hw::device &hwdev = lookup_device(m_device_name);
+    hwdev.set_name(m_device_name);
+    hwdev.set_network_type(m_nettype);
     hwdev.init();
     hwdev.connect();
     m_account.set_device(hwdev);
@@ -3255,7 +3297,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
   const cryptonote::account_keys& keys = m_account.get_keys();
   hw::device &hwdev = m_account.get_device();
   r = r && hwdev.verify_keys(keys.m_view_secret_key,  keys.m_account_address.m_view_public_key);
-  if(!m_watch_only && !m_multisig)
+  if(!m_watch_only && !m_multisig && hwdev.device_protocol() != hw::device::PROTOCOL_COLD)
     r = r && hwdev.verify_keys(keys.m_spend_secret_key, keys.m_account_address.m_spend_public_key);
   THROW_WALLET_EXCEPTION_IF(!r, error::invalid_password);
 
@@ -3279,7 +3321,7 @@ bool wallet2::verify_password(const epee::wipeable_string& password)
 {
   // this temporary unlocking is necessary for Windows (otherwise the file couldn't be loaded).
   unlock_keys_file();
-  bool r = verify_password(m_keys_file, password, m_watch_only || m_multisig, m_account.get_device(), m_kdf_rounds);
+  bool r = verify_password(m_keys_file, password, m_account.get_device().device_protocol() == hw::device::PROTOCOL_COLD || m_watch_only || m_multisig, m_account.get_device(), m_kdf_rounds);
   lock_keys_file();
   return r;
 }
@@ -3696,12 +3738,18 @@ void wallet2::restore(const std::string& wallet_, const epee::wipeable_string& p
     THROW_WALLET_EXCEPTION_IF(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, m_keys_file);
   }
   m_key_on_device = true;
-  m_account.create_from_device(device_name);
+
+  auto &hwdev = lookup_device(device_name);
+  hwdev.set_name(device_name);
+  hwdev.set_network_type(m_nettype);
+
+  m_account.create_from_device(hwdev);
   m_account_public_address = m_account.get_keys().m_account_address;
   m_watch_only = false;
   m_multisig = false;
   m_multisig_threshold = 0;
   m_multisig_signers.clear();
+  m_device_name = device_name;
   setup_keys(password);
 
   if (!wallet_.empty()) {
@@ -6195,6 +6243,19 @@ crypto::chacha_key wallet2::get_ringdb_key()
     m_ringdb_key = key;
   }
   return *m_ringdb_key;
+}
+
+void wallet2::register_devices(){
+  hw::trezor::register_all();
+}
+
+hw::device& wallet2::lookup_device(const std::string & device_descriptor){
+  if (!m_devices_registered){
+    m_devices_registered = true;
+    register_devices();
+  }
+
+  return hw::get_device(device_descriptor);
 }
 
 bool wallet2::add_rings(const crypto::chacha_key &key, const cryptonote::transaction_prefix &tx)
@@ -8855,6 +8916,84 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const crypton
   return ptx_vector;
 }
 //----------------------------------------------------------------------------------------------------
+bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_set &exported_txs, std::function<bool(const signed_tx_set &)> accept_func){
+  auto & hwdev = get_account().get_device();
+  if (!hwdev.has_tx_cold_sign()){
+    throw std::invalid_argument("Device does not support cold sign protocol");
+  }
+
+  unsigned_tx_set txs;
+  for (auto &tx: ptx_vector)
+  {
+    txs.txes.push_back(get_construction_data_with_decrypted_short_payment_id(tx, m_account.get_device()));
+  }
+  txs.transfers = m_transfers;
+
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
+
+  std::vector<std::string> aux_info;
+  hw::wallet_shim wallet_shim;
+  setup_shim(&wallet_shim, this);
+
+  dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_info);
+
+  LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
+  for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
+
+  if (accept_func && !accept_func(exported_txs))
+  {
+    LOG_PRINT_L1("Transactions rejected by callback");
+    return false;
+  }
+
+  // aux info
+  for (size_t i = 0; i < exported_txs.ptx.size(); ++i){
+    crypto::hash txid;
+    auto & ptx = exported_txs.ptx[i];
+
+    txid = get_transaction_hash(ptx.tx);
+    set_tx_device_aux(txid, aux_info[i]);
+  }
+
+  // import key images
+  if (exported_txs.key_images.size() > m_transfers.size())
+  {
+    LOG_PRINT_L1("More key images returned that we know outputs for");
+    return false;
+  }
+
+  for (size_t i = 0; i < exported_txs.key_images.size(); ++i)
+  {
+    transfer_details &td = m_transfers[i];
+    if (td.m_key_image_known && !td.m_key_image_partial && td.m_key_image != exported_txs.key_images[i])
+      LOG_PRINT_L0("WARNING: imported key image differs from previously known key image at index " << i << ": trusting imported one");
+    td.m_key_image = exported_txs.key_images[i];
+    m_key_images[m_transfers[i].m_key_image] = i;
+    td.m_key_image_known = true;
+    td.m_key_image_partial = false;
+    m_pub_keys[m_transfers[i].get_public_key()] = i;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
+  auto & hwdev = get_account().get_device();
+  if (!hwdev.has_ki_cold_sync()){
+    throw std::invalid_argument("Device does not support cold ki sync protocol");
+  }
+
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
+
+  std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
+  hw::wallet_shim wallet_shim;
+  setup_shim(&wallet_shim, this);
+
+  dev_cold->ki_sync(&wallet_shim, m_transfers, ski);
+
+  return import_key_images(ski, spent, unspent);
+}
+//----------------------------------------------------------------------------------------------------
 void wallet2::get_hard_fork_info(uint8_t version, uint64_t &earliest_height) const
 {
   boost::optional<std::string> result = m_node_rpc_proxy.get_earliest_height(version, earliest_height);
@@ -10006,6 +10145,19 @@ std::string wallet2::get_tx_note(const crypto::hash &txid) const
 {
   std::unordered_map<crypto::hash, std::string>::const_iterator i = m_tx_notes.find(txid);
   if (i == m_tx_notes.end())
+    return std::string();
+  return i->second;
+}
+
+void wallet2::set_tx_device_aux(const crypto::hash &txid, const std::string &aux)
+{
+  m_tx_device[txid] = aux;
+}
+
+std::string wallet2::get_tx_device_aux(const crypto::hash &txid) const
+{
+  std::unordered_map<crypto::hash, std::string>::const_iterator i = m_tx_device.find(txid);
+  if (i == m_tx_device.end())
     return std::string();
   return i->second;
 }

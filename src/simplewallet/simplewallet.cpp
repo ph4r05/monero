@@ -137,6 +137,7 @@ namespace
   const command_line::arg_descriptor<bool> arg_create_address_file = {"create-address-file", sw::tr("Create an address file for new wallets"), false};
   const command_line::arg_descriptor<std::string> arg_subaddress_lookahead = {"subaddress-lookahead", tools::wallet2::tr("Set subaddress lookahead sizes to <major>:<minor>"), ""};
   const command_line::arg_descriptor<bool> arg_use_english_language_names = {"use-english-language-names", sw::tr("Display English language names"), false};
+  const command_line::arg_descriptor<std::string> arg_hw_device = {"hw-device", sw::tr("HW device to use"), ""};
 
   const command_line::arg_descriptor< std::vector<std::string> > arg_command = {"command", ""};
 
@@ -530,7 +531,7 @@ namespace
       LOG_ERROR("internal error: " << e.to_string());
       fail_msg_writer() << tr("internal error: ") << e.what();
     }
-    catch (const std::exception& e)
+    catch (const std::exception& e) // TODO: custom wallet exception handlers
     {
       LOG_ERROR("unexpected error: " << e.what());
       fail_msg_writer() << tr("unexpected error: ") << e.what();
@@ -2193,6 +2194,28 @@ bool simple_wallet::set_ignore_fractional_outputs(const std::vector<std::string>
   return true;
 }
 
+bool simple_wallet::set_device_name(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
+{
+  const auto pwd_container = get_and_verify_password();
+  if (pwd_container)
+  {
+    m_wallet->device_name(args[0]);
+    bool r = false;
+    try {
+      r = m_wallet->reconnect_device();
+      if (!r){
+        fail_msg_writer() << "Device reconnect failed";
+      }
+
+    } catch(std::exception & e){
+      LOG_PRINT_L2(std::string("Device reconnect failed: ") + e.what());
+      fail_msg_writer() << "Device reconnect failed: " << e.what();
+    }
+
+  }
+  return true;
+}
+
 bool simple_wallet::help(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
 {
   if(args.empty())
@@ -2473,6 +2496,14 @@ simple_wallet::simple_wallet()
                            boost::bind(&simple_wallet::import_key_images, this, _1),
                            tr("import_key_images <file>"),
                            tr("Import a signed key images list and verify their spent status."));
+  m_cmd_binder.set_handler("hw_key_images_sync",
+                           boost::bind(&simple_wallet::hw_key_images_sync, this, _1),
+                           tr("hw_key_images_sync"),
+                           tr("Synchronizes key images with the hw wallet."));
+  m_cmd_binder.set_handler("hw_reconnect",
+                           boost::bind(&simple_wallet::hw_reconnect, this, _1),
+                           tr("hw_reconnect"),
+                           tr("Attempts to reconnect HW wallet."));
   m_cmd_binder.set_handler("export_outputs",
                            boost::bind(&simple_wallet::export_outputs, this, _1),
                            tr("export_outputs <file>"),
@@ -2589,6 +2620,7 @@ bool simple_wallet::set_variable(const std::vector<std::string> &args)
     success_msg_writer() << "subaddress-lookahead = " << lookahead.first << ":" << lookahead.second;
     success_msg_writer() << "segregation-height = " << m_wallet->segregation_height();
     success_msg_writer() << "ignore-fractional-outputs = " << m_wallet->ignore_fractional_outputs();
+    success_msg_writer() << "device_name = " << m_wallet->device_name();
     return true;
   }
   else
@@ -2644,6 +2676,7 @@ bool simple_wallet::set_variable(const std::vector<std::string> &args)
     CHECK_SIMPLE_VARIABLE("subaddress-lookahead", set_subaddress_lookahead, tr("<major>:<minor>"));
     CHECK_SIMPLE_VARIABLE("segregation-height", set_segregation_height, tr("unsigned integer"));
     CHECK_SIMPLE_VARIABLE("ignore-fractional-outputs", set_ignore_fractional_outputs, tr("0 or 1"));
+    CHECK_SIMPLE_VARIABLE("device-name", set_device_name, tr("<device_name[:device_spec]>"));
   }
   fail_msg_writer() << tr("set: unrecognized argument(s)");
   return true;
@@ -3234,7 +3267,8 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
     {
       m_wallet_file = m_generate_from_device;
       // create wallet
-      auto r = new_wallet(vm, "Ledger");
+      auto device_desc = command_line::get_arg(vm, arg_hw_device);
+      auto r = new_wallet(vm, device_desc.empty() ? "Ledger" : device_desc);
       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
       password = *r;
       // if no block_height is specified, assume its a new account and start it "now"
@@ -5011,6 +5045,28 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       else
       {
         success_msg_writer(true) << tr("Unsigned transaction(s) successfully written to file: ") << "multisig_monero_tx";
+      }
+    }
+    else if (m_wallet->get_account().get_device().has_tx_cold_sign())
+    {
+      try
+      {
+        tools::wallet2::signed_tx_set signed_tx;
+        if (!m_wallet->cold_sign_tx(ptx_vector, signed_tx, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
+          fail_msg_writer() << tr("Failed to cold sign transaction with HW wallet");
+          return true;
+        }
+
+        commit_or_save(signed_tx.ptx, m_do_not_relay);
+      }
+      catch (const std::exception& e)
+      {
+        handle_transfer_exception(std::current_exception(), is_daemon_trusted());
+      }
+      catch (...)
+      {
+        LOG_ERROR("Unknown error");
+        fail_msg_writer() << tr("unknown error");
       }
     }
     else if (m_wallet->watch_only())
@@ -7657,6 +7713,71 @@ bool simple_wallet::import_key_images(const std::vector<std::string> &args)
   return true;
 }
 //----------------------------------------------------------------------------------------------------
+bool simple_wallet::hw_key_images_sync(const std::vector<std::string> &args)
+{
+  if (!m_wallet->key_on_device())
+  {
+    fail_msg_writer() << tr("command only supported by HW wallet");
+    return true;
+  }
+  if (!m_wallet->get_account().get_device().has_ki_cold_sync())
+  {
+    fail_msg_writer() << tr("hw wallet does not support cold KI sync");
+    return true;
+  }
+  if (!is_daemon_trusted())
+  {
+    fail_msg_writer() << tr("this command requires a trusted daemon. Enable with --trusted-daemon");
+    return true;
+  }
+
+  LOCK_IDLE_SCOPE();
+  try
+  {
+    uint64_t spent = 0, unspent = 0;
+    uint64_t height = m_wallet->cold_key_image_sync(spent, unspent);
+    if (height > 0)
+    {
+      success_msg_writer() << "Signed key images imported to height " << height << ", "
+          << print_money(spent) << " spent, " << print_money(unspent) << " unspent";
+    } else {
+      fail_msg_writer() << "Failed to import key images";
+    }
+  }
+  catch (const std::exception &e)
+  {
+    fail_msg_writer() << "Failed to import key images: " << e.what();
+    return true;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
+bool simple_wallet::hw_reconnect(const std::vector<std::string> &args)
+{
+  if (!m_wallet->key_on_device())
+  {
+    fail_msg_writer() << tr("command only supported by HW wallet");
+    return true;
+  }
+
+  LOCK_IDLE_SCOPE();
+  try
+  {
+    bool r = m_wallet->reconnect_device();
+    if (!r){
+      fail_msg_writer() << "Failed to reconnect device";
+    }
+  }
+  catch (const std::exception &e)
+  {
+    fail_msg_writer() << "Failed to reconnect device: " << e.what();
+    return true;
+  }
+
+  return true;
+}
+//----------------------------------------------------------------------------------------------------
 bool simple_wallet::export_outputs(const std::vector<std::string> &args)
 {
   if (m_wallet->key_on_device())
@@ -7961,6 +8082,7 @@ int main(int argc, char* argv[])
   command_line::add_arg(desc_params, arg_create_address_file);
   command_line::add_arg(desc_params, arg_subaddress_lookahead);
   command_line::add_arg(desc_params, arg_use_english_language_names);
+  command_line::add_arg(desc_params, arg_hw_device);
 
   po::positional_options_description positional_options;
   positional_options.add(arg_command.name, -1);

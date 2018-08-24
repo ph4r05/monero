@@ -87,6 +87,7 @@ namespace rct {
     //verRange verifies that \sum Ci = C and that each Ci is a commitment to 0 or 2^i
     rangeSig proveRange(key & C, key & mask, const xmr_amount & amount);
     bool verRange(const key & C, const rangeSig & as);
+    bool verBulletproof(const Bulletproof &proof);
 
     //Ring-ct MG sigs
     //Prove:
@@ -133,7 +134,7 @@ namespace rct {
     xmr_amount decodeRct(const rctSig & rv, const key & sk, unsigned int i, hw::device &hwdev);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, key & mask, hw::device &hwdev);
     xmr_amount decodeRctSimple(const rctSig & rv, const key & sk, unsigned int i, hw::device &hwdev);
-
+    key get_pre_mlsag_hash(const rctSig &rv, hw::device &hwdev);
     bool signMultisig(rctSig &rv, const std::vector<unsigned int> &indices, const keyV &k, const multisig_out &msout, const key &secret_key);
 }
 #endif  /* RCTSIGS_H */
