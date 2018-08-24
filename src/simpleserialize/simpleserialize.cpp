@@ -62,6 +62,8 @@
 #include "ringct/rctSigs.h"
 #include "multisig/multisig.h"
 #include "wallet/wallet_args.h"
+#include "ringct/rctTypes.h"
+#include "ringct/bulletproofs.h"
 #include <stdexcept>
 
 #ifdef HAVE_READLINE
@@ -95,11 +97,96 @@ namespace
 //  }
 }
 
+static std::string dump_key(const void * buff, size_t len=32)
+{
+  std::stringstream os;
+  const auto * src = (const uint8_t*)buff;
 
+  os << "bytes([";
+  for(size_t i=0; i<len; ++i){
+    os << "0x" << setfill('0') << setw(2) << hex << static_cast<unsigned>(src[i] & 0xff);
+    if (i+1 < len) os << ", ";
+  }
+  os << "])";
+  return os.str();
+}
+
+static std::string dump_key_hex(const void * buff, size_t len=32)
+{
+  std::stringstream os;
+  const auto * src = (const uint8_t*)buff;
+
+  os << "unhexlify(b\"";
+  for(size_t i=0; i<len; ++i){
+    os << setfill('0') << setw(2) << hex << static_cast<unsigned>(src[i] & 0xff);
+  }
+  os << "\")";
+  return os.str();
+}
+
+static void dump_bp(const rct::Bulletproof &proof){
+  cout << "Bulletproof(" << endl;
+  cout << "    V=[" << endl;
+  for (auto & cur : proof.V){
+    cout << dump_key_hex(cur.bytes);
+    cout << ", " << endl;
+  }
+  cout << "], " << endl;
+  cout << "    A=" << dump_key_hex(proof.A.bytes) << ", " << endl
+       << "    S=" << dump_key_hex(proof.S.bytes) << ", " << endl
+       << "    T1=" << dump_key_hex(proof.T1.bytes) << ", " << endl
+       << "    T2=" << dump_key_hex(proof.T2.bytes) << ", " << endl
+       << "    taux=" << dump_key_hex(proof.taux.bytes) << ", " << endl
+       << "    mu=" << dump_key_hex(proof.mu.bytes) << ", " << endl
+       << "    L=[";
+  for (auto & cur : proof.L){
+    cout << dump_key_hex(cur.bytes);
+    cout << ", " << endl;
+  }
+  cout << "    ]," << endl
+      << "    R=[";
+  for (auto & cur : proof.R){
+    cout << dump_key_hex(cur.bytes);
+    cout << ", " << endl;
+  }
+  cout << "    ]," << endl
+      << "    a=" << dump_key_hex(proof.a.bytes) << ", " << endl
+      << "    b=" << dump_key_hex(proof.b.bytes) << ", " << endl
+      << "    t=" << dump_key_hex(proof.t.bytes) << "" << endl
+      << ")" << endl;
+}
+
+static rct::key from_uint(uint64_t v){
+  rct::key sv = rct::zero();
+  sv.bytes[0] = v & 255;
+  sv.bytes[1] = (v >> 8) & 255;
+  sv.bytes[2] = (v >> 16) & 255;
+  sv.bytes[3] = (v >> 24) & 255;
+  sv.bytes[4] = (v >> 32) & 255;
+  sv.bytes[5] = (v >> 40) & 255;
+  sv.bytes[6] = (v >> 48) & 255;
+  sv.bytes[7] = (v >> 56) & 255;
+  return sv;
+}
 
 //----------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
+  auto bp = bulletproof_PROVE(from_uint(123), from_uint(456));
+  dump_bp(bp);
+  bulletproof_VERIFY(bp);
+
+  std::vector<uint64_t> vals;
+  vals.push_back(123);
+  vals.push_back(768);
+
+  rct::keyV gammav;
+  gammav.push_back(from_uint(456));
+  gammav.push_back(from_uint(901));
+
+  auto proof2 = rct::bulletproof_PROVE(vals, gammav);
+  dump_bp(proof2);
+
   std::ostringstream oss;
   boost::archive::portable_binary_oarchive arx(oss);
 

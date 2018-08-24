@@ -43,6 +43,7 @@ monero_add_executable(simpleserialize
 target_link_libraries(simpleserialize
   PRIVATE
     wallet
+    ringct
     rpc_base
     cryptonote_core
     cncrypto
