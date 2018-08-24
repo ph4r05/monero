@@ -57,6 +57,7 @@
 #include "bulletproof.h"
 #include "crypto_ops.h"
 #include "multiexp.h"
+#include "equality.h"
 
 namespace po = boost::program_options;
 
@@ -534,6 +535,11 @@ int main(int argc, char** argv)
   TEST_PERFORMANCE3(filter, p, test_multiexp, multiexp_pippenger, 4096, 8);
   TEST_PERFORMANCE3(filter, p, test_multiexp, multiexp_pippenger, 4096, 9);
 #endif
+
+  TEST_PERFORMANCE2(filter, test_equality, memcmp32, true);
+  TEST_PERFORMANCE2(filter, test_equality, memcmp32, false);
+  TEST_PERFORMANCE2(filter, test_equality, verify32, false);
+  TEST_PERFORMANCE2(filter, test_equality, verify32, false);
 
   std::cout << "Tests finished. Elapsed time: " << timer.elapsed_ms() / 1000 << " sec" << std::endl;
 
