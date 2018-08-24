@@ -287,19 +287,59 @@ static rct::keyV vector_dup(const rct::key &x, size_t N)
   return rct::keyV(N, x);
 }
 
+static rct::key sm(rct::key y, int n, const rct::key &x)
+{
+  while (n--)
+    sc_mul(y.bytes, y.bytes, y.bytes);
+  sc_mul(y.bytes, y.bytes, x.bytes);
+  return y;
+}
+
 /* Compute the inverse of a scalar, the naive way */
 static rct::key invert(const rct::key &x)
 {
-  static const rct::key l_minus_2 = { {0xeb, 0xd3, 0xf5, 0x5c, 0x1a, 0x63, 0x12, 0x58, 0xd6, 0x9c, 0xf7, 0xa2, 0xde, 0xf9, 0xde, 0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10 } };
+  rct::key _1, _10, _100, _11, _101, _111, _1001, _1011, _1111;
 
-  rct::key inv = x;
-  rct::key tmp = x;
-  for (int n = 1; n < 253; ++n)
-  {
-    sc_mul(tmp.bytes, tmp.bytes, tmp.bytes);
-    if (l_minus_2[n>>3] & (1<<(n&7)))
-      sc_mul(inv.bytes, inv.bytes, tmp.bytes);
-  }
+  _1 = x;
+  sc_mul(_10.bytes, _1.bytes, _1.bytes);
+  sc_mul(_100.bytes, _10.bytes, _10.bytes);
+  sc_mul(_11.bytes, _10.bytes, _1.bytes);
+  sc_mul(_101.bytes, _10.bytes, _11.bytes);
+  sc_mul(_111.bytes, _10.bytes, _101.bytes);
+  sc_mul(_1001.bytes, _10.bytes, _111.bytes);
+  sc_mul(_1011.bytes, _10.bytes, _1001.bytes);
+  sc_mul(_1111.bytes, _100.bytes, _1011.bytes);
+
+  rct::key inv;
+  sc_mul(inv.bytes, _1111.bytes, _1.bytes);
+
+  inv = sm(inv, 123 + 3, _101);
+  inv = sm(inv, 2 + 2, _11);
+  inv = sm(inv, 1 + 4, _1111);
+  inv = sm(inv, 1 + 4, _1111);
+  inv = sm(inv, 4, _1001);
+  inv = sm(inv, 2, _11);
+  inv = sm(inv, 1 + 4, _1111);
+  inv = sm(inv, 1 + 3, _101);
+  inv = sm(inv, 3 + 3, _101);
+  inv = sm(inv, 3, _111);
+  inv = sm(inv, 1 + 4, _1111);
+  inv = sm(inv, 2 + 3, _111);
+  inv = sm(inv, 2 + 2, _11);
+  inv = sm(inv, 1 + 4, _1011);
+  inv = sm(inv, 2 + 4, _1011);
+  inv = sm(inv, 6 + 4, _1001);
+  inv = sm(inv, 2 + 2, _11);
+  inv = sm(inv, 3 + 2, _11);
+  inv = sm(inv, 3 + 2, _11);
+  inv = sm(inv, 1 + 4, _1001);
+  inv = sm(inv, 1 + 3, _111);
+  inv = sm(inv, 2 + 4, _1111);
+  inv = sm(inv, 1 + 4, _1011);
+  inv = sm(inv, 3, _101);
+  inv = sm(inv, 2 + 4, _1111);
+  inv = sm(inv, 3, _101);
+  inv = sm(inv, 1 + 2, _11);
 
 #ifdef DEBUG_BP
   rct::key tmp;
@@ -307,6 +347,34 @@ static rct::key invert(const rct::key &x)
   CHECK_AND_ASSERT_THROW_MES(tmp == rct::identity(), "invert failed");
 #endif
   return inv;
+}
+
+static rct::keyV invert(rct::keyV x)
+{
+  rct::keyV scratch;
+  scratch.reserve(x.size());
+
+  rct::key acc = rct::identity();
+  for (size_t n = 0; n < x.size(); ++n)
+  {
+    scratch.push_back(acc);
+    if (n == 0)
+      acc = x[0];
+    else
+      sc_mul(acc.bytes, acc.bytes, x[n].bytes);
+  }
+
+  acc = invert(acc);
+
+  rct::key tmp;
+  for (int i = x.size(); i-- > 0; )
+  {
+    sc_mul(tmp.bytes, acc.bytes, x[i].bytes);
+    sc_mul(x[i].bytes, acc.bytes, scratch[i].bytes);
+    acc = tmp;
+  }
+
+  return x;
 }
 
 /* Compute the slice of a vector */
@@ -814,10 +882,14 @@ bool bulletproof_VERIFY(const std::vector<const Bulletproof*> &proofs)
     rct::key ypow = rct::identity();
 
     PERF_TIMER_START_BP(VERIFY_line_24_25_invert);
-    const rct::key yinv = invert(y);
-    rct::keyV winv(rounds);
-    for (size_t i = 0; i < rounds; ++i)
-      winv[i] = invert(w[i]);
+    rct::keyV inv_in;
+    inv_in.reserve(w.size() + 1);
+    for (const auto &x: w)
+      inv_in.push_back(x);
+    inv_in.push_back(y);
+    rct::keyV winv = invert(inv_in);
+    const rct::key yinv = winv.back();
+    winv.resize(winv.size() - 1);
     PERF_TIMER_STOP(VERIFY_line_24_25_invert);
 
     // precalc
