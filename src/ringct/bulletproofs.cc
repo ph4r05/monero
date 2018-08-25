@@ -782,7 +782,7 @@ Bulletproof bulletproof_PROVE(const rct::keyV &sv, const rct::keyV &gamma)
 
 try_again:
   rct::key hash_cache = rct::hash_to_scalar(V);
-  
+
   PERF_TIMER_START_BP(PROVE_step1);
   // PAPER LINES 38-39
   rct::key alpha = rct::skGen();
