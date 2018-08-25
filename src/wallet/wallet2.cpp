@@ -750,7 +750,7 @@ bool wallet2::has_stagenet_option(const boost::program_options::variables_map& v
   return command_line::get_arg(vm, options().stagenet);
 }
 
-static std::string wallet2::device_name_option(const boost::program_options::variables_map& vm)
+std::string wallet2::device_name_option(const boost::program_options::variables_map& vm)
 {
   return command_line::get_arg(vm, options().hw_device);
 }
