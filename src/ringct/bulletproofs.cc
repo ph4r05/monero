@@ -760,8 +760,6 @@ Bulletproof bulletproof_PROVE(const rct::keyV &sv, const rct::keyV &gamma)
   }
   PERF_TIMER_STOP(PROVE_aLaR);
 
-  rct::key hash_cache = rct::hash_to_scalar(V);
-
   // DEBUG: Test to ensure this recovers the value
 #ifdef DEBUG_BP
   for (size_t j = 0; j < M; ++j)
@@ -783,6 +781,8 @@ Bulletproof bulletproof_PROVE(const rct::keyV &sv, const rct::keyV &gamma)
 #endif
 
 try_again:
+  rct::key hash_cache = rct::hash_to_scalar(V);
+
   PERF_TIMER_START_BP(PROVE_step1);
   // PAPER LINES 38-39
   rct::key alpha = rct::skGen();
