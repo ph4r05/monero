@@ -41,6 +41,8 @@ namespace hw {
     /*  SETUP                                                                  */
     /* ======================================================================= */
 
+    static std::unique_ptr<device_registry> registry;
+
     device_registry::device_registry(){
         hw::core::register_all(registry);
         #ifdef HAVE_PCSC
@@ -68,16 +70,16 @@ namespace hw {
 
         auto device = registry.find(device_descriptor_lookup);
         if (device == registry.end()) {
-            MERROR("device not found in registry: '" << device_descriptor << "'\n" << "known devices:");
+            MERROR("Device not found in registry: '" << device_descriptor << "'. Known devices: ");
             for( const auto& sm_pair : registry ) {
                 MERROR(" - " << sm_pair.first);
             }
-            throw std::runtime_error("device not found: "+ device_descriptor);
+            throw std::runtime_error("device not found: " + device_descriptor);
         }
         return *device->second;
     }
 
-    device& get_device(const std::string device_descriptor) {
+    device& get_device(const std::string & device_descriptor) {
         if (!registry){
             registry.reset(new device_registry());
         }

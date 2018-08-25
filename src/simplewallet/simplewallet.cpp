@@ -3262,8 +3262,7 @@ bool simple_wallet::init(const boost::program_options::variables_map& vm)
     {
       m_wallet_file = m_generate_from_device;
       // create wallet
-      auto device_desc = command_line::get_arg(vm, arg_hw_device);
-      auto r = new_wallet(vm, device_desc.empty() ? "Ledger" : device_desc);
+      auto r = new_wallet(vm);
       CHECK_AND_ASSERT_MES(r, false, tr("account creation failed"));
       password = *r;
       // if no block_height is specified, assume its a new account and start it "now"
@@ -3690,8 +3689,8 @@ boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::pr
 }
 
 //----------------------------------------------------------------------------------------------------
-boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::program_options::variables_map& vm,
-                               const std::string &device_name) {
+boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::program_options::variables_map& vm)
+{
   auto rc = tools::wallet2::make_new(vm, false, password_prompter);
   m_wallet = std::move(rc.first);
   if (!m_wallet)
@@ -3710,9 +3709,10 @@ boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::pr
   if (m_restore_height)
     m_wallet->set_refresh_from_block_height(m_restore_height);
 
+  auto device_desc = tools::wallet2::device_name_option(vm);
   try
   {
-    m_wallet->restore(m_wallet_file, std::move(rc.second).password(), device_name);
+    m_wallet->restore(m_wallet_file, std::move(rc.second).password(), device_desc.empty() ? "Ledger" : device_desc);
     message_writer(console_color_white, true) << tr("Generated new wallet on hw device: ")
       << m_wallet->get_account().get_public_address_str(m_wallet->nettype());
   }
@@ -7735,12 +7735,12 @@ bool simple_wallet::hw_reconnect(const std::vector<std::string> &args)
   {
     bool r = m_wallet->reconnect_device();
     if (!r){
-      fail_msg_writer() << "Failed to reconnect device";
+      fail_msg_writer() << tr("Failed to reconnect device");
     }
   }
   catch (const std::exception &e)
   {
-    fail_msg_writer() << "Failed to reconnect device: " << e.what();
+    fail_msg_writer() << tr("Failed to reconnect device: ") << tr(e.what());
     return true;
   }
 
