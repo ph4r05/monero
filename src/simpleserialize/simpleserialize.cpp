@@ -172,7 +172,14 @@ static rct::key from_uint(uint64_t v){
 //----------------------------------------------------------------------------------------------------
 int main(int argc, char* argv[])
 {
-  auto bp = bulletproof_PROVE(from_uint(123), from_uint(456));
+  std::vector<rct::key> amounts;
+  std::vector<rct::key> masks;
+  for(auto i = 0; i<4; i++){
+    amounts.push_back(from_uint(i));
+    masks.push_back(rct::skGen());
+  }
+
+  auto bp = bulletproof_PROVE(amounts, masks);
   dump_bp(bp);
   bulletproof_VERIFY(bp);
 
