@@ -16,6 +16,8 @@ namespace hw{
 namespace trezor{
 namespace protocol{
 
+#define BULLETPROOF_MAX_OUTPUTS 16
+
   std::string key_to_string(const ::crypto::ec_point & key){
     return std::string(key.data, 32);
   }
@@ -249,6 +251,45 @@ namespace tx {
     }
   }
 
+  static unsigned get_rsig_type(bool use_bulletproof, size_t num_outputs){
+    if (!use_bulletproof){
+      return 0;  // Borromean
+    } else if (num_outputs > 16){
+      return 2;  // Multioutputs
+    } else {
+      return 3;  // Padded
+    }
+  }
+
+  static void generate_rsig_batch_sizes(std::vector<uint64_t> batches, unsigned rsig_type, size_t num_outputs){
+    size_t amount_batched = 0;
+
+    while(amount_batched < num_outputs){
+      if (rsig_type == 0 || rsig_type == 1) {  // Borromean, BP per output
+        batches.push_back(1);
+        amount_batched += 1;
+
+      } else if (rsig_type == 3){  // BP padded
+        if (num_outputs > 16){
+          throw std::invalid_argument("BP padded can support only BULLETPROOF_MAX_OUTPUTS statements");
+        }
+        batches.push_back(num_outputs);
+        amount_batched += num_outputs;
+
+      } else if (rsig_type == 2){  // Multi output
+        size_t batch_size = 1;
+        while (batch_size * 2 + amount_batched <= num_outputs && batch_size * 2 <= BULLETPROOF_MAX_OUTPUTS){
+          batch_size *= 2;
+        }
+        batches.push_back(batch_size);
+        amount_batched += batch_size;
+
+      } else {
+        throw std::invalid_argument("Unknown rsig type");
+      }
+    }
+  }
+
   std::shared_ptr<messages::monero::MoneroTransactionInitRequest> Signer::step_init(){
     // extract payment ID from construction data
     auto & tsx_data = m_ct.tsx_data;
@@ -263,9 +304,17 @@ namespace tx {
     tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size()));
     tsx_data.set_account(tx.subaddr_account);
     assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
-    tsx_data.set_is_bulletproof(tx.use_bulletproofs);
     tsx_data.set_is_multisig(false);
     tsx_data.set_exp_tx_prefix_hash("");
+
+    // Rsig decision
+    // TODO: when BP aggregation is merged adapt to rct::RangeProofType
+    auto rsig_data = tsx_data.mutable_rsig_data();
+    m_ct.rsig_type = get_rsig_type(tx.use_bulletproofs, tx.splitted_dsts.size());
+    rsig_data->set_rsig_type(m_ct.rsig_type);
+
+    generate_rsig_batch_sizes(m_ct.grouping_vct, m_ct.rsig_type, tx.splitted_dsts.size());
+    assign_to_repeatable(rsig_data->mutable_grouping(), m_ct.grouping_vct.begin(), m_ct.grouping_vct.end());
 
     translate_dst_entry(tsx_data.mutable_change_dts(), std::addressof(tx.change_dts));
     for(auto & cur : tx.splitted_dsts){
@@ -295,6 +344,10 @@ namespace tx {
 
   void Signer::step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack){
     m_ct.in_memory = ack->in_memory();
+    if (ack->has_rsig_data()){
+      m_ct.rsig_param = std::make_shared<MoneroRsigData>(ack->rsig_data());
+    }
+
     assign_from_repeatable(std::addressof(m_ct.tx_out_entr_hmacs), ack->hmacs().begin(), ack->hmacs().end());
   }
 
@@ -389,12 +442,72 @@ namespace tx {
     }
   }
 
+  std::shared_ptr<messages::monero::MoneroTransactionAllInputsSetRequest> Signer::step_all_inputs_set(){
+    return std::make_shared<messages::monero::MoneroTransactionAllInputsSetRequest>();
+  }
+
+  void Signer::step_all_inputs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllInputsSetAck> ack){
+    if (is_offloading()){
+      // If offloading, expect rsig configuration.
+      if (!ack->has_rsig_data()){
+        throw exc::ProtocolException("Rsig offloading requires rsig param");
+      }
+
+      auto & rsig_data = ack->rsig_data();
+      if (!rsig_data.has_mask()){
+        throw exc::ProtocolException("Gamma masks not present in offloaded version");
+      }
+
+      auto & mask = rsig_data.mask();
+      if (mask.size() != 32 * num_outputs()){
+        throw exc::ProtocolException("Invalid number of gamma masks");
+      }
+
+      for(size_t idx=0, c=0; idx < mask.size(); idx += 32, ++c){
+        auto sub = mask.substr(idx, idx + 32);
+        rct::key mask{};
+        memcpy(mask.bytes, sub.data(), 32);
+        m_ct.rsig_gamma.emplace_back(mask);
+      }
+    }
+  }
 
   std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> Signer::step_set_output(size_t idx){
     m_ct.cur_output_idx = idx;
+    m_ct.cur_output_in_batch_idx += 1;   // assumes consequential call to step_set_output()
+
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
-    translate_dst_entry(res->mutable_dst_entr(), std::addressof(m_ct.tx_data.splitted_dsts[idx]));
+    auto & cur_dst = m_ct.tx_data.splitted_dsts[idx];
+    translate_dst_entry(res->mutable_dst_entr(), std::addressof(cur_dst));
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
+
+    // Range sig offloading to the host
+    if (!is_offloading()) {
+      return res;
+    }
+
+    if (m_ct.grouping_vct[m_ct.cur_batch_idx] > m_ct.cur_output_in_batch_idx) {
+      return res;
+    }
+
+    auto rsig_data = res->mutable_rsig_data();
+    if (!is_bulletproof()){
+      if (m_ct.grouping_vct[m_ct.cur_batch_idx] > 1){
+        throw std::invalid_argument("Borromean cannot batch outputs");
+      }
+
+      rct::key C{}, mask = m_ct.rsig_gamma[idx];
+      auto genRsig = rct::proveRange(C, mask, cur_dst.amount);  // TODO: rsig with given mask
+      auto serRsig = cn_serialize(genRsig);
+      rsig_data->set_rsig(serRsig);
+
+    } else {
+      throw exc::ProtocolException("Not implemented"); // TODO: fix when bp multi is merged
+
+    }
+
+    m_ct.cur_batch_idx += 1;
+    m_ct.cur_output_in_batch_idx = 0;
     return res;
   }
 
@@ -404,17 +517,13 @@ namespace tx {
     rct::Bulletproof bproof{};
     rct::ctkey out_pk{};
     rct::ecdhTuple ecdh{};
+    const bool has_rsig = ack->has_rsig_data()
+        && ack->rsig_data().has_rsig()
+        && ack->rsig_data().rsig().size() > 0;
+    auto rsig_data = ack->has_rsig_data() ? std::addressof(ack->rsig_data()) : nullptr;
 
     if (!cn_deserialize(ack->tx_out(), tx_out)){
       throw exc::ProtocolException("Cannot deserialize vout[i]");
-    }
-
-    if (!is_req_bulletproof() && !cn_deserialize(ack->rsig(), range_sig)){
-      throw exc::ProtocolException("Cannot deserialize rangesig");
-    }
-
-    if (is_req_bulletproof() && !cn_deserialize(ack->rsig(), bproof)){
-      throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
     }
 
     if (!cn_deserialize(ack->out_pk(), out_pk)){
@@ -423,6 +532,14 @@ namespace tx {
 
     if (!cn_deserialize(ack->ecdh_info(), ecdh)){
       throw exc::ProtocolException("Cannot deserialize ecdhtuple");
+    }
+
+    if (has_rsig && !is_req_bulletproof() && !cn_deserialize(rsig_data->rsig(), range_sig)){
+      throw exc::ProtocolException("Cannot deserialize rangesig");
+    }
+
+    if (has_rsig && is_req_bulletproof() && !cn_deserialize(rsig_data->rsig(), bproof)){
+      throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
     }
 
     m_ct.tx.vout.emplace_back(tx_out);
@@ -448,6 +565,14 @@ namespace tx {
     }
   }
 
+  std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> step_rsig(){
+    throw exc::ProtocolException("Not implemented");
+  }
+
+  void step_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionRangeSigAck> ack){
+    throw exc::ProtocolException("Not implemented");
+  }
+
   std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> Signer::step_all_outs_set(){
     return std::make_shared<messages::monero::MoneroTransactionAllOutSetRequest>();
   }
@@ -466,7 +591,7 @@ namespace tx {
       m_ct.tx.extra.push_back(static_cast<uint8_t>(extra_data[i]));
     }
 
-    ::crypto::hash tx_prefix_hash;
+    ::crypto::hash tx_prefix_hash{};
     cryptonote::get_transaction_prefix_hash(m_ct.tx, tx_prefix_hash);
     m_ct.tx_prefix_hash = key_to_string(tx_prefix_hash);
     if (!crypto::ct_equal(tx_prefix_hash.data, ack->tx_prefix_hash().data(), 32)){
@@ -493,10 +618,12 @@ namespace tx {
       m_ct.rv->mixRing[0].resize(num_sources);
     }
 
-    // Range proof
-    for(size_t i = 0; i < m_ct.tx_out_rsigs.size(); ++i){
+    for(size_t i = 0; i < m_ct.tx_out_ecdh.size(); ++i){
       m_ct.rv->outPk.push_back(m_ct.tx_out_pk[i]);
       m_ct.rv->ecdhInfo.push_back(m_ct.tx_out_ecdh[i]);
+    }
+
+    for(size_t i = 0; i < m_ct.tx_out_rsigs.size(); ++i){
       if (is_bulletproof()){
         m_ct.rv->p.bulletproofs.push_back(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs[i]));
       } else {

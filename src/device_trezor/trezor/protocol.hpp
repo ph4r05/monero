@@ -52,6 +52,17 @@ namespace protocol{
     return cn_deserialize(str.data(), str.size(), dst);
   }
 
+  template<typename T>
+  std::string cn_serialize(T & obj){
+    std::ostringstream oss;
+    binary_archive<true> oar(oss);
+    bool success = ::serialization::serialize(oar, obj);
+    if (!success){
+      throw exc::EncodingException("Could not CN serialize given object");
+    }
+    return oss.str();
+  }
+
 // Crypto / encryption
 namespace crypto {
   /**
@@ -127,6 +138,7 @@ namespace tx {
   using MoneroMultisigKLRki = messages::monero::MoneroTransactionSourceEntry_MoneroMultisigKLRki;
   using MoneroOutputEntry = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry;
   using MoneroRctKey = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry_MoneroRctKey;
+  using MoneroRsigData = messages::monero::MoneroTransactionRsigData;
 
   using tx_construction_data = tools::wallet2::tx_construction_data;
   using unsigned_tx_set = tools::wallet2::unsigned_tx_set;
@@ -148,8 +160,13 @@ namespace tx {
     tx_construction_data tx_data;
     cryptonote::transaction tx;
     bool in_memory;
+    unsigned rsig_type;
+    std::vector<uint64_t> grouping_vct;
+    std::shared_ptr<MoneroRsigData> rsig_param;
     size_t cur_input_idx;
     size_t cur_output_idx;
+    size_t cur_batch_idx;
+    size_t cur_output_in_batch_idx;
 
     std::vector<std::string> tx_in_hmacs;
     std::vector<std::string> tx_out_entr_hmacs;
@@ -164,6 +181,7 @@ namespace tx {
     std::vector<std::string> pseudo_outs_hmac;
     std::vector<std::string> couts;
     std::vector<std::string> couts_dec;
+    std::vector<rct::key> rsig_gamma;
     std::string tx_prefix_hash;
     std::string enc_salt1;
     std::string enc_salt2;
@@ -204,8 +222,14 @@ namespace tx {
     std::shared_ptr<messages::monero::MoneroTransactionInputViniRequest> step_set_vini_input(size_t idx);
     void step_set_vini_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputViniAck> ack);
 
+    std::shared_ptr<messages::monero::MoneroTransactionAllInputsSetRequest> step_all_inputs_set();
+    void step_all_inputs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllInputsSetAck> ack);
+
     std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> step_set_output(size_t idx);
     void step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack);
+
+    std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> step_rsig();
+    void step_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionRangeSigAck> ack);
 
     std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> step_all_outs_set();
     void step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack);
@@ -230,7 +254,7 @@ namespace tx {
         throw std::invalid_argument("RV not initialized");
       }
       auto tp = m_ct.rv->type;
-      return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;
+      return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;  // TODO: fix after BP multi merge
     }
 
     bool is_req_bulletproof() const {
@@ -242,7 +266,19 @@ namespace tx {
         throw std::invalid_argument("RV not initialized");
       }
       auto tp = m_ct.rv->type;
-      return tp == rct::RCTTypeSimpleBulletproof || tp == rct::RCTTypeFullBulletproof;
+      return tp == rct::RCTTypeSimpleBulletproof || tp == rct::RCTTypeFullBulletproof;  // TODO: fix after BP multi merge
+    }
+
+    bool is_offloading() const {
+      return m_ct.rsig_param && m_ct.rsig_param->offload_type() != 0;
+    }
+
+    size_t num_outputs() const {
+      return m_ct.tx_data.splitted_dsts.size();
+    }
+
+    size_t num_inputs() const {
+      return m_ct.tx_data.sources.size();
     }
 
     const TData & tdata() const {
