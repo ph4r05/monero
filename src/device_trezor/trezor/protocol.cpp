@@ -262,7 +262,7 @@ namespace tx {
     }
   }
 
-  static void generate_rsig_batch_sizes(std::vector<uint64_t> batches, unsigned rsig_type, size_t num_outputs){
+  static void generate_rsig_batch_sizes(std::vector<uint64_t> &batches, unsigned rsig_type, size_t num_outputs){
     size_t amount_batched = 0;
 
     while(amount_batched < num_outputs){

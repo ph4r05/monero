@@ -329,7 +329,8 @@ namespace trezor {
       auto all_inputs_set = signer->step_all_inputs_set();
       req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
       req_msg->mutable_all_in_set()->CopyFrom(*all_inputs_set);
-      auto ack_all_inputs = this->client_exchange<messages::monero::MoneroTransactionAllInputsSetRequest>(req_msg);
+      auto ack_all_inputs = this->client_exchange<messages::monero::MoneroTransactionAllInputsSetAck>(req_msg);
+      signer->step_all_inputs_set_ack(ack_all_inputs);
 
       // Step: outputs
       for(size_t cur_dst = 0; cur_dst < num_outputs; ++cur_dst){
