@@ -42,6 +42,7 @@ class MoneroTransactionSourceEntry_MoneroOutputEntry_MoneroRctKey;
 class MoneroTransactionSourceEntry_MoneroMultisigKLRki;
 class MoneroTransactionDestinationEntry;
 class MoneroTransactionDestinationEntry_MoneroAccountPublicAddress;
+class MoneroTransactionRsigData;
 class MoneroGetAddress;
 class MoneroAddress;
 class MoneroGetWatchKey;
@@ -55,8 +56,12 @@ class MoneroTransactionInputsPermutationRequest;
 class MoneroTransactionInputsPermutationAck;
 class MoneroTransactionInputViniRequest;
 class MoneroTransactionInputViniAck;
+class MoneroTransactionAllInputsSetRequest;
+class MoneroTransactionAllInputsSetAck;
 class MoneroTransactionSetOutputRequest;
 class MoneroTransactionSetOutputAck;
+class MoneroTransactionRangeSigRequest;
+class MoneroTransactionRangeSigAck;
 class MoneroTransactionAllOutSetRequest;
 class MoneroTransactionAllOutSetAck;
 class MoneroTransactionAllOutSetAck_MoneroRingCtSig;
@@ -793,6 +798,211 @@ class MoneroTransactionDestinationEntry : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class MoneroTransactionRsigData : public ::google::protobuf::Message {
+ public:
+  MoneroTransactionRsigData();
+  virtual ~MoneroTransactionRsigData();
+
+  MoneroTransactionRsigData(const MoneroTransactionRsigData& from);
+
+  inline MoneroTransactionRsigData& operator=(const MoneroTransactionRsigData& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MoneroTransactionRsigData& default_instance();
+
+  void Swap(MoneroTransactionRsigData* other);
+
+  // implements Message ----------------------------------------------
+
+  MoneroTransactionRsigData* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MoneroTransactionRsigData& from);
+  void MergeFrom(const MoneroTransactionRsigData& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional uint32 version = 1;
+  inline bool has_version() const;
+  inline void clear_version();
+  static const int kVersionFieldNumber = 1;
+  inline ::google::protobuf::uint32 version() const;
+  inline void set_version(::google::protobuf::uint32 value);
+
+  // optional uint32 rsig_type = 2;
+  inline bool has_rsig_type() const;
+  inline void clear_rsig_type();
+  static const int kRsigTypeFieldNumber = 2;
+  inline ::google::protobuf::uint32 rsig_type() const;
+  inline void set_rsig_type(::google::protobuf::uint32 value);
+
+  // optional uint32 offload_type = 3;
+  inline bool has_offload_type() const;
+  inline void clear_offload_type();
+  static const int kOffloadTypeFieldNumber = 3;
+  inline ::google::protobuf::uint32 offload_type() const;
+  inline void set_offload_type(::google::protobuf::uint32 value);
+
+  // repeated uint64 grouping = 4;
+  inline int grouping_size() const;
+  inline void clear_grouping();
+  static const int kGroupingFieldNumber = 4;
+  inline ::google::protobuf::uint64 grouping(int index) const;
+  inline void set_grouping(int index, ::google::protobuf::uint64 value);
+  inline void add_grouping(::google::protobuf::uint64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+      grouping() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+      mutable_grouping();
+
+  // optional uint32 step = 5;
+  inline bool has_step() const;
+  inline void clear_step();
+  static const int kStepFieldNumber = 5;
+  inline ::google::protobuf::uint32 step() const;
+  inline void set_step(::google::protobuf::uint32 value);
+
+  // optional uint64 operation = 6;
+  inline bool has_operation() const;
+  inline void clear_operation();
+  static const int kOperationFieldNumber = 6;
+  inline ::google::protobuf::uint64 operation() const;
+  inline void set_operation(::google::protobuf::uint64 value);
+
+  // optional bytes seed = 7;
+  inline bool has_seed() const;
+  inline void clear_seed();
+  static const int kSeedFieldNumber = 7;
+  inline const ::std::string& seed() const;
+  inline void set_seed(const ::std::string& value);
+  inline void set_seed(const char* value);
+  inline void set_seed(const void* value, size_t size);
+  inline ::std::string* mutable_seed();
+  inline ::std::string* release_seed();
+  inline void set_allocated_seed(::std::string* seed);
+
+  // optional bytes mask = 8;
+  inline bool has_mask() const;
+  inline void clear_mask();
+  static const int kMaskFieldNumber = 8;
+  inline const ::std::string& mask() const;
+  inline void set_mask(const ::std::string& value);
+  inline void set_mask(const char* value);
+  inline void set_mask(const void* value, size_t size);
+  inline ::std::string* mutable_mask();
+  inline ::std::string* release_mask();
+  inline void set_allocated_mask(::std::string* mask);
+
+  // optional bytes amount = 9;
+  inline bool has_amount() const;
+  inline void clear_amount();
+  static const int kAmountFieldNumber = 9;
+  inline const ::std::string& amount() const;
+  inline void set_amount(const ::std::string& value);
+  inline void set_amount(const char* value);
+  inline void set_amount(const void* value, size_t size);
+  inline ::std::string* mutable_amount();
+  inline ::std::string* release_amount();
+  inline void set_allocated_amount(::std::string* amount);
+
+  // optional bytes rsig = 10;
+  inline bool has_rsig() const;
+  inline void clear_rsig();
+  static const int kRsigFieldNumber = 10;
+  inline const ::std::string& rsig() const;
+  inline void set_rsig(const ::std::string& value);
+  inline void set_rsig(const char* value);
+  inline void set_rsig(const void* value, size_t size);
+  inline ::std::string* mutable_rsig();
+  inline ::std::string* release_rsig();
+  inline void set_allocated_rsig(::std::string* rsig);
+
+  // repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 11;
+  inline int outputs_size() const;
+  inline void clear_outputs();
+  static const int kOutputsFieldNumber = 11;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& outputs(int index) const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* mutable_outputs(int index);
+  inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* add_outputs();
+  inline const ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >&
+      outputs() const;
+  inline ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >*
+      mutable_outputs();
+
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionRsigData)
+ private:
+  inline void set_has_version();
+  inline void clear_has_version();
+  inline void set_has_rsig_type();
+  inline void clear_has_rsig_type();
+  inline void set_has_offload_type();
+  inline void clear_has_offload_type();
+  inline void set_has_step();
+  inline void clear_has_step();
+  inline void set_has_operation();
+  inline void clear_has_operation();
+  inline void set_has_seed();
+  inline void clear_has_seed();
+  inline void set_has_mask();
+  inline void clear_has_mask();
+  inline void set_has_amount();
+  inline void clear_has_amount();
+  inline void set_has_rsig();
+  inline void clear_has_rsig();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 version_;
+  ::google::protobuf::uint32 rsig_type_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint64 > grouping_;
+  ::google::protobuf::uint32 offload_type_;
+  ::google::protobuf::uint32 step_;
+  ::google::protobuf::uint64 operation_;
+  ::std::string* seed_;
+  ::std::string* mask_;
+  ::std::string* amount_;
+  ::std::string* rsig_;
+  ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry > outputs_;
+  friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
+  friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
+  friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
+
+  void InitAsDefaultInstance();
+  static MoneroTransactionRsigData* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class MoneroGetAddress : public ::google::protobuf::Message {
  public:
   MoneroGetAddress();
@@ -1365,12 +1575,14 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   inline const ::google::protobuf::RepeatedPtrField< ::std::string>& use_tx_keys() const;
   inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_use_tx_keys();
 
-  // optional bool is_bulletproof = 14;
-  inline bool has_is_bulletproof() const;
-  inline void clear_is_bulletproof();
-  static const int kIsBulletproofFieldNumber = 14;
-  inline bool is_bulletproof() const;
-  inline void set_is_bulletproof(bool value);
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 14;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 14;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
 
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData)
  private:
@@ -1394,8 +1606,8 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   inline void clear_has_is_multisig();
   inline void set_has_exp_tx_prefix_hash();
   inline void clear_has_exp_tx_prefix_hash();
-  inline void set_has_is_bulletproof();
-  inline void clear_has_is_bulletproof();
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1413,8 +1625,8 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > minor_indices_;
   ::std::string* exp_tx_prefix_hash_;
   ::google::protobuf::RepeatedPtrField< ::std::string> use_tx_keys_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
   bool is_multisig_;
-  bool is_bulletproof_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
   friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
@@ -1644,6 +1856,15 @@ class MoneroTransactionInitAck : public ::google::protobuf::Message {
   inline bool many_outputs() const;
   inline void set_many_outputs(bool value);
 
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 7;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 7;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionInitAck)
  private:
   inline void set_has_version();
@@ -1656,6 +1877,8 @@ class MoneroTransactionInitAck : public ::google::protobuf::Message {
   inline void clear_has_many_inputs();
   inline void set_has_many_outputs();
   inline void clear_has_many_outputs();
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1664,6 +1887,7 @@ class MoneroTransactionInitAck : public ::google::protobuf::Message {
   ::google::protobuf::uint32 version_;
   ::google::protobuf::uint32 status_;
   ::google::protobuf::RepeatedPtrField< ::std::string> hmacs_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
   bool in_memory_;
   bool many_inputs_;
   bool many_outputs_;
@@ -2287,6 +2511,168 @@ class MoneroTransactionInputViniAck : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class MoneroTransactionAllInputsSetRequest : public ::google::protobuf::Message {
+ public:
+  MoneroTransactionAllInputsSetRequest();
+  virtual ~MoneroTransactionAllInputsSetRequest();
+
+  MoneroTransactionAllInputsSetRequest(const MoneroTransactionAllInputsSetRequest& from);
+
+  inline MoneroTransactionAllInputsSetRequest& operator=(const MoneroTransactionAllInputsSetRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MoneroTransactionAllInputsSetRequest& default_instance();
+
+  void Swap(MoneroTransactionAllInputsSetRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  MoneroTransactionAllInputsSetRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MoneroTransactionAllInputsSetRequest& from);
+  void MergeFrom(const MoneroTransactionAllInputsSetRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 1;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionAllInputsSetRequest)
+ private:
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
+  friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
+  friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
+  friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
+
+  void InitAsDefaultInstance();
+  static MoneroTransactionAllInputsSetRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MoneroTransactionAllInputsSetAck : public ::google::protobuf::Message {
+ public:
+  MoneroTransactionAllInputsSetAck();
+  virtual ~MoneroTransactionAllInputsSetAck();
+
+  MoneroTransactionAllInputsSetAck(const MoneroTransactionAllInputsSetAck& from);
+
+  inline MoneroTransactionAllInputsSetAck& operator=(const MoneroTransactionAllInputsSetAck& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MoneroTransactionAllInputsSetAck& default_instance();
+
+  void Swap(MoneroTransactionAllInputsSetAck* other);
+
+  // implements Message ----------------------------------------------
+
+  MoneroTransactionAllInputsSetAck* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MoneroTransactionAllInputsSetAck& from);
+  void MergeFrom(const MoneroTransactionAllInputsSetAck& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 1;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionAllInputsSetAck)
+ private:
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
+  friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
+  friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
+  friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
+
+  void InitAsDefaultInstance();
+  static MoneroTransactionAllInputsSetAck* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class MoneroTransactionSetOutputRequest : public ::google::protobuf::Message {
  public:
   MoneroTransactionSetOutputRequest();
@@ -2361,12 +2747,23 @@ class MoneroTransactionSetOutputRequest : public ::google::protobuf::Message {
   inline ::std::string* release_dst_entr_hmac();
   inline void set_allocated_dst_entr_hmac(::std::string* dst_entr_hmac);
 
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 3;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 3;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest)
  private:
   inline void set_has_dst_entr();
   inline void clear_has_dst_entr();
   inline void set_has_dst_entr_hmac();
   inline void clear_has_dst_entr_hmac();
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2374,6 +2771,7 @@ class MoneroTransactionSetOutputRequest : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* dst_entr_;
   ::std::string* dst_entr_hmac_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
   friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
@@ -2460,17 +2858,14 @@ class MoneroTransactionSetOutputAck : public ::google::protobuf::Message {
   inline ::std::string* release_vouti_hmac();
   inline void set_allocated_vouti_hmac(::std::string* vouti_hmac);
 
-  // optional bytes rsig = 3;
-  inline bool has_rsig() const;
-  inline void clear_rsig();
-  static const int kRsigFieldNumber = 3;
-  inline const ::std::string& rsig() const;
-  inline void set_rsig(const ::std::string& value);
-  inline void set_rsig(const char* value);
-  inline void set_rsig(const void* value, size_t size);
-  inline ::std::string* mutable_rsig();
-  inline ::std::string* release_rsig();
-  inline void set_allocated_rsig(::std::string* rsig);
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 3;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 3;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
 
   // optional bytes out_pk = 4;
   inline bool has_out_pk() const;
@@ -2502,8 +2897,8 @@ class MoneroTransactionSetOutputAck : public ::google::protobuf::Message {
   inline void clear_has_tx_out();
   inline void set_has_vouti_hmac();
   inline void clear_has_vouti_hmac();
-  inline void set_has_rsig();
-  inline void clear_has_rsig();
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
   inline void set_has_out_pk();
   inline void clear_has_out_pk();
   inline void set_has_ecdh_info();
@@ -2515,7 +2910,7 @@ class MoneroTransactionSetOutputAck : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::std::string* tx_out_;
   ::std::string* vouti_hmac_;
-  ::std::string* rsig_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
   ::std::string* out_pk_;
   ::std::string* ecdh_info_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
@@ -2524,6 +2919,168 @@ class MoneroTransactionSetOutputAck : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static MoneroTransactionSetOutputAck* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MoneroTransactionRangeSigRequest : public ::google::protobuf::Message {
+ public:
+  MoneroTransactionRangeSigRequest();
+  virtual ~MoneroTransactionRangeSigRequest();
+
+  MoneroTransactionRangeSigRequest(const MoneroTransactionRangeSigRequest& from);
+
+  inline MoneroTransactionRangeSigRequest& operator=(const MoneroTransactionRangeSigRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MoneroTransactionRangeSigRequest& default_instance();
+
+  void Swap(MoneroTransactionRangeSigRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  MoneroTransactionRangeSigRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MoneroTransactionRangeSigRequest& from);
+  void MergeFrom(const MoneroTransactionRangeSigRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 1;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionRangeSigRequest)
+ private:
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
+  friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
+  friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
+  friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
+
+  void InitAsDefaultInstance();
+  static MoneroTransactionRangeSigRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MoneroTransactionRangeSigAck : public ::google::protobuf::Message {
+ public:
+  MoneroTransactionRangeSigAck();
+  virtual ~MoneroTransactionRangeSigAck();
+
+  MoneroTransactionRangeSigAck(const MoneroTransactionRangeSigAck& from);
+
+  inline MoneroTransactionRangeSigAck& operator=(const MoneroTransactionRangeSigAck& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MoneroTransactionRangeSigAck& default_instance();
+
+  void Swap(MoneroTransactionRangeSigAck* other);
+
+  // implements Message ----------------------------------------------
+
+  MoneroTransactionRangeSigAck* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MoneroTransactionRangeSigAck& from);
+  void MergeFrom(const MoneroTransactionRangeSigAck& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 1;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
+  // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionRangeSigAck)
+ private:
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::uint32 _has_bits_[1];
+  mutable int _cached_size_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
+  friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
+  friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
+  friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
+
+  void InitAsDefaultInstance();
+  static MoneroTransactionRangeSigAck* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2580,13 +3137,25 @@ class MoneroTransactionAllOutSetRequest : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 1;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest)
  private:
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint32 _has_bits_[1];
   mutable int _cached_size_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
   friend void protobuf_ShutdownFile_messages_2dmonero_2eproto();
@@ -2779,10 +3348,19 @@ class MoneroTransactionAllOutSetAck : public ::google::protobuf::Message {
   inline ::std::string* release_tx_prefix_hash();
   inline void set_allocated_tx_prefix_hash(::std::string* tx_prefix_hash);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.MoneroRingCtSig rv = 3;
+  // optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 3;
+  inline bool has_rsig_data() const;
+  inline void clear_rsig_data();
+  static const int kRsigDataFieldNumber = 3;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& rsig_data() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* mutable_rsig_data();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
+  inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.MoneroRingCtSig rv = 4;
   inline bool has_rv() const;
   inline void clear_rv();
-  static const int kRvFieldNumber = 3;
+  static const int kRvFieldNumber = 4;
   inline const ::hw::trezor::messages::monero::MoneroTransactionAllOutSetAck_MoneroRingCtSig& rv() const;
   inline ::hw::trezor::messages::monero::MoneroTransactionAllOutSetAck_MoneroRingCtSig* mutable_rv();
   inline ::hw::trezor::messages::monero::MoneroTransactionAllOutSetAck_MoneroRingCtSig* release_rv();
@@ -2794,6 +3372,8 @@ class MoneroTransactionAllOutSetAck : public ::google::protobuf::Message {
   inline void clear_has_extra();
   inline void set_has_tx_prefix_hash();
   inline void clear_has_tx_prefix_hash();
+  inline void set_has_rsig_data();
+  inline void clear_has_rsig_data();
   inline void set_has_rv();
   inline void clear_has_rv();
 
@@ -2803,6 +3383,7 @@ class MoneroTransactionAllOutSetAck : public ::google::protobuf::Message {
   mutable int _cached_size_;
   ::std::string* extra_;
   ::std::string* tx_prefix_hash_;
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
   ::hw::trezor::messages::monero::MoneroTransactionAllOutSetAck_MoneroRingCtSig* rv_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
@@ -3523,46 +4104,64 @@ class MoneroTransactionSignRequest : public ::google::protobuf::Message {
   inline ::hw::trezor::messages::monero::MoneroTransactionInputViniRequest* release_input_vini();
   inline void set_allocated_input_vini(::hw::trezor::messages::monero::MoneroTransactionInputViniRequest* input_vini);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionSetOutputRequest set_output = 5;
+  // optional .hw.trezor.messages.monero.MoneroTransactionAllInputsSetRequest all_in_set = 5;
+  inline bool has_all_in_set() const;
+  inline void clear_all_in_set();
+  static const int kAllInSetFieldNumber = 5;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest& all_in_set() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* mutable_all_in_set();
+  inline ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* release_all_in_set();
+  inline void set_allocated_all_in_set(::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* all_in_set);
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionSetOutputRequest set_output = 6;
   inline bool has_set_output() const;
   inline void clear_set_output();
-  static const int kSetOutputFieldNumber = 5;
+  static const int kSetOutputFieldNumber = 6;
   inline const ::hw::trezor::messages::monero::MoneroTransactionSetOutputRequest& set_output() const;
   inline ::hw::trezor::messages::monero::MoneroTransactionSetOutputRequest* mutable_set_output();
   inline ::hw::trezor::messages::monero::MoneroTransactionSetOutputRequest* release_set_output();
   inline void set_allocated_set_output(::hw::trezor::messages::monero::MoneroTransactionSetOutputRequest* set_output);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest all_out_set = 6;
+  // optional .hw.trezor.messages.monero.MoneroTransactionRangeSigRequest rsig = 7;
+  inline bool has_rsig() const;
+  inline void clear_rsig();
+  static const int kRsigFieldNumber = 7;
+  inline const ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest& rsig() const;
+  inline ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* mutable_rsig();
+  inline ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* release_rsig();
+  inline void set_allocated_rsig(::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* rsig);
+
+  // optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest all_out_set = 8;
   inline bool has_all_out_set() const;
   inline void clear_all_out_set();
-  static const int kAllOutSetFieldNumber = 6;
+  static const int kAllOutSetFieldNumber = 8;
   inline const ::hw::trezor::messages::monero::MoneroTransactionAllOutSetRequest& all_out_set() const;
   inline ::hw::trezor::messages::monero::MoneroTransactionAllOutSetRequest* mutable_all_out_set();
   inline ::hw::trezor::messages::monero::MoneroTransactionAllOutSetRequest* release_all_out_set();
   inline void set_allocated_all_out_set(::hw::trezor::messages::monero::MoneroTransactionAllOutSetRequest* all_out_set);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionMlsagDoneRequest mlsag_done = 7;
+  // optional .hw.trezor.messages.monero.MoneroTransactionMlsagDoneRequest mlsag_done = 9;
   inline bool has_mlsag_done() const;
   inline void clear_mlsag_done();
-  static const int kMlsagDoneFieldNumber = 7;
+  static const int kMlsagDoneFieldNumber = 9;
   inline const ::hw::trezor::messages::monero::MoneroTransactionMlsagDoneRequest& mlsag_done() const;
   inline ::hw::trezor::messages::monero::MoneroTransactionMlsagDoneRequest* mutable_mlsag_done();
   inline ::hw::trezor::messages::monero::MoneroTransactionMlsagDoneRequest* release_mlsag_done();
   inline void set_allocated_mlsag_done(::hw::trezor::messages::monero::MoneroTransactionMlsagDoneRequest* mlsag_done);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionSignInputRequest sign_input = 8;
+  // optional .hw.trezor.messages.monero.MoneroTransactionSignInputRequest sign_input = 10;
   inline bool has_sign_input() const;
   inline void clear_sign_input();
-  static const int kSignInputFieldNumber = 8;
+  static const int kSignInputFieldNumber = 10;
   inline const ::hw::trezor::messages::monero::MoneroTransactionSignInputRequest& sign_input() const;
   inline ::hw::trezor::messages::monero::MoneroTransactionSignInputRequest* mutable_sign_input();
   inline ::hw::trezor::messages::monero::MoneroTransactionSignInputRequest* release_sign_input();
   inline void set_allocated_sign_input(::hw::trezor::messages::monero::MoneroTransactionSignInputRequest* sign_input);
 
-  // optional .hw.trezor.messages.monero.MoneroTransactionFinalRequest final_msg = 9;
+  // optional .hw.trezor.messages.monero.MoneroTransactionFinalRequest final_msg = 11;
   inline bool has_final_msg() const;
   inline void clear_final_msg();
-  static const int kFinalMsgFieldNumber = 9;
+  static const int kFinalMsgFieldNumber = 11;
   inline const ::hw::trezor::messages::monero::MoneroTransactionFinalRequest& final_msg() const;
   inline ::hw::trezor::messages::monero::MoneroTransactionFinalRequest* mutable_final_msg();
   inline ::hw::trezor::messages::monero::MoneroTransactionFinalRequest* release_final_msg();
@@ -3578,8 +4177,12 @@ class MoneroTransactionSignRequest : public ::google::protobuf::Message {
   inline void clear_has_input_permutation();
   inline void set_has_input_vini();
   inline void clear_has_input_vini();
+  inline void set_has_all_in_set();
+  inline void clear_has_all_in_set();
   inline void set_has_set_output();
   inline void clear_has_set_output();
+  inline void set_has_rsig();
+  inline void clear_has_rsig();
   inline void set_has_all_out_set();
   inline void clear_has_all_out_set();
   inline void set_has_mlsag_done();
@@ -3597,7 +4200,9 @@ class MoneroTransactionSignRequest : public ::google::protobuf::Message {
   ::hw::trezor::messages::monero::MoneroTransactionSetInputRequest* set_input_;
   ::hw::trezor::messages::monero::MoneroTransactionInputsPermutationRequest* input_permutation_;
   ::hw::trezor::messages::monero::MoneroTransactionInputViniRequest* input_vini_;
+  ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* all_in_set_;
   ::hw::trezor::messages::monero::MoneroTransactionSetOutputRequest* set_output_;
+  ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* rsig_;
   ::hw::trezor::messages::monero::MoneroTransactionAllOutSetRequest* all_out_set_;
   ::hw::trezor::messages::monero::MoneroTransactionMlsagDoneRequest* mlsag_done_;
   ::hw::trezor::messages::monero::MoneroTransactionSignInputRequest* sign_input_;
@@ -6385,6 +6990,494 @@ inline void MoneroTransactionDestinationEntry::set_is_subaddress(bool value) {
 
 // -------------------------------------------------------------------
 
+// MoneroTransactionRsigData
+
+// optional uint32 version = 1;
+inline bool MoneroTransactionRsigData::has_version() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_version() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MoneroTransactionRsigData::clear_has_version() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MoneroTransactionRsigData::clear_version() {
+  version_ = 0u;
+  clear_has_version();
+}
+inline ::google::protobuf::uint32 MoneroTransactionRsigData::version() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.version)
+  return version_;
+}
+inline void MoneroTransactionRsigData::set_version(::google::protobuf::uint32 value) {
+  set_has_version();
+  version_ = value;
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.version)
+}
+
+// optional uint32 rsig_type = 2;
+inline bool MoneroTransactionRsigData::has_rsig_type() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_rsig_type() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void MoneroTransactionRsigData::clear_has_rsig_type() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void MoneroTransactionRsigData::clear_rsig_type() {
+  rsig_type_ = 0u;
+  clear_has_rsig_type();
+}
+inline ::google::protobuf::uint32 MoneroTransactionRsigData::rsig_type() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_type)
+  return rsig_type_;
+}
+inline void MoneroTransactionRsigData::set_rsig_type(::google::protobuf::uint32 value) {
+  set_has_rsig_type();
+  rsig_type_ = value;
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_type)
+}
+
+// optional uint32 offload_type = 3;
+inline bool MoneroTransactionRsigData::has_offload_type() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_offload_type() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void MoneroTransactionRsigData::clear_has_offload_type() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void MoneroTransactionRsigData::clear_offload_type() {
+  offload_type_ = 0u;
+  clear_has_offload_type();
+}
+inline ::google::protobuf::uint32 MoneroTransactionRsigData::offload_type() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.offload_type)
+  return offload_type_;
+}
+inline void MoneroTransactionRsigData::set_offload_type(::google::protobuf::uint32 value) {
+  set_has_offload_type();
+  offload_type_ = value;
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.offload_type)
+}
+
+// repeated uint64 grouping = 4;
+inline int MoneroTransactionRsigData::grouping_size() const {
+  return grouping_.size();
+}
+inline void MoneroTransactionRsigData::clear_grouping() {
+  grouping_.Clear();
+}
+inline ::google::protobuf::uint64 MoneroTransactionRsigData::grouping(int index) const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.grouping)
+  return grouping_.Get(index);
+}
+inline void MoneroTransactionRsigData::set_grouping(int index, ::google::protobuf::uint64 value) {
+  grouping_.Set(index, value);
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.grouping)
+}
+inline void MoneroTransactionRsigData::add_grouping(::google::protobuf::uint64 value) {
+  grouping_.Add(value);
+  // @@protoc_insertion_point(field_add:hw.trezor.messages.monero.MoneroTransactionRsigData.grouping)
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >&
+MoneroTransactionRsigData::grouping() const {
+  // @@protoc_insertion_point(field_list:hw.trezor.messages.monero.MoneroTransactionRsigData.grouping)
+  return grouping_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint64 >*
+MoneroTransactionRsigData::mutable_grouping() {
+  // @@protoc_insertion_point(field_mutable_list:hw.trezor.messages.monero.MoneroTransactionRsigData.grouping)
+  return &grouping_;
+}
+
+// optional uint32 step = 5;
+inline bool MoneroTransactionRsigData::has_step() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_step() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void MoneroTransactionRsigData::clear_has_step() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void MoneroTransactionRsigData::clear_step() {
+  step_ = 0u;
+  clear_has_step();
+}
+inline ::google::protobuf::uint32 MoneroTransactionRsigData::step() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.step)
+  return step_;
+}
+inline void MoneroTransactionRsigData::set_step(::google::protobuf::uint32 value) {
+  set_has_step();
+  step_ = value;
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.step)
+}
+
+// optional uint64 operation = 6;
+inline bool MoneroTransactionRsigData::has_operation() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_operation() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MoneroTransactionRsigData::clear_has_operation() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void MoneroTransactionRsigData::clear_operation() {
+  operation_ = GOOGLE_ULONGLONG(0);
+  clear_has_operation();
+}
+inline ::google::protobuf::uint64 MoneroTransactionRsigData::operation() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.operation)
+  return operation_;
+}
+inline void MoneroTransactionRsigData::set_operation(::google::protobuf::uint64 value) {
+  set_has_operation();
+  operation_ = value;
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.operation)
+}
+
+// optional bytes seed = 7;
+inline bool MoneroTransactionRsigData::has_seed() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_seed() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MoneroTransactionRsigData::clear_has_seed() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MoneroTransactionRsigData::clear_seed() {
+  if (seed_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    seed_->clear();
+  }
+  clear_has_seed();
+}
+inline const ::std::string& MoneroTransactionRsigData::seed() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.seed)
+  return *seed_;
+}
+inline void MoneroTransactionRsigData::set_seed(const ::std::string& value) {
+  set_has_seed();
+  if (seed_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    seed_ = new ::std::string;
+  }
+  seed_->assign(value);
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.seed)
+}
+inline void MoneroTransactionRsigData::set_seed(const char* value) {
+  set_has_seed();
+  if (seed_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    seed_ = new ::std::string;
+  }
+  seed_->assign(value);
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionRsigData.seed)
+}
+inline void MoneroTransactionRsigData::set_seed(const void* value, size_t size) {
+  set_has_seed();
+  if (seed_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    seed_ = new ::std::string;
+  }
+  seed_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionRsigData.seed)
+}
+inline ::std::string* MoneroTransactionRsigData::mutable_seed() {
+  set_has_seed();
+  if (seed_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    seed_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRsigData.seed)
+  return seed_;
+}
+inline ::std::string* MoneroTransactionRsigData::release_seed() {
+  clear_has_seed();
+  if (seed_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = seed_;
+    seed_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void MoneroTransactionRsigData::set_allocated_seed(::std::string* seed) {
+  if (seed_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete seed_;
+  }
+  if (seed) {
+    set_has_seed();
+    seed_ = seed;
+  } else {
+    clear_has_seed();
+    seed_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRsigData.seed)
+}
+
+// optional bytes mask = 8;
+inline bool MoneroTransactionRsigData::has_mask() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_mask() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void MoneroTransactionRsigData::clear_has_mask() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void MoneroTransactionRsigData::clear_mask() {
+  if (mask_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    mask_->clear();
+  }
+  clear_has_mask();
+}
+inline const ::std::string& MoneroTransactionRsigData::mask() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.mask)
+  return *mask_;
+}
+inline void MoneroTransactionRsigData::set_mask(const ::std::string& value) {
+  set_has_mask();
+  if (mask_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    mask_ = new ::std::string;
+  }
+  mask_->assign(value);
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.mask)
+}
+inline void MoneroTransactionRsigData::set_mask(const char* value) {
+  set_has_mask();
+  if (mask_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    mask_ = new ::std::string;
+  }
+  mask_->assign(value);
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionRsigData.mask)
+}
+inline void MoneroTransactionRsigData::set_mask(const void* value, size_t size) {
+  set_has_mask();
+  if (mask_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    mask_ = new ::std::string;
+  }
+  mask_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionRsigData.mask)
+}
+inline ::std::string* MoneroTransactionRsigData::mutable_mask() {
+  set_has_mask();
+  if (mask_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    mask_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRsigData.mask)
+  return mask_;
+}
+inline ::std::string* MoneroTransactionRsigData::release_mask() {
+  clear_has_mask();
+  if (mask_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = mask_;
+    mask_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void MoneroTransactionRsigData::set_allocated_mask(::std::string* mask) {
+  if (mask_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete mask_;
+  }
+  if (mask) {
+    set_has_mask();
+    mask_ = mask;
+  } else {
+    clear_has_mask();
+    mask_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRsigData.mask)
+}
+
+// optional bytes amount = 9;
+inline bool MoneroTransactionRsigData::has_amount() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_amount() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void MoneroTransactionRsigData::clear_has_amount() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void MoneroTransactionRsigData::clear_amount() {
+  if (amount_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    amount_->clear();
+  }
+  clear_has_amount();
+}
+inline const ::std::string& MoneroTransactionRsigData::amount() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.amount)
+  return *amount_;
+}
+inline void MoneroTransactionRsigData::set_amount(const ::std::string& value) {
+  set_has_amount();
+  if (amount_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    amount_ = new ::std::string;
+  }
+  amount_->assign(value);
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.amount)
+}
+inline void MoneroTransactionRsigData::set_amount(const char* value) {
+  set_has_amount();
+  if (amount_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    amount_ = new ::std::string;
+  }
+  amount_->assign(value);
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionRsigData.amount)
+}
+inline void MoneroTransactionRsigData::set_amount(const void* value, size_t size) {
+  set_has_amount();
+  if (amount_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    amount_ = new ::std::string;
+  }
+  amount_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionRsigData.amount)
+}
+inline ::std::string* MoneroTransactionRsigData::mutable_amount() {
+  set_has_amount();
+  if (amount_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    amount_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRsigData.amount)
+  return amount_;
+}
+inline ::std::string* MoneroTransactionRsigData::release_amount() {
+  clear_has_amount();
+  if (amount_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = amount_;
+    amount_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void MoneroTransactionRsigData::set_allocated_amount(::std::string* amount) {
+  if (amount_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete amount_;
+  }
+  if (amount) {
+    set_has_amount();
+    amount_ = amount;
+  } else {
+    clear_has_amount();
+    amount_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRsigData.amount)
+}
+
+// optional bytes rsig = 10;
+inline bool MoneroTransactionRsigData::has_rsig() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void MoneroTransactionRsigData::set_has_rsig() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void MoneroTransactionRsigData::clear_has_rsig() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void MoneroTransactionRsigData::clear_rsig() {
+  if (rsig_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    rsig_->clear();
+  }
+  clear_has_rsig();
+}
+inline const ::std::string& MoneroTransactionRsigData::rsig() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
+  return *rsig_;
+}
+inline void MoneroTransactionRsigData::set_rsig(const ::std::string& value) {
+  set_has_rsig();
+  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    rsig_ = new ::std::string;
+  }
+  rsig_->assign(value);
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
+}
+inline void MoneroTransactionRsigData::set_rsig(const char* value) {
+  set_has_rsig();
+  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    rsig_ = new ::std::string;
+  }
+  rsig_->assign(value);
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
+}
+inline void MoneroTransactionRsigData::set_rsig(const void* value, size_t size) {
+  set_has_rsig();
+  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    rsig_ = new ::std::string;
+  }
+  rsig_->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
+}
+inline ::std::string* MoneroTransactionRsigData::mutable_rsig() {
+  set_has_rsig();
+  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    rsig_ = new ::std::string;
+  }
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
+  return rsig_;
+}
+inline ::std::string* MoneroTransactionRsigData::release_rsig() {
+  clear_has_rsig();
+  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    return NULL;
+  } else {
+    ::std::string* temp = rsig_;
+    rsig_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+    return temp;
+  }
+}
+inline void MoneroTransactionRsigData::set_allocated_rsig(::std::string* rsig) {
+  if (rsig_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
+    delete rsig_;
+  }
+  if (rsig) {
+    set_has_rsig();
+    rsig_ = rsig;
+  } else {
+    clear_has_rsig();
+    rsig_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
+}
+
+// repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 11;
+inline int MoneroTransactionRsigData::outputs_size() const {
+  return outputs_.size();
+}
+inline void MoneroTransactionRsigData::clear_outputs() {
+  outputs_.Clear();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& MoneroTransactionRsigData::outputs(int index) const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.outputs)
+  return outputs_.Get(index);
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionRsigData::mutable_outputs(int index) {
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRsigData.outputs)
+  return outputs_.Mutable(index);
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* MoneroTransactionRsigData::add_outputs() {
+  // @@protoc_insertion_point(field_add:hw.trezor.messages.monero.MoneroTransactionRsigData.outputs)
+  return outputs_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >&
+MoneroTransactionRsigData::outputs() const {
+  // @@protoc_insertion_point(field_list:hw.trezor.messages.monero.MoneroTransactionRsigData.outputs)
+  return outputs_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry >*
+MoneroTransactionRsigData::mutable_outputs() {
+  // @@protoc_insertion_point(field_mutable_list:hw.trezor.messages.monero.MoneroTransactionRsigData.outputs)
+  return &outputs_;
+}
+
+// -------------------------------------------------------------------
+
 // MoneroGetAddress
 
 // repeated uint32 address_n = 1;
@@ -7286,28 +8379,45 @@ MoneroTransactionInitRequest_MoneroTransactionData::mutable_use_tx_keys() {
   return &use_tx_keys_;
 }
 
-// optional bool is_bulletproof = 14;
-inline bool MoneroTransactionInitRequest_MoneroTransactionData::has_is_bulletproof() const {
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 14;
+inline bool MoneroTransactionInitRequest_MoneroTransactionData::has_rsig_data() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData::set_has_is_bulletproof() {
+inline void MoneroTransactionInitRequest_MoneroTransactionData::set_has_rsig_data() {
   _has_bits_[0] |= 0x00002000u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_has_is_bulletproof() {
+inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_has_rsig_data() {
   _has_bits_[0] &= ~0x00002000u;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_is_bulletproof() {
-  is_bulletproof_ = false;
-  clear_has_is_bulletproof();
+inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
 }
-inline bool MoneroTransactionInitRequest_MoneroTransactionData::is_bulletproof() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.is_bulletproof)
-  return is_bulletproof_;
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionInitRequest_MoneroTransactionData::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
 }
-inline void MoneroTransactionInitRequest_MoneroTransactionData::set_is_bulletproof(bool value) {
-  set_has_is_bulletproof();
-  is_bulletproof_ = value;
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.is_bulletproof)
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionInitRequest_MoneroTransactionData::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionInitRequest_MoneroTransactionData::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionInitRequest_MoneroTransactionData::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.rsig_data)
 }
 
 // -------------------------------------------------------------------
@@ -7609,6 +8719,47 @@ inline void MoneroTransactionInitAck::set_many_outputs(bool value) {
   set_has_many_outputs();
   many_outputs_ = value;
   // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitAck.many_outputs)
+}
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 7;
+inline bool MoneroTransactionInitAck::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MoneroTransactionInitAck::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MoneroTransactionInitAck::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MoneroTransactionInitAck::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionInitAck::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitAck.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionInitAck::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionInitAck.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionInitAck::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionInitAck::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInitAck.rsig_data)
 }
 
 // -------------------------------------------------------------------
@@ -8533,6 +9684,96 @@ inline void MoneroTransactionInputViniRequest::set_allocated_pseudo_out_hmac(::s
 
 // -------------------------------------------------------------------
 
+// MoneroTransactionAllInputsSetRequest
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+inline bool MoneroTransactionAllInputsSetRequest::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MoneroTransactionAllInputsSetRequest::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MoneroTransactionAllInputsSetRequest::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MoneroTransactionAllInputsSetRequest::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionAllInputsSetRequest::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionAllInputsSetRequest.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllInputsSetRequest::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionAllInputsSetRequest.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllInputsSetRequest::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionAllInputsSetRequest::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionAllInputsSetRequest.rsig_data)
+}
+
+// -------------------------------------------------------------------
+
+// MoneroTransactionAllInputsSetAck
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+inline bool MoneroTransactionAllInputsSetAck::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MoneroTransactionAllInputsSetAck::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MoneroTransactionAllInputsSetAck::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MoneroTransactionAllInputsSetAck::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionAllInputsSetAck::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionAllInputsSetAck.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllInputsSetAck::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionAllInputsSetAck.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllInputsSetAck::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionAllInputsSetAck::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionAllInputsSetAck.rsig_data)
+}
+
+// -------------------------------------------------------------------
+
 // MoneroTransactionSetOutputRequest
 
 // optional .hw.trezor.messages.monero.MoneroTransactionDestinationEntry dst_entr = 1;
@@ -8650,6 +9891,47 @@ inline void MoneroTransactionSetOutputRequest::set_allocated_dst_entr_hmac(::std
     dst_entr_hmac_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
   }
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.dst_entr_hmac)
+}
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 3;
+inline bool MoneroTransactionSetOutputRequest::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void MoneroTransactionSetOutputRequest::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void MoneroTransactionSetOutputRequest::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void MoneroTransactionSetOutputRequest::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionSetOutputRequest::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionSetOutputRequest::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionSetOutputRequest::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionSetOutputRequest::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetOutputRequest.rsig_data)
 }
 
 // -------------------------------------------------------------------
@@ -8808,80 +10090,45 @@ inline void MoneroTransactionSetOutputAck::set_allocated_vouti_hmac(::std::strin
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.vouti_hmac)
 }
 
-// optional bytes rsig = 3;
-inline bool MoneroTransactionSetOutputAck::has_rsig() const {
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 3;
+inline bool MoneroTransactionSetOutputAck::has_rsig_data() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void MoneroTransactionSetOutputAck::set_has_rsig() {
+inline void MoneroTransactionSetOutputAck::set_has_rsig_data() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void MoneroTransactionSetOutputAck::clear_has_rsig() {
+inline void MoneroTransactionSetOutputAck::clear_has_rsig_data() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void MoneroTransactionSetOutputAck::clear_rsig() {
-  if (rsig_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    rsig_->clear();
-  }
-  clear_has_rsig();
+inline void MoneroTransactionSetOutputAck::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
 }
-inline const ::std::string& MoneroTransactionSetOutputAck::rsig() const {
-  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig)
-  return *rsig_;
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionSetOutputAck::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
 }
-inline void MoneroTransactionSetOutputAck::set_rsig(const ::std::string& value) {
-  set_has_rsig();
-  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    rsig_ = new ::std::string;
-  }
-  rsig_->assign(value);
-  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig)
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionSetOutputAck::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig_data)
+  return rsig_data_;
 }
-inline void MoneroTransactionSetOutputAck::set_rsig(const char* value) {
-  set_has_rsig();
-  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    rsig_ = new ::std::string;
-  }
-  rsig_->assign(value);
-  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig)
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionSetOutputAck::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
 }
-inline void MoneroTransactionSetOutputAck::set_rsig(const void* value, size_t size) {
-  set_has_rsig();
-  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    rsig_ = new ::std::string;
-  }
-  rsig_->assign(reinterpret_cast<const char*>(value), size);
-  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig)
-}
-inline ::std::string* MoneroTransactionSetOutputAck::mutable_rsig() {
-  set_has_rsig();
-  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    rsig_ = new ::std::string;
-  }
-  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig)
-  return rsig_;
-}
-inline ::std::string* MoneroTransactionSetOutputAck::release_rsig() {
-  clear_has_rsig();
-  if (rsig_ == &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    return NULL;
+inline void MoneroTransactionSetOutputAck::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
   } else {
-    ::std::string* temp = rsig_;
-    rsig_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-    return temp;
+    clear_has_rsig_data();
   }
-}
-inline void MoneroTransactionSetOutputAck::set_allocated_rsig(::std::string* rsig) {
-  if (rsig_ != &::google::protobuf::internal::GetEmptyStringAlreadyInited()) {
-    delete rsig_;
-  }
-  if (rsig) {
-    set_has_rsig();
-    rsig_ = rsig;
-  } else {
-    clear_has_rsig();
-    rsig_ = const_cast< ::std::string*>(&::google::protobuf::internal::GetEmptyStringAlreadyInited());
-  }
-  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig)
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSetOutputAck.rsig_data)
 }
 
 // optional bytes out_pk = 4;
@@ -9038,7 +10285,138 @@ inline void MoneroTransactionSetOutputAck::set_allocated_ecdh_info(::std::string
 
 // -------------------------------------------------------------------
 
+// MoneroTransactionRangeSigRequest
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+inline bool MoneroTransactionRangeSigRequest::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MoneroTransactionRangeSigRequest::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MoneroTransactionRangeSigRequest::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MoneroTransactionRangeSigRequest::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionRangeSigRequest::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRangeSigRequest.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionRangeSigRequest::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRangeSigRequest.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionRangeSigRequest::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionRangeSigRequest::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRangeSigRequest.rsig_data)
+}
+
+// -------------------------------------------------------------------
+
+// MoneroTransactionRangeSigAck
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+inline bool MoneroTransactionRangeSigAck::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MoneroTransactionRangeSigAck::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MoneroTransactionRangeSigAck::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MoneroTransactionRangeSigAck::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionRangeSigAck::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRangeSigAck.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionRangeSigAck::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRangeSigAck.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionRangeSigAck::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionRangeSigAck::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRangeSigAck.rsig_data)
+}
+
+// -------------------------------------------------------------------
+
 // MoneroTransactionAllOutSetRequest
+
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 1;
+inline bool MoneroTransactionAllOutSetRequest::has_rsig_data() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MoneroTransactionAllOutSetRequest::set_has_rsig_data() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MoneroTransactionAllOutSetRequest::clear_has_rsig_data() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MoneroTransactionAllOutSetRequest::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionAllOutSetRequest::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllOutSetRequest::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllOutSetRequest::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionAllOutSetRequest::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest.rsig_data)
+}
 
 // -------------------------------------------------------------------
 
@@ -9324,15 +10702,56 @@ inline void MoneroTransactionAllOutSetAck::set_allocated_tx_prefix_hash(::std::s
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.tx_prefix_hash)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.MoneroRingCtSig rv = 3;
-inline bool MoneroTransactionAllOutSetAck::has_rv() const {
+// optional .hw.trezor.messages.monero.MoneroTransactionRsigData rsig_data = 3;
+inline bool MoneroTransactionAllOutSetAck::has_rsig_data() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void MoneroTransactionAllOutSetAck::set_has_rv() {
+inline void MoneroTransactionAllOutSetAck::set_has_rsig_data() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void MoneroTransactionAllOutSetAck::clear_has_rv() {
+inline void MoneroTransactionAllOutSetAck::clear_has_rsig_data() {
   _has_bits_[0] &= ~0x00000004u;
+}
+inline void MoneroTransactionAllOutSetAck::clear_rsig_data() {
+  if (rsig_data_ != NULL) rsig_data_->::hw::trezor::messages::monero::MoneroTransactionRsigData::Clear();
+  clear_has_rsig_data();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRsigData& MoneroTransactionAllOutSetAck::rsig_data() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.rsig_data)
+  return rsig_data_ != NULL ? *rsig_data_ : *default_instance_->rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllOutSetAck::mutable_rsig_data() {
+  set_has_rsig_data();
+  if (rsig_data_ == NULL) rsig_data_ = new ::hw::trezor::messages::monero::MoneroTransactionRsigData;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.rsig_data)
+  return rsig_data_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* MoneroTransactionAllOutSetAck::release_rsig_data() {
+  clear_has_rsig_data();
+  ::hw::trezor::messages::monero::MoneroTransactionRsigData* temp = rsig_data_;
+  rsig_data_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionAllOutSetAck::set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data) {
+  delete rsig_data_;
+  rsig_data_ = rsig_data;
+  if (rsig_data) {
+    set_has_rsig_data();
+  } else {
+    clear_has_rsig_data();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.rsig_data)
+}
+
+// optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetAck.MoneroRingCtSig rv = 4;
+inline bool MoneroTransactionAllOutSetAck::has_rv() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void MoneroTransactionAllOutSetAck::set_has_rv() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void MoneroTransactionAllOutSetAck::clear_has_rv() {
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void MoneroTransactionAllOutSetAck::clear_rv() {
   if (rv_ != NULL) rv_->::hw::trezor::messages::monero::MoneroTransactionAllOutSetAck_MoneroRingCtSig::Clear();
@@ -10586,15 +12005,56 @@ inline void MoneroTransactionSignRequest::set_allocated_input_vini(::hw::trezor:
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.input_vini)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionSetOutputRequest set_output = 5;
-inline bool MoneroTransactionSignRequest::has_set_output() const {
+// optional .hw.trezor.messages.monero.MoneroTransactionAllInputsSetRequest all_in_set = 5;
+inline bool MoneroTransactionSignRequest::has_all_in_set() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void MoneroTransactionSignRequest::set_has_set_output() {
+inline void MoneroTransactionSignRequest::set_has_all_in_set() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void MoneroTransactionSignRequest::clear_has_set_output() {
+inline void MoneroTransactionSignRequest::clear_has_all_in_set() {
   _has_bits_[0] &= ~0x00000010u;
+}
+inline void MoneroTransactionSignRequest::clear_all_in_set() {
+  if (all_in_set_ != NULL) all_in_set_->::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest::Clear();
+  clear_has_all_in_set();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest& MoneroTransactionSignRequest::all_in_set() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSignRequest.all_in_set)
+  return all_in_set_ != NULL ? *all_in_set_ : *default_instance_->all_in_set_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* MoneroTransactionSignRequest::mutable_all_in_set() {
+  set_has_all_in_set();
+  if (all_in_set_ == NULL) all_in_set_ = new ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSignRequest.all_in_set)
+  return all_in_set_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* MoneroTransactionSignRequest::release_all_in_set() {
+  clear_has_all_in_set();
+  ::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* temp = all_in_set_;
+  all_in_set_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionSignRequest::set_allocated_all_in_set(::hw::trezor::messages::monero::MoneroTransactionAllInputsSetRequest* all_in_set) {
+  delete all_in_set_;
+  all_in_set_ = all_in_set;
+  if (all_in_set) {
+    set_has_all_in_set();
+  } else {
+    clear_has_all_in_set();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.all_in_set)
+}
+
+// optional .hw.trezor.messages.monero.MoneroTransactionSetOutputRequest set_output = 6;
+inline bool MoneroTransactionSignRequest::has_set_output() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MoneroTransactionSignRequest::set_has_set_output() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MoneroTransactionSignRequest::clear_has_set_output() {
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void MoneroTransactionSignRequest::clear_set_output() {
   if (set_output_ != NULL) set_output_->::hw::trezor::messages::monero::MoneroTransactionSetOutputRequest::Clear();
@@ -10627,15 +12087,56 @@ inline void MoneroTransactionSignRequest::set_allocated_set_output(::hw::trezor:
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.set_output)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest all_out_set = 6;
+// optional .hw.trezor.messages.monero.MoneroTransactionRangeSigRequest rsig = 7;
+inline bool MoneroTransactionSignRequest::has_rsig() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MoneroTransactionSignRequest::set_has_rsig() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MoneroTransactionSignRequest::clear_has_rsig() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MoneroTransactionSignRequest::clear_rsig() {
+  if (rsig_ != NULL) rsig_->::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest::Clear();
+  clear_has_rsig();
+}
+inline const ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest& MoneroTransactionSignRequest::rsig() const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionSignRequest.rsig)
+  return rsig_ != NULL ? *rsig_ : *default_instance_->rsig_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* MoneroTransactionSignRequest::mutable_rsig() {
+  set_has_rsig();
+  if (rsig_ == NULL) rsig_ = new ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest;
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionSignRequest.rsig)
+  return rsig_;
+}
+inline ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* MoneroTransactionSignRequest::release_rsig() {
+  clear_has_rsig();
+  ::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* temp = rsig_;
+  rsig_ = NULL;
+  return temp;
+}
+inline void MoneroTransactionSignRequest::set_allocated_rsig(::hw::trezor::messages::monero::MoneroTransactionRangeSigRequest* rsig) {
+  delete rsig_;
+  rsig_ = rsig;
+  if (rsig) {
+    set_has_rsig();
+  } else {
+    clear_has_rsig();
+  }
+  // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.rsig)
+}
+
+// optional .hw.trezor.messages.monero.MoneroTransactionAllOutSetRequest all_out_set = 8;
 inline bool MoneroTransactionSignRequest::has_all_out_set() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void MoneroTransactionSignRequest::set_has_all_out_set() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void MoneroTransactionSignRequest::clear_has_all_out_set() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void MoneroTransactionSignRequest::clear_all_out_set() {
   if (all_out_set_ != NULL) all_out_set_->::hw::trezor::messages::monero::MoneroTransactionAllOutSetRequest::Clear();
@@ -10668,15 +12169,15 @@ inline void MoneroTransactionSignRequest::set_allocated_all_out_set(::hw::trezor
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.all_out_set)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionMlsagDoneRequest mlsag_done = 7;
+// optional .hw.trezor.messages.monero.MoneroTransactionMlsagDoneRequest mlsag_done = 9;
 inline bool MoneroTransactionSignRequest::has_mlsag_done() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void MoneroTransactionSignRequest::set_has_mlsag_done() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void MoneroTransactionSignRequest::clear_has_mlsag_done() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void MoneroTransactionSignRequest::clear_mlsag_done() {
   if (mlsag_done_ != NULL) mlsag_done_->::hw::trezor::messages::monero::MoneroTransactionMlsagDoneRequest::Clear();
@@ -10709,15 +12210,15 @@ inline void MoneroTransactionSignRequest::set_allocated_mlsag_done(::hw::trezor:
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.mlsag_done)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionSignInputRequest sign_input = 8;
+// optional .hw.trezor.messages.monero.MoneroTransactionSignInputRequest sign_input = 10;
 inline bool MoneroTransactionSignRequest::has_sign_input() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void MoneroTransactionSignRequest::set_has_sign_input() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void MoneroTransactionSignRequest::clear_has_sign_input() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void MoneroTransactionSignRequest::clear_sign_input() {
   if (sign_input_ != NULL) sign_input_->::hw::trezor::messages::monero::MoneroTransactionSignInputRequest::Clear();
@@ -10750,15 +12251,15 @@ inline void MoneroTransactionSignRequest::set_allocated_sign_input(::hw::trezor:
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionSignRequest.sign_input)
 }
 
-// optional .hw.trezor.messages.monero.MoneroTransactionFinalRequest final_msg = 9;
+// optional .hw.trezor.messages.monero.MoneroTransactionFinalRequest final_msg = 11;
 inline bool MoneroTransactionSignRequest::has_final_msg() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void MoneroTransactionSignRequest::set_has_final_msg() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void MoneroTransactionSignRequest::clear_has_final_msg() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void MoneroTransactionSignRequest::clear_final_msg() {
   if (final_msg_ != NULL) final_msg_->::hw::trezor::messages::monero::MoneroTransactionFinalRequest::Clear();
