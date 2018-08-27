@@ -9,6 +9,7 @@
 #include <boost/endian/conversion.hpp>
 #include <common/apply_permutation.h>
 #include <ringct/rctSigs.h>
+#include <ringct/bulletproofs.h>
 #include "sodium.h"
 #include "sodium/crypto_aead_chacha20poly1305.h"
 
@@ -474,7 +475,7 @@ namespace tx {
 
   std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> Signer::step_set_output(size_t idx){
     m_ct.cur_output_idx = idx;
-    m_ct.cur_output_in_batch_idx += 1;   // assumes consequential call to step_set_output()
+    m_ct.cur_output_in_batch_idx += 1;   // assumes sequential call to step_set_output()
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
     auto & cur_dst = m_ct.tx_data.splitted_dsts[idx];
@@ -491,8 +492,10 @@ namespace tx {
     }
 
     auto rsig_data = res->mutable_rsig_data();
+    auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
+
     if (!is_bulletproof()){
-      if (m_ct.grouping_vct[m_ct.cur_batch_idx] > 1){
+      if (batch_size > 1){
         throw std::invalid_argument("Borromean cannot batch outputs");
       }
 
@@ -502,8 +505,16 @@ namespace tx {
       rsig_data->set_rsig(serRsig);
 
     } else {
-      throw exc::ProtocolException("Not implemented"); // TODO: fix when bp multi is merged
+      std::vector<uint64_t> amounts;
+      rct::keyV masks;
+      for(size_t i = 0; i < batch_size; ++i){
+        amounts.push_back(m_ct.tx_data.splitted_dsts[idx - batch_size + i].amount);
+        masks.push_back(m_ct.rsig_gamma[idx - batch_size + i]);
+      }
 
+      auto bp = bulletproof_PROVE(amounts, masks);
+      auto serRsig = cn_serialize(bp);
+      rsig_data->set_rsig(serRsig);
     }
 
     m_ct.cur_batch_idx += 1;
