@@ -131,7 +131,7 @@ static const struct {
     { 6, 1310, 0, 1501709789 },
     { 7, 1315, 0, 1512211236 },
     { 8, 1232000, 0, 1515967497 }, // Bulletproof
-
+    { 9, 1057778, 0, 1515967498 }, // BP multi
 
 //  // version 1 from the start of the blockchain
 //  { 1, 1, 0, 1341378000 },
@@ -147,6 +147,7 @@ static const struct {
 //  { 6, 971400, 0, 1501709789 },
 //  { 7, 1057027, 0, 1512211236 },
 //  { 8, 1057058, 0, 1515967497 },
+//  { 9, 1057778, 0, 1515967498 },
 };
 static const uint64_t testnet_hard_fork_version_1_till = 1295;
 
