@@ -16,7 +16,10 @@ namespace trezor {
 #define HW_TREZOR_NAME_LITE "TrezorLite"
 
     static device_trezor *trezor_device = nullptr;
+
+#if WITH_DEVICE_TREZOR_LITE
     static device_trezor_lite *trezor_device_lite = nullptr;
+#endif
 
     static device_trezor *ensure_trezor_device(){
       if (!trezor_device) {
@@ -26,6 +29,7 @@ namespace trezor {
       return trezor_device;
     }
 
+#if WITH_DEVICE_TREZOR_LITE
     static device_trezor_lite *ensure_trezor_device_lite(){
       if (!trezor_device_lite) {
         trezor_device_lite = new device_trezor_lite();
@@ -33,6 +37,7 @@ namespace trezor {
       }
       return trezor_device_lite;
     }
+#endif
 
     void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
       registry.insert(std::make_pair(HW_TREZOR_NAME, std::unique_ptr<device>(ensure_trezor_device())));
