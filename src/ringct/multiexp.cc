@@ -79,6 +79,20 @@ extern "C"
 // Best/cached		Straus	Straus	Straus	Straus	Straus	Straus	Straus	Straus	Pip	Pip	Pip	Pip
 // Best/uncached	Straus	Straus	Straus	Straus	Straus	Straus	Pip	Pip	Pip	Pip	Pip	Pip
 
+// New timings:
+//   Pippenger:
+//     pink(6)/turquoise(5) < 200
+//     green(7)/pink(6) at ~470
+//     red(8)/green(7) at ~1180
+//     orange(9)/red at ~2290
+//   Cached Pippenger:
+//     brown(6)/green(5) < 200
+//     turquoise(7)/brown(6) at 460
+//     pink(8)/turquoise(7) at 1180
+//     green(9)/pink(8) at 2300
+//
+//     Cached Straus/Pippenger seems to be cross at 230, but missing small pip c
+
 namespace rct
 {
 
@@ -550,9 +564,10 @@ size_t get_pippenger_c(size_t N)
   if (N <= 16) return 3;
   if (N <= 64) return 4;
   if (N <= 128) return 5;
-  if (N <= 256) return 6;
-  if (N <= 1024) return 7;
-  if (N <= 2048) return 8;
+
+  if (N <= 465) return 6;
+  if (N <= 1180) return 7;
+  if (N <= 2295) return 8;
   return 9;
 }
 
