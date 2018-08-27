@@ -11,6 +11,10 @@
   #define WITH_DEVICE_TREZOR 0
 #endif
 
+#ifndef WITH_DEVICE_TREZOR_LITE
+#define WITH_DEVICE_TREZOR_LITE 0
+#endif
+
 #if HAVE_PROTOBUF
 #include "trezor/transport.hpp"
 #include "trezor/messages/messages.pb.h"

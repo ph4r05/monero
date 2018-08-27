@@ -21,7 +21,7 @@
 namespace hw {
 namespace trezor {
 
-#if WITH_DEVICE_TREZOR
+#if WITH_DEVICE_TREZOR and WITH_DEVICE_TREZOR_LITE
   class device_trezor_lite;
 
   /**

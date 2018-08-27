@@ -36,12 +36,16 @@ namespace trezor {
 
     void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
       registry.insert(std::make_pair(HW_TREZOR_NAME, std::unique_ptr<device>(ensure_trezor_device())));
+#if WITH_DEVICE_TREZOR_LITE
       registry.insert(std::make_pair(HW_TREZOR_NAME_LITE, std::unique_ptr<device>(ensure_trezor_device_lite())));
+#endif
     }
 
     void register_all() {
       hw::register_device(HW_TREZOR_NAME, ensure_trezor_device());
+#if WITH_DEVICE_TREZOR_LITE
       hw::register_device(HW_TREZOR_NAME_LITE, ensure_trezor_device_lite());
+#endif
     }
 
     device_trezor::device_trezor() {
