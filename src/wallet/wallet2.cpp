@@ -161,6 +161,7 @@ struct options {
     }
   };
   const command_line::arg_descriptor<uint64_t> kdf_rounds = {"kdf-rounds", tools::wallet2::tr("Number of rounds for the key derivation function"), 1};
+  const command_line::arg_descriptor<std::string> hw_device = {"hw-device", tools::wallet2::tr("HW device to use"), ""};
 };
 
 void do_prepare_file_names(const std::string& file_path, std::string& keys_file, std::string& wallet_file)
@@ -209,6 +210,7 @@ std::unique_ptr<tools::wallet2> make_basic(const boost::program_options::variabl
   auto daemon_address = command_line::get_arg(vm, opts.daemon_address);
   auto daemon_host = command_line::get_arg(vm, opts.daemon_host);
   auto daemon_port = command_line::get_arg(vm, opts.daemon_port);
+  auto device_name = command_line::get_arg(vm, opts.hw_device);
 
   THROW_WALLET_EXCEPTION_IF(!daemon_address.empty() && !daemon_host.empty() && 0 != daemon_port,
       tools::error::wallet_internal_error, tools::wallet2::tr("can't specify daemon host or port more than once"));
@@ -242,6 +244,7 @@ std::unique_ptr<tools::wallet2> make_basic(const boost::program_options::variabl
   wallet->init(rpc, std::move(daemon_address), std::move(login));
   boost::filesystem::path ringdb_path = command_line::get_arg(vm, opts.shared_ringdb_dir);
   wallet->set_ring_database(ringdb_path.string());
+  wallet->device_name(device_name);
   return wallet;
 }
 
@@ -747,6 +750,11 @@ bool wallet2::has_stagenet_option(const boost::program_options::variables_map& v
   return command_line::get_arg(vm, options().stagenet);
 }
 
+std::string wallet2::device_name_option(const boost::program_options::variables_map& vm)
+{
+  return command_line::get_arg(vm, options().hw_device);
+}
+
 void wallet2::init_options(boost::program_options::options_description& desc_params)
 {
   const options opts{};
@@ -760,6 +768,7 @@ void wallet2::init_options(boost::program_options::options_description& desc_par
   command_line::add_arg(desc_params, opts.stagenet);
   command_line::add_arg(desc_params, opts.shared_ringdb_dir);
   command_line::add_arg(desc_params, opts.kdf_rounds);
+  command_line::add_arg(desc_params, opts.hw_device);
 }
 
 std::unique_ptr<wallet2> wallet2::make_from_json(const boost::program_options::variables_map& vm, bool rpc, const std::string& json_file, const std::function<boost::optional<tools::password_container>(const char *, bool)> &password_prompter)
@@ -3203,7 +3212,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     encrypted_secret_keys = field_encrypted_secret_keys;
 
     GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, device_name, std::string, String, false, std::string());
-    if (field_device_name_found)
+    if (m_device_name.empty() && field_device_name_found)
     {
       m_device_name = field_device_name;
     }
