@@ -57,6 +57,7 @@ set(unit_tests_sources
   mlocker.cpp
   mnemonics.cpp
   mul_div.cpp
+  multiexp.cpp
   multisig.cpp
   parse_amount.cpp
   random.cpp
@@ -76,7 +77,8 @@ set(unit_tests_sources
   output_selection.cpp
   vercmp.cpp
   ringdb.cpp
-  wipeable_string.cpp)
+  wipeable_string.cpp
+  aligned.cpp)
 
 set(unit_tests_headers
   unit_tests_utils.h)
