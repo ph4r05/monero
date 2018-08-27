@@ -10,7 +10,7 @@
 namespace hw {
 namespace trezor {
 
-#if WITH_DEVICE_TREZOR
+#if WITH_DEVICE_TREZOR and WITH_DEVICE_TREZOR_LITE
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "device.trezor"
