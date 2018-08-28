@@ -188,6 +188,8 @@ namespace tx {
     std::string enc_keys;
 
     std::shared_ptr<rct::rctSig> rv;
+
+    TData();
   };
 
   class Signer {
