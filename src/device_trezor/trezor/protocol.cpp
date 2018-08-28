@@ -221,6 +221,15 @@ namespace tx {
     dst->set_mask(key_to_string(src->mask));
   }
 
+  TData::TData() {
+    in_memory = false;
+    rsig_type = 0;
+    cur_input_idx = 0;
+    cur_output_idx = 0;
+    cur_batch_idx = 0;
+    cur_output_in_batch_idx = 0;
+  }
+
   Signer::Signer(wallet_shim *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
     m_wallet2 = wallet2;
     m_unsigned_tx = unsigned_tx;
@@ -494,7 +503,7 @@ namespace tx {
     auto rsig_data = res->mutable_rsig_data();
     auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
 
-    if (!is_bulletproof()){
+    if (!is_req_bulletproof()){
       if (batch_size > 1){
         throw std::invalid_argument("Borromean cannot batch outputs");
       }
@@ -508,17 +517,16 @@ namespace tx {
       std::vector<uint64_t> amounts;
       rct::keyV masks;
       for(size_t i = 0; i < batch_size; ++i){
-        amounts.push_back(m_ct.tx_data.splitted_dsts[idx - batch_size + i].amount);
-        masks.push_back(m_ct.rsig_gamma[idx - batch_size + i]);
+        amounts.push_back(m_ct.tx_data.splitted_dsts[1 + idx - batch_size + i].amount);
+        masks.push_back(m_ct.rsig_gamma[1 + idx - batch_size + i]);
       }
 
       auto bp = bulletproof_PROVE(amounts, masks);
       auto serRsig = cn_serialize(bp);
+      m_ct.tx_out_rsigs.emplace_back(bp);
       rsig_data->set_rsig(serRsig);
     }
 
-    m_ct.cur_batch_idx += 1;
-    m_ct.cur_output_in_batch_idx = 0;
     return res;
   }
 
@@ -530,7 +538,7 @@ namespace tx {
     rct::ecdhTuple ecdh{};
     const bool has_rsig = ack->has_rsig_data()
         && ack->rsig_data().has_rsig()
-        && ack->rsig_data().rsig().size() > 0;
+        && !ack->rsig_data().rsig().empty();
     auto rsig_data = ack->has_rsig_data() ? std::addressof(ack->rsig_data()) : nullptr;
 
     if (!cn_deserialize(ack->tx_out(), tx_out)){
@@ -558,22 +566,33 @@ namespace tx {
     m_ct.tx_out_pk.emplace_back(out_pk);
     m_ct.tx_out_ecdh.emplace_back(ecdh);
 
-    if (is_req_bulletproof()){
-      bproof.V.push_back(out_pk.mask);
-      m_ct.tx_out_rsigs.emplace_back(bproof);
-    } else {
-      m_ct.tx_out_rsigs.emplace_back(range_sig);
+    if (!has_rsig){
+      return;
     }
 
     if (is_req_bulletproof()){
+      auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
+      for (size_t i = 0; i < batch_size; ++i){
+        rct::key commitment = m_ct.tx_out_pk[1 + m_ct.cur_output_idx - batch_size + i].mask;
+        commitment = rct::scalarmultKey(commitment, rct::INV_EIGHT);
+        bproof.V.push_back(commitment);
+      }
+
+      m_ct.tx_out_rsigs.emplace_back(bproof);
       if (!rct::verBulletproof(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs.back()))) {
         throw exc::ProtocolException("Returned range signature is invalid");
       }
+
     } else {
+      m_ct.tx_out_rsigs.emplace_back(range_sig);
+
       if (!rct::verRange(out_pk.mask, boost::get<rct::rangeSig>(m_ct.tx_out_rsigs.back()))) {
         throw exc::ProtocolException("Returned range signature is invalid");
       }
     }
+
+    m_ct.cur_batch_idx += 1;
+    m_ct.cur_output_in_batch_idx = 0;
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> step_rsig(){
