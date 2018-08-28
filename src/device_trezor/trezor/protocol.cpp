@@ -291,6 +291,7 @@ namespace tx {
         while (batch_size * 2 + amount_batched <= num_outputs && batch_size * 2 <= BULLETPROOF_MAX_OUTPUTS){
           batch_size *= 2;
         }
+        batch_size = std::min(batch_size, num_outputs - amount_batched);
         batches.push_back(batch_size);
         amount_batched += batch_size;
 
@@ -631,7 +632,7 @@ namespace tx {
 
     // RctSig
     auto num_sources = m_ct.tx_data.sources.size();
-    if (is_simple()){
+    if (is_simple() || is_req_bulletproof()){
       auto & dst = m_ct.rv->pseudoOuts;
       if (is_bulletproof()){
         dst = m_ct.rv->p.pseudoOuts;
