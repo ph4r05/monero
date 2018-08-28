@@ -47,7 +47,7 @@ namespace trezor {
 
   // Flexible json serialization. HTTP client tailored for bridge API
   template<class t_req, class t_res, class t_transport>
-  bool invoke_bridge_http(const boost::string_ref uri, const t_req & out_struct, t_res & result_struct, t_transport& transport, const boost::string_ref method = "POST", std::chrono::milliseconds timeout = std::chrono::seconds(15))
+  bool invoke_bridge_http(const boost::string_ref uri, const t_req & out_struct, t_res & result_struct, t_transport& transport, const boost::string_ref method = "POST", std::chrono::milliseconds timeout = std::chrono::seconds(180))
   {
     std::string req_param;
     t_serialize(out_struct, req_param);
