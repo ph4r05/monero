@@ -511,6 +511,7 @@ namespace tx {
       rct::key C{}, mask = m_ct.rsig_gamma[idx];
       auto genRsig = rct::proveRange(C, mask, cur_dst.amount);  // TODO: rsig with given mask
       auto serRsig = cn_serialize(genRsig);
+      m_ct.tx_out_rsigs.emplace_back(genRsig);
       rsig_data->set_rsig(serRsig);
 
     } else {
