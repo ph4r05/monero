@@ -523,10 +523,11 @@ namespace tx {
         masks.push_back(m_ct.rsig_gamma[1 + idx - batch_size + i]);
       }
 
-      auto bp = bulletproof_PROVE(amounts, masks);
-      auto serRsig = cn_serialize(bp);
-      m_ct.tx_out_rsigs.emplace_back(bp);
-      rsig_data->set_rsig(serRsig);
+      throw exc::ProtocolException("Aggregated BP not yet merged");
+//      auto bp = bulletproof_PROVE(amounts, masks);
+//      auto serRsig = cn_serialize(bp);
+//      m_ct.tx_out_rsigs.emplace_back(bp);
+//      rsig_data->set_rsig(serRsig);
     }
 
     return res;
@@ -576,7 +577,7 @@ namespace tx {
       auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
       for (size_t i = 0; i < batch_size; ++i){
         rct::key commitment = m_ct.tx_out_pk[1 + m_ct.cur_output_idx - batch_size + i].mask;
-        commitment = rct::scalarmultKey(commitment, rct::INV_EIGHT);
+//        commitment = rct::scalarmultKey(commitment, rct::INV_EIGHT);  // TODO: after BP merge
         bproof.V.push_back(commitment);
       }
 
