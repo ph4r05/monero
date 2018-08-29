@@ -53,7 +53,6 @@ set(trezor_headers
 )
 
 set(trezor_sources
-        trezor/exceptions.cpp
         trezor/messages_map.cpp
         trezor/protocol.cpp
         trezor/transport.cpp
