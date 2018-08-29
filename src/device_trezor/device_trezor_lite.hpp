@@ -10,7 +10,6 @@
 #include <string>
 #include "device/device.hpp"
 #include "device/device_default.hpp"
-#include "device/device_ledger.hpp"
 #include <boost/scope_exit.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/recursive_mutex.hpp>
@@ -22,7 +21,29 @@ namespace hw {
 namespace trezor {
 
 #if WITH_DEVICE_TREZOR and WITH_DEVICE_TREZOR_LITE
-  class device_trezor_lite;
+
+    class ABPkeys {
+    public:
+      rct::key Aout;
+      rct::key Bout;
+      bool     is_subaddress;
+      size_t   index;
+      rct::key Pout;
+      rct::key AKout;
+      ABPkeys(const rct::key& A, const rct::key& B, const bool is_subaddr,  size_t index, const rct::key& P,const rct::key& AK);
+      ABPkeys(const ABPkeys& keys) ;
+      ABPkeys() {index=0;is_subaddress=false;}
+    };
+
+    class Keymap {
+    public:
+      std::vector<ABPkeys> ABP;
+
+      bool find(const rct::key& P, ABPkeys& keys) const;
+      void add(const ABPkeys& keys);
+      void clear();
+      void log();
+    };
 
   /**
    * Main device
@@ -33,7 +54,7 @@ namespace trezor {
     device_mode mode;
 
     // map public destination key to ephemeral destination key
-    hw::ledger::Keymap key_map;
+    Keymap key_map;
 
     // To speed up blockchain parsing the view key maybe handle here.
     crypto::secret_key viewkey;
