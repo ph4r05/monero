@@ -57,19 +57,19 @@ namespace exc {
     EncodingException(): CommunicationException("Trezor message encoding error"){}
   };
 
-  class NotConnectedException : CommunicationException {
+  class NotConnectedException : public CommunicationException {
   public:
     using CommunicationException::CommunicationException;
     NotConnectedException(): CommunicationException("Trezor not connected"){}
   };
 
-  class DeviceNotResponsiveException : CommunicationException {
+  class DeviceNotResponsiveException : public CommunicationException {
   public:
     using CommunicationException::CommunicationException;
     DeviceNotResponsiveException(): CommunicationException("Trezor does not respond to ping"){}
   };
 
-  class DeviceAcquireException : CommunicationException {
+  class DeviceAcquireException : public CommunicationException {
   public:
     using CommunicationException::CommunicationException;
     DeviceAcquireException(): CommunicationException("Trezor could not be acquired"){}
