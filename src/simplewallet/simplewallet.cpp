@@ -7706,15 +7706,15 @@ bool simple_wallet::hw_key_images_sync(const std::vector<std::string> &args)
     uint64_t height = m_wallet->cold_key_image_sync(spent, unspent);
     if (height > 0)
     {
-      success_msg_writer() << "Signed key images imported to height " << height << ", "
-          << print_money(spent) << " spent, " << print_money(unspent) << " unspent";
+      success_msg_writer() << tr("Signed key images imported to height ") << height << ", "
+          << print_money(spent) << tr(" spent, ") << print_money(unspent) << tr(" unspent");
     } else {
-      fail_msg_writer() << "Failed to import key images";
+      fail_msg_writer() << tr("Failed to import key images");
     }
   }
   catch (const std::exception &e)
   {
-    fail_msg_writer() << "Failed to import key images: " << e.what();
+    fail_msg_writer() << tr("Failed to import key images: ") << tr(e.what());
     return true;
   }
 
