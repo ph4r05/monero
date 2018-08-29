@@ -13,7 +13,6 @@
 
 #include <typeinfo>
 #include <type_traits>
-#include <net/http_base.h>
 #include "net/http_client.h"
 
 #include "rapidjson/document.h"
@@ -56,7 +55,7 @@ namespace trezor {
     additional_params.push_back(std::make_pair("Origin","https://python.trezor.io"));
     additional_params.push_back(std::make_pair("Content-Type","application/json; charset=utf-8"));
 
-    const http::http_response_info* pri = NULL;
+    const http::http_response_info* pri = nullptr;
     if(!transport.invoke(uri, method, req_param, timeout, std::addressof(pri), std::move(additional_params)))
     {
       LOG_PRINT_L1("Failed to invoke http request to  " << uri);
