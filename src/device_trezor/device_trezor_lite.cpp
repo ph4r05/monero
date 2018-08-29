@@ -5,7 +5,6 @@
 //
 
 #include "device_trezor_lite.hpp"
-#include "device/device_ledger.hpp"
 
 namespace hw {
 namespace trezor {
@@ -520,7 +519,7 @@ namespace trezor {
     bool device_trezor_lite::add_output_key_mapping(const crypto::public_key &Aout, const crypto::public_key &Bout, const bool is_subaddress, const size_t real_output_index,
                                                const rct::key &amount_key,  const crypto::public_key &out_eph_public_key)  {
       AUTO_LOCK_CMD();
-      key_map.add(hw::ledger::ABPkeys(rct::pk2rct(Aout),rct::pk2rct(Bout), is_subaddress, real_output_index, rct::pk2rct(out_eph_public_key), amount_key));
+      key_map.add(ABPkeys(rct::pk2rct(Aout),rct::pk2rct(Bout), is_subaddress, real_output_index, rct::pk2rct(out_eph_public_key), amount_key));
       return true;
     }
 
