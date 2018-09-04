@@ -1584,6 +1584,18 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   inline ::hw::trezor::messages::monero::MoneroTransactionRsigData* release_rsig_data();
   inline void set_allocated_rsig_data(::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data);
 
+  // repeated uint32 integrated_indices = 15;
+  inline int integrated_indices_size() const;
+  inline void clear_integrated_indices();
+  static const int kIntegratedIndicesFieldNumber = 15;
+  inline ::google::protobuf::uint32 integrated_indices(int index) const;
+  inline void set_integrated_indices(int index, ::google::protobuf::uint32 value);
+  inline void add_integrated_indices(::google::protobuf::uint32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+      integrated_indices() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+      mutable_integrated_indices();
+
   // @@protoc_insertion_point(class_scope:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData)
  private:
   inline void set_has_version();
@@ -1626,6 +1638,7 @@ class MoneroTransactionInitRequest_MoneroTransactionData : public ::google::prot
   ::std::string* exp_tx_prefix_hash_;
   ::google::protobuf::RepeatedPtrField< ::std::string> use_tx_keys_;
   ::hw::trezor::messages::monero::MoneroTransactionRsigData* rsig_data_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > integrated_indices_;
   bool is_multisig_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
@@ -8418,6 +8431,36 @@ inline void MoneroTransactionInitRequest_MoneroTransactionData::set_allocated_rs
     clear_has_rsig_data();
   }
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.rsig_data)
+}
+
+// repeated uint32 integrated_indices = 15;
+inline int MoneroTransactionInitRequest_MoneroTransactionData::integrated_indices_size() const {
+  return integrated_indices_.size();
+}
+inline void MoneroTransactionInitRequest_MoneroTransactionData::clear_integrated_indices() {
+  integrated_indices_.Clear();
+}
+inline ::google::protobuf::uint32 MoneroTransactionInitRequest_MoneroTransactionData::integrated_indices(int index) const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.integrated_indices)
+  return integrated_indices_.Get(index);
+}
+inline void MoneroTransactionInitRequest_MoneroTransactionData::set_integrated_indices(int index, ::google::protobuf::uint32 value) {
+  integrated_indices_.Set(index, value);
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.integrated_indices)
+}
+inline void MoneroTransactionInitRequest_MoneroTransactionData::add_integrated_indices(::google::protobuf::uint32 value) {
+  integrated_indices_.Add(value);
+  // @@protoc_insertion_point(field_add:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.integrated_indices)
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+MoneroTransactionInitRequest_MoneroTransactionData::integrated_indices() const {
+  // @@protoc_insertion_point(field_list:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.integrated_indices)
+  return integrated_indices_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+MoneroTransactionInitRequest_MoneroTransactionData::mutable_integrated_indices() {
+  // @@protoc_insertion_point(field_mutable_list:hw.trezor.messages.monero.MoneroTransactionInitRequest.MoneroTransactionData.integrated_indices)
+  return &integrated_indices_;
 }
 
 // -------------------------------------------------------------------

@@ -93,11 +93,12 @@ enum ButtonRequest_ButtonRequestType {
   ButtonRequest_ButtonRequestType_ButtonRequest_PublicKey = 11,
   ButtonRequest_ButtonRequestType_ButtonRequest_MnemonicWordCount = 12,
   ButtonRequest_ButtonRequestType_ButtonRequest_MnemonicInput = 13,
-  ButtonRequest_ButtonRequestType_ButtonRequest_PassphraseType = 14
+  ButtonRequest_ButtonRequestType_ButtonRequest_PassphraseType = 14,
+  ButtonRequest_ButtonRequestType_ButtonRequest_UnknownDerivationPath = 15
 };
 bool ButtonRequest_ButtonRequestType_IsValid(int value);
 const ButtonRequest_ButtonRequestType ButtonRequest_ButtonRequestType_ButtonRequestType_MIN = ButtonRequest_ButtonRequestType_ButtonRequest_Other;
-const ButtonRequest_ButtonRequestType ButtonRequest_ButtonRequestType_ButtonRequestType_MAX = ButtonRequest_ButtonRequestType_ButtonRequest_PassphraseType;
+const ButtonRequest_ButtonRequestType ButtonRequest_ButtonRequestType_ButtonRequestType_MAX = ButtonRequest_ButtonRequestType_ButtonRequest_UnknownDerivationPath;
 const int ButtonRequest_ButtonRequestType_ButtonRequestType_ARRAYSIZE = ButtonRequest_ButtonRequestType_ButtonRequestType_MAX + 1;
 
 const ::google::protobuf::EnumDescriptor* ButtonRequest_ButtonRequestType_descriptor();
@@ -411,6 +412,7 @@ class ButtonRequest : public ::google::protobuf::Message {
   static const ButtonRequestType ButtonRequest_MnemonicWordCount = ButtonRequest_ButtonRequestType_ButtonRequest_MnemonicWordCount;
   static const ButtonRequestType ButtonRequest_MnemonicInput = ButtonRequest_ButtonRequestType_ButtonRequest_MnemonicInput;
   static const ButtonRequestType ButtonRequest_PassphraseType = ButtonRequest_ButtonRequestType_ButtonRequest_PassphraseType;
+  static const ButtonRequestType ButtonRequest_UnknownDerivationPath = ButtonRequest_ButtonRequestType_ButtonRequest_UnknownDerivationPath;
   static inline bool ButtonRequestType_IsValid(int value) {
     return ButtonRequest_ButtonRequestType_IsValid(value);
   }
