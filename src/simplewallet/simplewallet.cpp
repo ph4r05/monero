@@ -4805,11 +4805,13 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     local_args.pop_back();
   }
 
+  vector<cryptonote::address_parse_info> dsts_info;
   vector<cryptonote::tx_destination_entry> dsts;
   size_t num_subaddresses = 0;
   for (size_t i = 0; i < local_args.size(); i += 2)
   {
-    cryptonote::address_parse_info info;
+    dsts_info.emplace_back();
+    cryptonote::address_parse_info & info = dsts_info.back();
     cryptonote::tx_destination_entry de;
     if (!cryptonote::get_account_address_from_str_or_url(info, m_wallet->nettype(), local_args[i], oa_prompter))
     {
@@ -5051,7 +5053,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       try
       {
         tools::wallet2::signed_tx_set signed_tx;
-        if (!m_wallet->cold_sign_tx(ptx_vector, signed_tx, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
+        if (!m_wallet->cold_sign_tx(ptx_vector, signed_tx, dsts_info, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
           fail_msg_writer() << tr("Failed to cold sign transaction with HW wallet");
           return true;
         }

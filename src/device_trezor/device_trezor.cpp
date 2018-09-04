@@ -220,7 +220,7 @@ namespace trezor {
     void device_trezor::tx_sign(wallet_shim * wallet,
                                 const tools::wallet2::unsigned_tx_set & unsigned_tx,
                                 tools::wallet2::signed_tx_set & signed_tx,
-                                std::vector<std::string> & aux_info)
+                                hw::tx_aux_data & aux_data)
     {
       size_t num_tx = unsigned_tx.txes.size();
       signed_tx.key_images.clear();
@@ -232,7 +232,7 @@ namespace trezor {
 
         auto & cdata = signer->tdata();
         auto aux_info_cur = signer->store_tx_aux_info();
-        aux_info.emplace_back(aux_info_cur);
+        aux_data.tx_device_aux.emplace_back(aux_info_cur);
 
         // Pending tx reconstruction
         signed_tx.ptx.emplace_back();

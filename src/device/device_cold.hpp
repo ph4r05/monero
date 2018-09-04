@@ -15,6 +15,12 @@ namespace hw {
     boost::function<crypto::public_key (const tools::wallet2::transfer_details &td)> get_tx_pub_key_from_received_outs;
   } wallet_shim;
 
+  class tx_aux_data {
+  public:
+    std::vector<std::string> tx_device_aux;  // device generated aux data
+    std::vector<cryptonote::address_parse_info> tx_recipients;  // as entered by user
+  };
+
   class device_cold {
   public:
 
@@ -35,12 +41,12 @@ namespace hw {
      * @param wallet
      * @param unsigned_tx
      * @param signed_tx
-     * @param aux_info
+     * @param aux_data
      */
     virtual void tx_sign(wallet_shim * wallet,
                  const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                  ::tools::wallet2::signed_tx_set & signed_tx,
-                 std::vector<std::string> & aux_info) =0;
+                 tx_aux_data & aux_data) =0;
   };
 }
 

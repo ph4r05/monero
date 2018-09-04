@@ -8925,7 +8925,7 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const crypton
   return ptx_vector;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_set &exported_txs, std::function<bool(const signed_tx_set &)> accept_func){
+bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_set &exported_txs, std::vector<cryptonote::address_parse_info> &dsts_info, std::function<bool(const signed_tx_set &)> accept_func){
   auto & hwdev = get_account().get_device();
   if (!hwdev.has_tx_cold_sign()){
     throw std::invalid_argument("Device does not support cold sign protocol");
@@ -8940,11 +8940,11 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
 
-  std::vector<std::string> aux_info;
+  hw::tx_aux_data aux_data;
   hw::wallet_shim wallet_shim;
   setup_shim(&wallet_shim, this);
-
-  dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_info);
+  aux_data.tx_recipients = dsts_info;
+  dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_data);
 
   LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
   for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
@@ -8961,7 +8961,7 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
     auto & ptx = exported_txs.ptx[i];
 
     txid = get_transaction_hash(ptx.tx);
-    set_tx_device_aux(txid, aux_info[i]);
+    set_tx_device_aux(txid, aux_data.tx_device_aux[i]);
   }
 
   // import key images
