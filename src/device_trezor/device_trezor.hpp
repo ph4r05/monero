@@ -98,10 +98,12 @@ namespace trezor {
        * @param unsigned_tx
        * @param idx
        * @param signer
+       * @param aux_data
        */
       void tx_sign(wallet_shim * wallet,
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
+                   hw::tx_aux_data & aux_data,
                    std::shared_ptr<protocol::tx::Signer> & signer);
 
       /**
