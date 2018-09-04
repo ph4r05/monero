@@ -597,11 +597,11 @@ namespace tx {
     m_ct.cur_output_in_batch_idx = 0;
   }
 
-  std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> step_rsig(){
+  std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> Signer::step_rsig(){
     throw exc::ProtocolException("Not implemented");
   }
 
-  void step_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionRangeSigAck> ack){
+  void Signer::step_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionRangeSigAck> ack){
     throw exc::ProtocolException("Not implemented");
   }
 
