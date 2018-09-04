@@ -221,6 +221,48 @@ namespace tx {
     dst->set_mask(key_to_string(src->mask));
   }
 
+  bool addr_eq(const MoneroAccountPublicAddress * a, const MoneroAccountPublicAddress * b){
+    if (a == nullptr && b == nullptr)
+      return true;
+    if (a == nullptr || b == nullptr)
+      return false;
+    return a->spend_public_key() == b->spend_public_key() && a->view_public_key() == b->view_public_key();
+  }
+
+  std::string hash_addr(const MoneroAccountPublicAddress * addr, boost::optional<uint64_t> amount, boost::optional<bool> is_subaddr){
+    return hash_addr(addr->spend_public_key(), addr->view_public_key(), amount, is_subaddr);
+  }
+
+  std::string hash_addr(const std::string & spend_key, const std::string & view_key, boost::optional<uint64_t> amount, boost::optional<bool> is_subaddr){
+    ::crypto::public_key spend{}, view{};
+    if (spend_key.size() != 32 || view_key.size() != 32){
+      throw std::invalid_argument("Public keys have invalid sizes");
+    }
+
+    memcpy(spend.data, spend_key.data(), 32);
+    memcpy(view.data, view_key.data(), 32);
+    return hash_addr(&spend, &view, amount, is_subaddr);
+  }
+
+  std::string hash_addr(const ::crypto::public_key * spend_key, const ::crypto::public_key * view_key, boost::optional<uint64_t> amount, boost::optional<bool> is_subaddr){
+    char buff[64+8+1];
+    size_t offset = 0;
+
+    memcpy(buff + offset, spend_key->data, 32); offset += 32;
+    memcpy(buff + offset, view_key->data, 32); offset += 32;
+
+    if (amount){
+      memcpy(buff + offset, (uint8_t*) &(amount.get()), sizeof(amount.get())); offset += sizeof(amount.get());
+    }
+
+    if (is_subaddr){
+      buff[offset] = is_subaddr.get();
+      offset += 1;
+    }
+
+    return std::string(buff, offset);
+  }
+
   TData::TData() {
     in_memory = false;
     rsig_type = 0;
@@ -230,9 +272,10 @@ namespace tx {
     cur_output_in_batch_idx = 0;
   }
 
-  Signer::Signer(wallet_shim *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx) {
+  Signer::Signer(wallet_shim *wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx, hw::tx_aux_data * aux_data) {
     m_wallet2 = wallet2;
     m_unsigned_tx = unsigned_tx;
+    m_aux_data = aux_data;
     m_tx_idx = tx_idx;
     m_ct.tx_data = cur_tx();
     m_multisig = false;
@@ -301,6 +344,43 @@ namespace tx {
     }
   }
 
+  void Signer::compute_integrated_indices(TsxData * tsx_data){
+    if (m_aux_data == nullptr || m_aux_data->tx_recipients.empty()){
+      return;
+    }
+
+    auto & chg = tsx_data->change_dts();
+    std::string change_hash = hash_addr(&chg.addr(), chg.amount(), chg.is_subaddress());
+
+    std::vector<uint32_t> integrated_indices;
+    std::set<std::string> integrated_hashes;
+    for (auto & cur : m_aux_data->tx_recipients){
+      if (!cur.has_payment_id){
+        continue;
+      }
+      integrated_hashes.emplace(hash_addr(&cur.address.m_spend_public_key, &cur.address.m_view_public_key));
+    }
+
+    ssize_t idx = -1;
+    for (auto & cur : tsx_data->outputs()){
+      idx += 1;
+
+      std::string c_hash = hash_addr(&cur.addr(), cur.amount(), cur.is_subaddress());
+      if (c_hash == change_hash || cur.is_subaddress()){
+        continue;
+      }
+
+      c_hash = hash_addr(&cur.addr());
+      if (integrated_hashes.find(c_hash) != integrated_hashes.end()){
+        integrated_indices.push_back((uint32_t)idx);
+      }
+    }
+
+    if (!integrated_indices.empty()){
+      assign_to_repeatable(tsx_data->mutable_integrated_indices(), integrated_indices.begin(), integrated_indices.end());
+    }
+  }
+
   std::shared_ptr<messages::monero::MoneroTransactionInitRequest> Signer::step_init(){
     // extract payment ID from construction data
     auto & tsx_data = m_ct.tsx_data;
@@ -332,6 +412,8 @@ namespace tx {
       auto dst = tsx_data.mutable_outputs()->Add();
       translate_dst_entry(dst, std::addressof(cur));
     }
+
+    compute_integrated_indices(std::addressof(tsx_data));
 
     int64_t fee = 0;
     for(auto & cur_in : tx.sources){

@@ -148,6 +148,10 @@ namespace tx {
   void translate_src_entry(MoneroTransactionSourceEntry * dst, const cryptonote::tx_source_entry * src);
   void translate_klrki(MoneroMultisigKLRki * dst, const rct::multisig_kLRki * src);
   void translate_rct_key(MoneroRctKey * dst, const rct::ctkey * src);
+  bool addr_eq(const MoneroAccountPublicAddress * a, const MoneroAccountPublicAddress * b);
+  std::string hash_addr(const MoneroAccountPublicAddress * addr, boost::optional<uint64_t> amount = boost::none, boost::optional<bool> is_subaddr = boost::none);
+  std::string hash_addr(const std::string & spend_key, const std::string & view_key, boost::optional<uint64_t> amount = boost::none, boost::optional<bool> is_subaddr = boost::none);
+  std::string hash_addr(const ::crypto::public_key * spend_key, const ::crypto::public_key * view_key, boost::optional<uint64_t> amount = boost::none, boost::optional<bool> is_subaddr = boost::none);
 
   typedef boost::variant<rct::rangeSig, rct::Bulletproof> rsig_v;
 
@@ -199,6 +203,7 @@ namespace tx {
 
     size_t m_tx_idx;
     const unsigned_tx_set * m_unsigned_tx;
+    hw::tx_aux_data * m_aux_data;
 
     bool m_multisig;
 
@@ -207,9 +212,10 @@ namespace tx {
     }
 
     void extract_payment_id();
+    void compute_integrated_indices(TsxData * tsx_data);
 
   public:
-    Signer(wallet_shim * wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx = 0);
+    Signer(wallet_shim * wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx = 0, hw::tx_aux_data * aux_data = nullptr);
 
     std::shared_ptr<messages::monero::MoneroTransactionInitRequest> step_init();
     void step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack);

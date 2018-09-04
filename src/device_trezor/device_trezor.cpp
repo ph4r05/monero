@@ -228,7 +228,7 @@ namespace trezor {
 
       for(size_t tx_idx = 0; tx_idx < num_tx; ++tx_idx) {
         std::shared_ptr<protocol::tx::Signer> signer;
-        tx_sign(wallet, unsigned_tx, tx_idx, signer);
+        tx_sign(wallet, unsigned_tx, tx_idx, aux_data, signer);
 
         auto & cdata = signer->tdata();
         auto aux_info_cur = signer->store_tx_aux_info();
@@ -273,13 +273,14 @@ namespace trezor {
     void device_trezor::tx_sign(wallet_shim * wallet,
                    const tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
+                   hw::tx_aux_data & aux_data,
                    std::shared_ptr<protocol::tx::Signer> & signer)
     {
       AUTO_LOCK_CMD();
       require_connected();
       test_ping();
 
-      signer = std::make_shared<protocol::tx::Signer>(wallet, std::addressof(unsigned_tx), idx);
+      signer = std::make_shared<protocol::tx::Signer>(wallet, std::addressof(unsigned_tx), idx, std::addressof(aux_data));
       auto & cur_tx = unsigned_tx.txes[idx];
       auto num_sources = cur_tx.sources.size();
       auto num_outputs = cur_tx.splitted_dsts.size();
