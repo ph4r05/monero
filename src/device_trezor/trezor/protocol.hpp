@@ -262,7 +262,7 @@ namespace tx {
         throw std::invalid_argument("RV not initialized");
       }
       auto tp = m_ct.rv->type;
-      return tp == rct::RCTTypeSimple || tp == rct::RCTTypeSimpleBulletproof;  // TODO: fix after BP multi merge
+      return tp == rct::RCTTypeSimple;
     }
 
     bool is_req_bulletproof() const {
@@ -274,7 +274,7 @@ namespace tx {
         throw std::invalid_argument("RV not initialized");
       }
       auto tp = m_ct.rv->type;
-      return tp == rct::RCTTypeSimpleBulletproof || tp == rct::RCTTypeFullBulletproof;  // TODO: fix after BP multi merge
+      return tp == rct::RCTTypeBulletproof;
     }
 
     bool is_offloading() const {
