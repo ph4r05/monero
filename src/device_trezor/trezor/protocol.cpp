@@ -399,7 +399,6 @@ namespace tx {
     tsx_data.set_exp_tx_prefix_hash("");
 
     // Rsig decision
-    // TODO: when BP aggregation is merged adapt to rct::RangeProofType
     auto rsig_data = tsx_data.mutable_rsig_data();
     m_ct.rsig_type = get_rsig_type(tx.use_bulletproofs, tx.splitted_dsts.size());
     rsig_data->set_rsig_type(m_ct.rsig_type);
@@ -454,7 +453,7 @@ namespace tx {
   void Signer::step_set_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetInputAck> ack){
     auto & vini_str = ack->vini();
 
-    cryptonote::txin_to_key vini;
+    cryptonote::txin_v vini;
     if (!cn_deserialize(vini_str.data(), vini_str.size(), vini)){
       throw exc::ProtocolException("Cannot deserialize vin[i]");
     }
@@ -517,7 +516,7 @@ namespace tx {
     m_ct.cur_input_idx = idx;
     auto tx = m_ct.tx_data;
     auto res = std::make_shared<messages::monero::MoneroTransactionInputViniRequest>();
-    auto vini = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[idx]);
+    auto & vini = m_ct.tx.vin[idx];
     translate_src_entry(res->mutable_src_entr(), std::addressof(tx.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(vini));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
@@ -768,7 +767,7 @@ namespace tx {
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSignInputRequest>();
     translate_src_entry(res->mutable_src_entr(), std::addressof(m_ct.tx_data.sources[idx]));
-    res->set_vini(cryptonote::t_serializable_object_to_blob(boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[idx])));
+    res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     res->set_alpha_enc(m_ct.alphas[idx]);
     res->set_spend_enc(m_ct.spend_encs[idx]);
