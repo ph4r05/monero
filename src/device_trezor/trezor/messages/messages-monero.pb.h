@@ -946,10 +946,26 @@ class MoneroTransactionRsigData : public ::google::protobuf::Message {
   inline ::std::string* release_rsig();
   inline void set_allocated_rsig(::std::string* rsig);
 
-  // repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 11;
+  // repeated bytes rsig_parts = 11;
+  inline int rsig_parts_size() const;
+  inline void clear_rsig_parts();
+  static const int kRsigPartsFieldNumber = 11;
+  inline const ::std::string& rsig_parts(int index) const;
+  inline ::std::string* mutable_rsig_parts(int index);
+  inline void set_rsig_parts(int index, const ::std::string& value);
+  inline void set_rsig_parts(int index, const char* value);
+  inline void set_rsig_parts(int index, const void* value, size_t size);
+  inline ::std::string* add_rsig_parts();
+  inline void add_rsig_parts(const ::std::string& value);
+  inline void add_rsig_parts(const char* value);
+  inline void add_rsig_parts(const void* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& rsig_parts() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_rsig_parts();
+
+  // repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 12;
   inline int outputs_size() const;
   inline void clear_outputs();
-  static const int kOutputsFieldNumber = 11;
+  static const int kOutputsFieldNumber = 12;
   inline const ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry& outputs(int index) const;
   inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* mutable_outputs(int index);
   inline ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry* add_outputs();
@@ -993,6 +1009,7 @@ class MoneroTransactionRsigData : public ::google::protobuf::Message {
   ::std::string* mask_;
   ::std::string* amount_;
   ::std::string* rsig_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> rsig_parts_;
   ::google::protobuf::RepeatedPtrField< ::hw::trezor::messages::monero::MoneroTransactionDestinationEntry > outputs_;
   friend void  protobuf_AddDesc_messages_2dmonero_2eproto();
   friend void protobuf_AssignDesc_messages_2dmonero_2eproto();
@@ -7459,7 +7476,61 @@ inline void MoneroTransactionRsigData::set_allocated_rsig(::std::string* rsig) {
   // @@protoc_insertion_point(field_set_allocated:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig)
 }
 
-// repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 11;
+// repeated bytes rsig_parts = 11;
+inline int MoneroTransactionRsigData::rsig_parts_size() const {
+  return rsig_parts_.size();
+}
+inline void MoneroTransactionRsigData::clear_rsig_parts() {
+  rsig_parts_.Clear();
+}
+inline const ::std::string& MoneroTransactionRsigData::rsig_parts(int index) const {
+  // @@protoc_insertion_point(field_get:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+  return rsig_parts_.Get(index);
+}
+inline ::std::string* MoneroTransactionRsigData::mutable_rsig_parts(int index) {
+  // @@protoc_insertion_point(field_mutable:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+  return rsig_parts_.Mutable(index);
+}
+inline void MoneroTransactionRsigData::set_rsig_parts(int index, const ::std::string& value) {
+  // @@protoc_insertion_point(field_set:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+  rsig_parts_.Mutable(index)->assign(value);
+}
+inline void MoneroTransactionRsigData::set_rsig_parts(int index, const char* value) {
+  rsig_parts_.Mutable(index)->assign(value);
+  // @@protoc_insertion_point(field_set_char:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+}
+inline void MoneroTransactionRsigData::set_rsig_parts(int index, const void* value, size_t size) {
+  rsig_parts_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_set_pointer:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+}
+inline ::std::string* MoneroTransactionRsigData::add_rsig_parts() {
+  return rsig_parts_.Add();
+}
+inline void MoneroTransactionRsigData::add_rsig_parts(const ::std::string& value) {
+  rsig_parts_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+}
+inline void MoneroTransactionRsigData::add_rsig_parts(const char* value) {
+  rsig_parts_.Add()->assign(value);
+  // @@protoc_insertion_point(field_add_char:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+}
+inline void MoneroTransactionRsigData::add_rsig_parts(const void* value, size_t size) {
+  rsig_parts_.Add()->assign(reinterpret_cast<const char*>(value), size);
+  // @@protoc_insertion_point(field_add_pointer:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+MoneroTransactionRsigData::rsig_parts() const {
+  // @@protoc_insertion_point(field_list:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+  return rsig_parts_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+MoneroTransactionRsigData::mutable_rsig_parts() {
+  // @@protoc_insertion_point(field_mutable_list:hw.trezor.messages.monero.MoneroTransactionRsigData.rsig_parts)
+  return &rsig_parts_;
+}
+
+// repeated .hw.trezor.messages.monero.MoneroTransactionDestinationEntry outputs = 12;
 inline int MoneroTransactionRsigData::outputs_size() const {
   return outputs_.size();
 }
