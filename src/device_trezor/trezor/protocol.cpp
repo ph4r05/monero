@@ -619,10 +619,24 @@ namespace tx {
     rct::Bulletproof bproof{};
     rct::ctkey out_pk{};
     rct::ecdhTuple ecdh{};
-    const bool has_rsig = ack->has_rsig_data()
-        && ack->rsig_data().has_rsig()
-        && !ack->rsig_data().rsig().empty();
-    auto rsig_data = ack->has_rsig_data() ? std::addressof(ack->rsig_data()) : nullptr;
+
+    bool has_rsig = false;
+    std::string rsig_buff;
+
+    if (ack->has_rsig_data()){
+      auto & rsig_data = ack->rsig_data();
+
+      if (rsig_data.has_rsig() && !rsig_data.rsig().empty()){
+        has_rsig = true;
+        rsig_buff = rsig_data.rsig();
+
+      } else if (rsig_data.rsig_parts_size() > 0){
+        has_rsig = true;
+        for (const auto &it : rsig_data.rsig_parts()) {
+          rsig_buff += it;
+        }
+      }
+    }
 
     if (!cn_deserialize(ack->tx_out(), tx_out)){
       throw exc::ProtocolException("Cannot deserialize vout[i]");
@@ -636,11 +650,11 @@ namespace tx {
       throw exc::ProtocolException("Cannot deserialize ecdhtuple");
     }
 
-    if (has_rsig && !is_req_bulletproof() && !cn_deserialize(rsig_data->rsig(), range_sig)){
+    if (has_rsig && !is_req_bulletproof() && !cn_deserialize(rsig_buff, range_sig)){
       throw exc::ProtocolException("Cannot deserialize rangesig");
     }
 
-    if (has_rsig && is_req_bulletproof() && !cn_deserialize(rsig_data->rsig(), bproof)){
+    if (has_rsig && is_req_bulletproof() && !cn_deserialize(rsig_buff, bproof)){
       throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
     }
 
