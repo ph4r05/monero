@@ -62,7 +62,7 @@ void protobuf_AddDesc_messages_2eproto() {
   ::google::protobuf::protobuf_AddDesc_google_2fprotobuf_2fdescriptor_2eproto();
   ::google::protobuf::DescriptorPool::InternalAddGeneratedFile(
     "\n\016messages.proto\022\022hw.trezor.messages\032 go"
-    "ogle/protobuf/descriptor.proto*\2404\n\013Messa"
+    "ogle/protobuf/descriptor.proto*\3067\n\013Messa"
     "geType\022$\n\026MessageType_Initialize\020\000\032\010\220\265\030\001"
     "\260\265\030\001\022\032\n\020MessageType_Ping\020\001\032\004\220\265\030\001\022\035\n\023Mess"
     "ageType_Success\020\002\032\004\230\265\030\001\022\035\n\023MessageType_F"
@@ -199,49 +199,60 @@ void protobuf_AddDesc_messages_2eproto() {
     "eAddress\020\221\003\032\004\230\265\030\001\022#\n\030MessageType_RippleS"
     "ignTx\020\222\003\032\004\220\265\030\001\022%\n\032MessageType_RippleSign"
     "edTx\020\223\003\032\004\220\265\030\001\0223\n(MessageType_MoneroTrans"
-    "actionSignRequest\020\365\003\032\004\220\265\030\001\022/\n$MessageTyp"
-    "e_MoneroTransactionInitAck\020\366\003\032\004\230\265\030\001\0223\n(M"
-    "essageType_MoneroTransactionSetInputAck\020"
-    "\367\003\032\004\230\265\030\001\022<\n1MessageType_MoneroTransactio"
-    "nInputsPermutationAck\020\370\003\032\004\230\265\030\001\0224\n)Messag"
-    "eType_MoneroTransactionInputViniAck\020\371\003\032\004"
-    "\230\265\030\001\0227\n,MessageType_MoneroTransactionAll"
-    "InputsSetAck\020\201\004\032\004\230\265\030\001\0224\n)MessageType_Mon"
-    "eroTransactionSetOutputAck\020\372\003\032\004\230\265\030\001\0223\n(M"
-    "essageType_MoneroTransactionRangeSigAck\020"
-    "\202\004\032\004\230\265\030\001\0224\n)MessageType_MoneroTransactio"
-    "nAllOutSetAck\020\373\003\032\004\230\265\030\001\0224\n)MessageType_Mo"
-    "neroTransactionMlsagDoneAck\020\374\003\032\004\230\265\030\001\0224\n)"
-    "MessageType_MoneroTransactionSignInputAc"
-    "k\020\375\003\032\004\230\265\030\001\0220\n%MessageType_MoneroTransact"
-    "ionFinalAck\020\376\003\032\004\230\265\030\001\0220\n%MessageType_Mone"
-    "roKeyImageSyncRequest\020\377\003\032\004\220\265\030\001\0222\n\'Messag"
-    "eType_MoneroKeyImageExportInitAck\020\210\004\032\004\230\265"
-    "\030\001\0220\n%MessageType_MoneroKeyImageSyncStep"
-    "Ack\020\211\004\032\004\230\265\030\001\0221\n&MessageType_MoneroKeyIma"
-    "geSyncFinalAck\020\212\004\032\004\230\265\030\001\022\'\n\034MessageType_M"
-    "oneroGetAddress\020\222\004\032\004\220\265\030\001\022$\n\031MessageType_"
-    "MoneroAddress\020\223\004\032\004\230\265\030\001\022(\n\035MessageType_Mo"
-    "neroGetWatchKey\020\224\004\032\004\220\265\030\001\022%\n\032MessageType_"
-    "MoneroWatchKey\020\225\004\032\004\230\265\030\001\022,\n!MessageType_M"
-    "oneroLiteInitRequest\020\234\004\032\004\220\265\030\001\022(\n\035Message"
-    "Type_MoneroLiteInitAck\020\235\004\032\004\230\265\030\001\022(\n\035Messa"
-    "geType_MoneroLiteRequest\020\236\004\032\004\220\265\030\001\022$\n\031Mes"
-    "sageType_MoneroLiteAck\020\237\004\032\004\230\265\030\001\022-\n\"Messa"
-    "geType_DebugMoneroDiagRequest\020\230\004\032\004\220\265\030\001\022)"
-    "\n\036MessageType_DebugMoneroDiagAck\020\231\004\032\004\230\265\030"
-    "\001:4\n\007wire_in\022!.google.protobuf.EnumValue"
-    "Options\030\322\206\003 \001(\010:5\n\010wire_out\022!.google.pro"
-    "tobuf.EnumValueOptions\030\323\206\003 \001(\010::\n\rwire_d"
-    "ebug_in\022!.google.protobuf.EnumValueOptio"
-    "ns\030\324\206\003 \001(\010:;\n\016wire_debug_out\022!.google.pr"
-    "otobuf.EnumValueOptions\030\325\206\003 \001(\010:6\n\twire_"
-    "tiny\022!.google.protobuf.EnumValueOptions\030"
-    "\326\206\003 \001(\010:<\n\017wire_bootloader\022!.google.prot"
-    "obuf.EnumValueOptions\030\327\206\003 \001(\010:8\n\013wire_no"
-    "_fsm\022!.google.protobuf.EnumValueOptions\030"
-    "\330\206\003 \001(\010B4\n#com.satoshilabs.trezor.lib.pr"
-    "otobufB\rTrezorMessage", 7221);
+    "actionInitRequest\020\365\003\032\004\230\265\030\001\022/\n$MessageTyp"
+    "e_MoneroTransactionInitAck\020\366\003\032\004\230\265\030\001\0227\n,M"
+    "essageType_MoneroTransactionSetInputRequ"
+    "est\020\367\003\032\004\230\265\030\001\0223\n(MessageType_MoneroTransa"
+    "ctionSetInputAck\020\370\003\032\004\230\265\030\001\022@\n5MessageType"
+    "_MoneroTransactionInputsPermutationReque"
+    "st\020\371\003\032\004\230\265\030\001\022<\n1MessageType_MoneroTransac"
+    "tionInputsPermutationAck\020\372\003\032\004\230\265\030\001\0228\n-Mes"
+    "sageType_MoneroTransactionInputViniReque"
+    "st\020\373\003\032\004\230\265\030\001\0224\n)MessageType_MoneroTransac"
+    "tionInputViniAck\020\374\003\032\004\230\265\030\001\022;\n0MessageType"
+    "_MoneroTransactionAllInputsSetRequest\020\375\003"
+    "\032\004\230\265\030\001\0227\n,MessageType_MoneroTransactionA"
+    "llInputsSetAck\020\376\003\032\004\230\265\030\001\0228\n-MessageType_M"
+    "oneroTransactionSetOutputRequest\020\377\003\032\004\230\265\030"
+    "\001\0224\n)MessageType_MoneroTransactionSetOut"
+    "putAck\020\200\004\032\004\230\265\030\001\0228\n-MessageType_MoneroTra"
+    "nsactionAllOutSetRequest\020\201\004\032\004\230\265\030\001\0224\n)Mes"
+    "sageType_MoneroTransactionAllOutSetAck\020\202"
+    "\004\032\004\230\265\030\001\0228\n-MessageType_MoneroTransaction"
+    "MlsagDoneRequest\020\203\004\032\004\230\265\030\001\0224\n)MessageType"
+    "_MoneroTransactionMlsagDoneAck\020\204\004\032\004\230\265\030\001\022"
+    "8\n-MessageType_MoneroTransactionSignInpu"
+    "tRequest\020\205\004\032\004\230\265\030\001\0224\n)MessageType_MoneroT"
+    "ransactionSignInputAck\020\206\004\032\004\230\265\030\001\0224\n)Messa"
+    "geType_MoneroTransactionFinalRequest\020\207\004\032"
+    "\004\230\265\030\001\0220\n%MessageType_MoneroTransactionFi"
+    "nalAck\020\210\004\032\004\230\265\030\001\0226\n+MessageType_MoneroKey"
+    "ImageExportInitRequest\020\222\004\032\004\230\265\030\001\0222\n\'Messa"
+    "geType_MoneroKeyImageExportInitAck\020\223\004\032\004\230"
+    "\265\030\001\0224\n)MessageType_MoneroKeyImageSyncSte"
+    "pRequest\020\224\004\032\004\230\265\030\001\0220\n%MessageType_MoneroK"
+    "eyImageSyncStepAck\020\225\004\032\004\230\265\030\001\0225\n*MessageTy"
+    "pe_MoneroKeyImageSyncFinalRequest\020\226\004\032\004\230\265"
+    "\030\001\0221\n&MessageType_MoneroKeyImageSyncFina"
+    "lAck\020\227\004\032\004\230\265\030\001\022\'\n\034MessageType_MoneroGetAd"
+    "dress\020\234\004\032\004\220\265\030\001\022$\n\031MessageType_MoneroAddr"
+    "ess\020\235\004\032\004\230\265\030\001\022(\n\035MessageType_MoneroGetWat"
+    "chKey\020\236\004\032\004\220\265\030\001\022%\n\032MessageType_MoneroWatc"
+    "hKey\020\237\004\032\004\230\265\030\001\022-\n\"MessageType_DebugMonero"
+    "DiagRequest\020\242\004\032\004\220\265\030\001\022)\n\036MessageType_Debu"
+    "gMoneroDiagAck\020\243\004\032\004\230\265\030\001:4\n\007wire_in\022!.goo"
+    "gle.protobuf.EnumValueOptions\030\322\206\003 \001(\010:5\n"
+    "\010wire_out\022!.google.protobuf.EnumValueOpt"
+    "ions\030\323\206\003 \001(\010::\n\rwire_debug_in\022!.google.p"
+    "rotobuf.EnumValueOptions\030\324\206\003 \001(\010:;\n\016wire"
+    "_debug_out\022!.google.protobuf.EnumValueOp"
+    "tions\030\325\206\003 \001(\010:6\n\twire_tiny\022!.google.prot"
+    "obuf.EnumValueOptions\030\326\206\003 \001(\010:<\n\017wire_bo"
+    "otloader\022!.google.protobuf.EnumValueOpti"
+    "ons\030\327\206\003 \001(\010:8\n\013wire_no_fsm\022!.google.prot"
+    "obuf.EnumValueOptions\030\330\206\003 \001(\010B4\n#com.sat"
+    "oshilabs.trezor.lib.protobufB\rTrezorMess"
+    "age", 7643);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "messages.proto", &protobuf_RegisterTypes);
   ::google::protobuf::internal::ExtensionSet::RegisterExtension(
@@ -428,21 +439,27 @@ bool MessageType_IsValid(int value) {
     case 509:
     case 510:
     case 511:
+    case 512:
     case 513:
     case 514:
+    case 515:
+    case 516:
+    case 517:
+    case 518:
+    case 519:
     case 520:
-    case 521:
-    case 522:
     case 530:
     case 531:
     case 532:
     case 533:
-    case 536:
-    case 537:
+    case 534:
+    case 535:
     case 540:
     case 541:
     case 542:
     case 543:
+    case 546:
+    case 547:
       return true;
     default:
       return false;
