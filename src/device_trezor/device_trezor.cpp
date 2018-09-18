@@ -170,10 +170,7 @@ namespace trezor {
 
       bool res = protocol::ki::generate_commitment(mtds, transfers, req);
       this->set_msg_addr<messages::monero::MoneroKeyImageExportInitRequest>(req.get());
-
-      auto env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
-      env->mutable_init()->CopyFrom(*req);
-      auto ack1 = this->client_exchange<messages::monero::MoneroKeyImageExportInitAck>(env);
+      auto ack1 = this->client_exchange<messages::monero::MoneroKeyImageExportInitAck>(req);
 
       const auto batch_size = 10;
       const auto num_batches = static_cast<uint64_t>(ceil(mtds.size() / static_cast<double>(batch_size)));
@@ -185,10 +182,7 @@ namespace trezor {
           *added_tdis = mtds[idx];
         }
 
-        env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
-        env->mutable_step()->CopyFrom(*step_req);
-
-        auto step_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncStepAck>(env);
+        auto step_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncStepAck>(step_req);
         auto kis_size = step_ack->kis_size();
         for(int i = 0; i < kis_size; ++i){
           auto ckis = step_ack->kis(i);
@@ -197,9 +191,7 @@ namespace trezor {
       }
 
       auto final_req = std::make_shared<messages::monero::MoneroKeyImageSyncFinalRequest>();
-      env = std::make_shared<messages::monero::MoneroKeyImageSyncRequest>();
-      env->mutable_final_msg()->CopyFrom(*final_req);
-      auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(env);
+      auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(final_req);
 
       for(auto & sub : kis){
         char buff[32*3];
@@ -288,29 +280,21 @@ namespace trezor {
       // Step: Init
       auto init_msg = signer->step_init();
       this->set_msg_addr(init_msg.get());
-      auto req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-      req_msg->mutable_init()->CopyFrom(*init_msg);
 
-      auto response = this->client_exchange<messages::monero::MoneroTransactionInitAck>(req_msg);
+      auto response = this->client_exchange<messages::monero::MoneroTransactionInitAck>(init_msg);
       signer->step_init_ack(response);
 
       // Step: Set transaction inputs
       for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
         auto src = signer->step_set_input(cur_src);
-        auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-        req->mutable_set_input()->CopyFrom(*src);
-
-        auto ack = this->client_exchange<messages::monero::MoneroTransactionSetInputAck>(req);
+        auto ack = this->client_exchange<messages::monero::MoneroTransactionSetInputAck>(src);
         signer->step_set_input_ack(ack);
       }
 
       // Step: sort
       auto perm_req = signer->step_permutation();
       if (perm_req){
-        req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-        req_msg->mutable_input_permutation()->CopyFrom(*perm_req);
-
-        auto perm_ack = this->client_exchange<messages::monero::MoneroTransactionInputsPermutationAck>(req_msg);
+        auto perm_ack = this->client_exchange<messages::monero::MoneroTransactionInputsPermutationAck>(perm_req);
         signer->step_permutation_ack(perm_ack);
       }
 
@@ -318,63 +302,43 @@ namespace trezor {
       if (!signer->in_memory()){
         for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
           auto src = signer->step_set_vini_input(cur_src);
-          auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-          req->mutable_input_vini()->CopyFrom(*src);
-
-          auto ack = this->client_exchange<messages::monero::MoneroTransactionInputViniAck>(req);
+          auto ack = this->client_exchange<messages::monero::MoneroTransactionInputViniAck>(src);
           signer->step_set_vini_input_ack(ack);
         }
       }
 
       // Step: all inputs set
       auto all_inputs_set = signer->step_all_inputs_set();
-      req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-      req_msg->mutable_all_in_set()->CopyFrom(*all_inputs_set);
-      auto ack_all_inputs = this->client_exchange<messages::monero::MoneroTransactionAllInputsSetAck>(req_msg);
+      auto ack_all_inputs = this->client_exchange<messages::monero::MoneroTransactionAllInputsSetAck>(all_inputs_set);
       signer->step_all_inputs_set_ack(ack_all_inputs);
 
       // Step: outputs
       for(size_t cur_dst = 0; cur_dst < num_outputs; ++cur_dst){
         auto src = signer->step_set_output(cur_dst);
-        auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-        req->mutable_set_output()->CopyFrom(*src);
-
-        auto ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(req);
+        auto ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(src);
         signer->step_set_output_ack(ack);
       }
 
       // Step: all outs set
       auto all_out_set = signer->step_all_outs_set();
-      req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-      req_msg->mutable_all_out_set()->CopyFrom(*all_out_set);
-
-      auto ack_all_out_set = this->client_exchange<messages::monero::MoneroTransactionAllOutSetAck>(req_msg);
+      auto ack_all_out_set = this->client_exchange<messages::monero::MoneroTransactionAllOutSetAck>(all_out_set);
       signer->step_all_outs_set_ack(ack_all_out_set);
 
       // Step: MlsagDone
       auto pre_mlsag_done = signer->step_pre_mlsag_done();
-      req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-      req_msg->mutable_mlsag_done()->CopyFrom(*pre_mlsag_done);
-
-      auto ack_pre_mlsag_done = this->client_exchange<messages::monero::MoneroTransactionMlsagDoneAck>(req_msg);
+      auto ack_pre_mlsag_done = this->client_exchange<messages::monero::MoneroTransactionMlsagDoneAck>(pre_mlsag_done);
       signer->step_pre_mlsag_done_ack(ack_pre_mlsag_done, *this);
 
       // Step: sign each input
       for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
         auto src = signer->step_sign_input(cur_src);
-        auto req = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-        req->mutable_sign_input()->CopyFrom(*src);
-
-        auto ack_sign = this->client_exchange<messages::monero::MoneroTransactionSignInputAck>(req);
+        auto ack_sign = this->client_exchange<messages::monero::MoneroTransactionSignInputAck>(src);
         signer->step_sign_input_ack(ack_sign);
       }
 
       // Step: final
       auto final_msg = signer->step_final();
-      req_msg = std::make_shared<messages::monero::MoneroTransactionSignRequest>();
-      req_msg->mutable_final_msg()->CopyFrom(*final_msg);
-
-      auto ack_final = this->client_exchange<messages::monero::MoneroTransactionFinalAck>(req_msg);
+      auto ack_final = this->client_exchange<messages::monero::MoneroTransactionFinalAck>(final_msg);
       signer->step_final_ack(ack_final);
     }
 

@@ -692,14 +692,6 @@ namespace tx {
     m_ct.cur_output_in_batch_idx = 0;
   }
 
-  std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> Signer::step_rsig(){
-    throw exc::ProtocolException("Not implemented");
-  }
-
-  void Signer::step_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionRangeSigAck> ack){
-    throw exc::ProtocolException("Not implemented");
-  }
-
   std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> Signer::step_all_outs_set(){
     return std::make_shared<messages::monero::MoneroTransactionAllOutSetRequest>();
   }
@@ -856,6 +848,8 @@ namespace tx {
 
 
 }
+
+#if WITH_DEVICE_TREZOR and WITH_DEVICE_TREZOR_LITE
 
 // Lite protocol
 namespace lite {
@@ -1048,12 +1042,9 @@ namespace lite {
     return this;
   }
 
-
-
-
-
-
 }
+
+#endif
 
 }
 }

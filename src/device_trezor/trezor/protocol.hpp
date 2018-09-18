@@ -236,9 +236,6 @@ namespace tx {
     std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> step_set_output(size_t idx);
     void step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack);
 
-    std::shared_ptr<messages::monero::MoneroTransactionRangeSigRequest> step_rsig();
-    void step_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionRangeSigAck> ack);
-
     std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> step_all_outs_set();
     void step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack);
 
@@ -295,6 +292,8 @@ namespace tx {
   };
 
 }
+
+#if WITH_DEVICE_TREZOR and WITH_DEVICE_TREZOR_LITE
 
 // Lite/proxy protocol
 namespace lite {
@@ -356,6 +355,8 @@ namespace lite {
   };
 
 }
+
+#endif
 
 }
 }
