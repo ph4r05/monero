@@ -208,6 +208,7 @@ namespace cryptonote
       res.was_bootstrap_ever_used = m_was_bootstrap_ever_used;
     }
     res.database_size = m_core.get_blockchain_storage().get_db().get_database_size();
+    res.update_available = m_core.is_update_available();
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
@@ -216,6 +217,15 @@ namespace cryptonote
     std::stringstream ss;
     binary_archive<true> ba(ss);
     bool r = tx.serialize_base(ba);
+    CHECK_AND_ASSERT_MES(r, cryptonote::blobdata(), "Failed to serialize rct signatures base");
+    return ss.str();
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  static cryptonote::blobdata get_pruned_tx_json(cryptonote::transaction &tx)
+  {
+    std::stringstream ss;
+    json_archive<true> ar(ss);
+    bool r = tx.serialize_base(ar);
     CHECK_AND_ASSERT_MES(r, cryptonote::blobdata(), "Failed to serialize rct signatures base");
     return ss.str();
   }
@@ -557,7 +567,7 @@ namespace cryptonote
       blobdata blob = req.prune ? get_pruned_tx_blob(tx) : t_serializable_object_to_blob(tx);
       e.as_hex = string_tools::buff_to_hex_nodelimer(blob);
       if (req.decode_as_json)
-        e.as_json = obj_to_json_str(tx);
+        e.as_json = req.prune ? get_pruned_tx_json(tx) : obj_to_json_str(tx);
       e.in_pool = pool_tx_hashes.find(tx_hash) != pool_tx_hashes.end();
       if (e.in_pool)
       {
@@ -1247,6 +1257,7 @@ namespace cryptonote
     response.depth = m_core.get_current_blockchain_height() - height - 1;
     response.hash = string_tools::pod_to_hex(hash);
     response.difficulty = m_core.get_blockchain_storage().block_difficulty(height);
+    response.cumulative_difficulty = response.block_weight = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(height);
     response.reward = get_block_reward(blk);
     response.block_size = response.block_weight = m_core.get_blockchain_storage().get_db().get_block_weight(height);
     response.num_txes = blk.tx_hashes.size();
@@ -1594,6 +1605,7 @@ namespace cryptonote
       res.was_bootstrap_ever_used = m_was_bootstrap_ever_used;
     }
     res.database_size = m_core.get_blockchain_storage().get_db().get_database_size();
+    res.update_available = m_core.is_update_available();
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

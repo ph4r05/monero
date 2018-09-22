@@ -801,7 +801,7 @@ wallet2::wallet2(network_type nettype, uint64_t kdf_rounds, bool unattended):
   m_light_wallet_connected(false),
   m_light_wallet_balance(0),
   m_light_wallet_unlocked_balance(0),
-  m_key_on_device(false),
+  m_key_device_type(hw::device::device_type::SOFTWARE),
   m_ring_history_saved(false),
   m_ringdb(),
   m_last_block_reward(0),
@@ -2916,7 +2916,7 @@ bool wallet2::store_keys(const std::string& keys_file_name, const epee::wipeable
 
   rapidjson::Value value2(rapidjson::kNumberType);
 
-  value2.SetInt(m_key_on_device?1:0);
+  value2.SetInt(m_key_device_type);
   json.AddMember("key_on_device", value2, json.GetAllocator());
 
   value2.SetInt(watch_only ? 1 :0); // WTF ? JSON has different true and false types, and not boolean ??
@@ -3129,7 +3129,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     m_subaddress_lookahead_major = SUBADDRESS_LOOKAHEAD_MAJOR;
     m_subaddress_lookahead_minor = SUBADDRESS_LOOKAHEAD_MINOR;
     m_device_name = "";
-    m_key_on_device = false;
+    m_key_device_type = hw::device::device_type::SOFTWARE;
     encrypted_secret_keys = false;
   }
   else if(json.IsObject())
@@ -3149,8 +3149,8 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
 
     if (json.HasMember("key_on_device"))
     {
-      GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, key_on_device, int, Int, false, false);
-      m_key_on_device = field_key_on_device;
+      GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, key_on_device, int, Int, false, hw::device::device_type::SOFTWARE);
+      m_key_device_type = static_cast<hw::device::device_type>(field_key_on_device);
     }
 
     GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, seed_language, std::string, String, false, std::string());
@@ -3277,7 +3277,8 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
   }
 
   r = epee::serialization::load_t_from_binary(m_account, account_data);
-  if (r && m_key_on_device) {
+  THROW_WALLET_EXCEPTION_IF(!r, error::invalid_password);
+  if (m_key_device_type == hw::device::device_type::LEDGER) {
     LOG_PRINT_L0("Account on device. Initing device...");
     hw::device &hwdev = lookup_device(m_device_name);
     hwdev.set_name(m_device_name);
@@ -3286,6 +3287,8 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     hwdev.connect();
     m_account.set_device(hwdev);
     LOG_PRINT_L0("Device inited...");
+  } else if (key_on_device()) {
+    THROW_WALLET_EXCEPTION(error::wallet_internal_error, "hardware device not supported");
   }
 
   if (r)
@@ -3454,6 +3457,59 @@ void wallet2::create_keys_file(const std::string &wallet_, bool watch_only, cons
 
 
 /*!
+ * \brief determine the key storage for the specified wallet file
+ * \param device_type     (OUT) wallet backend as enumerated in hw::device::device_type
+ * \param keys_file_name  Keys file to verify password for
+ * \param password        Password to verify
+ * \return                true if password correct, else false
+ *
+ * for verification only - determines key storage hardware
+ *
+ */
+bool wallet2::query_device(hw::device::device_type& device_type, const std::string& keys_file_name, const epee::wipeable_string& password, uint64_t kdf_rounds)
+{
+  rapidjson::Document json;
+  wallet2::keys_file_data keys_file_data;
+  std::string buf;
+  bool r = epee::file_io_utils::load_file_to_string(keys_file_name, buf);
+  THROW_WALLET_EXCEPTION_IF(!r, error::file_read_error, keys_file_name);
+
+  // Decrypt the contents
+  r = ::serialization::parse_binary(buf, keys_file_data);
+  THROW_WALLET_EXCEPTION_IF(!r, error::wallet_internal_error, "internal error: failed to deserialize \"" + keys_file_name + '\"');
+  crypto::chacha_key key;
+  crypto::generate_chacha_key(password.data(), password.size(), key, kdf_rounds);
+  std::string account_data;
+  account_data.resize(keys_file_data.account_data.size());
+  crypto::chacha20(keys_file_data.account_data.data(), keys_file_data.account_data.size(), key, keys_file_data.iv, &account_data[0]);
+  if (json.Parse(account_data.c_str()).HasParseError() || !json.IsObject())
+    crypto::chacha8(keys_file_data.account_data.data(), keys_file_data.account_data.size(), key, keys_file_data.iv, &account_data[0]);
+
+  // The contents should be JSON if the wallet follows the new format.
+  if (json.Parse(account_data.c_str()).HasParseError())
+  {
+    // old format before JSON wallet key file format
+  }
+  else
+  {
+    account_data = std::string(json["key_data"].GetString(), json["key_data"].GetString() +
+      json["key_data"].GetStringLength());
+
+    if (json.HasMember("key_on_device"))
+    {
+      GET_FIELD_FROM_JSON_RETURN_ON_ERROR(json, key_on_device, int, Int, false, hw::device::device_type::SOFTWARE);
+      device_type = static_cast<hw::device::device_type>(field_key_on_device);
+    }
+  }
+
+  cryptonote::account_base account_data_check;
+
+  r = epee::serialization::load_t_from_binary(account_data_check, account_data);
+  if (!r) return false;
+  return true;
+}
+
+/*!
  * \brief  Generates a wallet or restores one.
  * \param  wallet_              Name of wallet file
  * \param  password             Password of wallet file
@@ -3527,7 +3583,7 @@ void wallet2::generate(const std::string& wallet_, const epee::wipeable_string& 
   m_multisig = true;
   m_multisig_threshold = threshold;
   m_multisig_signers = multisig_signers;
-  m_key_on_device = false;
+  m_key_device_type = hw::device::device_type::SOFTWARE;
   setup_keys(password);
 
   create_keys_file(wallet_, false, password, m_nettype != MAINNET || create_address_file);
@@ -3567,7 +3623,7 @@ crypto::secret_key wallet2::generate(const std::string& wallet_, const epee::wip
   m_multisig = false;
   m_multisig_threshold = 0;
   m_multisig_signers.clear();
-  m_key_on_device = false;
+  m_key_device_type = hw::device::device_type::SOFTWARE;
   setup_keys(password);
 
   // calculate a starting refresh height
@@ -3655,7 +3711,7 @@ void wallet2::generate(const std::string& wallet_, const epee::wipeable_string& 
   m_multisig = false;
   m_multisig_threshold = 0;
   m_multisig_signers.clear();
-  m_key_on_device = false;
+  m_key_device_type = hw::device::device_type::SOFTWARE;
   setup_keys(password);
 
   create_keys_file(wallet_, true, password, m_nettype != MAINNET || create_address_file);
@@ -3695,7 +3751,7 @@ void wallet2::generate(const std::string& wallet_, const epee::wipeable_string& 
   m_multisig = false;
   m_multisig_threshold = 0;
   m_multisig_signers.clear();
-  m_key_on_device = false;
+  m_key_device_type = hw::device::device_type::SOFTWARE;
   setup_keys(password);
 
   create_keys_file(wallet_, false, password, create_address_file);
@@ -3722,13 +3778,13 @@ void wallet2::restore(const std::string& wallet_, const epee::wipeable_string& p
     THROW_WALLET_EXCEPTION_IF(boost::filesystem::exists(m_wallet_file, ignored_ec), error::file_exists, m_wallet_file);
     THROW_WALLET_EXCEPTION_IF(boost::filesystem::exists(m_keys_file,   ignored_ec), error::file_exists, m_keys_file);
   }
-  m_key_on_device = true;
 
   auto &hwdev = lookup_device(device_name);
   hwdev.set_name(device_name);
   hwdev.set_network_type(m_nettype);
 
   m_account.create_from_device(hwdev);
+  m_key_device_type = m_account.get_device().get_type();
   m_account_public_address = m_account.get_keys().m_account_address;
   m_watch_only = false;
   m_multisig = false;
@@ -3826,7 +3882,7 @@ std::string wallet2::make_multisig(const epee::wipeable_string &password,
   m_watch_only = false;
   m_multisig = true;
   m_multisig_threshold = threshold;
-  m_key_on_device = false;
+  m_key_device_type = hw::device::device_type::SOFTWARE;
 
   if (threshold == spend_keys.size() + 1)
   {
@@ -8432,7 +8488,7 @@ skip_tx:
   return ptx_vector;
 }
 
-std::vector<wallet2::pending_tx> wallet2::create_transactions_all(uint64_t below, const cryptonote::account_public_address &address, bool is_subaddress, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t>& extra, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices)
+std::vector<wallet2::pending_tx> wallet2::create_transactions_all(uint64_t below, const cryptonote::account_public_address &address, bool is_subaddress, const size_t outputs, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t>& extra, uint32_t subaddr_account, std::set<uint32_t> subaddr_indices)
 {
   std::vector<size_t> unused_transfers_indices;
   std::vector<size_t> unused_dust_indices;
@@ -8483,10 +8539,10 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_all(uint64_t below
     }
   }
 
-  return create_transactions_from(address, is_subaddress, unused_transfers_indices, unused_dust_indices, fake_outs_count, unlock_time, priority, extra);
+  return create_transactions_from(address, is_subaddress, outputs, unused_transfers_indices, unused_dust_indices, fake_outs_count, unlock_time, priority, extra);
 }
 
-std::vector<wallet2::pending_tx> wallet2::create_transactions_single(const crypto::key_image &ki, const cryptonote::account_public_address &address, bool is_subaddress, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t>& extra)
+std::vector<wallet2::pending_tx> wallet2::create_transactions_single(const crypto::key_image &ki, const cryptonote::account_public_address &address, bool is_subaddress, const size_t outputs, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t>& extra)
 {
   std::vector<size_t> unused_transfers_indices;
   std::vector<size_t> unused_dust_indices;
@@ -8504,10 +8560,10 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_single(const crypt
       break;
     }
   }
-  return create_transactions_from(address, is_subaddress, unused_transfers_indices, unused_dust_indices, fake_outs_count, unlock_time, priority, extra);
+  return create_transactions_from(address, is_subaddress, outputs, unused_transfers_indices, unused_dust_indices, fake_outs_count, unlock_time, priority, extra);
 }
 
-std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const cryptonote::account_public_address &address, bool is_subaddress, std::vector<size_t> unused_transfers_indices, std::vector<size_t> unused_dust_indices, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t>& extra)
+std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const cryptonote::account_public_address &address, bool is_subaddress, const size_t outputs, std::vector<size_t> unused_transfers_indices, std::vector<size_t> unused_dust_indices, const size_t fake_outs_count, const uint64_t unlock_time, uint32_t priority, const std::vector<uint8_t>& extra)
 {
   //ensure device is let in NONE mode in any case
   hw::device &hwdev = m_account.get_device();
@@ -8602,7 +8658,9 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const crypton
 
       needed_fee = estimate_fee(use_per_byte_fee, use_rct, tx.selected_transfers.size(), fake_outs_count, tx.dsts.size()+1, extra.size(), bulletproof, base_fee, fee_multiplier, fee_quantization_mask);
 
-      tx.dsts.push_back(tx_destination_entry(1, address, is_subaddress));
+      // add N - 1 outputs for correct initial fee estimation
+      for (size_t i = 0; i < ((outputs > 1) ? outputs - 1 : outputs); ++i)
+        tx.dsts.push_back(tx_destination_entry(1, address, is_subaddress));
 
       LOG_PRINT_L2("Trying to create a tx now, with " << tx.dsts.size() << " destinations and " <<
         tx.selected_transfers.size() << " outputs");
@@ -8614,15 +8672,35 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const crypton
           detail::digit_split_strategy, tx_dust_policy(::config::DEFAULT_DUST_THRESHOLD), test_tx, test_ptx);
       auto txBlob = t_serializable_object_to_blob(test_ptx.tx);
       needed_fee = calculate_fee(use_per_byte_fee, test_ptx.tx, txBlob.size(), base_fee, fee_multiplier, fee_quantization_mask);
-      available_for_fee = test_ptx.fee + test_ptx.dests[0].amount + test_ptx.change_dts.amount;
+      available_for_fee = test_ptx.fee + test_ptx.change_dts.amount;
+      for (auto &dt: test_ptx.dests)
+        available_for_fee += dt.amount;
       LOG_PRINT_L2("Made a " << get_weight_string(test_ptx.tx, txBlob.size()) << " tx, with " << print_money(available_for_fee) << " available for fee (" <<
         print_money(needed_fee) << " needed)");
+
+      // add last output, missed for fee estimation
+      if (outputs > 1)
+        tx.dsts.push_back(tx_destination_entry(1, address, is_subaddress));
 
       THROW_WALLET_EXCEPTION_IF(needed_fee > available_for_fee, error::wallet_internal_error, "Transaction cannot pay for itself");
 
       do {
         LOG_PRINT_L2("We made a tx, adjusting fee and saving it");
-        tx.dsts[0].amount = available_for_fee - needed_fee;
+        // distribute total transferred amount between outputs
+        uint64_t amount_transferred = available_for_fee - needed_fee;
+        uint64_t dt_amount = amount_transferred / outputs;
+        // residue is distributed as one atomic unit per output until it reaches zero
+        uint64_t residue = amount_transferred % outputs;
+        for (auto &dt: tx.dsts)
+        {
+          uint64_t dt_residue = 0;
+          if (residue > 0)
+          {
+            dt_residue = 1;
+            residue -= 1;
+          }
+          dt.amount = dt_amount + dt_residue;
+        }
         if (use_rct)
           transfer_selected_rct(tx.dsts, tx.selected_transfers, fake_outs_count, outs, unlock_time, needed_fee, extra, 
             test_tx, test_ptx, range_proof_type);
@@ -8947,7 +9025,7 @@ std::vector<wallet2::pending_tx> wallet2::create_unmixable_sweep_transactions()
       unmixable_transfer_outputs.push_back(n);
   }
 
-  return create_transactions_from(m_account_public_address, false, unmixable_transfer_outputs, unmixable_dust_outputs, 0 /*fake_outs_count */, 0 /* unlock_time */, 1 /*priority */, std::vector<uint8_t>());
+  return create_transactions_from(m_account_public_address, false, 1, unmixable_transfer_outputs, unmixable_dust_outputs, 0 /*fake_outs_count */, 0 /* unlock_time */, 1 /*priority */, std::vector<uint8_t>());
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::discard_unmixable_outputs()

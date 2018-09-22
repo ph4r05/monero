@@ -79,7 +79,6 @@ namespace hw {
            return false;
     }
 
-
     class device {
     protected:
         std::string  name;
@@ -97,6 +96,12 @@ namespace hw {
             TRANSACTION_CREATE_FAKE,
             TRANSACTION_PARSE
         };
+        enum device_type
+        {
+          SOFTWARE = 0,
+          LEDGER = 1
+        };
+
 
         enum device_protocol_t {
             PROTOCOL_DEFAULT,
@@ -116,7 +121,8 @@ namespace hw {
         virtual bool connect(void) = 0;
         virtual bool disconnect(void) = 0;
 
-        virtual bool  set_mode(device_mode mode) = 0;
+        virtual bool set_mode(device_mode mode) = 0;
+        virtual device_type get_type() const = 0;
         virtual device_protocol_t device_protocol() const { return PROTOCOL_DEFAULT; };
 
         /* ======================================================================= */

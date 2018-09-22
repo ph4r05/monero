@@ -108,7 +108,9 @@ Dates are provided in the format YYYY-MM-DD.
 | 1288616                        | 2017-04-15 | v5                | v0.10.3.0              | v0.10.3.1                  | Adjusted minimum blocksize and fee algorithm      |
 | 1400000                        | 2017-09-16 | v6                | v0.11.0.0              | v0.11.0.0                  | Allow only RingCT transactions, allow only >= ringsize 5      |
 | 1546000                        | 2018-04-06 | v7                | v0.12.0.0              | v0.12.3.0                  | Cryptonight variant 1, ringsize >= 7, sorted inputs
-| XXXXXXX                        | 2018-10-XX | XX                | XXXXXXXXX              | XXXXXXXXX                  | X
+| 1685555                        | 2018-10-18 | v8                | v0.13.0.0              | v0.13.0.0                  | max transaction size at half the penalty free block size, bulletproofs enabled, cryptonight variant 2, fixed ringsize [11](https://youtu.be/KOO5S4vxi0o)
+| 1686275                        | 2018-10-19 | v9                | v0.13.0.0              | v0.13.0.0                  | bulletproofs required
+| XXXXXXX                        | 2019-04-XX | XX                | XXXXXXXXX              | XXXXXXXXX                  | X
 
 X's indicate that these details have not been determined as of commit date.
 
@@ -116,6 +118,52 @@ X's indicate that these details have not been determined as of commit date.
 
 Approximately three months prior to a scheduled software upgrade, a branch from Master will be created with the new release version tag. Pull requests that address bugs should then be made to both Master and the new release branch. Pull requests that require extensive review and testing (generally, optimizations and new features) should *not* be made to the release branch. 
 
+<<<<<<< HEAD
+=======
+## Installing Monero from a package
+
+Packages are available for
+
+* Ubuntu and [snap supported](https://snapcraft.io/docs/core/install) systems, via a community contributed build.
+
+        snap install monero --beta
+
+Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
+
+* Arch Linux (via [AUR](https://aur.archlinux.org/)):
+  - Stable release: [`monero`](https://aur.archlinux.org/packages/monero)
+  - Bleeding edge: [`monero-git`](https://aur.archlinux.org/packages/monero-git)
+
+* Void Linux:
+
+        xbps-install -S monero
+
+* GuixSD
+
+        guix package -i monero
+
+* OS X via [Homebrew](http://brew.sh)
+
+        brew tap sammy007/cryptonight
+        brew install monero --build-from-source
+
+* Docker
+
+        # Build using all available cores
+        docker build -t monero .
+
+        # or build using a specific number of cores (reduce RAM requirement)
+        docker build --build-arg NPROC=1 -t monero .
+     
+        # either run in foreground
+        docker run -it -v /monero/chain:/root/.bitmonero -v /monero/wallet:/wallet -p 18080:18080 monero
+
+        # or in background
+        docker run -it -d -v /monero/chain:/root/.bitmonero -v /monero/wallet:/wallet -p 18080:18080 monero
+
+Packaging for your favorite distribution would be a welcome contribution!
+
+>>>>>>> f6d62ab... Formating commands inside README.md
 ## Compiling Monero from source
 
 ### Dependencies
@@ -139,7 +187,7 @@ library archives (`.a`).
 | libzmq       | 3.0.0         | NO       | `libzmq3-dev`      | `zeromq`     | `cppzmq-devel`    | NO       | ZeroMQ library |
 | OpenPGM      | ?             | NO       | `libpgm-dev`       | `libpgm`     | `openpgm-devel`   | NO       | For ZeroMQ     |
 | libunbound   | 1.4.16        | YES      | `libunbound-dev`   | `unbound`    | `unbound-devel`   | NO       | DNS resolver   |
-| libsodium    | ?             | NO       | `libsodium-dev`    | ?            | `libsodium-devel` | NO       | cryptography   |
+| libsodium    | ?             | NO       | `libsodium-dev`    | `libsodium`  | `libsodium-devel` | NO       | cryptography   |
 | libunwind    | any           | NO       | `libunwind8-dev`   | `libunwind`  | `libunwind-devel` | YES      | Stack traces   |
 | liblzma      | any           | NO       | `liblzma-dev`      | `xz`         | `xz-devel`        | YES      | For libunwind  |
 | libreadline  | 6.3.0         | NO       | `libreadline6-dev` | `readline`   | `readline-devel`  | YES      | Input editing  |
@@ -282,7 +330,7 @@ If you are using the older Raspbian Jessie image, compiling Monero is a bit more
 ```
 * Wait ~8 hours
 ```
-	sudo ./bjam install
+	sudo ./bjam cxxflags=-fPIC cflags=-fPIC -a install
 ```
 * Wait ~4 hours
 
@@ -497,7 +545,7 @@ Packages are available for
 
 * Ubuntu and [snap supported](https://snapcraft.io/docs/core/install) systems, via a community contributed build.
 
-    snap install monero --beta
+	snap install monero --beta
 
 Installing a snap is very quick. Snaps are secure. They are isolated with all of their dependencies. Snaps also auto update when a new version is released.
 

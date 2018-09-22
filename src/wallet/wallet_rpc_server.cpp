@@ -1103,6 +1103,13 @@ namespace tools
       return false;
     }
 
+    if (req.outputs < 1)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_TX_NOT_POSSIBLE;
+      er.message = "Amount of outputs should be greater than 0.";
+      return  false;
+    }
+
     try
     {
       uint64_t mixin;
@@ -1115,7 +1122,7 @@ namespace tools
         mixin = m_wallet->adjust_mixin(req.mixin);
       }
       uint32_t priority = m_wallet->adjust_priority(req.priority);
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_all(req.below_amount, dsts[0].addr, dsts[0].is_subaddress, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices);
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_all(req.below_amount, dsts[0].addr, dsts[0].is_subaddress, req.outputs, mixin, req.unlock_time, priority, extra, req.account_index, req.subaddr_indices);
 
       return fill_response(ptx_vector, req.get_tx_keys, res.tx_key_list, res.amount_list, res.fee_list, res.multisig_txset, res.unsigned_txset, req.do_not_relay,
           res.tx_hash_list, req.get_tx_hex, res.tx_blob_list, req.get_tx_metadata, res.tx_metadata_list, er);
@@ -1139,6 +1146,13 @@ namespace tools
       er.code = WALLET_RPC_ERROR_CODE_DENIED;
       er.message = "Command unavailable in restricted mode.";
       return false;
+    }
+
+    if (req.outputs < 1)
+    {
+      er.code = WALLET_RPC_ERROR_CODE_TX_NOT_POSSIBLE;
+      er.message = "Amount of outputs should be greater than 0.";
+      return  false;
     }
 
     // validate the transfer requested and populate dsts & extra
@@ -1171,7 +1185,7 @@ namespace tools
         mixin = m_wallet->adjust_mixin(req.mixin);
       }
       uint32_t priority = m_wallet->adjust_priority(req.priority);
-      std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_single(ki, dsts[0].addr, dsts[0].is_subaddress, mixin, req.unlock_time, priority, extra);
+      std::vector<wallet2::pending_tx> ptx_vector = m_wallet->create_transactions_single(ki, dsts[0].addr, dsts[0].is_subaddress, req.outputs, mixin, req.unlock_time, priority, extra);
 
       if (ptx_vector.empty())
       {
@@ -3281,9 +3295,12 @@ class t_daemon
 private:
   const boost::program_options::variables_map& vm;
 
+  std::unique_ptr<tools::wallet_rpc_server> wrpc;
+
 public:
   t_daemon(boost::program_options::variables_map const & _vm)
     : vm(_vm)
+    , wrpc(new tools::wallet_rpc_server)
   {
   }
 
@@ -3373,17 +3390,16 @@ public:
       return false;
     }
   just_dir:
-    tools::wallet_rpc_server wrpc;
-    if (wal) wrpc.set_wallet(wal.release());
-    bool r = wrpc.init(&vm);
+    if (wal) wrpc->set_wallet(wal.release());
+    bool r = wrpc->init(&vm);
     CHECK_AND_ASSERT_MES(r, false, tools::wallet_rpc_server::tr("Failed to initialize wallet RPC server"));
-    tools::signal_handler::install([&wrpc](int) {
-      wrpc.send_stop_signal();
+    tools::signal_handler::install([this](int) {
+      wrpc->send_stop_signal();
     });
     LOG_PRINT_L0(tools::wallet_rpc_server::tr("Starting wallet RPC server"));
     try
     {
-      wrpc.run();
+      wrpc->run();
     }
     catch (const std::exception &e)
     {
@@ -3394,7 +3410,7 @@ public:
     try
     {
       LOG_PRINT_L0(tools::wallet_rpc_server::tr("Saving wallet..."));
-      wrpc.stop();
+      wrpc->stop();
       LOG_PRINT_L0(tools::wallet_rpc_server::tr("Successfully saved"));
     }
     catch (const std::exception& e)
@@ -3404,6 +3420,11 @@ public:
     }
     return true;
   }
+
+  void stop()
+  {
+    wrpc->send_stop_signal();
+  }
 };
 
 class t_executor final
@@ -3411,7 +3432,9 @@ class t_executor final
 public:
   static std::string const NAME;
 
-  std::string const & name()
+  typedef ::t_daemon t_daemon;
+
+  std::string const & name() const
   {
     return NAME;
   }
