@@ -192,6 +192,7 @@ namespace trezor {
     device_trezor_base& operator=(const device_trezor_base &device) = delete;
 
     explicit operator bool() const override {return true;}
+    device_type get_type() const override {return device_type::TREZOR;};
 
     bool reset(void);
 
