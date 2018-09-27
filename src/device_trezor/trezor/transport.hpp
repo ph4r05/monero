@@ -86,6 +86,7 @@ namespace trezor {
   class Protocol {
   public:
     Protocol() = default;
+    virtual ~Protocol() = default;
     virtual bool session_begin(Transport & transport){ return false; };
     virtual bool session_end(Transport & transport){ return false; };
     virtual bool write(Transport & transport, const google::protobuf::Message & req)= 0;
@@ -95,6 +96,7 @@ namespace trezor {
   class ProtocolV1 : public Protocol {
   public:
     ProtocolV1() = default;
+    virtual ~ProtocolV1() = default;
 
     bool write(Transport & transport, const google::protobuf::Message & req) override;
     bool read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
@@ -107,6 +109,7 @@ namespace trezor {
   class Transport {
   public:
     Transport() = default;
+    virtual ~Transport() = default;
 
     virtual bool ping() { return false; };
     virtual std::string get_path() const { return ""; };
@@ -134,6 +137,8 @@ namespace trezor {
     {
       m_http_client.set_server(m_bridge_host, boost::none, false);
     }
+
+    virtual ~BridgeTransport() = default;
 
     static const char * PATH_PREFIX;
 
@@ -167,6 +172,8 @@ namespace trezor {
     explicit UdpTransport(
         boost::optional<std::string> device_path=boost::none,
         boost::optional<std::shared_ptr<Protocol>> proto=boost::none);
+
+    virtual ~UdpTransport() = default;
 
     static const char * PATH_PREFIX;
     static const char * DEFAULT_HOST;
