@@ -161,12 +161,9 @@ namespace trezor {
       return r;
     }
 
-    //lock the device for a long sequence
+    //unlock the device
     void device_trezor_base::unlock(void) {
-      try {
-        MDEBUG( "Ask for UNLOCKING for device "<<this->name << " in thread ");
-      } catch (...) {
-      }
+      MDEBUG( "Ask for UNLOCKING for device "<<this->name << " in thread ");
       device_locker.unlock();
       MDEBUG( "Device "<<this->name << " UNLOCKed");
     }
