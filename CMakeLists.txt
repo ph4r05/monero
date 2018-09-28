@@ -494,7 +494,6 @@ if(Protobuf_FOUND)
   set(HAVE_PROTOBUF 1)
   add_definitions(-DHAVE_PROTOBUF=1)
 else(Protobuf_FOUND)
-  add_definitions(-DHAVE_PROTOBUF=0)
   message(STATUS "Could not find Protobuf")
 endif()
 

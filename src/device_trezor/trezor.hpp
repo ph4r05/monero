@@ -30,7 +30,7 @@
 #ifndef MONERO_TREZOR_HPP
 #define MONERO_TREZOR_HPP
 
-#if HAVE_PROTOBUF && !defined(WITHOUT_TREZOR)
+#if defined(HAVE_PROTOBUF) && !defined(WITHOUT_TREZOR)
   #define WITH_DEVICE_TREZOR 1
 #else
   #define WITH_DEVICE_TREZOR 0
@@ -40,7 +40,7 @@
 #define WITH_DEVICE_TREZOR_LITE 0
 #endif
 
-#if HAVE_PROTOBUF
+#ifdef HAVE_PROTOBUF
 #include "trezor/transport.hpp"
 #include "trezor/messages/messages.pb.h"
 #include "trezor/messages/messages-common.pb.h"
