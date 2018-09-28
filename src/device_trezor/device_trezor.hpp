@@ -97,7 +97,7 @@ namespace trezor {
       /**
        * Get watch key from device. Throws.
        */
-      std::shared_ptr<messages::monero::MoneroWatchKey> get_watch_key(
+      std::shared_ptr<messages::monero::MoneroWatchKey> get_view_key(
           boost::optional<std::vector<uint32_t>> path = boost::none,
           boost::optional<cryptonote::network_type> network_type = boost::none);
 

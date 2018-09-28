@@ -130,7 +130,7 @@ namespace trezor {
     }
 
     bool  device_trezor::get_secret_keys(crypto::secret_key &viewkey , crypto::secret_key &spendkey) {
-      auto res = get_watch_key();
+      auto res = get_view_key();
       if (res->watch_key().size() != 32){
         throw std::runtime_error("Trezor returned invalid view key");
       }
@@ -164,7 +164,7 @@ namespace trezor {
       return response;
     }
 
-    std::shared_ptr<messages::monero::MoneroWatchKey> device_trezor::get_watch_key(
+    std::shared_ptr<messages::monero::MoneroWatchKey> device_trezor::get_view_key(
         boost::optional<std::vector<uint32_t>> path,
         boost::optional<cryptonote::network_type> network_type){
       AUTO_LOCK_CMD();
