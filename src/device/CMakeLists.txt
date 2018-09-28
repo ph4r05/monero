@@ -41,7 +41,6 @@ if(HIDAPI_FOUND)
     )
 endif()
 
-
 set(device_headers
   device.hpp
   device_io.hpp
@@ -57,7 +56,6 @@ if(HIDAPI_FOUND)
     device_io_hid.hpp
     )
 endif()
-
 
 set(device_private_headers)
 

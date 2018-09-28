@@ -107,8 +107,8 @@ namespace hw {
 
         enum device_protocol_t {
             PROTOCOL_DEFAULT,
-            PROTOCOL_PROXY,     // Originaly defined by Ledger
-            PROTOCOL_COLD,      // Originaly defined by Trezor
+            PROTOCOL_PROXY,     // Originally defined by Ledger
+            PROTOCOL_COLD,      // Originally defined by Trezor
         };
 
         /* ======================================================================= */
