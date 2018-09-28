@@ -306,10 +306,10 @@ namespace trezor {
       test_ping();
 
       CHECK_AND_ASSERT_THROW_MES(idx < unsigned_tx.txes.size(), "Invalid transaction index");
-      signer = std::make_shared<protocol::tx::Signer>(wallet, std::addressof(unsigned_tx), idx, std::addressof(aux_data));
-      auto & cur_tx = unsigned_tx.txes[idx];
-      auto num_sources = cur_tx.sources.size();
-      auto num_outputs = cur_tx.splitted_dsts.size();
+      signer = std::make_shared<protocol::tx::Signer>(wallet, &unsigned_tx, idx, &aux_data);
+      const tools::wallet2::tx_construction_data & cur_tx = unsigned_tx.txes[idx];
+      unsigned long num_sources = cur_tx.sources.size();
+      unsigned long num_outputs = cur_tx.splitted_dsts.size();
 
       // Step: Init
       auto init_msg = signer->step_init();
