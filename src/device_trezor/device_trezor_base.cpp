@@ -48,7 +48,7 @@ namespace trezor {
         disconnect();
         release();
       } catch(std::exception const& e){
-        LOG_PRINT_L1(std::string("Could not disconnect and release: ") + e.what());
+        MERROR("Could not disconnect and release: " << e.what());
       }
     }
 
@@ -99,13 +99,13 @@ namespace trezor {
       // Enumerate all available devices
       hw::trezor::t_transport_vect trans;
       if (!enumerate(trans)){
-        LOG_PRINT_L1("Enumeration failed");
+        MWARNING("Enumeration failed");
         return false;
       }
 
-      LOG_PRINT_L4("Enumeration yielded " << std::to_string(trans.size()) << " devices");
+      MDEBUG("Enumeration yielded " << trans.size() << " devices");
       for(auto & cur : trans){
-        LOG_PRINT_L4(std::string("  device: ") << *(cur.get()));
+        MDEBUG("  device: " << *(cur.get()));
         std::string cur_path = cur->get_path();
         if (boost::starts_with(cur_path, this->name)){
           MDEBUG("Device Match: " << cur_path);
@@ -197,7 +197,7 @@ namespace trezor {
         this->call_ping_unsafe();
 
       } catch(exc::TrezorException const& e){
-        LOG_PRINT_L2(std::string("Trezor does not respond: ") + e.what());
+        MINFO("Trezor does not respond: " << e.what());
         throw exc::DeviceNotResponsiveException(std::string("Trezor not responding: ") + e.what());
       }
     }
@@ -209,7 +209,7 @@ namespace trezor {
     bool device_trezor_base::ping() {
       AUTO_LOCK_CMD();
       if (!m_transport){
-        LOG_PRINT_L2("Ping failed, device not connected");
+        MINFO("Ping failed, device not connected");
         return false;
       }
 
@@ -218,9 +218,9 @@ namespace trezor {
         return true;
 
       } catch(std::exception const& e) {
-        LOG_PRINT_L1(std::string("Ping failed, exception thrown ") << e.what());
+        MERROR("Ping failed, exception thrown " << e.what());
       } catch(...){
-        LOG_PRINT_L1(std::string("Ping failed, general exception thrown") << boost::current_exception_diagnostic_information());
+        MERROR("Ping failed, general exception thrown" << boost::current_exception_diagnostic_information());
       }
 
       return false;

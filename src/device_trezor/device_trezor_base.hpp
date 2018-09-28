@@ -60,7 +60,7 @@ namespace trezor {
     explicit trezor_callback(device_trezor_base & device): device(device) {}
 
     std::shared_ptr<google::protobuf::Message> on_button_request(const messages::common::ButtonRequest * msg){
-      MDEBUG("on_botton_request");
+      MDEBUG("on_button_request");
       return std::make_shared<messages::common::ButtonAck>();
     }
 

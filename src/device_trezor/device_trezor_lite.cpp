@@ -99,7 +99,7 @@ namespace trezor {
         disconnect();
         release();
       } catch(std::exception const& e){
-        LOG_PRINT_L1(std::string("Could not disconnect and release: ") + e.what());
+        MERROR("Could not disconnect and release: " << e.what());
       }
     }
 

@@ -87,7 +87,7 @@ namespace trezor {
         disconnect();
         release();
       } catch(std::exception const& e){
-        LOG_PRINT_L1(std::string("Could not disconnect and release: ") + e.what());
+        MWARNING("Could not disconnect and release: " << e.what());
       }
     }
 
@@ -114,15 +114,15 @@ namespace trezor {
     bool device_trezor::get_public_address(cryptonote::account_public_address &pubkey) {
       auto res = get_address();
 
-      cryptonote::address_parse_info info;
+      cryptonote::address_parse_info info{};
       bool r = cryptonote::get_account_address_from_str(info, this->network_type, res->address());
       if (!r){
-        LOG_PRINT_L2("Returned address parse fail: " + res->address());
+        MERROR("Returned address parse fail: " << res->address());
         throw std::runtime_error("Could not parse returned address");
       }
 
       if (info.is_subaddress){
-        throw std::runtime_error("Trezor returned runtime address");
+        throw std::runtime_error("Trezor returned a sub address");
       }
 
       pubkey = info.address;
@@ -198,7 +198,7 @@ namespace trezor {
       auto ack1 = this->client_exchange<messages::monero::MoneroKeyImageExportInitAck>(req);
 
       const auto batch_size = 10;
-      const auto num_batches = static_cast<uint64_t>(ceil(mtds.size() / static_cast<double>(batch_size)));
+      const auto num_batches = (mtds.size() + batch_size - 1) / batch_size;
       for(uint64_t cur = 0; cur < num_batches; ++cur){
         auto step_req = std::make_shared<messages::monero::MoneroKeyImageSyncStepRequest>();
         auto idx_finish = std::min(static_cast<uint64_t>((cur + 1) * batch_size), static_cast<uint64_t>(mtds.size()));
@@ -209,6 +209,7 @@ namespace trezor {
 
         auto step_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncStepAck>(step_req);
         auto kis_size = step_ack->kis_size();
+        kis.reserve(kis_size);
         for(int i = 0; i < kis_size; ++i){
           auto ckis = step_ack->kis(i);
           kis.push_back(ckis);
@@ -217,6 +218,7 @@ namespace trezor {
 
       auto final_req = std::make_shared<messages::monero::MoneroKeyImageSyncFinalRequest>();
       auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(final_req);
+      ski.reserve(kis.size());
 
       for(auto & sub : kis){
         char buff[32*3];

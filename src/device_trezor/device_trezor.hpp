@@ -64,7 +64,7 @@ namespace trezor {
 
     public:
       device_trezor();
-      ~device_trezor() override;
+      virtual ~device_trezor() override;
 
       device_trezor(const device_trezor &device) = delete ;
       device_trezor& operator=(const device_trezor &device) = delete;

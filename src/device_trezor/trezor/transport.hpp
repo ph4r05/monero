@@ -83,20 +83,20 @@ namespace trezor {
     const http::http_response_info* pri = nullptr;
     if(!transport.invoke(uri, method, req_param, timeout, std::addressof(pri), std::move(additional_params)))
     {
-      LOG_PRINT_L1("Failed to invoke http request to  " << uri);
+      MERROR("Failed to invoke http request to  " << uri);
       return false;
     }
 
     if(!pri)
     {
-      LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", internal error (null response ptr)");
+      MERROR("Failed to invoke http request to  " << uri << ", internal error (null response ptr)");
       return false;
     }
 
     if(pri->m_response_code != 200)
     {
-      LOG_PRINT_L1("Failed to invoke http request to  " << uri << ", wrong response code: " << pri->m_response_code
-                                                        << " Response Body: " << pri->m_body);
+      MERROR("Failed to invoke http request to  " << uri << ", wrong response code: " << pri->m_response_code
+             << " Response Body: " << pri->m_body);
       return false;
     }
 
