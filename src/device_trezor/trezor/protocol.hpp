@@ -129,7 +129,7 @@ namespace ki {
   /**
    * Generates KI sync request with commitments computed.
    */
-  bool generate_commitment(std::vector<MoneroTransferDetails> & mtds,
+  void generate_commitment(std::vector<MoneroTransferDetails> & mtds,
                            const std::vector<tools::wallet2::transfer_details> & transfers,
                            std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> & req);
 

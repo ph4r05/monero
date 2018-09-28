@@ -192,8 +192,8 @@ namespace trezor {
       std::vector<protocol::ki::MoneroTransferDetails> mtds;
       std::vector<protocol::ki::MoneroExportedKeyImage> kis;
       protocol::ki::key_image_data(wallet, transfers, mtds);
+      protocol::ki::generate_commitment(mtds, transfers, req);
 
-      bool res = protocol::ki::generate_commitment(mtds, transfers, req);
       this->set_msg_addr<messages::monero::MoneroKeyImageExportInitRequest>(req.get());
       auto ack1 = this->client_exchange<messages::monero::MoneroKeyImageExportInitAck>(req);
 

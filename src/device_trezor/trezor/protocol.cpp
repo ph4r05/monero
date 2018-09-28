@@ -160,7 +160,7 @@ namespace ki {
     return std::string(reinterpret_cast<const char*>(md), 32);
   }
 
-  bool generate_commitment(std::vector<MoneroTransferDetails> & mtds,
+  void generate_commitment(std::vector<MoneroTransferDetails> & mtds,
                            const std::vector<tools::wallet2::transfer_details> & transfers,
                            std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> & req)
   {
@@ -194,8 +194,6 @@ namespace ki {
         subs->add_minor_indices(minor);
       }
     }
-
-    return true;
   }
 
 }
