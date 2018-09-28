@@ -209,7 +209,7 @@ namespace trezor {
 
         auto step_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncStepAck>(step_req);
         auto kis_size = step_ack->kis_size();
-        kis.reserve(kis_size);
+        kis.reserve(static_cast<size_t>(kis_size));
         for(int i = 0; i < kis_size; ++i){
           auto ckis = step_ack->kis(i);
           kis.push_back(ckis);
