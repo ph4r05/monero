@@ -125,13 +125,6 @@ namespace trezor {
           throw std::invalid_argument("Cannot specify list of accepted types and not using generic response");
         }
 
-        // Scoped session closer
-        BOOST_SCOPE_EXIT_ALL(&, this) {
-          if (open_session && depth == 0){
-            this->getTransport()->close();
-          }
-        };
-
         // Open session if required
         if (open_session && depth == 0){
           bool r = m_transport->open();
@@ -140,7 +133,15 @@ namespace trezor {
           }
         }
 
+        // Scoped session closer
+        BOOST_SCOPE_EXIT_ALL(&, this) {
+          if (open_session && depth == 0){
+            this->getTransport()->close();
+          }
+        };
+
         // Write the request
+        CHECK_AND_ASSERT_THROW_MES(req, "Request is null");
         this->getTransport()->write(*req);
 
         // Read the response
