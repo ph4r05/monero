@@ -112,9 +112,9 @@ namespace trezor {
       template<class t_message>
       std::shared_ptr<t_message>
       client_exchange(const std::shared_ptr<const google::protobuf::Message> &req,
-                      boost::optional<messages::MessageType> resp_type = boost::none,
-                      boost::optional<std::vector<messages::MessageType>> resp_types = boost::none,
-                      boost::optional<messages::MessageType*> resp_type_ptr = boost::none,
+                      const boost::optional<messages::MessageType> & resp_type = boost::none,
+                      const boost::optional<std::vector<messages::MessageType>> & resp_types = boost::none,
+                      const boost::optional<messages::MessageType*> & resp_type_ptr = boost::none,
                       bool open_session = false,
                       unsigned depth=0)
       {
@@ -184,8 +184,8 @@ namespace trezor {
        */
       template<class t_message>
       void set_msg_addr(t_message * msg,
-                        boost::optional<std::vector<uint32_t>> path = boost::none,
-                        boost::optional<cryptonote::network_type> network_type = boost::none)
+                        const boost::optional<std::vector<uint32_t>> & path = boost::none,
+                        const boost::optional<cryptonote::network_type> & network_type = boost::none)
       {
         msg->clear_address_n();
         if (path){

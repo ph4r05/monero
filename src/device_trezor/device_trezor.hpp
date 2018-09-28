@@ -91,15 +91,15 @@ namespace trezor {
        * Get address. Throws.
        */
       std::shared_ptr<messages::monero::MoneroAddress> get_address(
-          boost::optional<std::vector<uint32_t>> path = boost::none,
-          boost::optional<cryptonote::network_type> network_type = boost::none);
+          const boost::optional<std::vector<uint32_t>> & path = boost::none,
+          const boost::optional<cryptonote::network_type> & network_type = boost::none);
 
       /**
        * Get watch key from device. Throws.
        */
       std::shared_ptr<messages::monero::MoneroWatchKey> get_view_key(
-          boost::optional<std::vector<uint32_t>> path = boost::none,
-          boost::optional<cryptonote::network_type> network_type = boost::none);
+          const boost::optional<std::vector<uint32_t>> & path = boost::none,
+          const boost::optional<cryptonote::network_type> & network_type = boost::none);
 
       /**
        * Key image sync with the Trezor.

@@ -150,8 +150,8 @@ namespace trezor {
     /* ======================================================================= */
 
     std::shared_ptr<messages::monero::MoneroAddress> device_trezor::get_address(
-        boost::optional<std::vector<uint32_t>> path,
-        boost::optional<cryptonote::network_type> network_type){
+        const boost::optional<std::vector<uint32_t>> & path,
+        const boost::optional<cryptonote::network_type> & network_type){
       AUTO_LOCK_CMD();
       require_connected();
       test_ping();
@@ -165,8 +165,8 @@ namespace trezor {
     }
 
     std::shared_ptr<messages::monero::MoneroWatchKey> device_trezor::get_view_key(
-        boost::optional<std::vector<uint32_t>> path,
-        boost::optional<cryptonote::network_type> network_type){
+        const boost::optional<std::vector<uint32_t>> & path,
+        const boost::optional<cryptonote::network_type> & network_type){
       AUTO_LOCK_CMD();
       require_connected();
       test_ping();

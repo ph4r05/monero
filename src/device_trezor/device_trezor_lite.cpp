@@ -104,8 +104,8 @@ namespace trezor {
     }
 
     void device_trezor_lite::init_lite(
-        boost::optional<std::vector<uint32_t>> path,
-        boost::optional<cryptonote::network_type> network_type){
+        const boost::optional<std::vector<uint32_t>> & path,
+        const boost::optional<cryptonote::network_type> & network_type){
 
       auto req = std::make_shared<messages::monero::MoneroLiteInitRequest>();
       this->set_msg_addr(req.get(), std::move(path), std::move(network_type));
