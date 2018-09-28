@@ -493,9 +493,9 @@ namespace trezor{
 
         break;
 
-      } catch(exc::CommunicationException e){
+      } catch(exc::CommunicationException const& e){
         throw e;
-      } catch(std::exception e){
+      } catch(std::exception const& e){
         LOG_PRINT_L2(std::string("Error reading chunk, reason: ") << e.what());
         throw exc::CommunicationException(std::string("Chunk read error: ") + std::string(e.what()));
       }

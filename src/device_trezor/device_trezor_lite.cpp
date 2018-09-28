@@ -98,7 +98,7 @@ namespace trezor {
       try {
         disconnect();
         release();
-      } catch(std::exception & e){
+      } catch(std::exception const& e){
         LOG_PRINT_L1(std::string("Could not disconnect and release: ") + e.what());
       }
     }
@@ -121,7 +121,7 @@ namespace trezor {
       try {
         this->get_secret_keys(vkey, skey);
 
-      } catch(std::exception & e){
+      } catch(std::exception const& e){
         m_lite_sec_keys_loaded = false;
         throw e;
       }

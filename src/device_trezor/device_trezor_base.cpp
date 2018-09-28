@@ -47,7 +47,7 @@ namespace trezor {
       try {
         disconnect();
         release();
-      } catch(std::exception & e){
+      } catch(std::exception const& e){
         LOG_PRINT_L1(std::string("Could not disconnect and release: ") + e.what());
       }
     }
@@ -196,7 +196,7 @@ namespace trezor {
       try {
         this->call_ping_unsafe();
 
-      } catch(exc::TrezorException & e){
+      } catch(exc::TrezorException const& e){
         LOG_PRINT_L2(std::string("Trezor does not respond: ") + e.what());
         throw exc::DeviceNotResponsiveException(std::string("Trezor not responding: ") + e.what());
       }
