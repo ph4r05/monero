@@ -209,14 +209,14 @@ namespace tx {
   void translate_dst_entry(MoneroTransactionDestinationEntry * dst, const cryptonote::tx_destination_entry * src){
     dst->set_amount(src->amount);
     dst->set_is_subaddress(src->is_subaddress);
-    translate_address(dst->mutable_addr(), std::addressof(src->addr));
+    translate_address(dst->mutable_addr(), &(src->addr));
   }
 
   void translate_src_entry(MoneroTransactionSourceEntry * dst, const cryptonote::tx_source_entry * src){
     for(auto & cur : src->outputs){
       auto out = dst->add_outputs();
       out->set_idx(cur.first);
-      translate_rct_key(out->mutable_key(), std::addressof(cur.second));
+      translate_rct_key(out->mutable_key(), &(cur.second));
     }
 
     dst->set_real_output(src->real_output);
@@ -229,7 +229,7 @@ namespace tx {
     dst->set_amount(src->amount);
     dst->set_rct(src->rct);
     dst->set_mask(key_to_string(src->mask));
-    translate_klrki(dst->mutable_multisig_klrki(), std::addressof(src->multisig_kLRki));
+    translate_klrki(dst->mutable_multisig_klrki(), &(src->multisig_kLRki));
   }
 
   void translate_klrki(MoneroMultisigKLRki * dst, const rct::multisig_kLRki * src){
@@ -429,13 +429,13 @@ namespace tx {
     generate_rsig_batch_sizes(m_ct.grouping_vct, m_ct.rsig_type, tx.splitted_dsts.size());
     assign_to_repeatable(rsig_data->mutable_grouping(), m_ct.grouping_vct.begin(), m_ct.grouping_vct.end());
 
-    translate_dst_entry(tsx_data.mutable_change_dts(), std::addressof(tx.change_dts));
+    translate_dst_entry(tsx_data.mutable_change_dts(), &(tx.change_dts));
     for(auto & cur : tx.splitted_dsts){
       auto dst = tsx_data.mutable_outputs()->Add();
-      translate_dst_entry(dst, std::addressof(cur));
+      translate_dst_entry(dst, &cur);
     }
 
-    compute_integrated_indices(std::addressof(tsx_data));
+    compute_integrated_indices(&tsx_data);
 
     int64_t fee = 0;
     for(auto & cur_in : tx.sources){
@@ -463,13 +463,13 @@ namespace tx {
       m_ct.rsig_param = std::make_shared<MoneroRsigData>(ack->rsig_data());
     }
 
-    assign_from_repeatable(std::addressof(m_ct.tx_out_entr_hmacs), ack->hmacs().begin(), ack->hmacs().end());
+    assign_from_repeatable(&(m_ct.tx_out_entr_hmacs), ack->hmacs().begin(), ack->hmacs().end());
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionSetInputRequest> Signer::step_set_input(size_t idx){
     m_ct.cur_input_idx = idx;
     auto res = std::make_shared<messages::monero::MoneroTransactionSetInputRequest>();
-    translate_src_entry(res->mutable_src_entr(), std::addressof(cur_tx().sources[idx]));
+    translate_src_entry(res->mutable_src_entr(), &(cur_tx().sources[idx]));
     return res;
   }
 
@@ -540,7 +540,7 @@ namespace tx {
     auto tx = m_ct.tx_data;
     auto res = std::make_shared<messages::monero::MoneroTransactionInputViniRequest>();
     auto & vini = m_ct.tx.vin[idx];
-    translate_src_entry(res->mutable_src_entr(), std::addressof(tx.sources[idx]));
+    translate_src_entry(res->mutable_src_entr(), &(tx.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(vini));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     if (!in_memory()) {
@@ -593,7 +593,7 @@ namespace tx {
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
     auto & cur_dst = m_ct.tx_data.splitted_dsts[idx];
-    translate_dst_entry(res->mutable_dst_entr(), std::addressof(cur_dst));
+    translate_dst_entry(res->mutable_dst_entr(), &cur_dst);
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
 
     // Range sig offloading to the host
@@ -795,7 +795,7 @@ namespace tx {
     m_ct.cur_input_idx = idx;
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSignInputRequest>();
-    translate_src_entry(res->mutable_src_entr(), std::addressof(m_ct.tx_data.sources[idx]));
+    translate_src_entry(res->mutable_src_entr(), &(m_ct.tx_data.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     res->set_alpha_enc(m_ct.alphas[idx]);

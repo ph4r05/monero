@@ -81,7 +81,7 @@ namespace trezor {
     additional_params.push_back(std::make_pair("Content-Type","application/json; charset=utf-8"));
 
     const http::http_response_info* pri = nullptr;
-    if(!transport.invoke(uri, method, req_param, timeout, std::addressof(pri), std::move(additional_params)))
+    if(!transport.invoke(uri, method, req_param, timeout, &pri, std::move(additional_params)))
     {
       MERROR("Failed to invoke http request to  " << uri);
       return false;
