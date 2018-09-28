@@ -280,10 +280,16 @@ namespace trezor {
 
         // KI sync
         size_t num_sources = cdata.tx_data.sources.size();
+        CHECK_AND_ASSERT_THROW_MES(num_sources == cdata.source_permutation.size(), "Invalid permutation size");
+        CHECK_AND_ASSERT_THROW_MES(num_sources == cdata.tx.vin.size(), "Invalid tx.vin size");
         for(size_t src_idx = 0; src_idx < num_sources; ++src_idx){
           size_t idx_mapped = cdata.source_permutation[src_idx];
+          CHECK_AND_ASSERT_THROW_MES(idx_mapped < cdata.tx_data.selected_transfers.size(), "Invalid idx_mapped");
+
           size_t idx_map_src = cdata.tx_data.selected_transfers[idx_mapped];
           auto vini = boost::get<cryptonote::txin_to_key>(cdata.tx.vin[src_idx]);
+
+          CHECK_AND_ASSERT_THROW_MES(idx_map_src < signed_tx.key_images.size(), "Invalid key image index");
           signed_tx.key_images[idx_map_src] = vini.k_image;
         }
       }
@@ -299,6 +305,7 @@ namespace trezor {
       require_connected();
       test_ping();
 
+      CHECK_AND_ASSERT_THROW_MES(idx < unsigned_tx.txes.size(), "Invalid transaction index");
       signer = std::make_shared<protocol::tx::Signer>(wallet, std::addressof(unsigned_tx), idx, std::addressof(aux_data));
       auto & cur_tx = unsigned_tx.txes[idx];
       auto num_sources = cur_tx.sources.size();
