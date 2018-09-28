@@ -73,7 +73,7 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
     # Try to regenerate messages on cmake
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../external/trezor-common/protob/messages.proto")
         message(WARNING "Trezor-common submodule is not loaded. "
-                        "Try running git submodule init && git submotule update.")
+                        "Try running git submodule init && git submodule update.")
     else()
         if ("$ENV{PYTHON3}" STREQUAL "")
             set(PYTHON3 "python3")

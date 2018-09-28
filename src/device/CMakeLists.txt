@@ -29,7 +29,6 @@
 set(device_sources
   device.cpp
   device_default.cpp
-  device_cold.cpp
   log.cpp
   )
 

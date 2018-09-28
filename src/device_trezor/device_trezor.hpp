@@ -1,5 +1,30 @@
+// Copyright (c) 2017-2018, The Monero Project
 //
-// Created by Dusan Klinec on 01/08/2018.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification, are
+// permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this list of
+//    conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice, this list
+//    of conditions and the following disclaimer in the documentation and/or other
+//    materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its contributors may be
+//    used to endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+// THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
 #ifndef MONERO_DEVICE_TREZOR_H
@@ -64,9 +89,6 @@ namespace trezor {
 
       /**
        * Get address. Throws.
-       * @param path
-       * @param network_type
-       * @return
        */
       std::shared_ptr<messages::monero::MoneroAddress> get_address(
           boost::optional<std::vector<uint32_t>> path = boost::none,
@@ -74,9 +96,6 @@ namespace trezor {
 
       /**
        * Get watch key from device. Throws.
-       * @param path
-       * @param network_type
-       * @return
        */
       std::shared_ptr<messages::monero::MoneroWatchKey> get_watch_key(
           boost::optional<std::vector<uint32_t>> path = boost::none,
@@ -84,9 +103,6 @@ namespace trezor {
 
       /**
        * Key image sync with the Trezor.
-       * @param wallet
-       * @param transfers
-       * @param ski
        */
       void ki_sync(wallet_shim * wallet,
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
@@ -94,11 +110,6 @@ namespace trezor {
 
       /**
        * Signs particular transaction idx in the unsigned set, keeps state in the signer
-       * @param wallet
-       * @param unsigned_tx
-       * @param idx
-       * @param signer
-       * @param aux_data
        */
       void tx_sign(wallet_shim * wallet,
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
@@ -108,10 +119,6 @@ namespace trezor {
 
       /**
        * Signs unsigned transaction with the Trezor.
-       * @param wallet
-       * @param unsigned_tx
-       * @param signed_tx
-       * @param aux_data
        */
       void tx_sign(wallet_shim * wallet,
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,

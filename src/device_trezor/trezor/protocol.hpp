@@ -1,5 +1,30 @@
+// Copyright (c) 2017-2018, The Monero Project
 //
-// Created by Dusan Klinec on 06/08/2018.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without modification, are
+// permitted provided that the following conditions are met:
+//
+// 1. Redistributions of source code must retain the above copyright notice, this list of
+//    conditions and the following disclaimer.
+//
+// 2. Redistributions in binary form must reproduce the above copyright notice, this list
+//    of conditions and the following disclaimer in the documentation and/or other
+//    materials provided with the distribution.
+//
+// 3. Neither the name of the copyright holder nor the names of its contributors may be
+//    used to endorse or promote products derived from this software without specific
+//    prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+// EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+// MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
+// THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+// PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+// INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+// STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
+// THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
 #ifndef MONERO_PROTOCOL_H
@@ -67,22 +92,13 @@ namespace protocol{
 namespace crypto {
   /**
    * Constant time comparison.
-   * @param a
-   * @param b
-   * @param len
-   * @return
    */
   int ct_equal(const char *a, const char *b, size_t len);
 
 namespace chacha {
 
   /**
-   * Chacha20Poly1305 decryption with tag verification. Implements RFC 7539.
-   * @param data
-   * @param length
-   * @param key
-   * @param iv
-   * @param cipher
+   * Chacha20Poly1305 decryption with tag verification. RFC 7539.
    */
   void decrypt(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher);
 
@@ -100,10 +116,6 @@ namespace ki {
 
   /**
    * Converts transfer details to the MoneroTransferDetails required for KI sync
-   * @param wallet
-   * @param transfers
-   * @param res
-   * @return
    */
   bool key_image_data(wallet_shim * wallet,
                       const std::vector<tools::wallet2::transfer_details> & transfers,
@@ -111,17 +123,11 @@ namespace ki {
 
   /**
    * Computes a hash over MoneroTransferDetails. Commitment used in the KI sync.
-   * @param rr
-   * @return
    */
   std::string compute_hash(const MoneroTransferDetails & rr);
 
   /**
    * Generates KI sync request with commitments computed.
-   * @param mtds
-   * @param transfers
-   * @param req
-   * @return
    */
   bool generate_commitment(std::vector<MoneroTransferDetails> & mtds,
                            const std::vector<tools::wallet2::transfer_details> & transfers,
