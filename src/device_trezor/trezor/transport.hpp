@@ -248,13 +248,13 @@ namespace trezor {
   /**
    * Transforms path to the transport
    */
-  std::shared_ptr<Transport> transport(std::string path);
+  std::shared_ptr<Transport> transport(const std::string & path);
 
   /**
    * Transforms path to the particular transport
    */
   template<class t_transport>
-  std::shared_ptr<t_transport> transport_typed(std::string path){
+  std::shared_ptr<t_transport> transport_typed(const std::string & path){
     auto t = transport(path);
     if (!t){
       return nullptr;

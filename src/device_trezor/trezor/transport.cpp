@@ -610,15 +610,15 @@ namespace trezor{
     return true;
   }
 
-  std::shared_ptr<Transport> transport(std::string path){
+  std::shared_ptr<Transport> transport(const std::string & path){
     if (boost::starts_with(path, BridgeTransport::PATH_PREFIX)){
-      return std::make_shared<BridgeTransport>(path.erase(0, strlen(BridgeTransport::PATH_PREFIX)));
+      return std::make_shared<BridgeTransport>(path.substr(strlen(BridgeTransport::PATH_PREFIX)));
 
     } else if (boost::starts_with(path, UdpTransport::PATH_PREFIX)){
-      return std::make_shared<UdpTransport>(path.erase(0, strlen(UdpTransport::PATH_PREFIX)));
+      return std::make_shared<UdpTransport>(path.substr(strlen(UdpTransport::PATH_PREFIX)));
 
     } else {
-      throw std::invalid_argument("Unknown trezor device path: " + path);
+      throw std::invalid_argument("Unknown Trezor device path: " + path);
 
     }
   }
