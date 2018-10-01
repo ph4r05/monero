@@ -169,7 +169,7 @@ namespace trezor {
     bool  mlsag_prepare(const rct::key &H, const rct::key &xx, rct::key &a, rct::key &aG, rct::key &aHP, rct::key &rvII) override;
     bool  mlsag_prepare(rct::key &a, rct::key &aG) override;
     bool  mlsag_hash(const rct::keyV &long_message, rct::key &c) override;
-    bool  mlsag_sign( const rct::key &c, const rct::keyV &xx, const rct::keyV &alpha, const size_t rows, const size_t dsRows, rct::keyV &ss) override;
+    bool  mlsag_sign(const rct::key &c, const rct::keyV &xx, const rct::keyV &alpha, const size_t rows, const size_t dsRows, rct::keyV &ss) override;
 
     bool  close_tx(void) override;
 

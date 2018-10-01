@@ -249,7 +249,7 @@ namespace trezor {
       if ((this->mode == TRANSACTION_PARSE) && has_view_key) {
         //If we are in TRANSACTION_PARSE, the given derivation has been retrieved uncrypted (wihtout the help
         //of the device), so continue that way.
-        MDEBUG( "derive_subaddress_public_key  : PARSE mode with known viewkey");
+        MDEBUG("derive_subaddress_public_key  : PARSE mode with known viewkey");
         crypto::derive_subaddress_public_key(pub, derivation, output_index, derived_pub);
       } else {
 
@@ -371,7 +371,7 @@ namespace trezor {
       return true;
     }
 
-    bool device_trezor_lite::sc_secret_add( crypto::secret_key &r, const crypto::secret_key &a, const crypto::secret_key &b) {
+    bool device_trezor_lite::sc_secret_add(crypto::secret_key &r, const crypto::secret_key &a, const crypto::secret_key &b) {
       AUTO_LOCK_CMD();
 
       comm.set_header_noopt(INS_SECRET_KEY_ADD);
@@ -403,7 +403,7 @@ namespace trezor {
       if ((this->mode == TRANSACTION_PARSE)  && has_view_key) {
         //A derivation is resquested in PASRE mode and we have the view key,
         //so do that wihtout the device and return the derivation unencrypted.
-        MDEBUG( "generate_key_derivation  : PARSE mode with known viewkey");
+        MDEBUG("generate_key_derivation  : PARSE mode with known viewkey");
         //Note derivation in PARSE mode can only happen with viewkey, so assert it!
         CHECK_AND_ASSERT_THROW_MES(is_fake_view_key(sec), "Expecting fake view key");
         r = crypto::generate_key_derivation(pub, this->viewkey, derivation);
@@ -602,7 +602,7 @@ namespace trezor {
 
       //pseudoOuts
       if (type == rct::RCTTypeSimple) {
-        for ( i = 0; i < inputs_size; i++) {
+        for (i = 0; i < inputs_size; i++) {
           comm.set_header(INS_VALIDATE, 0x01, static_cast<uint8_t>(i + 2));
           comm.insert_u8(static_cast<uint8_t>((i == inputs_size - 1) ? 0x00 : 0x80));
           comm.insert(data+data_offset);
@@ -614,7 +614,7 @@ namespace trezor {
       // ======  Aout, Bout, AKout, C, v, k ======
       kv_offset = data_offset;
       C_offset = static_cast<unsigned int>(kv_offset + (32 * 2) * outputs_size);
-      for ( i = 0; i < outputs_size; i++) {
+      for (i = 0; i < outputs_size; i++) {
         hw::ledger::ABPkeys outKeys;
         bool found;
 
