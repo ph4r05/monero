@@ -90,11 +90,6 @@ namespace protocol{
 
 // Crypto / encryption
 namespace crypto {
-  /**
-   * Constant time comparison.
-   */
-  int ct_equal(const char *a, const char *b, size_t len);
-
 namespace chacha {
 
   /**

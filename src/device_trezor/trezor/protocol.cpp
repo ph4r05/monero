@@ -36,8 +36,9 @@
 #include <ringct/rctSigs.h>
 #include <ringct/bulletproofs.h>
 #include "cryptonote_config.h"
-#include "sodium.h"
-#include "sodium/crypto_aead_chacha20poly1305.h"
+#include <sodium.h>
+#include <sodium/crypto_verify_32.h>
+#include <sodium/crypto_aead_chacha20poly1305.h>
 
 namespace hw{
 namespace trezor{
@@ -81,16 +82,6 @@ namespace protocol{
   }
 
 namespace crypto {
-
-    int ct_equal(const char *a, const char *b, size_t len) {
-    size_t i;
-    unsigned int dif = 0;
-    for (i = 0; i < len; i++)
-      dif |= (a[i] ^ b[i]);
-    dif = (dif - 1) >> ((sizeof(unsigned int) * 8) - 1);
-    return (dif & 1);
-  }
-
 namespace chacha {
 
   void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext){
@@ -734,7 +725,8 @@ namespace tx {
     ::crypto::hash tx_prefix_hash{};
     cryptonote::get_transaction_prefix_hash(m_ct.tx, tx_prefix_hash);
     m_ct.tx_prefix_hash = key_to_string(tx_prefix_hash);
-    if (!crypto::ct_equal(tx_prefix_hash.data, ack->tx_prefix_hash().data(), 32)){
+    if (crypto_verify_32(reinterpret_cast<const unsigned char *>(tx_prefix_hash.data),
+        reinterpret_cast<const unsigned char *>(ack->tx_prefix_hash().data()))){
       throw exc::proto::SecurityException("Transaction prefix has does not match to the computed value");
     }
 
@@ -784,7 +776,8 @@ namespace tx {
       throw exc::ProtocolException("Returned mlsag hash has invalid size");
     }
 
-    if (!crypto::ct_equal(reinterpret_cast<const char *>(hash_computed.bytes), hash.data(), 32)){
+    if (crypto_verify_32(reinterpret_cast<const unsigned char *>(hash_computed.bytes),
+        reinterpret_cast<const unsigned char *>(hash.data()))){
       throw exc::proto::SecurityException("Computed MLSAG does not match");
     }
   }
