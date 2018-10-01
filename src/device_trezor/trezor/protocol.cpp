@@ -132,17 +132,21 @@ namespace ki {
     KECCAK_CTX kck;
     uint8_t md[32];
 
+    CHECK_AND_ASSERT_THROW_MES(rr.out_key().size() == 32, "Invalid out_key size");
+    CHECK_AND_ASSERT_THROW_MES(rr.tx_pub_key().size() == 32, "Invalid tx_pub_key size");
+
     keccak_init(&kck);
     keccak_update(&kck, reinterpret_cast<const uint8_t *>(rr.out_key().data()), 32);
     keccak_update(&kck, reinterpret_cast<const uint8_t *>(rr.tx_pub_key().data()), 32);
     for (const auto &aux : rr.additional_tx_pub_keys()){
+      CHECK_AND_ASSERT_THROW_MES(aux.size() == 32, "Invalid aux size");
       keccak_update(&kck, reinterpret_cast<const uint8_t *>(aux.data()), 32);
     }
 
     auto index_serialized = tools::get_varint_data(rr.internal_output_index());
     keccak_update(&kck, reinterpret_cast<const uint8_t *>(index_serialized.data()), index_serialized.size());
     keccak_finish(&kck, md);
-    return std::string(reinterpret_cast<const char*>(md), 32);
+    return std::string(reinterpret_cast<const char*>(md), sizeof(md));
   }
 
   void generate_commitment(std::vector<MoneroTransferDetails> & mtds,
