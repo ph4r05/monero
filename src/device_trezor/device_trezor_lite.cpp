@@ -76,8 +76,6 @@ namespace trezor {
 #define INS_GET_RESPONSE                    0xc0
 
 
-#define ASSERT_X(exp,msg)    CHECK_AND_ASSERT_THROW_MES(exp, msg)
-
     static bool is_fake_view_key(const crypto::secret_key &sec) {
       return sec == crypto::null_skey;
     }
@@ -407,7 +405,7 @@ namespace trezor {
         //so do that wihtout the device and return the derivation unencrypted.
         MDEBUG( "generate_key_derivation  : PARSE mode with known viewkey");
         //Note derivation in PARSE mode can only happen with viewkey, so assert it!
-        assert(is_fake_view_key(sec));
+        CHECK_AND_ASSERT_THROW_MES(is_fake_view_key(sec), "Expecting fake view key");
         r = crypto::generate_key_derivation(pub, this->viewkey, derivation);
         
       } else {
@@ -439,7 +437,7 @@ namespace trezor {
         }
       }
 
-      ASSERT_X(pkey, "Mismatched derivation on scan info");
+      CHECK_AND_ASSERT_THROW_MES(pkey, "Mismatched derivation on scan info");
       return this->generate_key_derivation(*pkey,  crypto::null_skey, derivation);
     }
 
