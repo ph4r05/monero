@@ -314,11 +314,11 @@ namespace tx {
 
   static unsigned get_rsig_type(bool use_bulletproof, size_t num_outputs){
     if (!use_bulletproof){
-      return 0;  // Borromean
+      return rct::RangeProofBorromean;
     } else if (num_outputs > BULLETPROOF_MAX_OUTPUTS){
-      return 2;  // Multioutputs
+      return rct::RangeProofMultiOutputBulletproof;
     } else {
-      return 3;  // Padded
+      return rct::RangeProofPaddedBulletproof;
     }
   }
 
@@ -326,18 +326,18 @@ namespace tx {
     size_t amount_batched = 0;
 
     while(amount_batched < num_outputs){
-      if (rsig_type == 0 || rsig_type == 1) {  // Borromean, BP per output
+      if (rsig_type == rct::RangeProofBorromean || rsig_type == rct::RangeProofBulletproof) {
         batches.push_back(1);
         amount_batched += 1;
 
-      } else if (rsig_type == 3){  // BP padded
-        if (num_outputs > 16){
+      } else if (rsig_type == rct::RangeProofPaddedBulletproof){
+        if (num_outputs > BULLETPROOF_MAX_OUTPUTS){
           throw std::invalid_argument("BP padded can support only BULLETPROOF_MAX_OUTPUTS statements");
         }
         batches.push_back(num_outputs);
         amount_batched += num_outputs;
 
-      } else if (rsig_type == 2){  // Multi output
+      } else if (rsig_type == rct::RangeProofMultiOutputBulletproof){
         size_t batch_size = 1;
         while (batch_size * 2 + amount_batched <= num_outputs && batch_size * 2 <= BULLETPROOF_MAX_OUTPUTS){
           batch_size *= 2;
