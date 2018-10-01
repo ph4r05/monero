@@ -2247,17 +2247,21 @@ bool simple_wallet::set_device_name(const std::vector<std::string> &args/* = std
   const auto pwd_container = get_and_verify_password();
   if (pwd_container)
   {
+    if (args.size() == 0){
+      fail_msg_writer() << tr("Device name not specified");
+    }
+
     m_wallet->device_name(args[0]);
     bool r = false;
     try {
       r = m_wallet->reconnect_device();
       if (!r){
-        fail_msg_writer() << "Device reconnect failed";
+        fail_msg_writer() << tr("Device reconnect failed");
       }
 
     } catch(const std::exception & e){
-      LOG_PRINT_L2(std::string("Device reconnect failed: ") + e.what());
-      fail_msg_writer() << "Device reconnect failed: " << e.what();
+      MWARNING("Device reconnect failed: " << e.what());
+      fail_msg_writer() << tr("Device reconnect failed: ") << e.what();
     }
 
   }
