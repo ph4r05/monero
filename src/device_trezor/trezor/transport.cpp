@@ -178,7 +178,7 @@ namespace trezor{
       return false;
     }
 
-    if (strncmp(chunk, "?##", 3) != 0 || nread < 3 + PROTO_HEADER_SIZE){
+    if (strncmp(chunk, "?##", 3) != 0){
       MERROR("Malformed chunk");
       return false;
     }
