@@ -204,6 +204,7 @@ namespace trezor {
         auto idx_finish = std::min(static_cast<uint64_t>((cur + 1) * batch_size), static_cast<uint64_t>(mtds.size()));
         for(uint64_t idx = cur * batch_size; idx < idx_finish; ++idx){
           auto added_tdis = step_req->add_tdis();
+          CHECK_AND_ASSERT_THROW_MES(idx < mtds.size(), "Invalid transfer detail index");
           *added_tdis = mtds[idx];
         }
 
@@ -285,6 +286,7 @@ namespace trezor {
         for(size_t src_idx = 0; src_idx < num_sources; ++src_idx){
           size_t idx_mapped = cdata.source_permutation[src_idx];
           CHECK_AND_ASSERT_THROW_MES(idx_mapped < cdata.tx_data.selected_transfers.size(), "Invalid idx_mapped");
+          CHECK_AND_ASSERT_THROW_MES(src_idx < cdata.tx.vin.size(), "Invalid idx_mapped");
 
           size_t idx_map_src = cdata.tx_data.selected_transfers[idx_mapped];
           auto vini = boost::get<cryptonote::txin_to_key>(cdata.tx.vin[src_idx]);

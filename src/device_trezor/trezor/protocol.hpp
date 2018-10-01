@@ -209,6 +209,7 @@ namespace tx {
     bool m_multisig;
 
     const tx_construction_data & cur_tx(){
+      CHECK_AND_ASSERT_THROW_MES(m_tx_idx < m_unsigned_tx->txes.size(), "Invalid transaction index");
       return m_unsigned_tx->txes[m_tx_idx];
     }
 

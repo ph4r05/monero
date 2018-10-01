@@ -452,6 +452,7 @@ namespace tx {
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionSetInputRequest> Signer::step_set_input(size_t idx){
+    CHECK_AND_ASSERT_THROW_MES(idx < cur_tx().sources.size(), "Invalid source index");
     m_ct.cur_input_idx = idx;
     auto res = std::make_shared<messages::monero::MoneroTransactionSetInputRequest>();
     translate_src_entry(res->mutable_src_entr(), &(cur_tx().sources[idx]));
@@ -475,16 +476,26 @@ namespace tx {
   }
 
   void Signer::sort_ki(){
+    const size_t input_size = cur_tx().sources.size();
+
     m_ct.source_permutation.clear();
-    for (size_t n = 0; n < cur_tx().sources.size(); ++n){
+    for (size_t n = 0; n < input_size; ++n){
       m_ct.source_permutation.push_back(n);
     }
 
+    CHECK_AND_ASSERT_THROW_MES(m_ct.tx.vin.size() == input_size, "Invalid vector size");
     std::sort(m_ct.source_permutation.begin(), m_ct.source_permutation.end(), [&](const size_t i0, const size_t i1) {
       const cryptonote::txin_to_key &tk0 = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[i0]);
       const cryptonote::txin_to_key &tk1 = boost::get<cryptonote::txin_to_key>(m_ct.tx.vin[i1]);
       return memcmp(&tk0.k_image, &tk1.k_image, sizeof(tk0.k_image)) > 0;
     });
+
+    CHECK_AND_ASSERT_THROW_MES(m_ct.tx_in_hmacs.size() == input_size, "Invalid vector size");
+    CHECK_AND_ASSERT_THROW_MES(m_ct.pseudo_outs.size() == input_size, "Invalid vector size");
+    CHECK_AND_ASSERT_THROW_MES(m_ct.pseudo_outs_hmac.size() == input_size, "Invalid vector size");
+    CHECK_AND_ASSERT_THROW_MES(m_ct.alphas.size() == input_size, "Invalid vector size");
+    CHECK_AND_ASSERT_THROW_MES(m_ct.spend_encs.size() == input_size, "Invalid vector size");
+    CHECK_AND_ASSERT_THROW_MES(m_ct.tx_data.sources.size() == input_size, "Invalid vector size");
 
     tools::apply_permutation(m_ct.source_permutation, [&](size_t i0, size_t i1){
       std::swap(m_ct.tx.vin[i0], m_ct.tx.vin[i1]);
@@ -520,6 +531,9 @@ namespace tx {
     if (in_memory()){
       return nullptr;
     }
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.sources.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx.vin.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_in_hmacs.size(), "Invalid transaction index");
 
     m_ct.cur_input_idx = idx;
     auto tx = m_ct.tx_data;
@@ -529,6 +543,8 @@ namespace tx {
     res->set_vini(cryptonote::t_serializable_object_to_blob(vini));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     if (!in_memory()) {
+      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
+      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
       res->set_pseudo_out(m_ct.pseudo_outs[idx]);
       res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
     }
@@ -577,6 +593,9 @@ namespace tx {
     m_ct.cur_output_in_batch_idx += 1;   // assumes sequential call to step_set_output()
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
+
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.splitted_dsts.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_out_entr_hmacs.size(), "Invalid transaction index");
     auto & cur_dst = m_ct.tx_data.splitted_dsts[idx];
     translate_dst_entry(res->mutable_dst_entr(), &cur_dst);
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
@@ -586,6 +605,7 @@ namespace tx {
       return res;
     }
 
+    CHECK_AND_ASSERT_THROW_MES(m_ct.cur_batch_idx < m_ct.grouping_vct.size(), "Invalid batch index");
     if (m_ct.grouping_vct[m_ct.cur_batch_idx] > m_ct.cur_output_in_batch_idx) {
       return res;
     }
@@ -598,6 +618,7 @@ namespace tx {
         throw std::invalid_argument("Borromean cannot batch outputs");
       }
 
+      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.rsig_gamma.size(), "Invalid gamma index");
       rct::key C{}, mask = m_ct.rsig_gamma[idx];
       auto genRsig = rct::proveRange(C, mask, cur_dst.amount);  // TODO: rsig with given mask
       auto serRsig = cn_serialize(genRsig);
@@ -608,8 +629,12 @@ namespace tx {
       std::vector<uint64_t> amounts;
       rct::keyV masks;
       for(size_t i = 0; i < batch_size; ++i){
-        amounts.push_back(m_ct.tx_data.splitted_dsts[1 + idx - batch_size + i].amount);
-        masks.push_back(m_ct.rsig_gamma[1 + idx - batch_size + i]);
+        const size_t bidx = 1 + idx - batch_size + i;
+        CHECK_AND_ASSERT_THROW_MES(bidx < m_ct.tx_data.splitted_dsts.size(), "Invalid gamma index");
+        CHECK_AND_ASSERT_THROW_MES(bidx < m_ct.rsig_gamma.size(), "Invalid gamma index");
+
+        amounts.push_back(m_ct.tx_data.splitted_dsts[bidx].amount);
+        masks.push_back(m_ct.rsig_gamma[bidx]);
       }
 
       auto bp = bulletproof_PROVE(amounts, masks);
@@ -676,9 +701,13 @@ namespace tx {
     }
 
     if (is_req_bulletproof()){
+      CHECK_AND_ASSERT_THROW_MES(m_ct.cur_batch_idx < m_ct.grouping_vct.size(), "Invalid batch index");
       auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
       for (size_t i = 0; i < batch_size; ++i){
-        rct::key commitment = m_ct.tx_out_pk[1 + m_ct.cur_output_idx - batch_size + i].mask;
+        const size_t bidx = 1 + m_ct.cur_output_idx - batch_size + i;
+        CHECK_AND_ASSERT_THROW_MES(bidx < m_ct.tx_out_pk.size(), "Invalid out index");
+
+        rct::key commitment = m_ct.tx_out_pk[bidx].mask;
         commitment = rct::scalarmultKey(commitment, rct::INV_EIGHT);
         bproof.V.push_back(commitment);
       }
@@ -746,6 +775,7 @@ namespace tx {
       m_ct.rv->mixRing[0].resize(num_sources);
     }
 
+    CHECK_AND_ASSERT_THROW_MES(m_ct.tx_out_pk.size() == m_ct.tx_out_ecdh.size(), "Invalid vector sizes");
     for(size_t i = 0; i < m_ct.tx_out_ecdh.size(); ++i){
       m_ct.rv->outPk.push_back(m_ct.tx_out_pk[i]);
       m_ct.rv->ecdhInfo.push_back(m_ct.tx_out_ecdh[i]);
@@ -781,6 +811,12 @@ namespace tx {
   std::shared_ptr<messages::monero::MoneroTransactionSignInputRequest> Signer::step_sign_input(size_t idx){
     m_ct.cur_input_idx = idx;
 
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.sources.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx.vin.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_in_hmacs.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.alphas.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.spend_encs.size(), "Invalid transaction index");
+
     auto res = std::make_shared<messages::monero::MoneroTransactionSignInputRequest>();
     translate_src_entry(res->mutable_src_entr(), &(m_ct.tx_data.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
@@ -788,6 +824,8 @@ namespace tx {
     res->set_alpha_enc(m_ct.alphas[idx]);
     res->set_spend_enc(m_ct.spend_encs[idx]);
     if (!in_memory()){
+      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
+      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
       res->set_pseudo_out(m_ct.pseudo_outs[idx]);
       res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
     }
