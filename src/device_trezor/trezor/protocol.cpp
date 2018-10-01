@@ -45,40 +45,40 @@ namespace trezor{
 namespace protocol{
 
   std::string key_to_string(const ::crypto::ec_point & key){
-    return std::string(key.data, 32);
+    return std::string(key.data, sizeof(key.data));
   }
 
   std::string key_to_string(const ::crypto::ec_scalar & key){
-    return std::string(key.data, 32);
+    return std::string(key.data, sizeof(key.data));
   }
 
   std::string key_to_string(const ::crypto::hash & key){
-    return std::string(key.data, 32);
+    return std::string(key.data, sizeof(key.data));
   }
 
   std::string key_to_string(const ::rct::key & key){
-    return std::string(reinterpret_cast<const char*>(key.bytes), 32);
+    return std::string(reinterpret_cast<const char*>(key.bytes), sizeof(key.bytes));
   }
 
   void string_to_key(::crypto::ec_scalar & key, const std::string & str){
-    if (str.size() != 32){
-      throw std::invalid_argument("Key has to have 32 B");
+    if (str.size() != sizeof(key.data)){
+      throw std::invalid_argument("Key has to have sizeof(key.data) B");
     }
-    memcpy(key.data, str.data(), 32);
+    memcpy(key.data, str.data(), sizeof(key.data));
   }
 
   void string_to_key(::crypto::ec_point & key, const std::string & str){
-    if (str.size() != 32){
-      throw std::invalid_argument("Key has to have 32 B");
+    if (str.size() != sizeof(key.data)){
+      throw std::invalid_argument("Key has to have sizeof(key.data) B");
     }
-    memcpy(key.data, str.data(), 32);
+    memcpy(key.data, str.data(), sizeof(key.data));
   }
 
   void string_to_key(::rct::key & key, const std::string & str){
-    if (str.size() != 32){
-      throw std::invalid_argument("Key has to have 32 B");
+    if (str.size() != sizeof(key.bytes)){
+      throw std::invalid_argument("Key has to have sizeof(key.data) B");
     }
-    memcpy(key.bytes, str.data(), 32);
+    memcpy(key.bytes, str.data(), sizeof(key.bytes));
   }
 
 namespace crypto {
