@@ -380,6 +380,9 @@ namespace trezor{
       } else {
         m_device_host = device_str.substr(0, delim);
         m_device_port = std::stoi(device_str.substr(delim + 1));
+        if (m_device_port <= 0 || m_device_port > 65535){
+          throw std::invalid_argument("Port number invalid");
+        }
       }
     } else {
       m_device_host = DEFAULT_HOST;
