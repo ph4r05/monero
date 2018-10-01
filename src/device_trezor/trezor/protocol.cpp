@@ -965,13 +965,13 @@ namespace lite {
 
   void LiteComm::assert_enough_read_data(size_t nbytes){
     if (m_c_offset + nbytes > m_c_len){
-      throw std::invalid_argument("Read buffer to small");
+      throw std::invalid_argument("Read buffer too small");
     }
   }
 
   void LiteComm::assert_enough_write_buff(size_t nbytes){
     if (m_r_len + nbytes > sizeof(m_r_buff)){
-      throw std::invalid_argument("Write buffer to small");
+      throw std::invalid_argument("Write buffer too small");
     }
   }
 
