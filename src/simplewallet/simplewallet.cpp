@@ -2255,7 +2255,7 @@ bool simple_wallet::set_device_name(const std::vector<std::string> &args/* = std
         fail_msg_writer() << "Device reconnect failed";
       }
 
-    } catch(std::exception & e){
+    } catch(const std::exception & e){
       LOG_PRINT_L2(std::string("Device reconnect failed: ") + e.what());
       fail_msg_writer() << "Device reconnect failed: " << e.what();
     }
