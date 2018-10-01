@@ -35,14 +35,13 @@
 #include <common/apply_permutation.h>
 #include <ringct/rctSigs.h>
 #include <ringct/bulletproofs.h>
+#include "cryptonote_config.h"
 #include "sodium.h"
 #include "sodium/crypto_aead_chacha20poly1305.h"
 
 namespace hw{
 namespace trezor{
 namespace protocol{
-
-#define BULLETPROOF_MAX_OUTPUTS 16
 
   std::string key_to_string(const ::crypto::ec_point & key){
     return std::string(key.data, 32);
@@ -330,7 +329,7 @@ namespace tx {
   static unsigned get_rsig_type(bool use_bulletproof, size_t num_outputs){
     if (!use_bulletproof){
       return 0;  // Borromean
-    } else if (num_outputs > 16){
+    } else if (num_outputs > BULLETPROOF_MAX_OUTPUTS){
       return 2;  // Multioutputs
     } else {
       return 3;  // Padded
