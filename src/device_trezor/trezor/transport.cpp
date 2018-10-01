@@ -169,11 +169,11 @@ namespace trezor{
   }
 
   bool ProtocolV1::read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type){
-    char chunk[64];
+    char chunk[REPLEN];
 
     // Initial chunk read
-    size_t nread = transport.read_chunk(chunk, 64);
-    if (nread != 64){
+    size_t nread = transport.read_chunk(chunk, REPLEN);
+    if (nread != REPLEN){
       MERROR("Read chunk has invalid size");
       return false;
     }
@@ -190,7 +190,7 @@ namespace trezor{
 
     std::string data_acc(chunk + 3 + 6, nread);
     while(nread < len){
-      size_t cur = transport.read_chunk(chunk, 64);
+      size_t cur = transport.read_chunk(chunk, REPLEN);
       if (chunk[0] != '?'){
         throw exc::CommunicationException("Chunk malformed");
       }
