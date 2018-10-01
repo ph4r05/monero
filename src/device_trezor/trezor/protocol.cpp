@@ -86,7 +86,7 @@ namespace chacha {
 
   void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext){
     if (length < 16){
-      throw std::invalid_argument("Ciphertext lentgh too small");
+      throw std::invalid_argument("Ciphertext length too small");
     }
 
     unsigned long long int cip_len = length;
