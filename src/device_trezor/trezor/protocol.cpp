@@ -713,7 +713,7 @@ namespace tx {
       }
 
       m_ct.tx_out_rsigs.emplace_back(bproof);
-      if (!rct::verBulletproof(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs.back()))) {
+      if (!rct::bulletproof_VERIFY(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs.back()))) {
         throw exc::ProtocolException("Returned range signature is invalid");
       }
 
