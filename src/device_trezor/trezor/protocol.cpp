@@ -564,10 +564,10 @@ namespace tx {
       }
 
       for(size_t idx=0, c=0; idx < mask.size(); idx += 32, ++c){
-        auto sub = mask.substr(idx, idx + 32);
-        rct::key mask{};
-        memcpy(mask.bytes, sub.data(), 32);
-        m_ct.rsig_gamma.emplace_back(mask);
+        auto sub = mask.substr(idx, 32);
+        rct::key cmask{};
+        memcpy(cmask.bytes, sub.data(), 32);
+        m_ct.rsig_gamma.emplace_back(cmask);
       }
     }
   }
