@@ -1013,7 +1013,7 @@ namespace lite {
 
   uint32_t LiteComm::fetch_u32(uint32_t * dst){
     uint8_t l0, l1, l2, l3;
-    uint16_t res;
+    uint32_t res;
 
     fetch(&l0, 1);
     fetch(&l1, 1);
