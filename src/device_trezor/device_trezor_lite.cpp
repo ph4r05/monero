@@ -76,7 +76,7 @@ namespace trezor {
 #define INS_GET_RESPONSE                    0xc0
 
 
-#define ASSERT_X(exp,msg)    CHECK_AND_ASSERT_THROW_MES(exp, msg);
+#define ASSERT_X(exp,msg)    CHECK_AND_ASSERT_THROW_MES(exp, msg)
 
     static bool is_fake_view_key(const crypto::secret_key &sec) {
       return sec == crypto::null_skey;
