@@ -100,7 +100,7 @@ namespace chacha {
   /**
    * Chacha20Poly1305 decryption with tag verification. RFC 7539.
    */
-  void decrypt(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher);
+  void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext);
 
 }
 }

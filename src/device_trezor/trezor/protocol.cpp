@@ -93,16 +93,15 @@ namespace crypto {
 
 namespace chacha {
 
-  void decrypt(const void* data, size_t length, const uint8_t* key, const uint8_t* iv, char* cipher){
+  void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext){
     if (length < 16){
       throw std::invalid_argument("Ciphertext lentgh too small");
     }
 
-    auto cip_data = reinterpret_cast<const char*>(data);
     unsigned long long int cip_len = length;
     auto r = crypto_aead_chacha20poly1305_ietf_decrypt(
-        reinterpret_cast<unsigned char *>(cipher), &cip_len, nullptr,
-        static_cast<const unsigned char *>(data), length, nullptr, 0, iv, key);
+        reinterpret_cast<unsigned char *>(plaintext), &cip_len, nullptr,
+        static_cast<const unsigned char *>(ciphertext), length, nullptr, 0, iv, key);
 
     if (r != 0){
       throw exc::Poly1305TagInvalid();
