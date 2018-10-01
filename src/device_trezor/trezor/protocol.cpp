@@ -111,10 +111,6 @@ namespace ki {
                       std::vector<MoneroTransferDetails> & res)
   {
     for(auto & td : transfers){
-      if (td.m_tx.vout.empty()){
-        throw std::invalid_argument("Tx with no outputs");
-      }
-
       ::crypto::public_key tx_pub_key = wallet->get_tx_pub_key_from_received_outs(td);
       const std::vector<::crypto::public_key> additional_tx_pub_keys = cryptonote::get_additional_tx_pub_keys_from_extra(td.m_tx);
 
