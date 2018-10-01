@@ -376,15 +376,15 @@ WalletImpl::WalletImpl(NetworkType nettype, uint64_t kdf_rounds)
     , m_rebuildWalletCache(false)
     , m_is_connected(false)
 {
-    m_wallet = new tools::wallet2(static_cast<cryptonote::network_type>(nettype), kdf_rounds, true);
-    m_history = new TransactionHistoryImpl(this);
-    m_wallet2Callback = new Wallet2CallbackImpl(this);
+    m_wallet = std::make_unique<tools::wallet2>(static_cast<cryptonote::network_type>(nettype), kdf_rounds, true);
+    m_history = std::make_unique<TransactionHistoryImpl>(this);
+    m_wallet2Callback = std::make_unique<Wallet2CallbackImpl>(this);
     m_wallet->callback(m_wallet2Callback);
     m_refreshThreadDone = false;
     m_refreshEnabled = false;
-    m_addressBook = new AddressBookImpl(this);
-    m_subaddress = new SubaddressImpl(this);
-    m_subaddressAccount = new SubaddressAccountImpl(this);
+    m_addressBook = std::make_unique<AddressBookImpl>(this);
+    m_subaddress = std::make_unique<SubaddressImpl>(this);
+    m_subaddressAccount = std::make_unique<SubaddressAccountImpl>(this);
 
 
     m_refreshIntervalMillis = DEFAULT_REFRESH_INTERVAL_MILLIS;
@@ -405,12 +405,6 @@ WalletImpl::~WalletImpl()
     close(false); // do not store wallet as part of the closing activities
     // Stop refresh thread
     stopRefresh();
-    delete m_wallet2Callback;
-    delete m_history;
-    delete m_addressBook;
-    delete m_subaddress;
-    delete m_subaddressAccount;
-    delete m_wallet;
     LOG_PRINT_L1(__FUNCTION__ << " finished");
 }
 
@@ -609,7 +603,7 @@ bool WalletImpl::recoverFromKeysWithPassword(const std::string &path,
             LOG_PRINT_L1("Generated new view only wallet from keys");
         }
         if(has_spendkey && !has_viewkey) {
-           m_wallet->generate(path, password, spendkey, true, false, false);
+           m_wallet->generate(path, password, spendkey, true, false);
            setSeedLanguage(language);
            LOG_PRINT_L1("Generated deterministic wallet from spend key with seed language: " + language);
         }
@@ -629,7 +623,7 @@ bool WalletImpl::recoverFromDevice(const std::string &path, const std::string &p
     m_recoveringFromDevice = true;
     try
     {
-        m_wallet->restore(path, password, device_name, false);
+        m_wallet->restore(path, password, device_name);
         LOG_PRINT_L1("Generated new wallet from device: " + device_name);
     }
     catch (const std::exception& e) {
@@ -1551,22 +1545,22 @@ void WalletImpl::disposeTransaction(PendingTransaction *t)
 
 TransactionHistory *WalletImpl::history()
 {
-    return m_history;
+    return m_history.get();
 }
 
 AddressBook *WalletImpl::addressBook()
 {
-    return m_addressBook;
+    return m_addressBook.get();
 }
 
 Subaddress *WalletImpl::subaddress()
 {
-    return m_subaddress;
+    return m_subaddress.get();
 }
 
 SubaddressAccount *WalletImpl::subaddressAccount()
 {
-    return m_subaddressAccount;
+    return m_subaddressAccount.get();
 }
 
 void WalletImpl::setListener(WalletListener *l)

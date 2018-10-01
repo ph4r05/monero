@@ -69,6 +69,7 @@ namespace tools
 {
   class ringdb;
   class wallet2;
+  class Notify;
 
   class wallet_keys_unlocker
   {
@@ -555,7 +556,7 @@ namespace tools
      * \param  device_name    name of HW to use
      * \param  create_address_file     Whether to create an address file
      */
-    void restore(const std::string& wallet_, const epee::wipeable_string& password, const std::string &device_name, bool create_address_file);
+    void restore(const std::string& wallet_, const epee::wipeable_string& password, const std::string &device_name, bool create_address_file = false);
 
     /*!
      * \brief Creates a multisig wallet
@@ -1186,6 +1187,8 @@ namespace tools
 
     void change_password(const std::string &filename, const epee::wipeable_string &original_password, const epee::wipeable_string &new_password);
 
+    void set_tx_notify(const std::shared_ptr<tools::Notify> &notify) { m_tx_notify = notify; }
+
   private:
     /*!
      * \brief  Stores wallet information to wallet file.
@@ -1369,6 +1372,8 @@ namespace tools
 
     bool m_unattended;
     bool m_devices_registered;
+
+    std::shared_ptr<tools::Notify> m_tx_notify;
   };
 }
 BOOST_CLASS_VERSION(tools::wallet2, 26)

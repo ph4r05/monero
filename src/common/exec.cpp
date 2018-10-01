@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2018, The Monero Project
+// Copyright (c) 2018, The Monero Project
 // 
 // All rights reserved.
 // 
@@ -26,51 +26,63 @@
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#include <boost/program_options.hpp>
-#include "include_base_utils.h"
-#include "string_tools.h"
-#include "common/command_line.h"
-#include "common/util.h"
-#include "fuzzer.h"
+#include <errno.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
-#if (!defined(__clang__) || (__clang__ < 5))
-static int __AFL_LOOP(int)
+#include "misc_log_ex.h"
+#include "exec.h"
+
+namespace tools
 {
-  static int once = 0;
-  if (once)
-    return 0;
-  once = 1;
-  return 1;
+
+int exec(const char *filename, char * const argv[], bool wait)
+{
+  pid_t pid = fork();
+  if (pid < 0)
+  {
+    MERROR("Error forking: " << strerror(errno));
+    return -1;
+  }
+
+  // child
+  if (pid == 0)
+  {
+    char *envp[] = {NULL};
+    execve(filename, argv, envp);
+    MERROR("Failed to execve: " << strerror(errno));
+    return -1;
+  }
+
+  // parent
+  if (pid > 0)
+  {
+    if (!wait)
+      return 0;
+
+    while (1)
+    {
+      int wstatus = 0;
+      pid_t w = waitpid(pid, &wstatus, WUNTRACED | WCONTINUED);
+      if (w  < 0) {
+        MERROR("Error waiting for child: " << strerror(errno));
+        return -1;
+      }
+      if (WIFEXITED(wstatus))
+      {
+        MINFO("Child exited with " << WEXITSTATUS(wstatus));
+        return WEXITSTATUS(wstatus);
+      }
+      if (WIFSIGNALED(wstatus))
+      {
+        MINFO("Child killed by " << WEXITSTATUS(wstatus));
+        return WEXITSTATUS(wstatus);
+      }
+    }
+  }
+  MERROR("Secret passage found");
+  return -1;
 }
-#endif
 
-int run_fuzzer(int argc, const char **argv, Fuzzer &fuzzer)
-{
-  TRY_ENTRY();
-
-  if (argc < 2)
-  {
-    std::cout << "usage: " << argv[0] << " " << "<filename>" << std::endl;
-    return 1;
-  }
-
-#ifdef __AFL_HAVE_MANUAL_CONTROL
-  __AFL_INIT();
-#endif
-
-  int ret = fuzzer.init();
-  if (ret)
-    return ret;
-
-  const std::string filename = argv[1];
-  while (__AFL_LOOP(1000))
-  {
-    ret = fuzzer.run(filename);
-    if (ret)
-      return ret;
-  }
-
-  return 0;
-
-  CATCH_ENTRY_L0("run_fuzzer", 1);
 }
