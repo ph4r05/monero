@@ -563,10 +563,10 @@ namespace tx {
         throw exc::ProtocolException("Invalid number of gamma masks");
       }
 
-      for(size_t idx=0, c=0; idx < mask.size(); idx += 32, ++c){
-        auto sub = mask.substr(idx, 32);
+      m_ct.rsig_gamma.reserve(num_outputs());
+      for(size_t c=0; c < num_outputs(); ++c){
         rct::key cmask{};
-        memcpy(cmask.bytes, sub.data(), 32);
+        memcpy(cmask.bytes, mask.data() + c * 32, 32);
         m_ct.rsig_gamma.emplace_back(cmask);
       }
     }
