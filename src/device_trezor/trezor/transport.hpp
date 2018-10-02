@@ -112,10 +112,10 @@ namespace trezor {
   public:
     Protocol() = default;
     virtual ~Protocol() = default;
-    virtual bool session_begin(Transport & transport){ return false; };
-    virtual bool session_end(Transport & transport){ return false; };
-    virtual bool write(Transport & transport, const google::protobuf::Message & req)= 0;
-    virtual bool read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr)= 0;
+    virtual void session_begin(Transport & transport){ };
+    virtual void session_end(Transport & transport){ };
+    virtual void write(Transport & transport, const google::protobuf::Message & req)= 0;
+    virtual void read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr)= 0;
   };
 
   class ProtocolV1 : public Protocol {
@@ -123,8 +123,8 @@ namespace trezor {
     ProtocolV1() = default;
     virtual ~ProtocolV1() = default;
 
-    bool write(Transport & transport, const google::protobuf::Message & req) override;
-    bool read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+    void write(Transport & transport, const google::protobuf::Message & req) override;
+    void read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
   };
 
 
@@ -138,13 +138,13 @@ namespace trezor {
 
     virtual bool ping() { return false; };
     virtual std::string get_path() const { return ""; };
-    virtual bool enumerate(t_transport_vect & res){ return false; };
-    virtual bool open(){return false;};
-    virtual bool close(){return false;};
-    virtual bool write(const google::protobuf::Message & req) =0;
-    virtual bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
+    virtual void enumerate(t_transport_vect & res){};
+    virtual void open(){};
+    virtual void close(){};
+    virtual void write(const google::protobuf::Message & req) =0;
+    virtual void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
 
-    virtual bool write_chunk(const void * buff, size_t size) { return false; };
+    virtual void write_chunk(const void * buff, size_t size) { };
     virtual size_t read_chunk(void * buff, size_t size) { return 0; };
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
   };
@@ -168,13 +168,13 @@ namespace trezor {
     static const char * PATH_PREFIX;
 
     std::string get_path() const override;
-    bool enumerate(t_transport_vect & res) override;
+    void enumerate(t_transport_vect & res) override;
 
-    bool open() override;
-    bool close() override;
+    void open() override;
+    void close() override;
 
-    bool write(const google::protobuf::Message &req) override;
-    bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+    void write(const google::protobuf::Message &req) override;
+    void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
     const boost::optional<json_val> & device_info() const;
     std::ostream& dump(std::ostream& o) const override;
@@ -206,15 +206,15 @@ namespace trezor {
 
     bool ping() override;
     std::string get_path() const override;
-    bool enumerate(t_transport_vect & res) override;
+    void enumerate(t_transport_vect & res) override;
 
-    bool open() override;
-    bool close() override;
+    void open() override;
+    void close() override;
 
-    bool write(const google::protobuf::Message &req) override;
-    bool read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+    void write(const google::protobuf::Message &req) override;
+    void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
-    bool write_chunk(const void * buff, size_t size) override;
+    void write_chunk(const void * buff, size_t size) override;
     size_t read_chunk(void * buff, size_t size) override;
 
     std::ostream& dump(std::ostream& o) const override;
@@ -243,7 +243,7 @@ namespace trezor {
   /**
    * Enumerates all transports
    */
-  bool enumerate(t_transport_vect & res);
+  void enumerate(t_transport_vect & res);
 
   /**
    * Transforms path to the transport

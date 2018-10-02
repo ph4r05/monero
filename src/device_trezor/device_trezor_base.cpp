@@ -80,52 +80,71 @@ namespace trezor {
     }
 
     bool device_trezor_base::init(void) {
-      release();
+      if (!release()){
+        MERROR("Release failed");
+        return false;
+      }
+
       if (!m_callback){
         m_callback = std::make_shared<trezor_callback>(*this);
       }
-
       return true;
     }
 
     bool device_trezor_base::release() {
-      disconnect();
-      return true;
+      try {
+        disconnect();
+        return true;
+
+      } catch(std::exception const& e){
+        MERROR("Release exception: " << e.what());
+        return false;
+      }
     }
 
     bool device_trezor_base::connect(void) {
       disconnect();
 
       // Enumerate all available devices
-      hw::trezor::t_transport_vect trans;
-      if (!enumerate(trans)){
-        MWARNING("Enumeration failed");
-        return false;
-      }
+      try {
+        hw::trezor::t_transport_vect trans;
+        enumerate(trans);
 
-      MDEBUG("Enumeration yielded " << trans.size() << " devices");
-      for(auto & cur : trans){
-        MDEBUG("  device: " << *(cur.get()));
-        std::string cur_path = cur->get_path();
-        if (boost::starts_with(cur_path, this->name)){
-          MDEBUG("Device Match: " << cur_path);
-          m_transport = cur;
-          break;
+        MDEBUG("Enumeration yielded " << trans.size() << " devices");
+        for (auto &cur : trans) {
+          MDEBUG("  device: " << *(cur.get()));
+          std::string cur_path = cur->get_path();
+          if (boost::starts_with(cur_path, this->name)) {
+            MDEBUG("Device Match: " << cur_path);
+            m_transport = cur;
+            break;
+          }
         }
-      }
 
-      if (!m_transport){
+        if (!m_transport) {
+          return false;
+        }
+
+        m_transport->open();
+        return true;
+
+      } catch(std::exception const& e){
+        MERROR("Open exception: " << e.what());
         return false;
       }
-
-      bool r = m_transport->open();
-      return r;
     }
 
     bool device_trezor_base::disconnect() {
       if (m_transport){
-        m_transport->close();
-        m_transport = nullptr;
+        try {
+          m_transport->close();
+          m_transport = nullptr;
+
+        } catch(std::exception const& e){
+          MERROR("Disconnect exception: " << e.what());
+          m_transport = nullptr;
+          return false;
+        }
       }
       return true;
     }

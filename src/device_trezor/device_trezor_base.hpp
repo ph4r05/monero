@@ -136,9 +136,10 @@ namespace trezor {
 
         // Open session if required
         if (open_session && depth == 0){
-          bool r = m_transport->open();
-          if (!r){
-            throw exc::SessionException("Could not open session");
+          try {
+            m_transport->open();
+          } catch (const std::exception& e) {
+            std::throw_with_nested(exc::SessionException("Could not open session"));
           }
         }
 

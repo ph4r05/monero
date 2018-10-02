@@ -128,7 +128,7 @@ namespace trezor{
 
 #define REPLEN 64
 
-  bool ProtocolV1::write(Transport & transport, const google::protobuf::Message & req){
+  void ProtocolV1::write(Transport & transport, const google::protobuf::Message & req){
     const auto msg_size = message_size(req);
     const auto buff_size = serialize_message_buffer_size(msg_size) + 2;
 
@@ -138,7 +138,6 @@ namespace trezor{
     req_buff_raw[1] = '#';
 
     if (!serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2)){
-      MERROR("Message could not be serialized");
       throw exc::EncodingException("Message could not be serialized");
     }
 
@@ -158,29 +157,22 @@ namespace trezor{
         memset(chunk_buff_raw + 1 + to_copy, 0, REPLEN - 1 - to_copy);
       }
 
-      if (!transport.write_chunk(chunk_buff_raw, REPLEN)){
-        MERROR("Chunk write failed");
-        return false;
-      }
-
+      transport.write_chunk(chunk_buff_raw, REPLEN);
       offset += REPLEN - 1;
     }
-    return true;
   }
 
-  bool ProtocolV1::read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type){
+  void ProtocolV1::read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type){
     char chunk[REPLEN];
 
     // Initial chunk read
     size_t nread = transport.read_chunk(chunk, REPLEN);
     if (nread != REPLEN){
-      MERROR("Read chunk has invalid size");
-      return false;
+      throw exc::CommunicationException("Read chunk has invalid size");
     }
 
     if (strncmp(chunk, "?##", 3) != 0){
-      MERROR("Malformed chunk");
-      return false;
+      throw exc::CommunicationException("Malformed chunk");
     }
 
     uint16_t tag;
@@ -209,12 +201,10 @@ namespace trezor{
 
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(tag));
     if (!msg_wrap->ParseFromArray(data_acc.c_str(), len)){
-      MERROR("Message could not be parsed");
-      return false;
+      throw exc::CommunicationException("Message could not be parsed");
     }
 
     msg = msg_wrap;
-    return true;
   }
 
   //
@@ -232,14 +222,13 @@ namespace trezor{
     return path + m_device_path.get();
   }
 
-  bool BridgeTransport::enumerate(t_transport_vect & res) {
+  void BridgeTransport::enumerate(t_transport_vect & res) {
     json bridge_res;
     std::string req;
 
     bool req_status = invoke_bridge_http("/enumerate", req, bridge_res, m_http_client);
     if (!req_status){
-      MERROR("Bridge enumeration failed");
-      return false;
+      throw exc::CommunicationException("Bridge enumeration failed");
     }
 
     for(rapidjson::Value::ConstValueIterator itr = bridge_res.Begin(); itr != bridge_res.End(); ++itr){
@@ -248,13 +237,11 @@ namespace trezor{
       t->m_device_info.emplace(*itr, bridge_res.GetAllocator());
       res.push_back(t);
     }
-    return true;
   }
 
-  bool BridgeTransport::open() {
+  void BridgeTransport::open() {
     if (!m_device_path){
-      MERROR("Coud not open, empty device path");
-      return false;
+      throw exc::CommunicationException("Coud not open, empty device path");
     }
 
     std::string uri = "/acquire/" + m_device_path.get() + "/null";
@@ -262,17 +249,15 @@ namespace trezor{
     json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
-      MERROR("Failed to acquire device");
-      return false;
+      throw exc::CommunicationException("Failed to acquire device");
     }
 
     m_session = boost::make_optional(json_get_string(bridge_res["session"]));
-    return true;
   }
 
-  bool BridgeTransport::close() {
+  void BridgeTransport::close() {
     if (!m_device_path || !m_session){
-      return false;
+      throw exc::CommunicationException("Device not open");
     }
 
     std::string uri = "/release/" + m_session.get();
@@ -280,15 +265,13 @@ namespace trezor{
     json bridge_res;
     bool req_status = invoke_bridge_http(uri, req, bridge_res, m_http_client);
     if (!req_status){
-      MERROR("Failed to release the device");
-      return false;
+      throw exc::CommunicationException("Failed to release device");
     }
 
     m_session = boost::none;
-    return true;
   }
 
-  bool BridgeTransport::write(const google::protobuf::Message &req) {
+  void BridgeTransport::write(const google::protobuf::Message &req) {
     m_response = boost::none;
 
     const auto msg_size = message_size(req);
@@ -298,7 +281,6 @@ namespace trezor{
     uint8_t * req_buff_raw = req_buff.get();
 
     if (!serialize_message(req, msg_size, req_buff_raw, buff_size)){
-      MERROR("Message could not be serialized");
       throw exc::EncodingException("Message could not be serialized");
     }
 
@@ -308,23 +290,19 @@ namespace trezor{
 
     bool req_status = invoke_bridge_http(uri, req_hex, res_hex, m_http_client);
     if (!req_status){
-      MERROR("Call method failed");
       throw exc::CommunicationException("Call method failed");
     }
 
     m_response = res_hex;
-    return true;
   }
 
-  bool BridgeTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
+  void BridgeTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
     if (!m_response){
-      MERROR("Could not read, no response stored");
-      return false;
+      throw exc::CommunicationException("Could not read, no response stored");
     }
 
     std::string bin_data;
     if (!epee::string_tools::parse_hexstr_to_binbuff(m_response.get(), bin_data)){
-      MERROR("Response is not well hexcoded");
       throw exc::CommunicationException("Response is not well hexcoded");
     }
 
@@ -332,7 +310,6 @@ namespace trezor{
     uint32_t msg_len;
     deserialize_message_header(bin_data.c_str(), msg_tag, msg_len);
     if (bin_data.size() != msg_len + 6){
-      MERROR("Response size invalid");
       throw exc::CommunicationException("Response is not well hexcoded");
     }
 
@@ -342,11 +319,9 @@ namespace trezor{
 
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(msg_tag));
     if (!msg_wrap->ParseFromArray(bin_data.c_str() + 6, msg_len)){
-      MERROR("Message could not be parsed");
       throw exc::EncodingException("Response is not well hexcoded");
     }
     msg = msg_wrap;
-    return true;
   }
 
   const boost::optional<json_val> & BridgeTransport::device_info() const {
@@ -418,7 +393,7 @@ namespace trezor{
     }
   }
 
-  bool UdpTransport::enumerate(t_transport_vect & res) {
+  void UdpTransport::enumerate(t_transport_vect & res) {
     std::shared_ptr<UdpTransport> t = std::make_shared<UdpTransport>();
     bool t_works = false;
 
@@ -432,10 +407,9 @@ namespace trezor{
     if (t_works){
       res.push_back(t);
     }
-    return true;
   }
 
-  bool UdpTransport::open() {
+  void UdpTransport::open() {
     udp::resolver resolver(m_io_service);
     udp::resolver::query query(udp::v4(), m_device_host, std::to_string(m_device_port));
     m_endpoint = *resolver.resolve(query);
@@ -447,22 +421,19 @@ namespace trezor{
     check_deadline();
 
     m_proto->session_begin(*this);
-
-    return true;
   }
 
-  bool UdpTransport::close() {
+  void UdpTransport::close() {
     if (!m_socket){
-      return false;
+      throw exc::CommunicationException("Socket is already closed");
     }
 
     m_proto->session_end(*this);
     m_socket->close();
     m_socket = nullptr;
-    return true;
   }
 
-  bool UdpTransport::write_chunk(const void * buff, size_t size){
+  void UdpTransport::write_chunk(const void * buff, size_t size){
     require_socket();
 
     if (size != 64){
@@ -470,7 +441,9 @@ namespace trezor{
     }
 
     auto written = m_socket->send_to(boost::asio::buffer(buff, size), m_endpoint);
-    return size == written;
+    if (size != written){
+      throw exc::CommunicationException("Could not send the whole chunk");
+    }
   }
 
   size_t UdpTransport::read_chunk(void * buff, size_t size){
@@ -557,12 +530,12 @@ namespace trezor{
     return length;
   }
 
-  bool UdpTransport::write(const google::protobuf::Message &req) {
-    return m_proto->write(*this, req);
+  void UdpTransport::write(const google::protobuf::Message &req) {
+    m_proto->write(*this, req);
   }
 
-  bool UdpTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
-    return m_proto->read(*this, msg, msg_type);
+  void UdpTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
+    m_proto->read(*this, msg, msg_type);
   }
 
   void UdpTransport::check_deadline(){
@@ -604,13 +577,12 @@ namespace trezor{
              << ">";
   }
 
-  bool enumerate(t_transport_vect & res){
+  void enumerate(t_transport_vect & res){
     BridgeTransport bt;
     bt.enumerate(res);
 
     hw::trezor::UdpTransport btu;
     btu.enumerate(res);
-    return true;
   }
 
   std::shared_ptr<Transport> transport(const std::string & path){

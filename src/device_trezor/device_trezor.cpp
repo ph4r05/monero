@@ -96,33 +96,45 @@ namespace trezor {
     /* ======================================================================= */
 
     bool device_trezor::get_public_address(cryptonote::account_public_address &pubkey) {
-      auto res = get_address();
+      try {
+        auto res = get_address();
 
-      cryptonote::address_parse_info info{};
-      bool r = cryptonote::get_account_address_from_str(info, this->network_type, res->address());
-      if (!r){
-        MERROR("Returned address parse fail: " << res->address());
-        throw std::runtime_error("Could not parse returned address");
+        cryptonote::address_parse_info info{};
+        bool r = cryptonote::get_account_address_from_str(info, this->network_type, res->address());
+        if (!r) {
+          MERROR("Returned address parse fail: " << res->address());
+          throw std::runtime_error("Could not parse returned address");
+        }
+
+        if (info.is_subaddress) {
+          throw std::runtime_error("Trezor returned a sub address");
+        }
+
+        pubkey = info.address;
+        return true;
+
+      } catch(std::exception const& e){
+        MERROR("Get public address exception: " << e.what());
+        return false;
       }
-
-      if (info.is_subaddress){
-        throw std::runtime_error("Trezor returned a sub address");
-      }
-
-      pubkey = info.address;
-      return true;
     }
 
-    bool  device_trezor::get_secret_keys(crypto::secret_key &viewkey , crypto::secret_key &spendkey) {
-      auto res = get_view_key();
-      if (res->watch_key().size() != 32){
-        throw std::runtime_error("Trezor returned invalid view key");
+    bool device_trezor::get_secret_keys(crypto::secret_key &viewkey , crypto::secret_key &spendkey) {
+      try {
+        auto res = get_view_key();
+        if (res->watch_key().size() != 32) {
+          throw std::runtime_error("Trezor returned invalid view key");
+        }
+
+        spendkey = crypto::null_skey; // not given
+        memcpy(viewkey.data, res->watch_key().data(), 32);
+
+        return true;
+
+      } catch(std::exception const& e){
+        MERROR("Get secret keys exception: " << e.what());
+        return false;
       }
-
-      spendkey = crypto::null_skey; // not given
-      memcpy(viewkey.data, res->watch_key().data(), 32);
-
-      return true;
     }
 
     /* ======================================================================= */
