@@ -28,7 +28,7 @@ pip install protobuf
 Regenerate messages:
 
 ```
-./venv/bin/python src/device/trezor/tools/build_protob.py
+./venv/bin/python3 src/device_trezor/trezor/tools/build_protob.py
 ```
 
 The messages regeneration is done also automatically via cmake.
