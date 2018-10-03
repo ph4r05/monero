@@ -85,7 +85,7 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
         if(RET)
             message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
                             "OUT: ${OUT}, ERR: ${ERR}."
-                            "Please read src/device/trezor/tools/README.md")
+                            "Please read src/device_trezor/trezor/tools/README.md")
         else()
             message(STATUS "Trezor protobuf messages regenerated ${OUT}")
         endif()
@@ -118,7 +118,7 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
 
 else()
     message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
-                    "Please read src/device/trezor/tools/README.md")
+                    "Please read src/device_trezor/trezor/tools/README.md")
 
     monero_private_headers(device_trezor)
     monero_add_library(device_trezor device_trezor.cpp)
