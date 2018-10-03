@@ -195,7 +195,7 @@ namespace hw {
 
     device_ledger::~device_ledger() {
       this->release();
-      MDEBUG( "Device "<<this->id <<" Destroyed");
+      MSAFELOG(MDEBUG( "Device "<<this->id <<" Destroyed"));
     }
 
     /* ======================================================================= */
