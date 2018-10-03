@@ -355,12 +355,17 @@ namespace trezor{
       } else {
         m_device_host = device_str.substr(0, delim);
         m_device_port = std::stoi(device_str.substr(delim + 1));
-        if (m_device_port <= 0 || m_device_port > 65535){
-          throw std::invalid_argument("Port number invalid");
-        }
       }
     } else {
       m_device_host = DEFAULT_HOST;
+    }
+
+    if (m_device_port <= 512 || m_device_port > 65535){
+      throw std::invalid_argument("Port number invalid");
+    }
+
+    if (m_device_host != "localhost" && m_device_host != DEFAULT_HOST){
+      throw std::invalid_argument("Local endpoint allowed only");
     }
 
     m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
