@@ -124,7 +124,9 @@ namespace hw {
         virtual bool disconnect(void) = 0;
 
         virtual bool set_mode(device_mode mode) = 0;
+
         virtual device_type get_type() const = 0;
+
         virtual device_protocol_t device_protocol() const { return PROTOCOL_DEFAULT; };
 
         /* ======================================================================= */
