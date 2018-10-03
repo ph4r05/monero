@@ -33,6 +33,17 @@
 #include <string>
 #include <type_traits>
 #include <memory>
+#include "exceptions.hpp"
+
+// Avoids protobuf undefined macro warning
+#ifndef PROTOBUF_INLINE_NOT_IN_HEADERS
+#define PROTOBUF_INLINE_NOT_IN_HEADERS 0
+#endif
+
+// Fixes gcc7 problem with minor macro defined clashing with minor() field.
+#ifdef minor
+#undef minor
+#endif
 
 #include <google/protobuf/stubs/common.h>
 #include <google/protobuf/generated_message_util.h>
@@ -42,7 +53,6 @@
 #include "google/protobuf/descriptor.pb.h"
 
 #include "messages/messages.pb.h"
-#include "exceptions.hpp"
 
 namespace hw {
 namespace trezor {
