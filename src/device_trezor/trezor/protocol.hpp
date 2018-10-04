@@ -30,6 +30,7 @@
 #ifndef MONERO_PROTOCOL_H
 #define MONERO_PROTOCOL_H
 
+#include "trezor_defs.hpp"
 #include "device/device_cold.hpp"
 #include "messages_map.hpp"
 #include "transport.hpp"

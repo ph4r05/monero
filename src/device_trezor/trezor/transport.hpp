@@ -45,6 +45,7 @@
 #include "rapidjson/stringbuffer.h"
 
 #include "exceptions.hpp"
+#include "trezor_defs.hpp"
 #include "messages_map.hpp"
 
 #include "messages/messages.pb.h"

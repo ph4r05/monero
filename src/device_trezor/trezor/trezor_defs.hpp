@@ -27,18 +27,22 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#ifndef MONERO_TREZOR_HPP
-#define MONERO_TREZOR_HPP
-
-#include "trezor/trezor_defs.hpp"
-
-#ifdef HAVE_PROTOBUF
-#include "trezor/transport.hpp"
-#include "trezor/messages/messages.pb.h"
-#include "trezor/messages/messages-common.pb.h"
-#include "trezor/messages/messages-management.pb.h"
-#include "trezor/messages/messages-monero.pb.h"
-#include "trezor/protocol.hpp"
+#if defined(HAVE_PROTOBUF) && !defined(WITHOUT_TREZOR)
+  #define WITH_DEVICE_TREZOR 1
+#else
+  #define WITH_DEVICE_TREZOR 0
 #endif
 
-#endif //MONERO_TREZOR_HPP
+#ifndef WITH_DEVICE_TREZOR_LITE
+#define WITH_DEVICE_TREZOR_LITE 0
+#endif
+
+// Avoids protobuf undefined macro warning
+#ifndef PROTOBUF_INLINE_NOT_IN_HEADERS
+#define PROTOBUF_INLINE_NOT_IN_HEADERS 0
+#endif
+
+// Fixes gcc7 problem with minor macro defined clashing with minor() field.
+#ifdef minor
+#undef minor
+#endif
