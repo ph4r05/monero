@@ -91,6 +91,8 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
         endif()
     endif()
 
+    add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
+
     monero_private_headers(device_trezor
             ${device_private_headers}
             ${PROTOBUF_INCLUDE_DIR})
