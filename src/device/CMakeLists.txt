@@ -71,6 +71,7 @@ target_link_libraries(device
     ${HIDAPI_LIBRARIES}
     cncrypto
     ringct_basic
+    ${CMAKE_THREAD_LIBS_INIT}
     ${OPENSSL_CRYPTO_LIBRARIES}
   PRIVATE
     ${EXTRA_LIBRARIES})
