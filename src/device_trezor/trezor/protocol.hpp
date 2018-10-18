@@ -139,7 +139,7 @@ namespace tx {
   using MoneroTransactionSourceEntry = messages::monero::MoneroTransactionSourceEntry;
   using MoneroMultisigKLRki = messages::monero::MoneroTransactionSourceEntry_MoneroMultisigKLRki;
   using MoneroOutputEntry = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry;
-  using MoneroRctKey = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry_MoneroRctKey;
+  using MoneroRctKey = messages::monero::MoneroTransactionSourceEntry_MoneroOutputEntry_MoneroRctKeyPublic;
   using MoneroRsigData = messages::monero::MoneroTransactionRsigData;
 
   using tx_construction_data = tools::wallet2::tx_construction_data;
@@ -240,10 +240,7 @@ namespace tx {
     void step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack);
 
     std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> step_all_outs_set();
-    void step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack);
-
-    std::shared_ptr<messages::monero::MoneroTransactionMlsagDoneRequest> step_pre_mlsag_done();
-    void step_pre_mlsag_done_ack(std::shared_ptr<const messages::monero::MoneroTransactionMlsagDoneAck> ack, hw::device &hwdev);
+    void step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack, hw::device &hwdev);
 
     std::shared_ptr<messages::monero::MoneroTransactionSignInputRequest> step_sign_input(size_t idx);
     void step_sign_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSignInputAck> ack);

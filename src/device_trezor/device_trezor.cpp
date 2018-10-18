@@ -354,12 +354,7 @@ namespace trezor {
       // Step: all outs set
       auto all_out_set = signer->step_all_outs_set();
       auto ack_all_out_set = this->client_exchange<messages::monero::MoneroTransactionAllOutSetAck>(all_out_set);
-      signer->step_all_outs_set_ack(ack_all_out_set);
-
-      // Step: MlsagDone
-      auto pre_mlsag_done = signer->step_pre_mlsag_done();
-      auto ack_pre_mlsag_done = this->client_exchange<messages::monero::MoneroTransactionMlsagDoneAck>(pre_mlsag_done);
-      signer->step_pre_mlsag_done_ack(ack_pre_mlsag_done, *this);
+      signer->step_all_outs_set_ack(ack_all_out_set, *this);
 
       // Step: sign each input
       for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){

@@ -230,7 +230,7 @@ namespace tx {
 
   void translate_rct_key(MoneroRctKey * dst, const rct::ctkey * src){
     dst->set_dest(key_to_string(src->dest));
-    dst->set_mask(key_to_string(src->mask));
+    dst->set_commitment(key_to_string(src->mask));
   }
 
   bool addr_eq(const MoneroAccountPublicAddress * a, const MoneroAccountPublicAddress * b){
@@ -407,8 +407,6 @@ namespace tx {
     tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size()));
     tsx_data.set_account(tx.subaddr_account);
     assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
-    tsx_data.set_is_multisig(false);
-    tsx_data.set_exp_tx_prefix_hash("");
 
     // Rsig decision
     auto rsig_data = tsx_data.mutable_rsig_data();
@@ -447,7 +445,7 @@ namespace tx {
   }
 
   void Signer::step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack){
-    m_ct.in_memory = ack->in_memory();
+    m_ct.in_memory = false;
     if (ack->has_rsig_data()){
       m_ct.rsig_param = std::make_shared<MoneroRsigData>(ack->rsig_data());
     }
@@ -475,8 +473,8 @@ namespace tx {
     m_ct.tx_in_hmacs.push_back(ack->vini_hmac());
     m_ct.pseudo_outs.push_back(ack->pseudo_out());
     m_ct.pseudo_outs_hmac.push_back(ack->pseudo_out_hmac());
-    m_ct.alphas.push_back(ack->alpha_enc());
-    m_ct.spend_encs.push_back(ack->spend_enc());
+    m_ct.alphas.push_back(ack->pseudo_out_alpha());
+    m_ct.spend_encs.push_back(ack->spend_key());
   }
 
   void Signer::sort_ki(){
@@ -737,7 +735,7 @@ namespace tx {
     return std::make_shared<messages::monero::MoneroTransactionAllOutSetRequest>();
   }
 
-  void Signer::step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack){
+  void Signer::step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack, hw::device &hwdev){
     m_ct.rv = std::make_shared<rct::rctSig>();
     m_ct.rv->txnFee = ack->rv().txn_fee();
     m_ct.rv->type = static_cast<uint8_t>(ack->rv().rv_type());
@@ -792,13 +790,7 @@ namespace tx {
         m_ct.rv->p.rangeSigs.push_back(boost::get<rct::rangeSig>(m_ct.tx_out_rsigs[i]));
       }
     }
-  }
 
-  std::shared_ptr<messages::monero::MoneroTransactionMlsagDoneRequest> Signer::step_pre_mlsag_done(){
-    return std::make_shared<messages::monero::MoneroTransactionMlsagDoneRequest>();
-  }
-
-  void Signer::step_pre_mlsag_done_ack(std::shared_ptr<const messages::monero::MoneroTransactionMlsagDoneAck> ack, hw::device &hwdev){
     rct::key hash_computed = rct::get_pre_mlsag_hash(*(m_ct.rv), hwdev);
     auto & hash = ack->full_message_hash();
 
@@ -807,7 +799,7 @@ namespace tx {
     }
 
     if (crypto_verify_32(reinterpret_cast<const unsigned char *>(hash_computed.bytes),
-        reinterpret_cast<const unsigned char *>(hash.data()))){
+                         reinterpret_cast<const unsigned char *>(hash.data()))){
       throw exc::proto::SecurityException("Computed MLSAG does not match");
     }
   }
@@ -825,8 +817,8 @@ namespace tx {
     translate_src_entry(res->mutable_src_entr(), &(m_ct.tx_data.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(m_ct.tx.vin[idx]));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
-    res->set_alpha_enc(m_ct.alphas[idx]);
-    res->set_spend_enc(m_ct.spend_encs[idx]);
+    res->set_pseudo_out_alpha(m_ct.alphas[idx]);
+    res->set_spend_key(m_ct.spend_encs[idx]);
     if (!in_memory()){
       CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
       CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
@@ -843,7 +835,6 @@ namespace tx {
     }
 
     m_ct.rv->p.MGs.push_back(mg);
-    m_ct.couts.push_back(ack->cout());
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionFinalRequest> Signer::step_final(){
