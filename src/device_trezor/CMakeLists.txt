@@ -88,8 +88,17 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
                             "Please read src/device_trezor/trezor/tools/README.md")
         else()
             message(STATUS "Trezor protobuf messages regenerated ${OUT}")
+            set(TREZOR_PROTOBUF_GENERATED 1)
         endif()
     endif()
+else()
+    message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
+            "Please read src/device_trezor/trezor/tools/README.md")
+endif()
+
+
+if(TREZOR_PROTOBUF_GENERATED)
+    message(STATUS "Trezor support enabled")
 
     add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
 
@@ -119,11 +128,7 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
     # add_definitions(-DWITH_DEVICE_TREZOR=1)
 
 else()
-    message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
-                    "Please read src/device_trezor/trezor/tools/README.md")
-
     monero_private_headers(device_trezor)
     monero_add_library(device_trezor device_trezor.cpp)
     target_link_libraries(device_trezor PUBLIC cncrypto)
-
 endif()
