@@ -121,6 +121,7 @@ namespace trezor {
 
     bool device_trezor::get_secret_keys(crypto::secret_key &viewkey , crypto::secret_key &spendkey) {
       try {
+        MDEBUG("Loading view-only key from the Trezor. Please check the Trezor for a confirmation.");
         auto res = get_view_key();
         if (res->watch_key().size() != 32) {
           throw std::runtime_error("Trezor returned invalid view key");

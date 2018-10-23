@@ -108,6 +108,8 @@ namespace trezor {
       // Enumerate all available devices
       try {
         hw::trezor::t_transport_vect trans;
+
+        MDEBUG("Enumerating TREZOR devices...");
         enumerate(trans);
 
         MDEBUG("Enumeration yielded " << trans.size() << " devices");
