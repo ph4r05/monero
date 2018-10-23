@@ -109,7 +109,7 @@ namespace trezor {
       try {
         hw::trezor::t_transport_vect trans;
 
-        MDEBUG("Enumerating TREZOR devices...");
+        MDEBUG("Enumerating Trezor devices...");
         enumerate(trans);
 
         MDEBUG("Enumeration yielded " << trans.size() << " devices");
@@ -124,7 +124,7 @@ namespace trezor {
         }
 
         if (!m_transport) {
-          MERROR("No matching TREZOR device found. Device specifier: \"" + this->name + "\"");
+          MERROR("No matching Trezor device found. Device specifier: \"" + this->name + "\"");
           return false;
         }
 
