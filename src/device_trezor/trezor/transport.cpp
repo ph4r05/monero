@@ -329,7 +329,7 @@ namespace trezor{
   }
 
   std::ostream& BridgeTransport::dump(std::ostream& o) const {
-    return o << "BridgeTransport<path=" << (m_device_path ? m_device_path.get() : "None")
+    return o << "BridgeTransport<path=" << (m_device_path ? get_path() : "None")
              << ", info=" << (m_device_info ? t_serialize(m_device_info.get()) : "None")
              << ", session=" << (m_session ? m_session.get() : "None")
              << ">";
