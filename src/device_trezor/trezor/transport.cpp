@@ -578,7 +578,7 @@ namespace trezor{
 
   std::ostream& UdpTransport::dump(std::ostream& o) const {
     return o << "UdpTransport<path=" << get_path()
-             << ", socket_ok=" << (m_socket ? "1" : "0")
+             << ", socket_alive=" << (m_socket ? "true" : "false")
              << ">";
   }
 
