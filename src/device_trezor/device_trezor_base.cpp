@@ -79,7 +79,7 @@ namespace trezor {
       return this->full_name;
     }
 
-    bool device_trezor_base::init(void) {
+    bool device_trezor_base::init() {
       if (!release()){
         MERROR("Release failed");
         return false;
@@ -102,7 +102,7 @@ namespace trezor {
       }
     }
 
-    bool device_trezor_base::connect(void) {
+    bool device_trezor_base::connect() {
       disconnect();
 
       // Enumerate all available devices
@@ -122,6 +122,7 @@ namespace trezor {
         }
 
         if (!m_transport) {
+          MERROR("No matching TREZOR device found. Device specifier: \"" + this->name + "\"");
           return false;
         }
 
