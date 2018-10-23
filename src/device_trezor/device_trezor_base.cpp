@@ -62,10 +62,10 @@ namespace trezor {
 
     bool device_trezor_base::set_name(const std::string & name) {
       this->full_name = name;
-      this->name = name;
+      this->name = "";
 
       auto delim = name.find(':');
-      if (delim != std::string::npos) {
+      if (delim != std::string::npos && delim + 1 < name.length()) {
         this->name = name.substr(delim + 1);
       }
 
