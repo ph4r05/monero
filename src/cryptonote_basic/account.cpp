@@ -138,6 +138,15 @@ DISABLE_VS_WARNINGS(4244 4345)
     m_keys = account_keys();
   }
   //-----------------------------------------------------------------
+  void account_base::deinit()
+  {
+    try{
+      m_keys.get_device().disconnect();
+    } catch (const std::exception &e){
+      MERROR("Device disconnect exception: " << e.what());
+    }
+  }
+  //-----------------------------------------------------------------
   void account_base::forget_spend_key()
   {
     m_keys.m_spend_secret_key = crypto::secret_key();
@@ -211,7 +220,7 @@ DISABLE_VS_WARNINGS(4244 4345)
     try {
       CHECK_AND_ASSERT_THROW_MES(hwdev.get_public_address(m_keys.m_account_address), "Cannot get a device address");
       CHECK_AND_ASSERT_THROW_MES(hwdev.get_secret_keys(m_keys.m_view_secret_key, m_keys.m_spend_secret_key), "Cannot get device secret");
-    } catch (std::exception const& e){
+    } catch (const std::exception &e){
       hwdev.disconnect();
       throw;
     }
