@@ -159,7 +159,8 @@ namespace trezor {
         m_device_path(device_path),
         m_bridge_host(bridge_host ? bridge_host.get() : DEFAULT_BRIDGE),
         m_response(boost::none),
-        m_session(boost::none)
+        m_session(boost::none),
+        m_device_info(boost::none)
     {
       m_http_client.set_server(m_bridge_host, boost::none, false);
     }
@@ -177,7 +178,7 @@ namespace trezor {
     void write(const google::protobuf::Message &req) override;
     void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
 
-    const boost::optional<json_val> & device_info() const;
+    const boost::optional<json> & device_info() const;
     std::ostream& dump(std::ostream& o) const override;
 
   private:
@@ -186,7 +187,7 @@ namespace trezor {
     boost::optional<std::string> m_device_path;
     boost::optional<std::string> m_session;
     boost::optional<std::string> m_response;
-    boost::optional<json_val> m_device_info;
+    boost::optional<json> m_device_info;
   };
 
   // UdpTransport transport

@@ -234,7 +234,8 @@ namespace trezor{
     for(rapidjson::Value::ConstValueIterator itr = bridge_res.Begin(); itr != bridge_res.End(); ++itr){
       auto element = itr->GetObject();
       auto t = std::make_shared<BridgeTransport>(boost::make_optional(json_get_string(element["path"])));
-      t->m_device_info.emplace(*itr, bridge_res.GetAllocator());
+      t->m_device_info.emplace();
+      t->m_device_info->CopyFrom(*itr, t->m_device_info->GetAllocator());
       res.push_back(t);
     }
   }
@@ -324,7 +325,7 @@ namespace trezor{
     msg = msg_wrap;
   }
 
-  const boost::optional<json_val> & BridgeTransport::device_info() const {
+  const boost::optional<json> & BridgeTransport::device_info() const {
     return m_device_info;
   }
 
