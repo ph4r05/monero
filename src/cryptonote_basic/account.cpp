@@ -133,6 +133,10 @@ DISABLE_VS_WARNINGS(4244 4345)
     set_null();
   }
   //-----------------------------------------------------------------
+  account_base::~account_base() {
+    deinit();
+  }
+  //-----------------------------------------------------------------
   void account_base::set_null()
   {
     m_keys = account_keys();

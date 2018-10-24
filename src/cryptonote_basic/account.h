@@ -76,6 +76,7 @@ namespace cryptonote
   {
   public:
     account_base();
+    virtual ~account_base();
     crypto::secret_key generate(const crypto::secret_key& recovery_key = crypto::secret_key(), bool recover = false, bool two_random = false);
     void create_from_device(const std::string &device_name);
     void create_from_device(hw::device &hwdev);
