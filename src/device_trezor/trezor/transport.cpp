@@ -350,7 +350,7 @@ namespace trezor{
     m_device_port = DEFAULT_PORT;
     if (device_path) {
       const std::string device_str = device_path.get();
-      auto delim = device_str.find(":");
+      auto delim = device_str.find(':');
       if (delim == std::string::npos) {
         m_device_host = device_str;
       } else {
@@ -384,13 +384,17 @@ namespace trezor{
   }
 
   bool UdpTransport::ping(){
+    return ping_int();
+  }
+
+  bool UdpTransport::ping_int(boost::posix_time::time_duration timeout){
     require_socket();
     try {
       std::string req = "PINGPING";
       char res[8];
 
-      auto sent = m_socket->send_to(boost::asio::buffer(req.c_str(), req.size()), m_endpoint);
-      receive(res, 8);
+      m_socket->send_to(boost::asio::buffer(req.c_str(), req.size()), m_endpoint);
+      receive(res, 8, nullptr, false, timeout);
 
       return memcmp(res, "PONGPONG", 8) == 0;
 
@@ -486,9 +490,8 @@ namespace trezor{
     return static_cast<size_t>(len);
   }
 
-  ssize_t UdpTransport::receive(void * buff, size_t size, boost::system::error_code * error_code, bool no_throw){
+  ssize_t UdpTransport::receive(void * buff, size_t size, boost::system::error_code * error_code, bool no_throw, boost::posix_time::time_duration timeout){
     boost::system::error_code ec;
-    boost::posix_time::seconds timeout(10);
     boost::asio::mutable_buffer buffer = boost::asio::buffer(buff, size);
 
     require_socket();
