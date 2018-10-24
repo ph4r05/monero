@@ -37,6 +37,8 @@
 #include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/join.hpp>
+#include <boost/range/adaptor/transformed.hpp>
 #include "include_base_utils.h"
 using namespace epee;
 
@@ -122,6 +124,8 @@ using namespace cryptonote;
 #define SEGREGATION_FORK_VICINITY 1500 /* blocks */
 
 #define FIRST_REFRESH_GRANULARITY     1024
+
+#define GAMMA_PICK_HALF_WINDOW 5
 
 static const std::string MULTISIG_SIGNATURE_MAGIC = "SigMultisigPkV1";
 static const std::string MULTISIG_EXTRA_INFO_MAGIC = "MultisigxV1";
@@ -6821,10 +6825,29 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
           error::get_output_distribution, "Decreasing offsets in rct distribution: " +
           std::to_string(block_offset) + ": " + std::to_string(rct_offsets[block_offset]) + ", " +
           std::to_string(block_offset + 1) + ": " + std::to_string(rct_offsets[block_offset + 1]));
-      uint64_t n_rct = rct_offsets[block_offset + 1] - rct_offsets[block_offset];
+      uint64_t first_block_offset = block_offset, last_block_offset = block_offset;
+      for (size_t half_window = 0; half_window < GAMMA_PICK_HALF_WINDOW; ++half_window)
+      {
+        // end when we have a non empty block
+        uint64_t cum0 = first_block_offset > 0 ? rct_offsets[first_block_offset] - rct_offsets[first_block_offset - 1] : rct_offsets[0];
+        if (cum0 > 1)
+          break;
+        uint64_t cum1 = last_block_offset > 0 ? rct_offsets[last_block_offset] - rct_offsets[last_block_offset - 1] : rct_offsets[0];
+        if (cum1 > 1)
+          break;
+        if (first_block_offset == 0 && last_block_offset >= rct_offsets.size() - 2)
+          break;
+        // expand up to bounds
+        if (first_block_offset > 0)
+          --first_block_offset;
+        if (last_block_offset < rct_offsets.size() - 1)
+          ++last_block_offset;
+      }
+      const uint64_t n_rct = rct_offsets[last_block_offset] - (first_block_offset == 0 ? 0 : rct_offsets[first_block_offset - 1]);
       if (n_rct == 0)
         return rct_offsets[block_offset] ? rct_offsets[block_offset] - 1 : 0;
-      return rct_offsets[block_offset] + crypto::rand<uint64_t>() % n_rct;
+      MDEBUG("Picking 1/" << n_rct << " in " << (last_block_offset - first_block_offset + 1) << " blocks centered around " << block_offset);
+      return rct_offsets[first_block_offset] + crypto::rand<uint64_t>() % n_rct;
     };
 
     size_t num_selected_transfers = 0;
@@ -6994,6 +7017,8 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
           LOG_PRINT_L1("Selecting real output: " << td.m_global_output_index << " for " << print_money(amount));
         }
 
+        std::unordered_map<const char*, std::set<uint64_t>> picks;
+
         // while we still need more mixins
         uint64_t num_usable_outs = num_outs;
         bool allow_blackballed = false;
@@ -7008,7 +7033,7 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
             // outputs, we still need to reach the minimum ring size)
             if (allow_blackballed)
               break;
-            MINFO("Not enough non blackballed outputs, we'll allow blackballed ones");
+            MINFO("Not enough output not marked as spent, we'll allow outputs marked as spent");
             allow_blackballed = true;
             num_usable_outs = num_outs;
           }
@@ -7092,10 +7117,14 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
           }
           seen_indices.emplace(i);
 
-          LOG_PRINT_L2("picking " << i << " as " << type);
+          picks[type].insert(i);
           req.outputs.push_back({amount, i});
           ++num_found;
         }
+
+        for (const auto &pick: picks)
+          MDEBUG("picking " << pick.first << " outputs: " <<
+              boost::join(pick.second | boost::adaptors::transformed([](uint64_t out){return std::to_string(out);}), " "));
 
         // if we had enough unusable outputs, we might fall off here and still
         // have too few outputs, so we stuff with one to keep counts good, and
@@ -7112,8 +7141,15 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
           [](const get_outputs_out &a, const get_outputs_out &b) { return a.index < b.index; });
     }
 
-    for (auto i: req.outputs)
-      LOG_PRINT_L1("asking for output " << i.index << " for " << print_money(i.amount));
+    if (ELPP->vRegistry()->allowed(el::Level::Debug, MONERO_DEFAULT_LOG_CATEGORY))
+    {
+      std::map<uint64_t, std::set<uint64_t>> outs;
+      for (const auto &i: req.outputs)
+        outs[i.amount].insert(i.index);
+      for (const auto &o: outs)
+        MDEBUG("asking for outputs with amount " << print_money(o.first) << ": " <<
+            boost::join(o.second | boost::adaptors::transformed([](uint64_t out){return std::to_string(out);}), " "));
+    }
 
     // get the keys for those
     m_daemon_rpc_mutex.lock();
