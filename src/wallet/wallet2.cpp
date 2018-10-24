@@ -3428,7 +3428,7 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
     m_account.set_device(hwdev);
 
     account_public_address device_account_public_address;
-    CHECK_AND_ASSERT_THROW_MES(hwdev.get_public_address(device_account_public_address), "Cannot get a device address");
+    THROW_WALLET_EXCEPTION_IF(!hwdev.get_public_address(device_account_public_address), error::wallet_internal_error, "Cannot get a device address");
     THROW_WALLET_EXCEPTION_IF(device_account_public_address != m_account.get_keys().m_account_address, error::wallet_internal_error, "Device wallet does not match wallet address");
     LOG_PRINT_L0("Device inited...");
   } else if (key_on_device()) {
