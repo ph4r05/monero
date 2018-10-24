@@ -157,29 +157,29 @@ namespace trezor {
     /* ======================================================================= */
 
     //lock the device for a long sequence
-    void device_trezor_base::lock(void) {
-      MDEBUG("Ask for LOCKING for device "<<this->name << " in thread ");
+    void device_trezor_base::lock() {
+      MTRACE("Ask for LOCKING for device " << this->name << " in thread ");
       device_locker.lock();
-      MDEBUG("Device "<<this->name << " LOCKed");
+      MTRACE("Device " << this->name << " LOCKed");
     }
 
     //lock the device for a long sequence
-    bool device_trezor_base::try_lock(void) {
-      MDEBUG("Ask for LOCKING(try) for device "<<this->name << " in thread ");
+    bool device_trezor_base::try_lock() {
+      MTRACE("Ask for LOCKING(try) for device " << this->name << " in thread ");
       bool r = device_locker.try_lock();
       if (r) {
-        MDEBUG("Device "<<this->name << " LOCKed(try)");
+        MTRACE("Device " << this->name << " LOCKed(try)");
       } else {
-        MDEBUG("Device "<<this->name << " not LOCKed(try)");
+        MDEBUG("Device " << this->name << " not LOCKed(try)");
       }
       return r;
     }
 
     //unlock the device
-    void device_trezor_base::unlock(void) {
-      MDEBUG("Ask for UNLOCKING for device "<<this->name << " in thread ");
+    void device_trezor_base::unlock() {
+      MTRACE("Ask for UNLOCKING for device " << this->name << " in thread ");
       device_locker.unlock();
-      MDEBUG("Device "<<this->name << " UNLOCKed");
+      MTRACE("Device " << this->name << " UNLOCKed");
     }
 
     /* ======================================================================= */
