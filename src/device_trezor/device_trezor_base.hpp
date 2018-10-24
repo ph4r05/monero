@@ -197,6 +197,7 @@ namespace trezor {
                         const boost::optional<std::vector<uint32_t>> & path = boost::none,
                         const boost::optional<cryptonote::network_type> & network_type = boost::none)
       {
+        CHECK_AND_ASSERT_THROW_MES(msg, "Message is null");
         msg->clear_address_n();
         if (path){
           for(auto x : path.get()){
