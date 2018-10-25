@@ -65,7 +65,6 @@ namespace trezor {
     device_trezor_base & device;
 
   public:
-    trezor_callback() = default;
     explicit trezor_callback(device_trezor_base & device): device(device) {}
 
     std::shared_ptr<google::protobuf::Message> on_button_request(const messages::common::ButtonRequest * msg){
@@ -226,7 +225,7 @@ namespace trezor {
     explicit operator bool() const override {return true;}
     device_type get_type() const override {return device_type::TREZOR;};
 
-    bool reset(void);
+    bool reset();
 
     // Default derivation path for Monero
     static const uint32_t DEFAULT_BIP44_PATH[5];
@@ -245,17 +244,17 @@ namespace trezor {
     bool set_name(const std::string &name) override;
 
     const std::string get_name() const override;
-    bool init(void) override;
+    bool init() override;
     bool release() override;
-    bool connect(void) override;
+    bool connect() override;
     bool disconnect() override;
 
     /* ======================================================================= */
     /*  LOCKER                                                                 */
     /* ======================================================================= */
-    void lock(void)  override;
-    void unlock(void) override;
-    bool try_lock(void) override;
+    void lock()  override;
+    void unlock() override;
+    bool try_lock() override;
 
     /* ======================================================================= */
     /*                              TREZOR PROTOCOL                            */

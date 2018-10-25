@@ -480,7 +480,7 @@ namespace trezor{
         break;
 
       } catch(exc::CommunicationException const& e){
-        throw e;
+        throw;
       } catch(std::exception const& e){
         MWARNING("Error reading chunk, reason: " << e.what());
         throw exc::CommunicationException(std::string("Chunk read error: ") + std::string(e.what()));

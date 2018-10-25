@@ -56,7 +56,7 @@ namespace trezor {
     /*                              SETUP/TEARDOWN                             */
     /* ======================================================================= */
 
-    bool device_trezor_base::reset(void) {
+    bool device_trezor_base::reset() {
       return false;
     }
 
