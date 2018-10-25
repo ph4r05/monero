@@ -760,15 +760,15 @@ namespace tx {
     // RctSig
     auto num_sources = m_ct.tx_data.sources.size();
     if (is_simple() || is_req_bulletproof()){
-      auto & dst = m_ct.rv->pseudoOuts;
+      auto dst = &m_ct.rv->pseudoOuts;
       if (is_bulletproof()){
-        dst = m_ct.rv->p.pseudoOuts;
+        dst = &m_ct.rv->p.pseudoOuts;
       }
 
-      dst.clear();
+      dst->clear();
       for (const auto &pseudo_out : m_ct.pseudo_outs) {
-        dst.emplace_back();
-        string_to_key(dst.back(), pseudo_out);
+        dst->emplace_back();
+        string_to_key(dst->back(), pseudo_out);
       }
 
       m_ct.rv->mixRing.resize(num_sources);
