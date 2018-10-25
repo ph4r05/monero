@@ -264,6 +264,14 @@ namespace trezor {
         cpend.dests = cdata.tx_data.dests;
         cpend.construction_data = cdata.tx_data;
 
+        // Transaction check
+        cryptonote::blobdata tx_blob;
+        cryptonote::transaction tx_deserialized;
+        bool r = cryptonote::t_serializable_object_to_blob(cpend.tx, tx_blob);
+        CHECK_AND_ASSERT_THROW_MES(r, "Transaction serialization failed");
+        r = cryptonote::parse_and_validate_tx_from_blob(tx_blob, tx_deserialized);
+        CHECK_AND_ASSERT_THROW_MES(r, "Transaction deserialization failed");
+
         std::string key_images;
         bool all_are_txin_to_key = std::all_of(cdata.tx.vin.begin(), cdata.tx.vin.end(), [&](const cryptonote::txin_v& s_e) -> bool
         {
