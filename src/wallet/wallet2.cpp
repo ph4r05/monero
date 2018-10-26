@@ -9118,7 +9118,7 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   }
   txs.transfers = m_transfers;
 
-  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(&hwdev);
 
   hw::tx_aux_data aux_data;
   hw::wallet_shim wallet_shim;
