@@ -5789,22 +5789,8 @@ bool wallet2::parse_tx_from_str(const std::string &signed_tx_st, std::vector<too
   }
 
   // import key images
-  if (signed_txs.key_images.size() > m_transfers.size())
-  {
-    LOG_PRINT_L1("More key images returned that we know outputs for");
-    return false;
-  }
-  for (size_t i = 0; i < signed_txs.key_images.size(); ++i)
-  {
-    transfer_details &td = m_transfers[i];
-    if (td.m_key_image_known && !td.m_key_image_partial && td.m_key_image != signed_txs.key_images[i])
-      LOG_PRINT_L0("WARNING: imported key image differs from previously known key image at index " << i << ": trusting imported one");
-    td.m_key_image = signed_txs.key_images[i];
-    m_key_images[m_transfers[i].m_key_image] = i;
-    td.m_key_image_known = true;
-    td.m_key_image_partial = false;
-    m_pub_keys[m_transfers[i].get_public_key()] = i;
-  }
+  bool r = import_key_images(signed_txs.key_images);
+  if (!r) return false;
 
   ptx = signed_txs.ptx;
 
@@ -9105,7 +9091,18 @@ std::vector<wallet2::pending_tx> wallet2::create_transactions_from(const crypton
   return ptx_vector;
 }
 //----------------------------------------------------------------------------------------------------
-bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_set &exported_txs, std::vector<cryptonote::address_parse_info> &dsts_info, std::function<bool(const signed_tx_set &)> accept_func){
+void wallet2::cold_tx_aux_import(const std::vector<pending_tx> & ptx, const std::vector<std::string> & tx_device_aux)
+{
+  CHECK_AND_ASSERT_THROW_MES(ptx.size() == tx_device_aux.size(), "TX aux has invalid size");
+  for (size_t i = 0; i < ptx.size(); ++i){
+    crypto::hash txid;
+    txid = get_transaction_hash(ptx[i].tx);
+    set_tx_device_aux(txid, tx_device_aux[i]);
+  }
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_set &exported_txs, std::vector<cryptonote::address_parse_info> &dsts_info, std::vector<std::string> & tx_device_aux)
+{
   auto & hwdev = get_account().get_device();
   if (!hwdev.has_tx_cold_sign()){
     throw std::invalid_argument("Device does not support cold sign protocol");
@@ -9125,45 +9122,10 @@ bool wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   setup_shim(&wallet_shim, this);
   aux_data.tx_recipients = dsts_info;
   dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_data);
+  tx_device_aux = aux_data.tx_device_aux;
 
   LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
   for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
-
-  if (accept_func && !accept_func(exported_txs))
-  {
-    LOG_PRINT_L1("Transactions rejected by callback");
-    return false;
-  }
-
-  // aux info
-  for (size_t i = 0; i < exported_txs.ptx.size(); ++i){
-    crypto::hash txid;
-    auto & ptx = exported_txs.ptx[i];
-
-    txid = get_transaction_hash(ptx.tx);
-    set_tx_device_aux(txid, aux_data.tx_device_aux[i]);
-  }
-
-  // import key images
-  if (exported_txs.key_images.size() > m_transfers.size())
-  {
-    LOG_PRINT_L1("More key images returned that we know outputs for");
-    return false;
-  }
-
-  for (size_t i = 0; i < exported_txs.key_images.size(); ++i)
-  {
-    transfer_details &td = m_transfers[i];
-    if (td.m_key_image_known && !td.m_key_image_partial && td.m_key_image != exported_txs.key_images[i])
-      LOG_PRINT_L0("WARNING: imported key image differs from previously known key image at index " << i << ": trusting imported one");
-    td.m_key_image = exported_txs.key_images[i];
-    m_key_images[m_transfers[i].m_key_image] = i;
-    td.m_key_image_known = true;
-    td.m_key_image_partial = false;
-    m_pub_keys[m_transfers[i].get_public_key()] = i;
-  }
-
-  return true;
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
@@ -10897,6 +10859,29 @@ uint64_t wallet2::import_key_images(const std::vector<std::pair<crypto::key_imag
 
   return m_transfers[signed_key_images.size() - 1].m_block_height;
 }
+
+bool wallet2::import_key_images(std::vector<crypto::key_image> key_images)
+{
+  if (key_images.size() > m_transfers.size())
+  {
+    LOG_PRINT_L1("More key images returned that we know outputs for");
+    return false;
+  }
+  for (size_t i = 0; i < key_images.size(); ++i)
+  {
+    transfer_details &td = m_transfers[i];
+    if (td.m_key_image_known && !td.m_key_image_partial && td.m_key_image != key_images[i])
+      LOG_PRINT_L0("WARNING: imported key image differs from previously known key image at index " << i << ": trusting imported one");
+    td.m_key_image = key_images[i];
+    m_key_images[m_transfers[i].m_key_image] = i;
+    td.m_key_image_known = true;
+    td.m_key_image_partial = false;
+    m_pub_keys[m_transfers[i].get_public_key()] = i;
+  }
+
+  return true;
+}
+
 wallet2::payment_container wallet2::export_payments() const
 {
   payment_container payments;

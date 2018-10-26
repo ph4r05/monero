@@ -1801,6 +1801,25 @@ bool simple_wallet::version(const std::vector<std::string> &args)
   return true;
 }
 
+bool simple_wallet::cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& ptx_vector, tools::wallet2::signed_tx_set &exported_txs, std::vector<cryptonote::address_parse_info> &dsts_info, std::function<bool(const tools::wallet2::signed_tx_set &)> accept_func)
+{
+  std::vector<std::string> tx_aux;
+
+  m_wallet->cold_sign_tx(ptx_vector, exported_txs, dsts_info, tx_aux);
+
+  if (accept_func && !accept_func(exported_txs))
+  {
+    LOG_PRINT_L1("Transactions rejected by callback");
+    return false;
+  }
+
+  // aux info
+  m_wallet->cold_tx_aux_import(exported_txs.ptx, tx_aux);
+
+  // import key images
+  return m_wallet->import_key_images(exported_txs.key_images);
+}
+
 bool simple_wallet::set_always_confirm_transfers(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
 {
   const auto pwd_container = get_and_verify_password();
@@ -5155,7 +5174,7 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
       try
       {
         tools::wallet2::signed_tx_set signed_tx;
-        if (!m_wallet->cold_sign_tx(ptx_vector, signed_tx, dsts_info, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
+        if (!cold_sign_tx(ptx_vector, signed_tx, dsts_info, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
           fail_msg_writer() << tr("Failed to cold sign transaction with HW wallet");
           return true;
         }
@@ -5602,7 +5621,7 @@ bool simple_wallet::sweep_main(uint64_t below, bool locked, const std::vector<st
         std::vector<cryptonote::address_parse_info> dsts_info;
         dsts_info.push_back(info);
 
-        if (!m_wallet->cold_sign_tx(ptx_vector, signed_tx, dsts_info, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
+        if (!cold_sign_tx(ptx_vector, signed_tx, dsts_info, [&](const tools::wallet2::signed_tx_set &tx){ return accept_loaded_tx(tx); })){
           fail_msg_writer() << tr("Failed to cold sign transaction with HW wallet");
           return true;
         }
