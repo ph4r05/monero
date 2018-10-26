@@ -1405,6 +1405,8 @@ PendingTransaction *WalletImpl::createTransaction(const string &dst_addr, const 
                                                                           extra, subaddr_account, subaddr_indices);
             }
 
+            pendingTxPostProcess(transaction);
+
             if (multisig().isMultisig) {
                 transaction->m_signers = m_wallet->make_multisig_tx_set(transaction->m_pending_tx).m_signers;
             }
@@ -1489,6 +1491,7 @@ PendingTransaction *WalletImpl::createSweepUnmixableTransaction()
     do {
         try {
             transaction->m_pending_tx = m_wallet->create_unmixable_sweep_transactions();
+            pendingTxPostProcess(transaction);
 
         } catch (const tools::error::daemon_busy&) {
             // TODO: make it translatable with "tr"?
@@ -2062,6 +2065,21 @@ bool WalletImpl::isNewWallet() const
     // If wallet cache is rebuilt, creation height stored in .keys is used.
     // Watch only wallet is a copy of an existing wallet. 
     return !(blockChainHeight() > 1 || m_recoveringFromSeed || m_recoveringFromDevice || m_rebuildWalletCache) && !watchOnly();
+}
+
+void WalletImpl::pendingTxPostProcess(PendingTransactionImpl * pending)
+{
+  // If the device being used is HW device with cold signing protocol, cold sign then.
+  if (!m_wallet->get_account().get_device().has_tx_cold_sign()){
+    return;
+  }
+
+  tools::wallet2::signed_tx_set exported_txs;
+  std::vector<cryptonote::address_parse_info> dsts_info;
+
+  m_wallet->cold_sign_tx(pending->m_pending_tx, exported_txs, dsts_info, pending->m_tx_device_aux);
+  pending->m_key_images = exported_txs.key_images;
+  pending->m_pending_tx = exported_txs.ptx;
 }
 
 bool WalletImpl::doInit(const string &daemon_address, uint64_t upper_transaction_size_limit, bool ssl)
