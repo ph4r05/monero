@@ -9121,7 +9121,7 @@ void wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   hw::wallet_shim wallet_shim;
   setup_shim(&wallet_shim, this);
   aux_data.tx_recipients = dsts_info;
-  dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_data);
+  dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_data, nullptr);
   tx_device_aux = aux_data.tx_device_aux;
 
   LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
@@ -9140,7 +9140,7 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
   hw::wallet_shim wallet_shim;
   setup_shim(&wallet_shim, this);
 
-  dev_cold->ki_sync(&wallet_shim, m_transfers, ski);
+  dev_cold->ki_sync(&wallet_shim, m_transfers, ski, nullptr);
 
   return import_key_images(ski, spent, unspent);
 }

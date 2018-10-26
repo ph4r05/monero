@@ -176,9 +176,12 @@ namespace trezor {
       return response;
     }
 
+#define EVENT_PROGRESS(events, ...) do { if (events) {(events)->on_progress(__VA_ARGS__); } }while(0)
+
     void device_trezor::ki_sync(wallet_shim * wallet,
                                 const std::vector<tools::wallet2::transfer_details> & transfers,
-                                hw::device_cold::exported_key_image & ski)
+                                hw::device_cold::exported_key_image & ski,
+                                device_cold_ki_sync_events_t * events)
     {
       AUTO_LOCK_CMD();
       require_connected();
@@ -212,7 +215,10 @@ namespace trezor {
           auto ckis = step_ack->kis(i);
           kis.push_back(ckis);
         }
+
+        EVENT_PROGRESS(events, cur * batch_size, mtds.size());
       }
+      EVENT_PROGRESS(events, mtds.size(), mtds.size());
 
       auto final_req = std::make_shared<messages::monero::MoneroKeyImageSyncFinalRequest>();
       auto final_ack = this->client_exchange<messages::monero::MoneroKeyImageSyncFinalAck>(final_req);
@@ -237,7 +243,8 @@ namespace trezor {
     void device_trezor::tx_sign(wallet_shim * wallet,
                                 const tools::wallet2::unsigned_tx_set & unsigned_tx,
                                 tools::wallet2::signed_tx_set & signed_tx,
-                                hw::tx_aux_data & aux_data)
+                                hw::tx_aux_data & aux_data,
+                                device_cold_tx_sign_events_t * events)
     {
       size_t num_tx = unsigned_tx.txes.size();
       signed_tx.key_images.clear();
@@ -245,7 +252,7 @@ namespace trezor {
 
       for(size_t tx_idx = 0; tx_idx < num_tx; ++tx_idx) {
         std::shared_ptr<protocol::tx::Signer> signer;
-        tx_sign(wallet, unsigned_tx, tx_idx, aux_data, signer);
+        tx_sign(wallet, unsigned_tx, tx_idx, aux_data, events, signer);
 
         auto & cdata = signer->tdata();
         auto aux_info_cur = signer->store_tx_aux_info();
@@ -306,6 +313,7 @@ namespace trezor {
                    const tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
                    hw::tx_aux_data & aux_data,
+                   device_cold_tx_sign_events_t * events,
                    std::shared_ptr<protocol::tx::Signer> & signer)
     {
       AUTO_LOCK_CMD();
@@ -321,6 +329,7 @@ namespace trezor {
       // Step: Init
       auto init_msg = signer->step_init();
       this->set_msg_addr(init_msg.get());
+      EVENT_PROGRESS(events, idx, 1, 0);
 
       auto response = this->client_exchange<messages::monero::MoneroTransactionInitAck>(init_msg);
       signer->step_init_ack(response);
@@ -330,6 +339,7 @@ namespace trezor {
         auto src = signer->step_set_input(cur_src);
         auto ack = this->client_exchange<messages::monero::MoneroTransactionSetInputAck>(src);
         signer->step_set_input_ack(ack);
+        EVENT_PROGRESS(events, idx, 2, cur_src);
       }
 
       // Step: sort
@@ -338,6 +348,7 @@ namespace trezor {
         auto perm_ack = this->client_exchange<messages::monero::MoneroTransactionInputsPermutationAck>(perm_req);
         signer->step_permutation_ack(perm_ack);
       }
+      EVENT_PROGRESS(events, idx, 3, 0);
 
       // Step: input_vini
       if (!signer->in_memory()){
@@ -345,6 +356,7 @@ namespace trezor {
           auto src = signer->step_set_vini_input(cur_src);
           auto ack = this->client_exchange<messages::monero::MoneroTransactionInputViniAck>(src);
           signer->step_set_vini_input_ack(ack);
+          EVENT_PROGRESS(events, idx, 4, cur_src);
         }
       }
 
@@ -352,30 +364,35 @@ namespace trezor {
       auto all_inputs_set = signer->step_all_inputs_set();
       auto ack_all_inputs = this->client_exchange<messages::monero::MoneroTransactionAllInputsSetAck>(all_inputs_set);
       signer->step_all_inputs_set_ack(ack_all_inputs);
+      EVENT_PROGRESS(events, idx, 5, 0);
 
       // Step: outputs
       for(size_t cur_dst = 0; cur_dst < num_outputs; ++cur_dst){
         auto src = signer->step_set_output(cur_dst);
         auto ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(src);
         signer->step_set_output_ack(ack);
+        EVENT_PROGRESS(events, idx, 6, cur_dst);
       }
 
       // Step: all outs set
       auto all_out_set = signer->step_all_outs_set();
       auto ack_all_out_set = this->client_exchange<messages::monero::MoneroTransactionAllOutSetAck>(all_out_set);
       signer->step_all_outs_set_ack(ack_all_out_set, *this);
+      EVENT_PROGRESS(events, idx, 7, 0);
 
       // Step: sign each input
       for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
         auto src = signer->step_sign_input(cur_src);
         auto ack_sign = this->client_exchange<messages::monero::MoneroTransactionSignInputAck>(src);
         signer->step_sign_input_ack(ack_sign);
+        EVENT_PROGRESS(events, idx, 8, cur_src);
       }
 
       // Step: final
       auto final_msg = signer->step_final();
       auto ack_final = this->client_exchange<messages::monero::MoneroTransactionFinalAck>(final_msg);
       signer->step_final_ack(ack_final);
+      EVENT_PROGRESS(events, idx, 9, 0);
     }
 
 #else //WITH_DEVICE_TREZOR

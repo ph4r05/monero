@@ -46,6 +46,16 @@ namespace hw {
     std::vector<cryptonote::address_parse_info> tx_recipients;  // as entered by user
   };
 
+  class device_cold_ki_sync_events_t {
+  public:
+    virtual void on_progress(size_t done, size_t total) =0;
+  };
+
+  class device_cold_tx_sign_events_t {
+  public:
+    virtual void on_progress(size_t tx_id, size_t step_idx, size_t sub_step_idx) =0;
+  };
+
   class device_cold {
   public:
 
@@ -56,7 +66,8 @@ namespace hw {
      */
     virtual void ki_sync(wallet_shim * wallet,
                  const std::vector<::tools::wallet2::transfer_details> & transfers,
-                 exported_key_image & ski) =0;
+                 exported_key_image & ski,
+                 device_cold_ki_sync_events_t * events) =0;
 
     /**
      * Signs unsigned transaction with the cold protocol.
@@ -64,7 +75,8 @@ namespace hw {
     virtual void tx_sign(wallet_shim * wallet,
                  const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                  ::tools::wallet2::signed_tx_set & signed_tx,
-                 tx_aux_data & aux_data) =0;
+                 tx_aux_data & aux_data,
+                 device_cold_tx_sign_events_t * events) =0;
   };
 }
 
