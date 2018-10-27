@@ -58,19 +58,30 @@ namespace trezor {
   class device_trezor_base;
 
   /**
-   * Default trezor protocol client callback
+   * Trezor device callbacks
    */
   class trezor_callback {
+  public:
+    virtual void on_button_request() {};
+    virtual void on_pin_request(std::string & pin) {};
+    virtual void on_passphrase_request(bool on_device, std::string & passphrase) {};
+    virtual void on_passphrase_state_request(const std::string & state) {};
+  };
+
+  /**
+   * Default Trezor protocol client callback
+   */
+  class trezor_protocol_callback {
   protected:
     device_trezor_base & device;
 
   public:
-    explicit trezor_callback(device_trezor_base & device): device(device) {}
+    explicit trezor_protocol_callback(device_trezor_base & device): device(device) {}
 
-    std::shared_ptr<google::protobuf::Message> on_button_request(const messages::common::ButtonRequest * msg){
-      MDEBUG("on_button_request");
-      return std::make_shared<messages::common::ButtonAck>();
-    }
+    std::shared_ptr<google::protobuf::Message> on_button_request(const messages::common::ButtonRequest * msg);
+    std::shared_ptr<google::protobuf::Message> on_pin_matrix_request(const messages::common::PinMatrixRequest * msg);
+    std::shared_ptr<google::protobuf::Message> on_passphrase_request(const messages::common::PassphraseRequest * msg);
+    std::shared_ptr<google::protobuf::Message> on_passphrase_state_request(const messages::common::PassphraseStateRequest * msg);
 
     std::shared_ptr<google::protobuf::Message> on_message(const google::protobuf::Message * msg, messages::MessageType message_type){
       MDEBUG("on_general_message");
@@ -80,6 +91,12 @@ namespace trezor {
     std::shared_ptr<google::protobuf::Message> on_message_dispatch(const google::protobuf::Message * msg, messages::MessageType message_type){
       if (message_type == messages::MessageType_ButtonRequest){
         return on_button_request(dynamic_cast<const messages::common::ButtonRequest*>(msg));
+      } else if (message_type == messages::MessageType_PassphraseRequest) {
+        return on_passphrase_request(dynamic_cast<const messages::common::PassphraseRequest*>(msg));
+      } else if (message_type == messages::MessageType_PassphraseStateRequest) {
+        return on_passphrase_state_request(dynamic_cast<const messages::common::PassphraseStateRequest*>(msg));
+      } else if (message_type == messages::MessageType_PinMatrixRequest) {
+        return on_pin_matrix_request(dynamic_cast<const messages::common::PinMatrixRequest*>(msg));
       } else {
         return nullptr;
       }
@@ -97,6 +114,7 @@ namespace trezor {
       mutable boost::mutex  command_locker;
 
       std::shared_ptr<Transport> m_transport;
+      std::shared_ptr<trezor_protocol_callback> m_protocol_callback;
       std::shared_ptr<trezor_callback> m_callback;
 
       std::string full_name;
@@ -174,7 +192,7 @@ namespace trezor {
           return message_ptr_retype<t_message>(msg_resp);
 
         } else {
-          auto resp = this->getCallback()->on_message(msg_resp.get(), msg_resp_type);
+          auto resp = this->getProtocolCallback()->on_message(msg_resp.get(), msg_resp_type);
           if (resp) {
             return this->client_exchange<t_message>(resp, boost::none, resp_types, resp_type_ptr, false, depth + 1);
 
@@ -234,6 +252,10 @@ namespace trezor {
       return m_transport;
     }
 
+    std::shared_ptr<trezor_protocol_callback> getProtocolCallback(){
+      return m_protocol_callback;
+    }
+
     std::shared_ptr<trezor_callback> getCallback(){
       return m_callback;
     }
@@ -264,6 +286,12 @@ namespace trezor {
      * Device ping, no-throw
      */
     bool ping();
+
+    // Protocol callbacks
+    void on_button_request();
+    void on_pin_request(std::string & pin);
+    void on_passphrase_request(bool on_device, std::string & passphrase);
+    void on_passphrase_state_request(const std::string & state);
   };
 
 #endif
