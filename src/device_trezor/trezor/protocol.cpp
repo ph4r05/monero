@@ -62,21 +62,21 @@ namespace protocol{
 
   void string_to_key(::crypto::ec_scalar & key, const std::string & str){
     if (str.size() != sizeof(key.data)){
-      throw std::invalid_argument("Key has to have sizeof(key.data) B");
+      throw std::invalid_argument(std::string("Key has to have ") + std::to_string(sizeof(key.data)) + " B");
     }
     memcpy(key.data, str.data(), sizeof(key.data));
   }
 
   void string_to_key(::crypto::ec_point & key, const std::string & str){
     if (str.size() != sizeof(key.data)){
-      throw std::invalid_argument("Key has to have sizeof(key.data) B");
+      throw std::invalid_argument(std::string("Key has to have ") + std::to_string(sizeof(key.data)) + " B");
     }
     memcpy(key.data, str.data(), sizeof(key.data));
   }
 
   void string_to_key(::rct::key & key, const std::string & str){
     if (str.size() != sizeof(key.bytes)){
-      throw std::invalid_argument("Key has to have sizeof(key.data) B");
+      throw std::invalid_argument(std::string("Key has to have ") + std::to_string(sizeof(key.bytes)) + " B");
     }
     memcpy(key.bytes, str.data(), sizeof(key.bytes));
   }
