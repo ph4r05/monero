@@ -107,7 +107,7 @@ namespace trezor{
     len = boost::endian::big_to_native(wire_len);
   }
 
-  static bool serialize_message(const google::protobuf::Message &req, size_t msg_size, uint8_t * buff, size_t buff_size) {
+  static void serialize_message(const google::protobuf::Message &req, size_t msg_size, uint8_t * buff, size_t buff_size) {
     auto msg_wire_num = MessageMapper::get_message_wire_number(req);
     const auto req_buffer_size = serialize_message_buffer_size(msg_size);
     if (req_buffer_size > buff_size){
@@ -118,8 +118,6 @@ namespace trezor{
     if (!req.SerializeToArray(buff + 6, msg_size)){
       throw exc::EncodingException("Message serialization error");
     }
-
-    return true;
   }
 
   //
@@ -137,27 +135,24 @@ namespace trezor{
     req_buff_raw[0] = '#';
     req_buff_raw[1] = '#';
 
-    if (!serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2)){
-      throw exc::EncodingException("Message could not be serialized");
-    }
+    serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2);
 
     size_t offset = 0;
-    std::unique_ptr<uint8_t[]> chunk_buff(new uint8_t[REPLEN]);
-    uint8_t * chunk_buff_raw = chunk_buff.get();
+    uint8_t chunk_buff[REPLEN];
 
     // Chunk by chunk upload
     while(offset < buff_size){
       auto to_copy = std::min((size_t)(buff_size - offset), (size_t)(REPLEN - 1));
 
-      chunk_buff_raw[0] = '?';
-      memcpy(chunk_buff_raw + 1, req_buff_raw + offset, to_copy);
+      chunk_buff[0] = '?';
+      memcpy(chunk_buff + 1, req_buff_raw + offset, to_copy);
 
       // Pad with zeros
       if (to_copy < REPLEN - 1){
-        memset(chunk_buff_raw + 1 + to_copy, 0, REPLEN - 1 - to_copy);
+        memset(chunk_buff + 1 + to_copy, 0, REPLEN - 1 - to_copy);
       }
 
-      transport.write_chunk(chunk_buff_raw, REPLEN);
+      transport.write_chunk(chunk_buff, REPLEN);
       offset += REPLEN - 1;
     }
   }
@@ -182,7 +177,7 @@ namespace trezor{
 
     std::string data_acc(chunk + 3 + 6, nread);
     while(nread < len){
-      size_t cur = transport.read_chunk(chunk, REPLEN);
+      const size_t cur = transport.read_chunk(chunk, REPLEN);
       if (chunk[0] != '?'){
         throw exc::CommunicationException("Chunk malformed");
       }
@@ -281,9 +276,7 @@ namespace trezor{
     std::unique_ptr<uint8_t[]> req_buff(new uint8_t[buff_size]);
     uint8_t * req_buff_raw = req_buff.get();
 
-    if (!serialize_message(req, msg_size, req_buff_raw, buff_size)){
-      throw exc::EncodingException("Message could not be serialized");
-    }
+    serialize_message(req, msg_size, req_buff_raw, buff_size);
 
     std::string uri = "/call/" + m_session.get();
     std::string req_hex = epee::to_hex::string(epee::span<const std::uint8_t>(req_buff_raw, buff_size));
