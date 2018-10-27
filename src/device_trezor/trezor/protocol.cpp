@@ -404,7 +404,7 @@ namespace tx {
     tsx_data.set_version(1);
     tsx_data.set_unlock_time(tx.unlock_time);
     tsx_data.set_num_inputs(static_cast<google::protobuf::uint32>(tx.sources.size()));
-    tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size()));
+    tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size() - 1));
     tsx_data.set_account(tx.subaddr_account);
     assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
 
