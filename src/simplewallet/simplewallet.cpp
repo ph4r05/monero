@@ -1805,6 +1805,9 @@ bool simple_wallet::cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& 
 {
   std::vector<std::string> tx_aux;
 
+  message_writer(console_color_white, false) << "\r" <<
+                                             tr("Please confirm the transaction on the device");
+
   m_wallet->cold_sign_tx(ptx_vector, exported_txs, dsts_info, tx_aux);
 
   if (accept_func && !accept_func(exported_txs))
