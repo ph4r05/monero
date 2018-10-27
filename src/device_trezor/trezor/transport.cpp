@@ -183,6 +183,8 @@ namespace trezor{
     deserialize_message_header(chunk + 3, tag, len);
 
     std::string data_acc(chunk + 3 + 6, nread);
+    data_acc.reserve(len);
+
     while(nread < len){
       const size_t cur = transport.read_chunk(chunk, REPLEN);
       if (chunk[0] != '?'){
