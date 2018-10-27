@@ -1812,8 +1812,8 @@ bool simple_wallet::cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& 
 
   if (accept_func && !accept_func(exported_txs))
   {
-    LOG_PRINT_L1("Transactions rejected by callback");
-    return false;
+    MERROR("Transactions rejected by callback");
+    return true;
   }
 
   // aux info
@@ -2282,6 +2282,7 @@ bool simple_wallet::set_device_name(const std::vector<std::string> &args/* = std
   {
     if (args.size() == 0){
       fail_msg_writer() << tr("Device name not specified");
+      return true;
     }
 
     m_wallet->device_name(args[0]);
