@@ -102,12 +102,13 @@ namespace trezor {
         cryptonote::address_parse_info info{};
         bool r = cryptonote::get_account_address_from_str(info, this->network_type, res->address());
         if (!r) {
-          MERROR("Returned address parse fail: " << res->address());
-          throw std::runtime_error("Could not parse returned address");
+          MERROR("Could not parse returned address. Address: " << res->address());
+          return false;
         }
 
         if (info.is_subaddress) {
-          throw std::runtime_error("Trezor returned a sub address");
+          MERROR("Trezor returned a sub address");
+          return false;
         }
 
         pubkey = info.address;
@@ -124,7 +125,8 @@ namespace trezor {
         MDEBUG("Loading view-only key from the Trezor. Please check the Trezor for a confirmation.");
         auto res = get_view_key();
         if (res->watch_key().size() != 32) {
-          throw std::runtime_error("Trezor returned invalid view key");
+          MERROR("Trezor returned invalid view key");
+          return false;
         }
 
         spendkey = crypto::null_skey; // not given
@@ -157,7 +159,7 @@ namespace trezor {
       this->set_msg_addr<messages::monero::MoneroGetAddress>(req.get(), path, network_type);
 
       auto response = this->client_exchange<messages::monero::MoneroAddress>(req);
-      MDEBUG("Get address response received");
+      MTRACE("Get address response received");
       return response;
     }
 
@@ -172,7 +174,7 @@ namespace trezor {
       this->set_msg_addr<messages::monero::MoneroGetWatchKey>(req.get(), path, network_type);
 
       auto response = this->client_exchange<messages::monero::MoneroWatchKey>(req);
-      MDEBUG("Get watch key response received");
+      MTRACE("Get watch key response received");
       return response;
     }
 
