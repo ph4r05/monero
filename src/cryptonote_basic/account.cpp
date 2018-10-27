@@ -140,6 +140,7 @@ DISABLE_VS_WARNINGS(4244 4345)
   void account_base::set_null()
   {
     m_keys = account_keys();
+    m_creation_timestamp = 0;
   }
   //-----------------------------------------------------------------
   void account_base::deinit()

@@ -4769,8 +4769,6 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
   if (!try_connect_to_daemon())
     return true;
 
-  SCOPED_WALLET_UNLOCK();
-
   std::vector<std::string> local_args = args_;
 
   std::set<uint32_t> subaddr_indices;
@@ -4992,6 +4990,8 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
        return true; 
      }
   }
+
+  SCOPED_WALLET_UNLOCK();
 
   try
   {
@@ -7154,12 +7154,6 @@ bool simple_wallet::run()
 void simple_wallet::stop()
 {
   m_cmd_binder.stop_handling();
-
-  m_idle_run.store(false, std::memory_order_relaxed);
-  m_wallet->stop();
-  // make the background refresh thread quit
-  boost::unique_lock<boost::mutex> lock(m_idle_mutex);
-  m_idle_cond.notify_one();
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::account(const std::vector<std::string> &args/* = std::vector<std::string>()*/)
