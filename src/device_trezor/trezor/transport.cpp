@@ -256,6 +256,7 @@ namespace trezor{
       throw exc::ProtocolException("Missing session for v2 protocol");
     }
 
+    // msg_tag (4B) | msg_len (4B) | msg
     const auto msg_size = message_size(req);
     const auto buff_size = msg_size + 8;
 
@@ -280,9 +281,9 @@ namespace trezor{
       const size_t hdr_len = offset == 0 ? 5 : 9;
       const size_t to_copy = std::min((size_t)(buff_size - offset), (size_t)(REPLEN - hdr_len));
       if (offset == 0){
-        chunk_buff[0] = 1;
+        chunk_buff[0] = 1;  // tag (1B) | session_id (4B)
       } else {
-        chunk_buff[0] = 2;
+        chunk_buff[0] = 2;  // tag (1B) | session_id (4B) | seq_id (4B)
         uint32_t seq_big = boost::endian::native_to_big(seq);
         memcpy(chunk_buff + 5, (void*) &seq_big, 4);
         seq += 1;
@@ -310,8 +311,8 @@ namespace trezor{
     const size_t hdr_first_len = 13;
     const size_t hdr_len = 9;
 
-
     // Initial chunk read
+    // Format: >BLLL = magic | session_id | msg_tag | msg_len
     size_t nread = transport.read_chunk(chunk, REPLEN);
     if (nread != REPLEN){
       throw exc::CommunicationException("Read chunk has invalid size");
@@ -336,7 +337,10 @@ namespace trezor{
     }
 
     std::string data_acc(chunk + hdr_first_len, nread);
+    data_acc.reserve(msg_len);
+
     while(nread < msg_len){
+      // Format: >BLL = magic | session_id | seq_id
       size_t cur = transport.read_chunk(chunk, REPLEN);
       if (cur < 9){
         throw exc::CommunicationException("Read chunk has invalid size");
