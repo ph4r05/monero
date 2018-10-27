@@ -246,7 +246,7 @@ namespace trezor {
     bool reset();
 
     // Default derivation path for Monero
-    static const uint32_t DEFAULT_BIP44_PATH[5];
+    static const uint32_t DEFAULT_BIP44_PATH[3];
 
     std::shared_ptr<Transport> getTransport(){
       return m_transport;
