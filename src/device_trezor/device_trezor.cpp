@@ -101,15 +101,8 @@ namespace trezor {
 
         cryptonote::address_parse_info info{};
         bool r = cryptonote::get_account_address_from_str(info, this->network_type, res->address());
-        if (!r) {
-          MERROR("Could not parse returned address. Address: " << res->address());
-          return false;
-        }
-
-        if (info.is_subaddress) {
-          MERROR("Trezor returned a sub address");
-          return false;
-        }
+        CHECK_AND_ASSERT_MES(r, false, "Could not parse returned address. Address parse failed: " + res->address());
+        CHECK_AND_ASSERT_MES(!info.is_subaddress, false, "Trezor returned a sub address");
 
         pubkey = info.address;
         return true;
@@ -124,10 +117,7 @@ namespace trezor {
       try {
         MDEBUG("Loading view-only key from the Trezor. Please check the Trezor for a confirmation.");
         auto res = get_view_key();
-        if (res->watch_key().size() != 32) {
-          MERROR("Trezor returned invalid view key");
-          return false;
-        }
+        CHECK_AND_ASSERT_MES(res->watch_key().size() == 32, false, "Trezor returned invalid view key");
 
         spendkey = crypto::null_skey; // not given
         memcpy(viewkey.data, res->watch_key().data(), 32);
