@@ -69,7 +69,7 @@ namespace trezor {
       return std::make_shared<messages::common::PassphraseStateRequest>();
     }
 
-    const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000, 0, 0};
+    const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000};
 
     device_trezor_base::device_trezor_base() {
 
