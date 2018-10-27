@@ -9124,6 +9124,7 @@ void wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   txs.transfers = m_transfers;
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(&hwdev);
+  CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
 
   hw::tx_aux_data aux_data;
   hw::wallet_shim wallet_shim;
@@ -9142,7 +9143,8 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
     throw std::invalid_argument("Device does not support cold ki sync protocol");
   }
 
-  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(&hwdev);
+  CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
 
   std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
   hw::wallet_shim wallet_shim;
