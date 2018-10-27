@@ -525,7 +525,7 @@ namespace trezor{
       m_device_host = DEFAULT_HOST;
     }
 
-    if (m_device_port <= 512 || m_device_port > 65535){
+    if (m_device_port <= 1024 || m_device_port > 65535){
       throw std::invalid_argument("Port number invalid");
     }
 
