@@ -36,7 +36,39 @@ namespace trezor {
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "device.trezor"
-  
+
+    std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_button_request(const messages::common::ButtonRequest * msg){
+      MDEBUG("on_button_request");
+      device.on_button_request();
+      return std::make_shared<messages::common::ButtonAck>();
+    }
+
+    std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_pin_matrix_request(const messages::common::PinMatrixRequest * msg){
+      MDEBUG("on_pin_request");
+      std::string pin;
+      device.on_pin_request(pin);
+      auto resp = std::make_shared<messages::common::PinMatrixAck>();
+      resp->set_pin(pin);
+      return resp;
+    }
+
+    std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_passphrase_request(const messages::common::PassphraseRequest * msg){
+      MDEBUG("on_passhprase_request");
+      std::string passphrase;
+      device.on_passphrase_request(msg->on_device(), passphrase);
+      auto resp = std::make_shared<messages::common::PassphraseAck>();
+      if (!msg->on_device()){
+        resp->set_passphrase(passphrase);
+      }
+      return resp;
+    }
+
+    std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_passphrase_state_request(const messages::common::PassphraseStateRequest * msg){
+      MDEBUG("on_passhprase_state_request");
+      device.on_passphrase_state_request(msg->state());
+      return std::make_shared<messages::common::PassphraseStateRequest>();
+    }
+
     const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000, 0, 0};
 
     device_trezor_base::device_trezor_base() {
@@ -85,8 +117,8 @@ namespace trezor {
         return false;
       }
 
-      if (!m_callback){
-        m_callback = std::make_shared<trezor_callback>(*this);
+      if (!m_protocol_callback){
+        m_protocol_callback = std::make_shared<trezor_protocol_callback>(*this);
       }
       return true;
     }
@@ -235,6 +267,34 @@ namespace trezor {
       }
 
       return false;
+    }
+
+    void device_trezor_base::on_button_request()
+    {
+      if (m_callback){
+        m_callback->on_button_request();
+      }
+    }
+
+    void device_trezor_base::on_pin_request(std::string & pin)
+    {
+      if (m_callback){
+        m_callback->on_pin_request(pin);
+      }
+    }
+
+    void device_trezor_base::on_passphrase_request(bool on_device, std::string & passphrase)
+    {
+      if (m_callback){
+        m_callback->on_passphrase_request(on_device, passphrase);
+      }
+    }
+
+    void device_trezor_base::on_passphrase_state_request(const std::string & state)
+    {
+      if (m_callback){
+        m_callback->on_passphrase_state_request(state);
+      }
     }
 
 #endif //WITH_DEVICE_TREZOR
