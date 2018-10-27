@@ -591,13 +591,13 @@ namespace tx {
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> Signer::step_set_output(size_t idx){
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.splitted_dsts.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_out_entr_hmacs.size(), "Invalid transaction index");
+
     m_ct.cur_output_idx = idx;
     m_ct.cur_output_in_batch_idx += 1;   // assumes sequential call to step_set_output()
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
-
-    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.splitted_dsts.size(), "Invalid transaction index");
-    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_out_entr_hmacs.size(), "Invalid transaction index");
     auto & cur_dst = m_ct.tx_data.splitted_dsts[idx];
     translate_dst_entry(res->mutable_dst_entr(), &cur_dst);
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
@@ -630,6 +630,8 @@ namespace tx {
     } else {
       std::vector<uint64_t> amounts;
       rct::keyV masks;
+      CHECK_AND_ASSERT_THROW_MES(idx >= batch_size, "Invalid index for batching");
+
       for(size_t i = 0; i < batch_size; ++i){
         const size_t bidx = 1 + idx - batch_size + i;
         CHECK_AND_ASSERT_THROW_MES(bidx < m_ct.tx_data.splitted_dsts.size(), "Invalid gamma index");
@@ -745,6 +747,7 @@ namespace tx {
     m_ct.tx.extra.clear();
     auto extra = ack->extra();
     auto extra_data = extra.data();
+    m_ct.tx.extra.reserve(extra.size());
     for(size_t i = 0; i < extra.size(); ++i){
       m_ct.tx.extra.push_back(static_cast<uint8_t>(extra_data[i]));
     }
