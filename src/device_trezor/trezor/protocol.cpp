@@ -233,14 +233,6 @@ namespace tx {
     dst->set_commitment(key_to_string(src->mask));
   }
 
-  bool addr_eq(const MoneroAccountPublicAddress * a, const MoneroAccountPublicAddress * b){
-    if (a == nullptr && b == nullptr)
-      return true;
-    if (a == nullptr || b == nullptr)
-      return false;
-    return a->spend_public_key() == b->spend_public_key() && a->view_public_key() == b->view_public_key();
-  }
-
   std::string hash_addr(const MoneroAccountPublicAddress * addr, boost::optional<uint64_t> amount, boost::optional<bool> is_subaddr){
     return hash_addr(addr->spend_public_key(), addr->view_public_key(), amount, is_subaddr);
   }
