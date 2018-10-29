@@ -66,7 +66,7 @@ namespace trezor {
     std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_passphrase_state_request(const messages::common::PassphraseStateRequest * msg){
       MDEBUG("on_passhprase_state_request");
       device.on_passphrase_state_request(msg->state());
-      return std::make_shared<messages::common::PassphraseStateRequest>();
+      return std::make_shared<messages::common::PassphraseStateAck>();
     }
 
     const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000};
