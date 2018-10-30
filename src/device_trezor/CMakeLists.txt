@@ -70,30 +70,21 @@ find_package(Protobuf)  # REQUIRED
 
 # Test for HAVE_PROTOBUF from the parent
 if(Protobuf_FOUND AND HAVE_PROTOBUF)
-    # Try to regenerate messages on cmake
-    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/../../external/trezor-common/protob/messages.proto")
-        message(WARNING "Trezor-common submodule is not loaded. "
-                        "Try running git submodule init && git submodule update.")
+    if ("$ENV{PYTHON3}" STREQUAL "")
+        set(PYTHON3 "python3")
     else()
-        if ("$ENV{PYTHON3}" STREQUAL "")
-            set(PYTHON3 "python3")
-        else()
-            set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
-        endif()
-
-        execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
-        if(RET)
-            message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
-                            "OUT: ${OUT}, ERR: ${ERR}."
-                            "Please read src/device_trezor/trezor/tools/README.md")
-        else()
-            message(STATUS "Trezor protobuf messages regenerated ${OUT}")
-            set(TREZOR_PROTOBUF_GENERATED 1)
-        endif()
+        set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
     endif()
-else()
-    message(WARNING "Protocol buffers library could not be found. Cannot compile Trezor device messages. "
-            "Please read src/device_trezor/trezor/tools/README.md")
+
+    execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
+    if(RET)
+        message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
+                        "OUT: ${OUT}, ERR: ${ERR}."
+                        "Please read src/device_trezor/trezor/tools/README.md")
+    else()
+        message(STATUS "Trezor protobuf messages regenerated ${OUT}")
+        set(TREZOR_PROTOBUF_GENERATED 1)
+    endif()
 endif()
 
 
