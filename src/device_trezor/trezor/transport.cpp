@@ -213,11 +213,11 @@ namespace trezor{
 
   void ProtocolV2::session_begin(Transport & transport) {
     uint8_t buff[REPLEN] = {0};
-    buff[0] = 3;
+    buff[0] = 3;  // session_begin tag
     transport.write_chunk(buff, REPLEN);
 
     size_t nread = transport.read_chunk(buff, REPLEN);
-    if (nread < 5){
+    if (nread < 5){  // response format: >BL = tag (1B) | session_id (4B)
       throw exc::CommunicationException("Read chunk has invalid size");
     }
 
@@ -236,7 +236,7 @@ namespace trezor{
     }
 
     uint8_t buff[REPLEN] = {0};
-    buff[0] = 4;
+    buff[0] = 4;  // session end tag
     transport.write_chunk(buff, REPLEN);
 
     size_t nread = transport.read_chunk(buff, REPLEN);
@@ -264,9 +264,9 @@ namespace trezor{
     uint8_t * req_buff_raw = req_buff.get();
 
     uint32_t msg_tag = MessageMapper::get_message_wire_number(req);
-    serialize_message_header_v2(req_buff_raw, msg_tag, msg_size);
+    serialize_message_header_v2(req_buff_raw, msg_tag, static_cast<uint32_t>(msg_size));
 
-    if (!req.SerializeToArray(req_buff_raw + 8, msg_size)){
+    if (!req.SerializeToArray(req_buff_raw + 8, static_cast<int>(msg_size))){
       throw exc::EncodingException("Message serialization error");
     }
 
