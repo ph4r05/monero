@@ -97,6 +97,13 @@ namespace trezor{
     memcpy((uint8_t*)buff + 2, (void *) &wire_len, 4);
   }
 
+  static void serialize_message_header_v2(void * buff, uint32_t tag, uint32_t len){
+    uint32_t wire_tag = boost::endian::native_to_big(static_cast<uint16_t>(tag));
+    uint32_t wire_len = boost::endian::native_to_big(static_cast<uint32_t>(len));
+    memcpy(buff, (void *) &wire_tag, 4);
+    memcpy((uint8_t*)buff + 4, (void *) &wire_len, 4);
+  }
+
   static void deserialize_message_header(const void * buff, uint16_t & tag, uint32_t & len){
     uint16_t wire_tag;
     uint32_t wire_len;
@@ -107,7 +114,7 @@ namespace trezor{
     len = boost::endian::big_to_native(wire_len);
   }
 
-  static bool serialize_message(const google::protobuf::Message &req, size_t msg_size, uint8_t * buff, size_t buff_size) {
+  static void serialize_message(const google::protobuf::Message &req, size_t msg_size, uint8_t * buff, size_t buff_size) {
     auto msg_wire_num = MessageMapper::get_message_wire_number(req);
     const auto req_buffer_size = serialize_message_buffer_size(msg_size);
     if (req_buffer_size > buff_size){
@@ -118,8 +125,6 @@ namespace trezor{
     if (!req.SerializeToArray(buff + 6, msg_size)){
       throw exc::EncodingException("Message serialization error");
     }
-
-    return true;
   }
 
   //
@@ -137,27 +142,24 @@ namespace trezor{
     req_buff_raw[0] = '#';
     req_buff_raw[1] = '#';
 
-    if (!serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2)){
-      throw exc::EncodingException("Message could not be serialized");
-    }
+    serialize_message(req, msg_size, req_buff_raw + 2, buff_size - 2);
 
     size_t offset = 0;
-    std::unique_ptr<uint8_t[]> chunk_buff(new uint8_t[REPLEN]);
-    uint8_t * chunk_buff_raw = chunk_buff.get();
+    uint8_t chunk_buff[REPLEN];
 
     // Chunk by chunk upload
     while(offset < buff_size){
       auto to_copy = std::min((size_t)(buff_size - offset), (size_t)(REPLEN - 1));
 
-      chunk_buff_raw[0] = '?';
-      memcpy(chunk_buff_raw + 1, req_buff_raw + offset, to_copy);
+      chunk_buff[0] = '?';
+      memcpy(chunk_buff + 1, req_buff_raw + offset, to_copy);
 
       // Pad with zeros
       if (to_copy < REPLEN - 1){
-        memset(chunk_buff_raw + 1 + to_copy, 0, REPLEN - 1 - to_copy);
+        memset(chunk_buff + 1 + to_copy, 0, REPLEN - 1 - to_copy);
       }
 
-      transport.write_chunk(chunk_buff_raw, REPLEN);
+      transport.write_chunk(chunk_buff, REPLEN);
       offset += REPLEN - 1;
     }
   }
@@ -181,8 +183,10 @@ namespace trezor{
     deserialize_message_header(chunk + 3, tag, len);
 
     std::string data_acc(chunk + 3 + 6, nread);
+    data_acc.reserve(len);
+
     while(nread < len){
-      size_t cur = transport.read_chunk(chunk, REPLEN);
+      const size_t cur = transport.read_chunk(chunk, REPLEN);
       if (chunk[0] != '?'){
         throw exc::CommunicationException("Chunk malformed");
       }
@@ -201,6 +205,174 @@ namespace trezor{
 
     std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(tag));
     if (!msg_wrap->ParseFromArray(data_acc.c_str(), len)){
+      throw exc::CommunicationException("Message could not be parsed");
+    }
+
+    msg = msg_wrap;
+  }
+
+  void ProtocolV2::session_begin(Transport & transport) {
+    uint8_t buff[REPLEN] = {0};
+    buff[0] = 3;  // session_begin tag
+    transport.write_chunk(buff, REPLEN);
+
+    size_t nread = transport.read_chunk(buff, REPLEN);
+    if (nread < 5){  // response format: >BL = tag (1B) | session_id (4B)
+      throw exc::CommunicationException("Read chunk has invalid size");
+    }
+
+    if (buff[0] != 3){
+      throw exc::ProtocolException("Unexpected magic character");
+    }
+
+    uint32_t tmp_session;
+    memcpy((void*) &tmp_session, buff + 1, 4);
+    this->session = boost::make_optional(boost::endian::big_to_native(tmp_session));
+  }
+
+  void ProtocolV2::session_end(Transport & transport) {
+    if (!this->session){
+      return;
+    }
+
+    uint8_t buff[REPLEN] = {0};
+    buff[0] = 4;  // session end tag
+    transport.write_chunk(buff, REPLEN);
+
+    size_t nread = transport.read_chunk(buff, REPLEN);
+    if (nread < 1){
+      throw exc::CommunicationException("Read chunk has invalid size");
+    }
+
+    if (buff[0] != 4){
+      throw exc::ProtocolException("Unexpected magic character, expected session close");
+    }
+
+    this->session = boost::none;
+  }
+
+  void ProtocolV2::write(Transport & transport, const google::protobuf::Message & req){
+    if (!this->session){
+      throw exc::ProtocolException("Missing session for v2 protocol");
+    }
+
+    // msg_tag (4B) | msg_len (4B) | msg
+    const auto msg_size = message_size(req);
+    const auto buff_size = msg_size + 8;
+
+    std::unique_ptr<uint8_t[]> req_buff(new uint8_t[buff_size]);
+    uint8_t * req_buff_raw = req_buff.get();
+
+    uint32_t msg_tag = MessageMapper::get_message_wire_number(req);
+    serialize_message_header_v2(req_buff_raw, msg_tag, static_cast<uint32_t>(msg_size));
+
+    if (!req.SerializeToArray(req_buff_raw + 8, static_cast<int>(msg_size))){
+      throw exc::EncodingException("Message serialization error");
+    }
+
+    uint32_t seq = 0;
+    size_t offset = 0;
+
+    uint8_t chunk_buff[REPLEN];
+    const uint32_t session_big = boost::endian::native_to_big(static_cast<uint32_t>(this->session.get()));
+
+    // Chunk by chunk upload
+    while(offset < buff_size){
+      const size_t hdr_len = offset == 0 ? 5 : 9;
+      const size_t to_copy = std::min((size_t)(buff_size - offset), (size_t)(REPLEN - hdr_len));
+      if (offset == 0){
+        chunk_buff[0] = 1;  // tag (1B) | session_id (4B)
+      } else {
+        chunk_buff[0] = 2;  // tag (1B) | session_id (4B) | seq_id (4B)
+        uint32_t seq_big = boost::endian::native_to_big(seq);
+        memcpy(chunk_buff + 5, (void*) &seq_big, 4);
+        seq += 1;
+      }
+
+      memcpy(chunk_buff + 1, (void*) &session_big, 4);
+      memcpy(chunk_buff + hdr_len, req_buff_raw + offset, to_copy);
+
+      // Pad with zeros
+      if (to_copy < REPLEN - hdr_len){
+        memset(chunk_buff + hdr_len + to_copy, 0, REPLEN - hdr_len - to_copy);
+      }
+
+      transport.write_chunk(chunk_buff, REPLEN);
+      offset += REPLEN - hdr_len;
+    }
+  }
+
+  void ProtocolV2::read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type){
+    if (!this->session){
+      throw exc::ProtocolException("Missing session for v2 protocol");
+    }
+
+    char chunk[REPLEN];
+    const size_t hdr_first_len = 13;
+    const size_t hdr_len = 9;
+
+    // Initial chunk read
+    // Format: >BLLL = magic | session_id | msg_tag | msg_len
+    size_t nread = transport.read_chunk(chunk, REPLEN);
+    if (nread != REPLEN){
+      throw exc::CommunicationException("Read chunk has invalid size");
+    }
+
+    if (chunk[0] != 1){
+      throw exc::CommunicationException("Unexpected magic character");
+    }
+
+    uint32_t session_id, msg_tag, msg_len;
+    memcpy((void*) &session_id, chunk + 1, 4);
+    memcpy((void*) &msg_tag, chunk + 5, 4);
+    memcpy((void*) &msg_len, chunk + 9, 4);
+
+    session_id = boost::endian::big_to_native(session_id);
+    msg_tag = boost::endian::big_to_native(msg_tag);
+    msg_len = boost::endian::big_to_native(msg_len);
+    nread -= hdr_first_len;
+
+    if (session_id != this->session.get()){
+      throw exc::ProtocolException("Session id mismatch");
+    }
+
+    std::string data_acc(chunk + hdr_first_len, nread);
+    data_acc.reserve(msg_len);
+
+    while(nread < msg_len){
+      // Format: >BLL = magic | session_id | seq_id
+      size_t cur = transport.read_chunk(chunk, REPLEN);
+      if (cur < 9){
+        throw exc::CommunicationException("Read chunk has invalid size");
+      }
+
+      if (chunk[0] != 2){
+        throw exc::CommunicationException("Chunk malformed");
+      }
+
+      memcpy((void*) &session_id, chunk + 1, 4);
+      session_id = boost::endian::big_to_native(session_id);
+
+      if (session_id != this->session.get()){
+        throw exc::ProtocolException("Session id mismatch");
+      }
+
+      if (cur > hdr_len) {
+        data_acc.append(chunk + hdr_len, cur - hdr_len);
+      }
+      nread += cur - hdr_len;
+    }
+
+    if (msg_type){
+      *msg_type = static_cast<messages::MessageType>(msg_tag);
+    }
+
+    if (nread < msg_len){
+      throw exc::CommunicationException("Response incomplete");
+    }
+
+    std::shared_ptr<google::protobuf::Message> msg_wrap(MessageMapper::get_message(msg_tag));
+    if (!msg_wrap->ParseFromArray(data_acc.c_str(), msg_len)){
       throw exc::CommunicationException("Message could not be parsed");
     }
 
@@ -281,9 +453,7 @@ namespace trezor{
     std::unique_ptr<uint8_t[]> req_buff(new uint8_t[buff_size]);
     uint8_t * req_buff_raw = req_buff.get();
 
-    if (!serialize_message(req, msg_size, req_buff_raw, buff_size)){
-      throw exc::EncodingException("Message could not be serialized");
-    }
+    serialize_message(req, msg_size, req_buff_raw, buff_size);
 
     std::string uri = "/call/" + m_session.get();
     std::string req_hex = epee::to_hex::string(epee::span<const std::uint8_t>(req_buff_raw, buff_size));
@@ -361,7 +531,7 @@ namespace trezor{
       m_device_host = DEFAULT_HOST;
     }
 
-    if (m_device_port <= 512 || m_device_port > 65535){
+    if (m_device_port <= 1024 || m_device_port > 65535){
       throw std::invalid_argument("Port number invalid");
     }
 

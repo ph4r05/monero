@@ -45,20 +45,20 @@ namespace trezor {
 
     std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_pin_matrix_request(const messages::common::PinMatrixRequest * msg){
       MDEBUG("on_pin_request");
-      std::string pin;
+      epee::wipeable_string pin;
       device.on_pin_request(pin);
       auto resp = std::make_shared<messages::common::PinMatrixAck>();
-      resp->set_pin(pin);
+      resp->set_pin(pin.data(), pin.size());
       return resp;
     }
 
     std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_passphrase_request(const messages::common::PassphraseRequest * msg){
       MDEBUG("on_passhprase_request");
-      std::string passphrase;
+      epee::wipeable_string passphrase;
       device.on_passphrase_request(msg->on_device(), passphrase);
       auto resp = std::make_shared<messages::common::PassphraseAck>();
       if (!msg->on_device()){
-        resp->set_passphrase(passphrase);
+        resp->set_passphrase(passphrase.data(), passphrase.size());
       }
       return resp;
     }
@@ -66,7 +66,7 @@ namespace trezor {
     std::shared_ptr<google::protobuf::Message> trezor_protocol_callback::on_passphrase_state_request(const messages::common::PassphraseStateRequest * msg){
       MDEBUG("on_passhprase_state_request");
       device.on_passphrase_state_request(msg->state());
-      return std::make_shared<messages::common::PassphraseStateRequest>();
+      return std::make_shared<messages::common::PassphraseStateAck>();
     }
 
     const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000};
@@ -276,14 +276,14 @@ namespace trezor {
       }
     }
 
-    void device_trezor_base::on_pin_request(std::string & pin)
+    void device_trezor_base::on_pin_request(epee::wipeable_string & pin)
     {
       if (m_callback){
         m_callback->on_pin_request(pin);
       }
     }
 
-    void device_trezor_base::on_passphrase_request(bool on_device, std::string & passphrase)
+    void device_trezor_base::on_passphrase_request(bool on_device, epee::wipeable_string & passphrase)
     {
       if (m_callback){
         m_callback->on_passphrase_request(on_device, passphrase);

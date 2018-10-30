@@ -62,21 +62,21 @@ namespace protocol{
 
   void string_to_key(::crypto::ec_scalar & key, const std::string & str){
     if (str.size() != sizeof(key.data)){
-      throw std::invalid_argument("Key has to have sizeof(key.data) B");
+      throw std::invalid_argument(std::string("Key has to have ") + std::to_string(sizeof(key.data)) + " B");
     }
     memcpy(key.data, str.data(), sizeof(key.data));
   }
 
   void string_to_key(::crypto::ec_point & key, const std::string & str){
     if (str.size() != sizeof(key.data)){
-      throw std::invalid_argument("Key has to have sizeof(key.data) B");
+      throw std::invalid_argument(std::string("Key has to have ") + std::to_string(sizeof(key.data)) + " B");
     }
     memcpy(key.data, str.data(), sizeof(key.data));
   }
 
   void string_to_key(::rct::key & key, const std::string & str){
     if (str.size() != sizeof(key.bytes)){
-      throw std::invalid_argument("Key has to have sizeof(key.data) B");
+      throw std::invalid_argument(std::string("Key has to have ") + std::to_string(sizeof(key.bytes)) + " B");
     }
     memcpy(key.bytes, str.data(), sizeof(key.bytes));
   }
@@ -231,14 +231,6 @@ namespace tx {
   void translate_rct_key(MoneroRctKey * dst, const rct::ctkey * src){
     dst->set_dest(key_to_string(src->dest));
     dst->set_commitment(key_to_string(src->mask));
-  }
-
-  bool addr_eq(const MoneroAccountPublicAddress * a, const MoneroAccountPublicAddress * b){
-    if (a == nullptr && b == nullptr)
-      return true;
-    if (a == nullptr || b == nullptr)
-      return false;
-    return a->spend_public_key() == b->spend_public_key() && a->view_public_key() == b->view_public_key();
   }
 
   std::string hash_addr(const MoneroAccountPublicAddress * addr, boost::optional<uint64_t> amount, boost::optional<bool> is_subaddr){
@@ -404,7 +396,7 @@ namespace tx {
     tsx_data.set_version(1);
     tsx_data.set_unlock_time(tx.unlock_time);
     tsx_data.set_num_inputs(static_cast<google::protobuf::uint32>(tx.sources.size()));
-    tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size()));
+    tsx_data.set_mixin(static_cast<google::protobuf::uint32>(tx.sources[0].outputs.size() - 1));
     tsx_data.set_account(tx.subaddr_account);
     assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
 
@@ -591,13 +583,13 @@ namespace tx {
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> Signer::step_set_output(size_t idx){
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.splitted_dsts.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_out_entr_hmacs.size(), "Invalid transaction index");
+
     m_ct.cur_output_idx = idx;
     m_ct.cur_output_in_batch_idx += 1;   // assumes sequential call to step_set_output()
 
     auto res = std::make_shared<messages::monero::MoneroTransactionSetOutputRequest>();
-
-    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.splitted_dsts.size(), "Invalid transaction index");
-    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_out_entr_hmacs.size(), "Invalid transaction index");
     auto & cur_dst = m_ct.tx_data.splitted_dsts[idx];
     translate_dst_entry(res->mutable_dst_entr(), &cur_dst);
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
@@ -630,6 +622,8 @@ namespace tx {
     } else {
       std::vector<uint64_t> amounts;
       rct::keyV masks;
+      CHECK_AND_ASSERT_THROW_MES(idx >= batch_size, "Invalid index for batching");
+
       for(size_t i = 0; i < batch_size; ++i){
         const size_t bidx = 1 + idx - batch_size + i;
         CHECK_AND_ASSERT_THROW_MES(bidx < m_ct.tx_data.splitted_dsts.size(), "Invalid gamma index");
@@ -745,6 +739,7 @@ namespace tx {
     m_ct.tx.extra.clear();
     auto extra = ack->extra();
     auto extra_data = extra.data();
+    m_ct.tx.extra.reserve(extra.size());
     for(size_t i = 0; i < extra.size(); ++i){
       m_ct.tx.extra.push_back(static_cast<uint8_t>(extra_data[i]));
     }

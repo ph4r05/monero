@@ -3433,7 +3433,9 @@ bool wallet2::load_keys(const std::string& keys_file_name, const epee::wipeable_
 
     account_public_address device_account_public_address;
     THROW_WALLET_EXCEPTION_IF(!hwdev.get_public_address(device_account_public_address), error::wallet_internal_error, "Cannot get a device address");
-    THROW_WALLET_EXCEPTION_IF(device_account_public_address != m_account.get_keys().m_account_address, error::wallet_internal_error, "Device wallet does not match wallet address");
+    THROW_WALLET_EXCEPTION_IF(device_account_public_address != m_account.get_keys().m_account_address, error::wallet_internal_error, "Device wallet does not match wallet address. "
+                                                                                                                                     "Device address: " + cryptonote::get_account_address_as_str(m_nettype, false, device_account_public_address) +
+                                                                                                                                     ", wallet address: " + m_account.get_public_address_str(m_nettype));
     LOG_PRINT_L0("Device inited...");
   } else if (key_on_device()) {
     THROW_WALLET_EXCEPTION(error::wallet_internal_error, "hardware device not supported");
@@ -9124,6 +9126,7 @@ void wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   txs.transfers = m_transfers;
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(&hwdev);
+  CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
 
   hw::tx_aux_data aux_data;
   hw::wallet_shim wallet_shim;
@@ -9132,7 +9135,7 @@ void wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
   dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_data, nullptr);
   tx_device_aux = aux_data.tx_device_aux;
 
-  LOG_PRINT_L0("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
+  MDEBUG("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
   for (auto &c_ptx: exported_txs.ptx) LOG_PRINT_L0(cryptonote::obj_to_json_str(c_ptx.tx));
 }
 //----------------------------------------------------------------------------------------------------
@@ -9142,7 +9145,8 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
     throw std::invalid_argument("Device does not support cold ki sync protocol");
   }
 
-  auto dev_cold = dynamic_cast<::hw::device_cold*>(std::addressof(hwdev));
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(&hwdev);
+  CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
 
   std::vector<std::pair<crypto::key_image, crypto::signature>> ski;
   hw::wallet_shim wallet_shim;

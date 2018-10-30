@@ -128,6 +128,19 @@ namespace trezor {
     void read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
   };
 
+  class ProtocolV2 : public Protocol {
+  private:
+    boost::optional<unsigned long> session;
+
+  public:
+    ProtocolV2() = default;
+    virtual ~ProtocolV2() = default;
+
+    void session_begin(Transport & transport) override;
+    void session_end(Transport & transport) override;
+    void write(Transport & transport, const google::protobuf::Message & req) override;
+    void read(Transport & transport, std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
+  };
 
   // Base transport
   typedef std::vector<std::shared_ptr<Transport>> t_transport_vect;

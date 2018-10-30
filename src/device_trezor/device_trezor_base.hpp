@@ -63,8 +63,8 @@ namespace trezor {
   class trezor_callback {
   public:
     virtual void on_button_request() {};
-    virtual void on_pin_request(std::string & pin) {};
-    virtual void on_passphrase_request(bool on_device, std::string & passphrase) {};
+    virtual void on_pin_request(epee::wipeable_string & pin) {};
+    virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) {};
     virtual void on_passphrase_state_request(const std::string & state) {};
   };
 
@@ -246,7 +246,7 @@ namespace trezor {
     bool reset();
 
     // Default derivation path for Monero
-    static const uint32_t DEFAULT_BIP44_PATH[5];
+    static const uint32_t DEFAULT_BIP44_PATH[3];
 
     std::shared_ptr<Transport> getTransport(){
       return m_transport;
@@ -289,8 +289,8 @@ namespace trezor {
 
     // Protocol callbacks
     void on_button_request();
-    void on_pin_request(std::string & pin);
-    void on_passphrase_request(bool on_device, std::string & passphrase);
+    void on_pin_request(epee::wipeable_string & pin);
+    void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase);
     void on_passphrase_state_request(const std::string & state);
   };
 
