@@ -13,7 +13,7 @@ common_defs = os.path.join(TREZOR_COMMON, "defs")
 if not os.path.exists(common_defs):
     raise ValueError(
         "trezor-common submodule seems to be missing.\n"
-        + 'Use "git submodule update --init" to retrieve it.'
+        + 'Use "git submodule update --init --recursive" to retrieve it.'
     )
 
 # regenerate messages
