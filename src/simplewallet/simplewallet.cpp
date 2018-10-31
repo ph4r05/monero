@@ -1805,8 +1805,7 @@ bool simple_wallet::cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& 
 {
   std::vector<std::string> tx_aux;
 
-  message_writer(console_color_white, false) << "\r" <<
-                                             tr("Please confirm the transaction on the device");
+  message_writer(console_color_white, false) << tr("Please confirm the transaction on the device");
 
   m_wallet->cold_sign_tx(ptx_vector, exported_txs, dsts_info, tx_aux);
 
@@ -7912,8 +7911,7 @@ bool simple_wallet::hw_key_images_sync(const std::vector<std::string> &args)
   LOCK_IDLE_SCOPE();
   try
   {
-    message_writer(console_color_white, false) << "\r" <<
-                                               tr("Please confirm the key image sync on the device");
+    message_writer(console_color_white, false) << tr("Please confirm the key image sync on the device");
 
     uint64_t spent = 0, unspent = 0;
     uint64_t height = m_wallet->cold_key_image_sync(spent, unspent);
@@ -7927,7 +7925,7 @@ bool simple_wallet::hw_key_images_sync(const std::vector<std::string> &args)
   }
   catch (const std::exception &e)
   {
-    fail_msg_writer() << tr("Failed to import key images: ") << tr(e.what());
+    fail_msg_writer() << tr("Failed to import key images: ") << e.what();
     return true;
   }
 
