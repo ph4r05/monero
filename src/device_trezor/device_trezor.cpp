@@ -204,6 +204,8 @@ namespace trezor {
           auto ckis = step_ack->kis(i);
           kis.push_back(ckis);
         }
+
+        MTRACE("Batch " << cur << " / " << num_batches << " batches processed");
       }
 
       auto final_req = std::make_shared<messages::monero::MoneroKeyImageSyncFinalRequest>();
