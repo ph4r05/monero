@@ -267,7 +267,6 @@ namespace trezor {
 
     static const char * PATH_PREFIX;
 
-    bool ping() override;
     std::string get_path() const override;
     void enumerate(t_transport_vect & res) override;
 
@@ -284,6 +283,7 @@ namespace trezor {
 
   private:
     void require_device();
+    void require_connected();
 
     bool m_debug_mode;
     unsigned m_conn_count;
