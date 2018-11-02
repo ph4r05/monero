@@ -1063,7 +1063,7 @@ bool WalletImpl::submitTransaction(const string &fileName) {
   clearStatus();
   std::unique_ptr<PendingTransactionImpl> transaction(new PendingTransactionImpl(*this));
 
-  bool r = m_wallet->load_signed_tx_from_file(fileName, transaction->m_pending_tx);
+  bool r = m_wallet->load_tx(fileName, transaction->m_pending_tx);
   if (!r) {
     setStatus(Status_Ok, tr("Failed to load transaction from file"));
     return false;
