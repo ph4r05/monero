@@ -67,7 +67,7 @@ set(trezor_private_headers)
 
 include(FindProtobuf)
 find_package(Protobuf)  # REQUIRED
-find_library(LIBUSB-1.0_LIBRARY usb-1.0)
+find_package(LibUSB)
 
 # Test for HAVE_PROTOBUF from the parent
 if(Protobuf_FOUND AND HAVE_PROTOBUF)
@@ -93,11 +93,19 @@ if(TREZOR_PROTOBUF_GENERATED)
     message(STATUS "Trezor support enabled")
 
     add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
+    set ( libdevice_trezor_hdr "" )
+    set ( libdevice_trezor_lib "" )
+
+    if(LibUSB_FOUND)
+        list(APPEND libdevice_trezor_hdr ${LibUSB_INCLUDE_DIRS})
+        list(APPEND libdevice_trezor_lib ${LibUSB_LIBRARIES})
+        message(STATUS "LibUSB found")
+    endif(LibUSB_FOUND)
 
     monero_private_headers(device_trezor
             ${device_private_headers}
             ${PROTOBUF_INCLUDE_DIR}
-            ${LIBUSB-1.0_INCLUDE_DIR})
+            ${libdevice_trezor_hdr})
 
     monero_add_library(device_trezor
             ${trezor_sources}
@@ -114,7 +122,7 @@ if(TREZOR_PROTOBUF_GENERATED)
             ${SODIUM_LIBRARY}
             ${Boost_CHRONO_LIBRARY}
             ${PROTOBUF_LIBRARY}
-            ${LIBUSB-1.0_LIBRARY}
+            ${libdevice_trezor_lib}
             PRIVATE
             ${EXTRA_LIBRARIES})
 
