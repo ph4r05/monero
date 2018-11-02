@@ -43,7 +43,6 @@
 #include "serialization/debug_archive.h"
 #include "serialization/variant.h"
 #include "serialization/vector.h"
-#include "serialization/set.h"
 #include "serialization/binary_utils.h"
 #include "wallet/wallet2.h"
 #include "gtest/gtest.h"
