@@ -67,6 +67,7 @@ set(trezor_private_headers)
 
 include(FindProtobuf)
 find_package(Protobuf)  # REQUIRED
+find_library(LIBUSB-1.0_LIBRARY usb-1.0)
 find_package(LibUSB)
 
 # Test for HAVE_PROTOBUF from the parent
@@ -96,11 +97,15 @@ if(TREZOR_PROTOBUF_GENERATED)
     set ( libdevice_trezor_hdr "" )
     set ( libdevice_trezor_lib "" )
 
-    if(LibUSB_FOUND)
+    if(LIBUSB-1.0_LIBRARY)
+        list(APPEND libdevice_trezor_hdr ${LIBUSB-1.0_INCLUDE_DIR})
+        list(APPEND libdevice_trezor_lib ${LIBUSB-1.0_LIBRARY})
+        message(STATUS "LibUSB found, w1")
+    elseif(LibUSB_FOUND)
         list(APPEND libdevice_trezor_hdr ${LibUSB_INCLUDE_DIRS})
         list(APPEND libdevice_trezor_lib ${LibUSB_LIBRARIES})
-        message(STATUS "LibUSB found")
-    endif(LibUSB_FOUND)
+        message(STATUS "LibUSB found, w2")
+    endif()
 
     monero_private_headers(device_trezor
             ${device_private_headers}
