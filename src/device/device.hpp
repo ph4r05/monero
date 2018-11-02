@@ -86,7 +86,7 @@ namespace hw {
 
     public:
 
-        device()  {}
+        device(): mode(NONE)  {}
         device(const device &hwdev) {}
         virtual ~device()   {}
 
@@ -123,7 +123,8 @@ namespace hw {
         virtual bool connect(void) = 0;
         virtual bool disconnect(void) = 0;
 
-        virtual bool set_mode(device_mode mode) = 0;
+        virtual bool set_mode(device_mode mode) { this->mode = mode; return true; }
+        virtual device_mode get_mode() const { return mode; }
 
         virtual device_type get_type() const = 0;
 
@@ -216,6 +217,9 @@ namespace hw {
         virtual bool  has_tx_cold_sign(void) const { return false; }
 
         virtual void  set_network_type(cryptonote::network_type network_type) { }
+
+    protected:
+        device_mode mode;
     } ;
 
     struct reset_mode {
