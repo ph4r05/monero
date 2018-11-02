@@ -1812,7 +1812,7 @@ bool simple_wallet::cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& 
   if (accept_func && !accept_func(exported_txs))
   {
     MERROR("Transactions rejected by callback");
-    return true;
+    return false;
   }
 
   // aux info
