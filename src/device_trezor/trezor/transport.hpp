@@ -318,7 +318,7 @@ namespace trezor {
   /**
    * Transforms path to the particular transport
    */
-  template<class t_transport>
+  template<class t_transport=Transport>
   std::shared_ptr<t_transport> transport_typed(const std::string & path){
     auto t = transport(path);
     if (!t){
@@ -357,7 +357,7 @@ namespace trezor {
    * @throws UnexpectedMessageException if the response message type is different than expected.
    * Exception contains message type and the message itself.
    */
-  template<class t_message>
+  template<class t_message=google::protobuf::Message>
   std::shared_ptr<t_message>
       exchange_message(Transport & transport, const google::protobuf::Message & req,
                        boost::optional<messages::MessageType> resp_type = boost::none)

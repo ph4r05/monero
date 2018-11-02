@@ -135,7 +135,7 @@ namespace trezor {
        * @throws UnexpectedMessageException if the response message type is different than expected.
        * Exception contains message type and the message itself.
        */
-      template<class t_message>
+      template<class t_message=google::protobuf::Message>
       std::shared_ptr<t_message>
       client_exchange(const std::shared_ptr<const google::protobuf::Message> &req,
                       const boost::optional<messages::MessageType> & resp_type = boost::none,
