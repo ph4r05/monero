@@ -147,7 +147,7 @@ namespace trezor {
 
   class Transport {
   public:
-    Transport() = default;
+    Transport();
     virtual ~Transport() = default;
 
     virtual bool ping() { return false; };
@@ -157,10 +157,14 @@ namespace trezor {
     virtual void close(){};
     virtual void write(const google::protobuf::Message & req) =0;
     virtual void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
+    void session_begin();
+    void session_end();
 
     virtual void write_chunk(const void * buff, size_t size) { };
     virtual size_t read_chunk(void * buff, size_t size) { return 0; };
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
+  protected:
+    unsigned m_session_counter;
   };
 
   // Bridge transport

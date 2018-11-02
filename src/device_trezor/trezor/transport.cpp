@@ -384,6 +384,24 @@ namespace trezor{
     msg = msg_wrap;
   }
 
+  Transport::Transport(): m_session_counter(0) {
+
+  }
+
+  void Transport::session_begin(){
+    if (m_session_counter == 0){
+      open();
+    }
+    m_session_counter += 1;
+  }
+
+  void Transport::session_end(){
+    m_session_counter = MAX(m_session_counter - 1, 0);
+    if (m_session_counter == 0){
+      close();
+    }
+  }
+
   //
   // Bridge transport
   //
