@@ -208,6 +208,7 @@ namespace trezor {
           kis.push_back(ckis);
         }
 
+        MTRACE("Batch " << cur << " / " << num_batches << " batches processed");
         EVENT_PROGRESS(events, cur * batch_size, mtds.size());
       }
       EVENT_PROGRESS(events, mtds.size(), mtds.size());

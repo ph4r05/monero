@@ -622,7 +622,7 @@ namespace tx {
     } else {
       std::vector<uint64_t> amounts;
       rct::keyV masks;
-      CHECK_AND_ASSERT_THROW_MES(idx >= batch_size, "Invalid index for batching");
+      CHECK_AND_ASSERT_THROW_MES(idx + 1 >= batch_size, "Invalid index for batching");
 
       for(size_t i = 0; i < batch_size; ++i){
         const size_t bidx = 1 + idx - batch_size + i;
