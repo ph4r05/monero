@@ -40,7 +40,9 @@ namespace trezor {
     const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000};
 
     device_trezor_base::device_trezor_base() {
-
+#ifdef WITH_TREZOR_DEBUG
+      m_debug = false;
+#endif
     }
 
     device_trezor_base::~device_trezor_base() {
@@ -126,6 +128,10 @@ namespace trezor {
         }
 
         m_transport->open();
+
+#ifdef WITH_TREZOR_DEBUG
+        setup_debug();
+#endif
         return true;
 
       } catch(std::exception const& e){
@@ -146,6 +152,10 @@ namespace trezor {
           return false;
         }
       }
+
+#ifdef WITH_TREZOR_DEBUG
+      if (m_debug_callback) m_debug_callback->on_disconnect();
+#endif
       return true;
     }
 
@@ -276,6 +286,32 @@ namespace trezor {
       return false;
     }
 
+#ifdef WITH_TREZOR_DEBUG
+#define TREZOR_CALLBACK(method, ...) do { \
+  if (m_debug_callback) m_debug_callback->method(__VA_ARGS__); \
+  if (m_callback) m_callback->method(__VA_ARGS__);             \
+}while(0)
+
+    void device_trezor_base::setup_debug(){
+      if (!m_debug){
+        return;
+      }
+
+      if (m_debug && !m_debug_callback){
+        CHECK_AND_ASSERT_THROW_MES(m_transport, "Transport does not exist");
+        auto debug_transport = m_transport->find_debug();
+        if (debug_transport) {
+          m_debug_callback = std::make_shared<trezor_debug_callback>(debug_transport);
+        } else {
+          MDEBUG("Transport does not have debug link option");
+        }
+      }
+    }
+
+#else
+#define TREZOR_CALLBACK(method, ...) if (m_callback) m_callback->method(__VA_ARGS__)
+#endif
+
     void device_trezor_base::on_button_request(GenericMessage & resp, const messages::common::ButtonRequest * msg)
     {
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
@@ -284,10 +320,7 @@ namespace trezor {
       messages::common::ButtonAck ack;
       write_raw(&ack);
 
-      if (m_callback){
-        m_callback->on_button_request();
-      }
-
+      TREZOR_CALLBACK(on_button_request, msg->code());
       resp = read_raw();
     }
 
@@ -298,9 +331,7 @@ namespace trezor {
 
       epee::wipeable_string pin;
 
-      if (m_callback){
-        m_callback->on_pin_request(pin);
-      }
+      TREZOR_CALLBACK(on_pin_request, pin);
 
       messages::common::PinMatrixAck m;
       m.set_pin(pin.data(), pin.size());
@@ -313,9 +344,7 @@ namespace trezor {
       MDEBUG("on_passhprase_request, on device: " << msg->on_device());
       epee::wipeable_string passphrase;
 
-      if (m_callback){
-        m_callback->on_passphrase_request(msg->on_device(), passphrase);
-      }
+      TREZOR_CALLBACK(on_passphrase_request, msg->on_device(), passphrase);
 
       messages::common::PassphraseAck m;
       if (!msg->on_device()){
@@ -336,6 +365,34 @@ namespace trezor {
       messages::common::PassphraseStateAck m;
       resp = call_raw(&m);
     }
+
+#ifdef WITH_TREZOR_DEBUG
+
+    trezor_debug_callback::trezor_debug_callback(std::shared_ptr<Transport> & debug_transport){
+      m_debug_link = std::make_shared<DebugLink>();
+      m_debug_link->init(debug_transport);
+    }
+
+    void trezor_debug_callback::on_button_request(messages::common::ButtonRequest_ButtonRequestType code) {
+      if (m_debug_link) m_debug_link->press_yes();
+    }
+
+    void trezor_debug_callback::on_pin_request(epee::wipeable_string &pin) {
+
+    }
+
+    void trezor_debug_callback::on_passphrase_request(bool on_device, epee::wipeable_string &passphrase) {
+
+    }
+
+    void trezor_debug_callback::on_passphrase_state_request(const std::string &state) {
+
+    }
+
+    void trezor_debug_callback::on_disconnect(){
+      if (m_debug_link) m_debug_link->close();
+    }
+#endif
 
 #endif //WITH_DEVICE_TREZOR
 }}
