@@ -636,6 +636,19 @@ namespace trezor{
     m_socket = nullptr;
   }
 
+  std::shared_ptr<Transport> UdpTransport::find_debug() {
+#ifdef WITH_TREZOR_DEBUG
+    std::shared_ptr<UdpTransport> t = std::make_shared<UdpTransport>();
+    t->m_proto = std::make_shared<ProtocolV1>();
+    t->m_device_host = m_device_host;
+    t->m_device_port = m_device_port + 1;
+    return t;
+#else
+    MINFO("Debug link is disabled in production");
+    return nullptr;
+#endif
+  }
+
   void UdpTransport::write_chunk(const void * buff, size_t size){
     require_socket();
 
@@ -1021,6 +1034,20 @@ namespace trezor{
     }
   };
 
+  std::shared_ptr<Transport> WebUsbTransport::find_debug() {
+#ifdef WITH_TREZOR_DEBUG
+    require_device();
+    auto t = std::make_shared<WebUsbTransport>(boost::make_optional(m_usb_device_desc.get()));
+    t->m_bus_id = m_bus_id;
+    t->m_device_addr = m_device_addr;
+    t->m_port_numbers = m_port_numbers;
+    t->m_debug_mode = true;
+    return t;
+#else
+      MINFO("Debug link is disabled in production");
+      return nullptr;
+#endif
+    }
 
   int WebUsbTransport::get_interface(){
     const int INTERFACE_NORMAL = 0;

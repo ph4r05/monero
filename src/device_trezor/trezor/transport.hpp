@@ -157,6 +157,7 @@ namespace trezor {
     virtual void close(){};
     virtual void write(const google::protobuf::Message & req) =0;
     virtual void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
+    virtual std::shared_ptr<Transport> find_debug() { return nullptr; };
     void session_begin();
     void session_end();
 
@@ -229,6 +230,7 @@ namespace trezor {
 
     void open() override;
     void close() override;
+    std::shared_ptr<Transport> find_debug() override;
 
     void write(const google::protobuf::Message &req) override;
     void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
@@ -276,6 +278,7 @@ namespace trezor {
 
     void open() override;
     void close() override;
+    std::shared_ptr<Transport> find_debug() override;
 
     void write(const google::protobuf::Message &req) override;
     void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
