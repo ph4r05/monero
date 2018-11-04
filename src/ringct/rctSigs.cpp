@@ -1194,7 +1194,7 @@ namespace rct {
 
         for (size_t n = 0; n < indices.size(); ++n) {
             rct::key diff;
-            sc_mulsub(diff.bytes, msout.c[n].bytes, secret_key.bytes, k[n].bytes); // c-ab = k-msout*secret
+            sc_mulsub(diff.bytes, msout.c[n].bytes, secret_key.bytes, k[n].bytes);
             sc_add(rv.p.MGs[n].ss[indices[n]][0].bytes, rv.p.MGs[n].ss[indices[n]][0].bytes, diff.bytes);
         }
         return true;

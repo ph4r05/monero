@@ -483,7 +483,7 @@ namespace
       LOG_ERROR("internal error: " << e.to_string());
       fail_msg_writer() << sw::tr("internal error: ") << e.what();
     }
-    catch (const std::exception& e) // TODO: custom wallet exception handlers
+    catch (const std::exception& e)
     {
       LOG_ERROR("unexpected error: " << e.what());
       fail_msg_writer() << sw::tr("unexpected error: ") << e.what();
@@ -3801,7 +3801,6 @@ boost::optional<epee::wipeable_string> simple_wallet::new_wallet(const boost::pr
   {
     bool create_address_file = command_line::get_arg(vm, arg_create_address_file);
     m_wallet->restore(m_wallet_file, std::move(rc.second).password(), device_desc.empty() ? "Ledger" : device_desc, create_address_file);
-
     message_writer(console_color_white, true) << tr("Generated new wallet on hw device: ")
       << m_wallet->get_account().get_public_address_str(m_wallet->nettype());
   }
@@ -4896,7 +4895,6 @@ bool simple_wallet::transfer_main(int transfer_type, const std::vector<std::stri
     dsts_info.emplace_back();
     cryptonote::address_parse_info & info = dsts_info.back();
     cryptonote::tx_destination_entry de;
-
     bool r = true;
 
     // check for a URI

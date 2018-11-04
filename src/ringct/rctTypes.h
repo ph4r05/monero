@@ -49,7 +49,6 @@ extern "C" {
 #include "hex.h"
 #include "span.h"
 #include "serialization/vector.h"
-#include "serialization/set.h"
 #include "serialization/debug_archive.h"
 #include "serialization/binary_archive.h"
 #include "serialization/json_archive.h"
