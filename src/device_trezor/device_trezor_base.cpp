@@ -28,6 +28,7 @@
 //
 
 #include "device_trezor_lite.hpp"
+#include "device_trezor_base.hpp"
 
 namespace hw {
 namespace trezor {

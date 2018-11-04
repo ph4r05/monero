@@ -1,4 +1,4 @@
-// Copyright (c) 2016-2018, The Monero Project
+// Copyright (c) 2018, The Monero Project
 // 
 // All rights reserved.
 // 
@@ -28,38 +28,25 @@
 
 #pragma once
 
-#include <boost/optional/optional.hpp>
-#include <cstdint>
-#include <string>
-#include <vector>
+#include "crypto/crypto.h"
 
-namespace cryptonote
+class test_sc_check
 {
-class core;
+public:
+  static const size_t loop_count = 10000000;
 
-namespace rpc
-{
+  bool init()
+  {
+    m_scalar = crypto::rand<crypto::ec_scalar>();
+    return true;
+  }
 
-struct output_distribution_data
-{
-  std::vector<std::uint64_t> distribution;
-  std::uint64_t start_height;
-  std::uint64_t base;
+  bool test()
+  {
+    sc_check((unsigned char*)m_scalar.data);
+    return true;
+  }
+
+private:
+  crypto::ec_scalar m_scalar;
 };
-
-class RpcHandler
-{
-  public:
-    RpcHandler() { }
-    virtual ~RpcHandler() { }
-
-    virtual std::string handle(const std::string& request) = 0;
-
-    static boost::optional<output_distribution_data>
-      get_output_distribution(core& src, std::uint64_t amount, std::uint64_t from_height, std::uint64_t to_height, bool cumulative);
-};
-
-
-}  // rpc
-
-}  // cryptonote
