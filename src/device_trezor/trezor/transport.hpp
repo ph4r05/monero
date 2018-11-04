@@ -354,6 +354,20 @@ namespace trezor {
   [[ noreturn ]] void throw_failure_exception(const messages::common::Failure * failure);
 
   /**
+   * Generic message holder, type + obj
+   */
+  class GenericMessage {
+  public:
+    GenericMessage(): m_empty(true) {}
+    GenericMessage(messages::MessageType m_type, const std::shared_ptr<google::protobuf::Message> &m_msg);
+    bool empty() { return m_empty; }
+
+    hw::trezor::messages::MessageType m_type;
+    std::shared_ptr<google::protobuf::Message> m_msg;
+    bool m_empty;
+  };
+
+  /**
    * Simple wrapper for write-read message exchange with expected message response type.
    *
    * @throws UnexpectedMessageException if the response message type is different than expected.
