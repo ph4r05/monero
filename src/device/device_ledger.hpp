@@ -139,6 +139,7 @@ namespace hw {
         bool connected(void) const;
 
         bool set_mode(device_mode mode) override;
+
         device_type get_type() const override {return device_type::LEDGER;};
         device_protocol_t device_protocol() const override { return PROTOCOL_PROXY; };
 
