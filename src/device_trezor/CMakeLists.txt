@@ -70,6 +70,14 @@ find_package(Protobuf)  # REQUIRED
 find_library(LIBUSB-1.0_LIBRARY usb-1.0)
 find_package(LibUSB)
 
+# Debug link
+if(TREZOR_DEBUG)
+    list(APPEND trezor_headers trezor/debug_link.hpp trezor/messages/messages-debug.pb.h)
+    list(APPEND trezor_sources trezor/debug_link.cpp trezor/messages/messages-debug.pb.cc)
+    set(TREZOR_PROTOB_FLAGS "--debug-msg")
+    message(STATUS "Trezor debug link enabled")
+endif(TREZOR_DEBUG)
+
 # Test for HAVE_PROTOBUF from the parent
 if(Protobuf_FOUND AND HAVE_PROTOBUF)
     if ("$ENV{PYTHON3}" STREQUAL "")
@@ -78,7 +86,7 @@ if(Protobuf_FOUND AND HAVE_PROTOBUF)
         set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
     endif()
 
-    execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
+    execute_process(COMMAND ${PYTHON3} tools/build_protob.py ${TREZOR_PROTOB_FLAGS} WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
     if(RET)
         message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
                         "OUT: ${OUT}, ERR: ${ERR}."
