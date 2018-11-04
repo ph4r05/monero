@@ -1165,6 +1165,9 @@ namespace trezor{
     }
   }
 
+  GenericMessage::GenericMessage(messages::MessageType m_type, const shared_ptr<google::protobuf::Message> &m_msg)
+        : m_type(m_type), m_msg(m_msg), m_empty(false) {}
+
   std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t){
     return t.dump(o);
   }
