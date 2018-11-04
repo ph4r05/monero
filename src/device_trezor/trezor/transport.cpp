@@ -901,7 +901,7 @@ namespace trezor{
   };
 
   void WebUsbTransport::open() {
-    const int interface = m_debug_mode ? 1 : 0;
+    const int interface = get_interface();
     if (m_conn_count > 0){
       MTRACE("Already opened");
       return;
@@ -975,7 +975,7 @@ namespace trezor{
   };
 
   void WebUsbTransport::close() {
-    const int interface = m_debug_mode ? 1 : 0;
+    const int interface = get_interface();
 
     if (m_conn_count > 0){
       m_conn_count -= 1;
@@ -1003,6 +1003,27 @@ namespace trezor{
     }
   };
 
+
+  int WebUsbTransport::get_interface(){
+    const int INTERFACE_NORMAL = 0;
+#ifdef WITH_TREZOR_DEBUG
+    const int INTERFACE_DEBUG = 1;
+    return m_debug_mode ? INTERFACE_DEBUG : INTERFACE_NORMAL;
+#else
+    return INTERFACE_NORMAL;
+#endif
+  }
+
+  unsigned char WebUsbTransport::get_endpoint(){
+    const unsigned char ENDPOINT_NORMAL = 1;
+#ifdef WITH_TREZOR_DEBUG
+    const unsigned char ENDPOINT_DEBUG = 2;
+    return m_debug_mode ? ENDPOINT_DEBUG : ENDPOINT_NORMAL;
+#else
+    return ENDPOINT_NORMAL;
+#endif
+  }
+
   void WebUsbTransport::write(const google::protobuf::Message &req) {
     m_proto->write(*this, req);
   };
@@ -1017,7 +1038,7 @@ namespace trezor{
       throw exc::CommunicationException("Invalid chunk size: ");
     }
 
-    unsigned char endpoint = m_debug_mode ? 2 : 1;
+    unsigned char endpoint = get_endpoint();
     endpoint = (endpoint & ~LIBUSB_ENDPOINT_DIR_MASK) | LIBUSB_ENDPOINT_OUT;
 
     int transferred = 0;
@@ -1030,7 +1051,7 @@ namespace trezor{
 
   size_t WebUsbTransport::read_chunk(void * buff, size_t size) {
     require_connected();
-    unsigned char endpoint = m_debug_mode ? 2 : 1;
+    unsigned char endpoint = get_endpoint();
     endpoint = (endpoint & ~LIBUSB_ENDPOINT_DIR_MASK) | LIBUSB_ENDPOINT_IN;
 
     int transferred = 0;

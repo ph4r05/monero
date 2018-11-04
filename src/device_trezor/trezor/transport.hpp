@@ -284,6 +284,8 @@ namespace trezor {
   private:
     void require_device();
     void require_connected();
+    int get_interface();
+    unsigned char get_endpoint();
 
     bool m_debug_mode;
     unsigned m_conn_count;
