@@ -37,6 +37,10 @@
 #define WITH_DEVICE_TREZOR_LITE 0
 #endif
 
+#if defined(HAVE_LIBUSB) && WITH_DEVICE_TREZOR
+#define WITH_DEVICE_TREZOR_WEBUSB 1
+#endif
+
 // Avoids protobuf undefined macro warning
 #ifndef PROTOBUF_INLINE_NOT_IN_HEADERS
 #define PROTOBUF_INLINE_NOT_IN_HEADERS 0

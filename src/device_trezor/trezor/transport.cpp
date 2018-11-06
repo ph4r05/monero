@@ -27,10 +27,15 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
+#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+#include <libusb-1.0/libusb.h>
+#endif
+
 #include <boost/endian/conversion.hpp>
 #include <boost/asio/io_service.hpp>
 #include <boost/asio/ip/udp.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <boost/format.hpp>
 #include "transport.hpp"
 #include "messages/messages-common.pb.h"
 
@@ -756,9 +761,343 @@ namespace trezor{
              << ">";
   }
 
+#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+
+  static bool is_trezor1(libusb_device_descriptor * info){
+    return info->idVendor == 0x534C && info->idProduct == 0x0001;
+  }
+
+  static bool is_trezor2(libusb_device_descriptor * info){
+    return info->idVendor == 0x1209 && info->idProduct == 0x53C1;
+  }
+
+  static bool is_trezor2_bl(libusb_device_descriptor * info){
+    return info->idVendor == 0x1209 && info->idProduct == 0x53C0;
+  }
+
+  static uint8_t get_trezor_dev_mask(libusb_device_descriptor * info){
+    uint8_t mask = 0;
+    mask |= is_trezor1(info) ? 1 : 0;
+    mask |= is_trezor2(info) ? 2 : 0;
+    mask |= is_trezor2_bl(info) ? 4 : 0;
+    return mask;
+  }
+
+  static void get_libusb_ports(libusb_device *dev, std::vector<uint8_t> &path){
+    uint8_t tmp_path[16];
+    int r = libusb_get_port_numbers(dev, tmp_path, sizeof(tmp_path));
+    CHECK_AND_ASSERT_THROW_MES(r != LIBUSB_ERROR_OVERFLOW, "Libusb path array too small");
+    CHECK_AND_ASSERT_THROW_MES(r >= 0, "Libusb path array error");
+
+    path.resize(static_cast<unsigned long>(r));
+    for (int i = 0; i < r; i++){
+      path[i] = tmp_path[i];
+    }
+  }
+
+  static std::string get_usb_path(uint8_t bus_id, const std::vector<uint8_t> &path){
+    std::stringstream ss;
+    ss << WebUsbTransport::PATH_PREFIX << (boost::format("%03d") % ((int)bus_id));
+    for(uint8_t port : path){
+      ss << ":" << ((int) port);
+    }
+    return ss.str();
+  }
+
+  const char * WebUsbTransport::PATH_PREFIX = "webusb:";
+
+  WebUsbTransport::WebUsbTransport(
+      boost::optional<libusb_device_descriptor*> descriptor,
+      boost::optional<std::shared_ptr<Protocol>> proto
+  ): m_conn_count(0), m_debug_mode(false),
+     m_usb_session(nullptr), m_usb_device(nullptr), m_usb_device_handle(nullptr),
+     m_bus_id(-1), m_device_addr(-1)
+  {
+    if (descriptor){
+      libusb_device_descriptor * desc = new libusb_device_descriptor;
+      memcpy(desc, descriptor.get(), sizeof(libusb_device_descriptor));
+      this->m_usb_device_desc.reset(desc);
+    }
+
+    m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
+  }
+
+  WebUsbTransport::~WebUsbTransport(){
+    if (m_usb_device){
+      close();
+    }
+
+    if (m_usb_session) {
+      libusb_exit(m_usb_session);
+      m_usb_session = nullptr;
+    }
+  }
+
+  void WebUsbTransport::require_device(){
+    if (!m_usb_device_desc){
+      throw std::runtime_error("No USB device specified");
+    }
+  }
+
+  void WebUsbTransport::require_connected(){
+    require_device();
+    if (!m_usb_device_handle){
+      throw std::runtime_error("USB Device not opened");
+    }
+  }
+
+  void WebUsbTransport::enumerate(t_transport_vect & res) {
+    int r;
+    libusb_device **devs;
+    libusb_context *ctx = nullptr;
+
+    r = libusb_init(&ctx);
+    CHECK_AND_ASSERT_THROW_MES(r >= 0, "Unable to init libusb");
+
+    // set verbosity level to 3, as suggested in the documentation
+    libusb_set_debug(ctx, 3);
+
+    ssize_t cnt = libusb_get_device_list(ctx, &devs);
+    if (cnt < 0){
+      libusb_exit(ctx);
+      throw std::runtime_error("Unable to enumerate libusb devices");
+    }
+
+    MTRACE("Libusb devices: " << cnt);
+
+    for(ssize_t i = 0; i < cnt; i++) {
+      libusb_device_descriptor desc{};
+      r = libusb_get_device_descriptor(devs[i], &desc);
+      if (r < 0){
+        MERROR("Unable to get libusb device descriptor " << i);
+        continue;
+      }
+
+      const auto trezor_mask = get_trezor_dev_mask(&desc);
+      if (!trezor_mask){
+        continue;
+      }
+
+      MTRACE("Found Trezor device: " << desc.idVendor << ":" << desc.idProduct << " mask " << (int)trezor_mask);
+
+      auto t = std::make_shared<WebUsbTransport>(boost::make_optional(&desc));
+      t->m_bus_id = libusb_get_bus_number(devs[i]);
+      t->m_device_addr = libusb_get_device_address(devs[i]);
+      get_libusb_ports(devs[i], t->m_port_numbers);
+
+      res.push_back(t);
+    }
+
+    libusb_free_device_list(devs, 1);
+    libusb_exit(ctx);
+  }
+
+  std::string WebUsbTransport::get_path() const {
+    if (!m_usb_device_desc){
+      return "";
+    }
+
+    return get_usb_path(static_cast<uint8_t>(m_bus_id), m_port_numbers);
+  };
+
+  void WebUsbTransport::open() {
+    const int interface = get_interface();
+    if (m_conn_count > 0){
+      MTRACE("Already opened");
+      return;
+    }
+
+    int r;
+    libusb_device **devs = nullptr;
+
+    if (m_usb_session) {
+      libusb_exit(m_usb_session);
+      m_usb_session = nullptr;
+    }
+
+    r = libusb_init(&m_usb_session);
+    CHECK_AND_ASSERT_THROW_MES(r >= 0, "Unable to init libusb");
+    libusb_set_debug(m_usb_session, 3);
+
+    bool found = false;
+    int open_res = 0;
+
+    ssize_t cnt = libusb_get_device_list(m_usb_session, &devs);
+    CHECK_AND_ASSERT_THROW_MES(cnt >= 0, "Unable to enumerate libusb devices");
+
+    for (ssize_t i = 0; i < cnt; i++) {
+      libusb_device_descriptor desc{};
+      r = libusb_get_device_descriptor(devs[i], &desc);
+      if (r < 0){
+        MERROR("Unable to get libusb device descriptor " << i);
+        continue;
+      }
+
+      const auto trezor_mask = get_trezor_dev_mask(&desc);
+      if (!trezor_mask) {
+        continue;
+      }
+
+      auto bus_id = libusb_get_bus_number(devs[i]);
+      std::vector<uint8_t> path;
+      get_libusb_ports(devs[i], path);
+
+      MTRACE("Found Trezor device: " << desc.idVendor << ":" << desc.idProduct
+                                     << ", mask: " << (int)trezor_mask
+                                     << ". path: " << get_usb_path(bus_id, path));
+
+      if (bus_id == m_bus_id && path == m_port_numbers) {
+        found = true;
+        m_usb_device = devs[i];
+        open_res = libusb_open(m_usb_device, &m_usb_device_handle);
+        break;
+      }
+    }
+
+    libusb_free_device_list(devs, 1);
+
+    if (!found){
+      throw exc::DeviceAcquireException("Device not found");
+    }
+
+    CHECK_AND_ASSERT_THROW_MES(found && open_res == 0, "Unable to open libusb device");
+    r = libusb_claim_interface(m_usb_device_handle, interface);
+
+    if (r != 0){
+      libusb_close(m_usb_device_handle);
+      m_usb_device_handle = nullptr;
+      m_usb_device = nullptr;
+      throw exc::DeviceAcquireException("Unable to claim libusb device");
+    }
+
+    m_conn_count += 1;
+    m_proto->session_begin(*this);
+  };
+
+  void WebUsbTransport::close() {
+    const int interface = get_interface();
+
+    if (m_conn_count > 0){
+      m_conn_count -= 1;
+    }
+
+    if (m_conn_count <= 0){
+      m_proto->session_end(*this);
+
+      MTRACE("Closing webusb device");
+      int r = libusb_release_interface(m_usb_device_handle, interface);
+      if (r != 0){
+        MERROR("Could not release libusb interface: " << r);
+      }
+
+      libusb_close(m_usb_device_handle);
+      m_usb_device_handle = nullptr;
+      m_usb_device = nullptr;
+
+      if (m_usb_session) {
+        libusb_exit(m_usb_session);
+        m_usb_session = nullptr;
+      }
+
+      m_conn_count = 0;
+    }
+  };
+
+
+  int WebUsbTransport::get_interface(){
+    const int INTERFACE_NORMAL = 0;
+#ifdef WITH_TREZOR_DEBUG
+    const int INTERFACE_DEBUG = 1;
+    return m_debug_mode ? INTERFACE_DEBUG : INTERFACE_NORMAL;
+#else
+    return INTERFACE_NORMAL;
+#endif
+  }
+
+  unsigned char WebUsbTransport::get_endpoint(){
+    const unsigned char ENDPOINT_NORMAL = 1;
+#ifdef WITH_TREZOR_DEBUG
+    const unsigned char ENDPOINT_DEBUG = 2;
+    return m_debug_mode ? ENDPOINT_DEBUG : ENDPOINT_NORMAL;
+#else
+    return ENDPOINT_NORMAL;
+#endif
+  }
+
+  void WebUsbTransport::write(const google::protobuf::Message &req) {
+    m_proto->write(*this, req);
+  };
+
+  void WebUsbTransport::read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type) {
+    m_proto->read(*this, msg, msg_type);
+  };
+
+  void WebUsbTransport::write_chunk(const void * buff, size_t size) {
+    require_connected();
+    if (size != REPLEN){
+      throw exc::CommunicationException("Invalid chunk size: ");
+    }
+
+    unsigned char endpoint = get_endpoint();
+    endpoint = (endpoint & ~LIBUSB_ENDPOINT_DIR_MASK) | LIBUSB_ENDPOINT_OUT;
+
+    int transferred = 0;
+    int r = libusb_interrupt_transfer(m_usb_device_handle, endpoint, (unsigned char*)buff, (int)size, &transferred, 0);
+    CHECK_AND_ASSERT_THROW_MES(r == 0, "Unable to transfer, r: " << r);
+    if (transferred != (int)size){
+      throw exc::CommunicationException("Could not transfer chunk");
+    }
+  };
+
+  size_t WebUsbTransport::read_chunk(void * buff, size_t size) {
+    require_connected();
+    unsigned char endpoint = get_endpoint();
+    endpoint = (endpoint & ~LIBUSB_ENDPOINT_DIR_MASK) | LIBUSB_ENDPOINT_IN;
+
+    int transferred = 0;
+    int r = libusb_interrupt_transfer(m_usb_device_handle, endpoint, (unsigned char*)buff, (int)size, &transferred, 0);
+    CHECK_AND_ASSERT_THROW_MES(r == 0, "Unable to transfer, r: " << r);
+    if (transferred != (int)size){
+      throw exc::CommunicationException("Could not read the chunk");
+    }
+
+    return transferred;
+  };
+
+  std::ostream& WebUsbTransport::dump(std::ostream& o) const {
+    o << "WebUsbTransport<path=" << get_path()
+             << ", vendorId=" << (m_usb_device_desc ? std::to_string(m_usb_device_desc->idVendor) : "?")
+             << ", productId=" << (m_usb_device_desc ? std::to_string(m_usb_device_desc->idProduct) : "?")
+             << ", deviceType=";
+
+    if (m_usb_device_desc){
+      if (is_trezor1(m_usb_device_desc.get()))
+        o << "TrezorOne";
+      else if (is_trezor2(m_usb_device_desc.get()))
+        o << "TrezorT";
+      else if (is_trezor2_bl(m_usb_device_desc.get()))
+        o << "TrezorT BL";
+    } else {
+      o << "?";
+    }
+
+    return o << ">";
+  };
+
+#endif  // WITH_DEVICE_TREZOR_WEBUSB
+
   void enumerate(t_transport_vect & res){
     BridgeTransport bt;
     bt.enumerate(res);
+
+#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+    hw::trezor::WebUsbTransport btw;
+    try{
+      btw.enumerate(res);
+    } catch (const std::exception & e){
+      MERROR("WebUSB enumeration failed:" << e.what());
+    }
+#endif
 
     hw::trezor::UdpTransport btu;
     btu.enumerate(res);
@@ -808,6 +1147,9 @@ namespace trezor{
     }
   }
 
+  GenericMessage::GenericMessage(messages::MessageType m_type, const shared_ptr<google::protobuf::Message> &m_msg)
+        : m_type(m_type), m_msg(m_msg), m_empty(false) {}
+
   std::ostream& operator<<(std::ostream& o, hw::trezor::Transport const& t){
     return t.dump(o);
   }
@@ -822,5 +1164,4 @@ namespace trezor{
 
 }
 }
-
 
