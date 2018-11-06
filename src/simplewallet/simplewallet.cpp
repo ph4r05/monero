@@ -4483,7 +4483,7 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
   tools::wallet2::transfer_container transfers;
   m_wallet->get_transfers(transfers);
 
-  bool transfers_found = false;
+  size_t transfers_found = 0;
   for (const auto& td : transfers)
   {
     if (!filter || available != td.m_spent)
@@ -4496,7 +4496,6 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
         if (verbose)
           verbose_string = (boost::format("%68s%68s") % tr("pubkey") % tr("key image")).str();
         message_writer() << boost::format("%21s%8s%12s%8s%16s%68s%16s%s") % tr("amount") % tr("spent") % tr("unlocked") % tr("ringct") % tr("global index") % tr("tx id") % tr("addr index") % verbose_string;
-        transfers_found = true;
       }
       std::string verbose_string;
       if (verbose)
@@ -4511,6 +4510,7 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
         td.m_txid %
         td.m_subaddr_index.minor %
         verbose_string;
+      ++transfers_found;
     }
   }
 
@@ -4528,6 +4528,10 @@ bool simple_wallet::show_incoming_transfers(const std::vector<std::string>& args
     {
       success_msg_writer() << tr("No incoming unavailable transfers");
     }
+  }
+  else
+  {
+    success_msg_writer() << boost::format("Found %u/%u transfers") % transfers_found % transfers.size();
   }
 
   return true;
@@ -6105,8 +6109,8 @@ bool simple_wallet::accept_loaded_tx(const std::function<size_t()> get_num_txes,
 bool simple_wallet::accept_loaded_tx(const tools::wallet2::unsigned_tx_set &txs)
 {
   std::string extra_message;
-  if (!txs.transfers.empty())
-    extra_message = (boost::format("%u outputs to import. ") % (unsigned)txs.transfers.size()).str();
+  if (!txs.transfers.second.empty())
+    extra_message = (boost::format("%u outputs to import. ") % (unsigned)txs.transfers.second.size()).str();
   return accept_loaded_tx([&txs](){return txs.txes.size();}, [&txs](size_t n)->const tools::wallet2::tx_construction_data&{return txs.txes[n];}, extra_message);
 }
 //----------------------------------------------------------------------------------------------------
@@ -6859,7 +6863,8 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
         payment_id = payment_id.substr(0,16);
       std::string note = m_wallet->get_tx_note(pd.m_tx_hash);
       const std::string type = pd.m_coinbase ? tr("block") : tr("in");
-      output.insert(std::make_pair(pd.m_block_height, std::make_tuple(epee::console_color_green, type, (boost::format("%25.25s %20.20s %s %s %d %s %s") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % payment_id % pd.m_subaddr_index.minor % "-" % note).str())));
+      const bool unlocked = m_wallet->is_tx_spendtime_unlocked(pd.m_unlock_time, pd.m_block_height);
+      output.insert(std::make_pair(pd.m_block_height, std::make_tuple(epee::console_color_green, type, (boost::format("%8.8s %25.25s %20.20s %s %s %d %s %s") % (unlocked ? "unlocked" : "locked") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % payment_id % pd.m_subaddr_index.minor % "-" % note).str())));
     }
   }
 
@@ -6892,7 +6897,7 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
       if (payment_id.substr(16).find_first_not_of('0') == std::string::npos)
         payment_id = payment_id.substr(0,16);
       std::string note = m_wallet->get_tx_note(i->first);
-      output.insert(std::make_pair(pd.m_block_height, std::make_tuple(epee::console_color_magenta, tr("out"), (boost::format("%25.25s %20.20s %s %s %14.14s %s %s - %s") % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount_in - change - fee) % string_tools::pod_to_hex(i->first) % payment_id % print_money(fee) % dests % print_subaddr_indices(pd.m_subaddr_indices) % note).str())));
+      output.insert(std::make_pair(pd.m_block_height, std::make_tuple(epee::console_color_magenta, tr("out"), (boost::format("%8.8s %25.25s %20.20s %s %s %14.14s %s %s - %s") % "-" % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount_in - change - fee) % string_tools::pod_to_hex(i->first) % payment_id % print_money(fee) % dests % print_subaddr_indices(pd.m_subaddr_indices) % note).str())));
     }
   }
 
@@ -6921,7 +6926,7 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
         std::string double_spend_note;
         if (i->second.m_double_spend_seen)
           double_spend_note = tr("[Double spend seen on the network: this transaction may or may not end up being mined] ");
-        message_writer() << (boost::format("%8.8s %6.6s %25.25s %20.20s %s %s %d %s %s%s") % "pool" % "in" % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % payment_id % pd.m_subaddr_index.minor % "-" % note % double_spend_note).str();
+        message_writer() << (boost::format("%8.8s %6.6s %8.8s %25.25s %20.20s %s %s %d %s %s%s") % "pool" % "in" % "locked" % get_human_readable_timestamp(pd.m_timestamp) % print_money(pd.m_amount) % string_tools::pod_to_hex(pd.m_tx_hash) % payment_id % pd.m_subaddr_index.minor % "-" % note % double_spend_note).str();
       }
     }
     catch (const std::exception& e)
@@ -6944,7 +6949,7 @@ bool simple_wallet::show_transfers(const std::vector<std::string> &args_)
       std::string note = m_wallet->get_tx_note(i->first);
       bool is_failed = pd.m_state == tools::wallet2::unconfirmed_transfer_details::failed;
       if ((failed && is_failed) || (!is_failed && pending)) {
-        message_writer() << (boost::format("%8.8s %6.6s %25.25s %20.20s %s %s %14.14s %s - %s") % (is_failed ? tr("failed") : tr("pending")) % tr("out") % get_human_readable_timestamp(pd.m_timestamp) % print_money(amount - pd.m_change - fee) % string_tools::pod_to_hex(i->first) % payment_id % print_money(fee) % print_subaddr_indices(pd.m_subaddr_indices) % note).str();
+        message_writer() << (boost::format("%8.8s %6.6s %8.8s %25.25s %20.20s %s %s %14.14s %s - %s") % (is_failed ? tr("failed") : tr("pending")) % tr("out") % "-" % get_human_readable_timestamp(pd.m_timestamp) % print_money(amount - pd.m_change - fee) % string_tools::pod_to_hex(i->first) % payment_id % print_money(fee) % print_subaddr_indices(pd.m_subaddr_indices) % note).str();
       }
     }
   }
