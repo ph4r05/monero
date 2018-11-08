@@ -911,12 +911,13 @@ namespace trezor{
       return;
     }
 
+#define TREZOR_DESTROY_SESSION() do { libusb_exit(m_usb_session); m_usb_session = nullptr; } while(0)
+
     int r;
     libusb_device **devs = nullptr;
 
     if (m_usb_session) {
-      libusb_exit(m_usb_session);
-      m_usb_session = nullptr;
+      TREZOR_DESTROY_SESSION();
     }
 
     r = libusb_init(&m_usb_session);
@@ -927,7 +928,10 @@ namespace trezor{
     int open_res = 0;
 
     ssize_t cnt = libusb_get_device_list(m_usb_session, &devs);
-    CHECK_AND_ASSERT_THROW_MES(cnt >= 0, "Unable to enumerate libusb devices");
+    if (cnt < 0){
+      TREZOR_DESTROY_SESSION();
+      throw std::runtime_error("Unable to enumerate libusb devices");
+    }
 
     for (ssize_t i = 0; i < cnt; i++) {
       libusb_device_descriptor desc{};
@@ -961,26 +965,33 @@ namespace trezor{
     libusb_free_device_list(devs, 1);
 
     if (!found){
+      TREZOR_DESTROY_SESSION();
       throw exc::DeviceAcquireException("Device not found");
+
+    } else if (found && open_res != 0) {
+      m_usb_device_handle = nullptr;
+      m_usb_device = nullptr;
+      TREZOR_DESTROY_SESSION();
+      throw exc::DeviceAcquireException("Unable to open libusb device");
     }
 
-    CHECK_AND_ASSERT_THROW_MES(found && open_res == 0, "Unable to open libusb device");
     r = libusb_claim_interface(m_usb_device_handle, interface);
 
     if (r != 0){
       libusb_close(m_usb_device_handle);
       m_usb_device_handle = nullptr;
       m_usb_device = nullptr;
+      TREZOR_DESTROY_SESSION();
       throw exc::DeviceAcquireException("Unable to claim libusb device");
     }
 
     m_conn_count += 1;
     m_proto->session_begin(*this);
+    
+#undef TREZOR_DESTROY_SESSION
   };
 
   void WebUsbTransport::close() {
-    const int interface = get_interface();
-
     if (m_conn_count > 0){
       m_conn_count -= 1;
     }
@@ -989,14 +1000,16 @@ namespace trezor{
       m_proto->session_end(*this);
 
       MTRACE("Closing webusb device");
-      int r = libusb_release_interface(m_usb_device_handle, interface);
+      int r = libusb_release_interface(m_usb_device_handle, get_interface());
       if (r != 0){
         MERROR("Could not release libusb interface: " << r);
       }
 
-      libusb_close(m_usb_device_handle);
-      m_usb_device_handle = nullptr;
       m_usb_device = nullptr;
+      if (m_usb_device_handle) {
+        libusb_close(m_usb_device_handle);
+        m_usb_device_handle = nullptr;
+      }
 
       if (m_usb_session) {
         libusb_exit(m_usb_session);
