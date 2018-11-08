@@ -27,17 +27,26 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#if defined(HAVE_PROTOBUF) && !defined(WITHOUT_TREZOR)
-  #define WITH_DEVICE_TREZOR 1
-#else
-  #define WITH_DEVICE_TREZOR 0
+#ifndef USE_DEVICE_TREZOR
+#define USE_DEVICE_TREZOR 1
 #endif
 
-#ifndef WITH_DEVICE_TREZOR_LITE
-#define WITH_DEVICE_TREZOR_LITE 0
+// HAVE_TREZOR_READY set by cmake after protobuf messages
+// were generated successfully and all minimal dependencies are met.
+#ifndef DEVICE_TREZOR_READY
+#undef  USE_DEVICE_TREZOR
+#define USE_DEVICE_TREZOR 0
 #endif
 
-#if defined(HAVE_LIBUSB) && WITH_DEVICE_TREZOR
+#if USE_DEVICE_TREZOR
+#define WITH_DEVICE_TREZOR 1
+#endif
+
+#ifndef WITH_DEVICE_TREZOR
+#undef WITH_DEVICE_TREZOR_LITE
+#endif
+
+#if defined(HAVE_TREZOR_LIBUSB) && USE_DEVICE_TREZOR
 #define WITH_DEVICE_TREZOR_WEBUSB 1
 #endif
 

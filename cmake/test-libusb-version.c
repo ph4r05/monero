@@ -25,53 +25,28 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-// 
-// Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
-#pragma once
+#include <libusb-1.0/libusb.h>
 
-#include "crypto/crypto.h"
-#include "cryptonote_basic/cryptonote_basic.h"
+#define UNUSED(expr) (void)(expr)
 
-#include "single_tx_test_base.h"
+int main(int argc, char *argv[]) {
+  libusb_device **devs;
+  libusb_context *ctx = NULL;
 
-class test_ge_frombytes_vartime : public multi_tx_test_base<1>
-{
-public:
-  static const size_t loop_count = 10000;
+  int r = libusb_init(&ctx); UNUSED(r);
+  ssize_t cnt = libusb_get_device_list(ctx, &devs); UNUSED(cnt);
 
-  typedef multi_tx_test_base<1> base_class;
+  struct libusb_device_descriptor desc;
+  r = libusb_get_device_descriptor(devs[0], &desc); UNUSED(r);
+  uint8_t bus_id = libusb_get_bus_number(devs[0]); UNUSED(bus_id);
+  uint8_t addr = libusb_get_device_address(devs[0]); UNUSED(addr);
 
-  bool init()
-  {
-    using namespace cryptonote;
+  uint8_t tmp_path[16];
+  r = libusb_get_port_numbers(devs[0], tmp_path, sizeof(tmp_path));
+  UNUSED(r);
+  UNUSED(tmp_path);
 
-    if (!base_class::init())
-      return false;
-
-    cryptonote::account_base m_alice;
-    cryptonote::transaction m_tx;
-
-    m_alice.generate();
-
-    std::vector<tx_destination_entry> destinations;
-    destinations.push_back(tx_destination_entry(1, m_alice.get_keys().m_account_address, false));
-
-    if (!construct_tx(this->m_miners[this->real_source_idx].get_keys(), this->m_sources, destinations, boost::none, std::vector<uint8_t>(), m_tx, 0))
-      return false;
-
-    const cryptonote::txin_to_key& txin = boost::get<cryptonote::txin_to_key>(m_tx.vin[0]);
-    m_key = rct::ki2rct(txin.k_image);
-
-    return true;
-  }
-
-  bool test()
-  {
-    ge_p3 unp;
-    return ge_frombytes_vartime(&unp, (const unsigned char*) &m_key) == 0;
-  }
-
-private:
-  rct::key m_key;
-};
+  libusb_free_device_list(devs, 1);
+  libusb_exit(ctx);
+}

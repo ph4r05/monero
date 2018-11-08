@@ -27,7 +27,7 @@
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 
-#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+#ifdef WITH_DEVICE_TREZOR_WEBUSB
 #include <libusb-1.0/libusb.h>
 #endif
 
@@ -761,7 +761,7 @@ namespace trezor{
              << ">";
   }
 
-#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+#ifdef WITH_DEVICE_TREZOR_WEBUSB
 
   static bool is_trezor1(libusb_device_descriptor * info){
     return info->idVendor == 0x534C && info->idProduct == 0x0001;
@@ -1090,7 +1090,7 @@ namespace trezor{
     BridgeTransport bt;
     bt.enumerate(res);
 
-#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+#ifdef WITH_DEVICE_TREZOR_WEBUSB
     hw::trezor::WebUsbTransport btw;
     try{
       btw.enumerate(res);

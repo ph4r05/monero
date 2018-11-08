@@ -92,9 +92,34 @@ if ( LibUSB_FOUND )
     check_include_file ( "${LibUSB_HEADER_FILE}" LibUSB_FOUND )
 endif ( LibUSB_FOUND )
 
+# Fallback libusb
+if( NOT LibUSB_FOUND )
+    find_library(LIBUSB-1.0_LIBRARY usb-1.0)
+    if(LIBUSB-1.0_LIBRARY)
+        set(LibUSB_INCLUDE_DIRS ${LIBUSB-1.0_INCLUDE_DIR})
+        set(LibUSB_LIBRARIES ${LIBUSB-1.0_LIBRARY})
+        set(LibUSB_FOUND 1)
+        message(STATUS "LibUSB found, with find_library")
+    endif()
+endif()
+
 if ( LibUSB_FOUND )
     check_library_exists ( "${usb_LIBRARY}" usb_open "" LibUSB_FOUND )
     check_library_exists ( "${usb_LIBRARY}" libusb_get_device_list "" LibUSB_VERSION_1.0 )
+    check_library_exists ( "${usb_LIBRARY}" libusb_get_port_numbers "" LibUSB_VERSION_1.0.16 )
+
+    if ( LibUSB_VERSION_1.0.16 )
+        try_compile(LibUSB_COMPILE_TEST
+                ${CMAKE_BINARY_DIR}
+                "${CMAKE_SOURCE_DIR}/cmake/test-libusb-version.c"
+                CMAKE_FLAGS
+                    "-DINCLUDE_DIRECTORIES=${LibUSB_INCLUDE_DIRS}"
+                    "-DLINK_DIRECTORIES=${LibUSB_LIBRARIES}"
+                LINK_LIBRARIES ${LibUSB_LIBRARIES}
+                OUTPUT_VARIABLE OUTPUT)
+        message(STATUS "LibUSB Compilation test: ${LibUSB_COMPILE_TEST}")
+    endif()
+
 endif ( LibUSB_FOUND )
 
 if ( NOT LibUSB_FOUND )

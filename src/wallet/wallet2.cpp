@@ -3151,12 +3151,21 @@ bool wallet2::store_keys(const std::string& keys_file_name, const epee::wipeable
   crypto::chacha20(account_data.data(), account_data.size(), key, keys_file_data.iv, &cipher[0]);
   keys_file_data.account_data = cipher;
 
-  unlock_keys_file();
+  std::string tmp_file_name = keys_file_name + ".new";
   std::string buf;
   r = ::serialization::dump_binary(keys_file_data, buf);
-  r = r && epee::file_io_utils::save_string_to_file(keys_file_name, buf); //and never touch wallet_keys_file again, only read
-  CHECK_AND_ASSERT_MES(r, false, "failed to generate wallet keys file " << keys_file_name);
+  r = r && epee::file_io_utils::save_string_to_file(tmp_file_name, buf);
+  CHECK_AND_ASSERT_MES(r, false, "failed to generate wallet keys file " << tmp_file_name);
+
+  unlock_keys_file();
+  std::error_code e = tools::replace_file(tmp_file_name, keys_file_name);
   lock_keys_file();
+
+  if (e) {
+      boost::filesystem::remove(tmp_file_name);
+      LOG_ERROR("failed to update wallet keys file " << keys_file_name);
+      return false;
+  }
 
   return true;
 }
@@ -5097,11 +5106,27 @@ void wallet2::rescan_spent()
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::rescan_blockchain(bool refresh)
+void wallet2::rescan_blockchain(bool hard, bool refresh)
 {
-  clear();
+  if(hard)
+  {
+    clear();
+    setup_new_blockchain();
+  }
+  else
+  {
+    m_blockchain.clear();
+    m_transfers.clear();
+    m_key_images.clear();
+    m_pub_keys.clear();
+    m_scanned_pool_txs[0].clear();
+    m_scanned_pool_txs[1].clear();
 
-  setup_new_blockchain();
+    cryptonote::block b;
+    generate_genesis(b);
+    m_blockchain.push_back(get_block_hash(b));
+    m_last_block_reward = cryptonote::get_outs_money_amount(b.miner_tx);
+  }
 
   if (refresh)
     this->refresh(false);
@@ -7191,6 +7216,9 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
           break;
         }
       }
+      bool use_histogram = amount != 0 || !has_rct_distribution;
+      if (!use_histogram)
+        num_outs = rct_offsets[rct_offsets.size() - CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE];
 
       // make sure the real outputs we asked for are really included, along
       // with the correct key and mask: this guards against an active attack
@@ -7282,6 +7310,20 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
       v.push_back(std::make_tuple(td.m_global_output_index, td.get_public_key(), mask));
       outs.push_back(v);
     }
+  }
+
+  // save those outs in the ringdb for reuse
+  for (size_t i = 0; i < selected_transfers.size(); ++i)
+  {
+    const size_t idx = selected_transfers[i];
+    THROW_WALLET_EXCEPTION_IF(idx >= m_transfers.size(), error::wallet_internal_error, "selected_transfers entry out of range");
+    const transfer_details &td = m_transfers[idx];
+    std::vector<uint64_t> ring;
+    ring.reserve(outs[i].size());
+    for (const auto &e: outs[i])
+      ring.push_back(std::get<0>(e));
+    if (!set_ring(td.m_key_image, ring, false))
+      MERROR("Failed to set ring for " << td.m_key_image);
   }
 }
 
@@ -11028,7 +11070,8 @@ std::string wallet2::export_outputs_to_str() const
 
   std::stringstream oss;
   boost::archive::portable_binary_oarchive ar(oss);
-  ar << export_outputs();
+  const auto& outputs = export_outputs();
+  ar << outputs;
 
   std::string magic(OUTPUT_EXPORT_FILE_MAGIC, strlen(OUTPUT_EXPORT_FILE_MAGIC));
   const cryptonote::account_public_address &keys = get_account().get_keys().m_account_address;

@@ -252,7 +252,7 @@ namespace trezor {
     udp::endpoint m_endpoint;
   };
 
-#if defined(WITH_DEVICE_TREZOR_WEBUSB)
+#ifdef WITH_DEVICE_TREZOR_WEBUSB
 #include <libusb-1.0/libusb.h>
 
   class WebUsbTransport : public Transport {

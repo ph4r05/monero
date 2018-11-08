@@ -65,46 +65,18 @@ set(trezor_sources
 set(trezor_private_headers)
 
 
-include(FindProtobuf)
-find_package(Protobuf)  # REQUIRED
-find_library(LIBUSB-1.0_LIBRARY usb-1.0)
-find_package(LibUSB)
-
-# Test for HAVE_PROTOBUF from the parent
-if(Protobuf_FOUND AND HAVE_PROTOBUF)
-    if ("$ENV{PYTHON3}" STREQUAL "")
-        set(PYTHON3 "python3")
-    else()
-        set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
-    endif()
-
-    execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
-    if(RET)
-        message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
-                        "OUT: ${OUT}, ERR: ${ERR}."
-                        "Please read src/device_trezor/trezor/tools/README.md")
-    else()
-        message(STATUS "Trezor protobuf messages regenerated ${OUT}")
-        set(TREZOR_PROTOBUF_GENERATED 1)
-    endif()
-endif()
-
-
-if(TREZOR_PROTOBUF_GENERATED)
+# Protobuf and LibUSB processed by CheckTrezor
+if(DEVICE_TREZOR_READY)
     message(STATUS "Trezor support enabled")
 
     add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
     set ( libdevice_trezor_hdr "" )
     set ( libdevice_trezor_lib "" )
 
-    if(LIBUSB-1.0_LIBRARY)
-        list(APPEND libdevice_trezor_hdr ${LIBUSB-1.0_INCLUDE_DIR})
-        list(APPEND libdevice_trezor_lib ${LIBUSB-1.0_LIBRARY})
-        message(STATUS "LibUSB found, w1")
-    elseif(LibUSB_FOUND)
+    if(LibUSB_COMPILE_TEST)
         list(APPEND libdevice_trezor_hdr ${LibUSB_INCLUDE_DIRS})
         list(APPEND libdevice_trezor_lib ${LibUSB_LIBRARIES})
-        message(STATUS "LibUSB found, w2")
+        message(STATUS "Trezor compatible LibUSB found")
     endif()
 
     monero_private_headers(device_trezor
