@@ -209,6 +209,7 @@ private:
     bool daemonSynced() const;
     void stopRefresh();
     bool isNewWallet() const;
+    void pendingTxPostProcess(PendingTransactionImpl * pending);
     bool doInit(const std::string &daemon_address, uint64_t upper_transaction_size_limit = 0, bool ssl = false);
 
 private:

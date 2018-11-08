@@ -105,7 +105,8 @@ namespace trezor {
        */
       void ki_sync(wallet_shim * wallet,
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
-                   hw::device_cold::exported_key_image & ski) override;
+                   hw::device_cold::exported_key_image & ski,
+                   device_cold_ki_sync_events_t * events) override;
 
       /**
        * Signs particular transaction idx in the unsigned set, keeps state in the signer
@@ -114,6 +115,7 @@ namespace trezor {
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                    size_t idx,
                    hw::tx_aux_data & aux_data,
+                   device_cold_tx_sign_events_t * events,
                    std::shared_ptr<protocol::tx::Signer> & signer);
 
       /**
@@ -122,7 +124,8 @@ namespace trezor {
       void tx_sign(wallet_shim * wallet,
                    const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                    ::tools::wallet2::signed_tx_set & signed_tx,
-                   hw::tx_aux_data & aux_data) override;
+                   hw::tx_aux_data & aux_data,
+                   device_cold_tx_sign_events_t * events) override;
     };
 
 #endif
