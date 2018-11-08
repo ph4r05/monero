@@ -1,21 +1,21 @@
-// Copyright (c) 2017-2018, The Monero Project
-//
+// Copyright (c) 2014-2018, The Monero Project
+// 
 // All rights reserved.
-//
+// 
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-//
+// 
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-//
+// 
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-//
+// 
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-//
+// 
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -25,20 +25,28 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-//
 
-#ifndef MONERO_TREZOR_HPP
-#define MONERO_TREZOR_HPP
+#include <libusb-1.0/libusb.h>
 
-#include "trezor/trezor_defs.hpp"
+#define UNUSED(expr) (void)(expr)
 
-#ifdef WITH_DEVICE_TREZOR
-#include "trezor/transport.hpp"
-#include "trezor/messages/messages.pb.h"
-#include "trezor/messages/messages-common.pb.h"
-#include "trezor/messages/messages-management.pb.h"
-#include "trezor/messages/messages-monero.pb.h"
-#include "trezor/protocol.hpp"
-#endif
+int main(int argc, char *argv[]) {
+  libusb_device **devs;
+  libusb_context *ctx = NULL;
 
-#endif //MONERO_TREZOR_HPP
+  int r = libusb_init(&ctx); UNUSED(r);
+  ssize_t cnt = libusb_get_device_list(ctx, &devs); UNUSED(cnt);
+
+  struct libusb_device_descriptor desc;
+  r = libusb_get_device_descriptor(devs[0], &desc); UNUSED(r);
+  uint8_t bus_id = libusb_get_bus_number(devs[0]); UNUSED(bus_id);
+  uint8_t addr = libusb_get_device_address(devs[0]); UNUSED(addr);
+
+  uint8_t tmp_path[16];
+  r = libusb_get_port_numbers(devs[0], tmp_path, sizeof(tmp_path));
+  UNUSED(r);
+  UNUSED(tmp_path);
+
+  libusb_free_device_list(devs, 1);
+  libusb_exit(ctx);
+}
