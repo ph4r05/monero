@@ -992,6 +992,8 @@ start:
     MGINFO("END DUMP");
     MGINFO("Please send moneromooo on Libera.Chat the contents of this log, from a couple dozen lines before START DUMP to END DUMP");
   }
+  // TREZOR-DEBUG: keep difficulty low
+  m_difficulty_for_next_block = 2; //diff;
   return diff;
 }
 //------------------------------------------------------------------
