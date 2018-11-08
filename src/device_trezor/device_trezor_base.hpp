@@ -54,7 +54,7 @@
 namespace hw {
 namespace trezor {
 
-#if WITH_DEVICE_TREZOR
+#ifdef WITH_DEVICE_TREZOR
   class device_trezor_base;
 
   /**
