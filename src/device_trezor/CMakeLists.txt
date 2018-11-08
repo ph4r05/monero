@@ -73,16 +73,14 @@ if(DEVICE_TREZOR_READY)
     set ( libdevice_trezor_hdr "" )
     set ( libdevice_trezor_lib "" )
 
-    if(LibUSB_COMPILE_TEST)
+    if(LibUSB_COMPILE_TEST_PASSED)
         list(APPEND libdevice_trezor_hdr ${LibUSB_INCLUDE_DIRS})
         list(APPEND libdevice_trezor_lib ${LibUSB_LIBRARIES})
-        message(STATUS "Trezor compatible LibUSB found")
+        message(STATUS "Trezor compatible LibUSB found at: ${LibUSB_INCLUDE_DIRS}")
     endif()
 
     monero_private_headers(device_trezor
-            ${device_private_headers}
-            ${PROTOBUF_INCLUDE_DIR}
-            ${libdevice_trezor_hdr})
+            ${device_private_headers})
 
     monero_add_library(device_trezor
             ${trezor_sources}
@@ -107,6 +105,7 @@ if(DEVICE_TREZOR_READY)
     # add_definitions(-DWITH_DEVICE_TREZOR=1)
 
 else()
+    message(STATUS "Trezor support disabled")
     monero_private_headers(device_trezor)
     monero_add_library(device_trezor device_trezor.cpp)
     target_link_libraries(device_trezor PUBLIC cncrypto)

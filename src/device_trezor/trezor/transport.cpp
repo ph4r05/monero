@@ -28,7 +28,7 @@
 //
 
 #ifdef WITH_DEVICE_TREZOR_WEBUSB
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 #endif
 
 #include <boost/endian/conversion.hpp>

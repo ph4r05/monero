@@ -1,23 +1,15 @@
-OPTION(USE_DEVICE_TREZOR "Option description" ON)
+OPTION(USE_DEVICE_TREZOR "Trezor support compilation" ON)
+OPTION(USE_DEVICE_TREZOR_LIBUSB "Trezor LibUSB compilation" ON)
 
 # Use Trezor master switch
 if (USE_DEVICE_TREZOR)
-
     # Protobuf is required to build protobuf messages for Trezor
-    include(FindProtobuf)
+    include(FindProtobuf OPTIONAL)
     find_package(Protobuf)
-    if(Protobuf_FOUND)
-        add_definitions(-DHAVE_PROTOBUF=1)
-    else(Protobuf_FOUND)
+    if(NOT Protobuf_FOUND)
         message(STATUS "Could not find Protobuf")
     endif()
 
-    # LibUSB support, check for particular version
-    # Include support only if compilation test passes
-    find_package(LibUSB)
-    if ( LibUSB_COMPILE_TEST )
-        add_definitions(-DHAVE_TREZOR_LIBUSB=1)
-    endif()
 else()
     message(STATUS "Trezor support disabled by USE_DEVICE_TREZOR")
 endif()
@@ -39,5 +31,22 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR)
         message(STATUS "Trezor protobuf messages regenerated ${OUT}")
         set(DEVICE_TREZOR_READY 1)
         add_definitions(-DDEVICE_TREZOR_READY=1)
+
+        if (PROTOBUF_INCLUDE_DIR)
+            include_directories(${PROTOBUF_INCLUDE_DIR})
+        endif()
+
+        # LibUSB support, check for particular version
+        # Include support only if compilation test passes
+        if (USE_DEVICE_TREZOR_LIBUSB)
+            find_package(LibUSB)
+        endif()
+
+        if (LibUSB_COMPILE_TEST_PASSED)
+            add_definitions(-DHAVE_TREZOR_LIBUSB=1)
+            if(LibUSB_INCLUDE_DIRS)
+                include_directories(${LibUSB_INCLUDE_DIRS})
+            endif()
+        endif()
     endif()
 endif()

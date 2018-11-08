@@ -47,6 +47,8 @@ else ( PKGCONFIG_LIBUSB_FOUND )
             $ENV{LibUSB_ROOT_DIR}
             PATH_SUFFIXES
             include
+            libusb-1.0
+            include/libusb-1.0
             )
     mark_as_advanced ( LibUSB_HEADER_FILE )
     get_filename_component ( LibUSB_INCLUDE_DIRS "${LibUSB_HEADER_FILE}" PATH )
@@ -92,34 +94,40 @@ if ( LibUSB_FOUND )
     check_include_file ( "${LibUSB_HEADER_FILE}" LibUSB_FOUND )
 endif ( LibUSB_FOUND )
 
-# Fallback libusb
-if( NOT LibUSB_FOUND )
-    find_library(LIBUSB-1.0_LIBRARY usb-1.0)
-    if(LIBUSB-1.0_LIBRARY)
-        set(LibUSB_INCLUDE_DIRS ${LIBUSB-1.0_INCLUDE_DIR})
-        set(LibUSB_LIBRARIES ${LIBUSB-1.0_LIBRARY})
-        set(LibUSB_FOUND 1)
-        message(STATUS "LibUSB found, with find_library")
-    endif()
-endif()
-
 if ( LibUSB_FOUND )
-    check_library_exists ( "${usb_LIBRARY}" usb_open "" LibUSB_FOUND )
-    check_library_exists ( "${usb_LIBRARY}" libusb_get_device_list "" LibUSB_VERSION_1.0 )
-    check_library_exists ( "${usb_LIBRARY}" libusb_get_port_numbers "" LibUSB_VERSION_1.0.16 )
+    check_library_exists ( "${LibUSB_LIBRARIES}" usb_open "" LibUSB_FOUND )
+    check_library_exists ( "${LibUSB_LIBRARIES}" libusb_get_device_list "" LibUSB_VERSION_1.0 )
+    check_library_exists ( "${LibUSB_LIBRARIES}" libusb_get_port_numbers "" LibUSB_VERSION_1.0.16 )
 
-    if ( LibUSB_VERSION_1.0.16 )
-        try_compile(LibUSB_COMPILE_TEST
+    # Library 1.0.16+ compilation test.
+    # The check_library_exists does not work well on Apple with shared libs.
+    if (APPLE OR LibUSB_VERSION_1.0.16)
+        if (APPLE)
+            if(DEPENDS)
+                list(APPEND TEST_COMPILE_EXTRA_LIBRARIES "-framework Foundation -framework IOKit")
+            else()
+                find_library(COREFOUNDATION CoreFoundation)
+                find_library(IOKIT IOKit)
+                list(APPEND TEST_COMPILE_EXTRA_LIBRARIES ${IOKIT})
+                list(APPEND TEST_COMPILE_EXTRA_LIBRARIES ${COREFOUNDATION})
+            endif()
+        endif()
+        if (WIN32)
+            list(APPEND TEST_COMPILE_EXTRA_LIBRARIES setupapi)
+        endif()
+        list(APPEND TEST_COMPILE_EXTRA_LIBRARIES ${LibUSB_LIBRARIES})
+
+        try_compile(LibUSB_COMPILE_TEST_PASSED
                 ${CMAKE_BINARY_DIR}
                 "${CMAKE_SOURCE_DIR}/cmake/test-libusb-version.c"
                 CMAKE_FLAGS
                     "-DINCLUDE_DIRECTORIES=${LibUSB_INCLUDE_DIRS}"
                     "-DLINK_DIRECTORIES=${LibUSB_LIBRARIES}"
-                LINK_LIBRARIES ${LibUSB_LIBRARIES}
+                LINK_LIBRARIES ${TEST_COMPILE_EXTRA_LIBRARIES}
                 OUTPUT_VARIABLE OUTPUT)
-        message(STATUS "LibUSB Compilation test: ${LibUSB_COMPILE_TEST}")
+        unset(TEST_COMPILE_EXTRA_LIBRARIES)
+        message(STATUS "LibUSB Compilation test: ${LibUSB_COMPILE_TEST_PASSED}")
     endif()
-
 endif ( LibUSB_FOUND )
 
 if ( NOT LibUSB_FOUND )

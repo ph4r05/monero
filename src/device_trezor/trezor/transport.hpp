@@ -253,7 +253,7 @@ namespace trezor {
   };
 
 #ifdef WITH_DEVICE_TREZOR_WEBUSB
-#include <libusb-1.0/libusb.h>
+#include <libusb.h>
 
   class WebUsbTransport : public Transport {
   public:
