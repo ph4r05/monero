@@ -46,6 +46,7 @@ set(trezor_headers
         trezor/protocol.hpp
         trezor/transport.hpp
         device_trezor_base.hpp
+        device_trezor_lite.hpp
         device_trezor.hpp
         trezor.hpp
         ${TREZOR_PROTOB_H}
@@ -56,6 +57,7 @@ set(trezor_sources
         trezor/protocol.cpp
         trezor/transport.cpp
         device_trezor_base.cpp
+        device_trezor_lite.cpp
         device_trezor.cpp
         ${TREZOR_PROTOB_CPP}
 )
@@ -63,37 +65,24 @@ set(trezor_sources
 set(trezor_private_headers)
 
 
-include(FindProtobuf)
-find_package(Protobuf)  # REQUIRED
-
-# Test for HAVE_PROTOBUF from the parent
-if(Protobuf_FOUND AND HAVE_PROTOBUF)
-    if ("$ENV{PYTHON3}" STREQUAL "")
-        set(PYTHON3 "python3")
-    else()
-        set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
-    endif()
-
-    execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
-    if(RET)
-        message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
-                        "OUT: ${OUT}, ERR: ${ERR}."
-                        "Please read src/device_trezor/trezor/tools/README.md")
-    else()
-        message(STATUS "Trezor protobuf messages regenerated ${OUT}")
-        set(TREZOR_PROTOBUF_GENERATED 1)
-    endif()
-endif()
-
-
-if(TREZOR_PROTOBUF_GENERATED)
+# Protobuf and LibUSB processed by CheckTrezor
+if(DEVICE_TREZOR_READY)
     message(STATUS "Trezor support enabled")
 
     add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
+    set ( libdevice_trezor_hdr "" )
+    set ( libdevice_trezor_lib "" )
+
+    if(LibUSB_COMPILE_TEST)
+        list(APPEND libdevice_trezor_hdr ${LibUSB_INCLUDE_DIRS})
+        list(APPEND libdevice_trezor_lib ${LibUSB_LIBRARIES})
+        message(STATUS "Trezor compatible LibUSB found")
+    endif()
 
     monero_private_headers(device_trezor
             ${device_private_headers}
-            ${PROTOBUF_INCLUDE_DIR})
+            ${PROTOBUF_INCLUDE_DIR}
+            ${libdevice_trezor_hdr})
 
     monero_add_library(device_trezor
             ${trezor_sources}
@@ -110,6 +99,7 @@ if(TREZOR_PROTOBUF_GENERATED)
             ${SODIUM_LIBRARY}
             ${Boost_CHRONO_LIBRARY}
             ${PROTOBUF_LIBRARY}
+            ${libdevice_trezor_lib}
             PRIVATE
             ${EXTRA_LIBRARIES})
 

@@ -32,7 +32,7 @@
 namespace hw {
 namespace trezor {
 
-#if WITH_DEVICE_TREZOR
+#ifdef WITH_DEVICE_TREZOR
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "device.trezor"
@@ -41,6 +41,11 @@ namespace trezor {
 #define HW_TREZOR_NAME_LITE "TrezorLite"
 
     static device_trezor *trezor_device = nullptr;
+
+#ifdef WITH_DEVICE_TREZOR_LITE
+    static device_trezor_lite *trezor_device_lite = nullptr;
+#endif
+
     static device_trezor *ensure_trezor_device(){
       if (!trezor_device) {
         trezor_device = new device_trezor();
@@ -49,12 +54,28 @@ namespace trezor {
       return trezor_device;
     }
 
+#ifdef WITH_DEVICE_TREZOR_LITE
+    static device_trezor_lite *ensure_trezor_device_lite(){
+      if (!trezor_device_lite) {
+        trezor_device_lite = new device_trezor_lite();
+        trezor_device_lite->set_name(HW_TREZOR_NAME);
+      }
+      return trezor_device_lite;
+    }
+#endif
+
     void register_all(std::map<std::string, std::unique_ptr<device>> &registry) {
       registry.insert(std::make_pair(HW_TREZOR_NAME, std::unique_ptr<device>(ensure_trezor_device())));
+#ifdef WITH_DEVICE_TREZOR_LITE
+      registry.insert(std::make_pair(HW_TREZOR_NAME_LITE, std::unique_ptr<device>(ensure_trezor_device_lite())));
+#endif
     }
 
     void register_all() {
       hw::register_device(HW_TREZOR_NAME, ensure_trezor_device());
+#ifdef WITH_DEVICE_TREZOR_LITE
+      hw::register_device(HW_TREZOR_NAME_LITE, ensure_trezor_device_lite());
+#endif
     }
 
     device_trezor::device_trezor() {

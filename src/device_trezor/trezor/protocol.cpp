@@ -886,6 +886,204 @@ namespace tx {
 
 
 }
+
+#if defined(WITH_DEVICE_TREZOR) and defined(WITH_DEVICE_TREZOR_LITE)
+
+// Lite protocol
+namespace lite {
+
+  LiteComm::LiteComm(){
+
+  }
+
+  LiteComm::~LiteComm(){
+
+  }
+
+  uint8_t LiteComm::get_ins() const {
+    return m_ins;
+  }
+
+  LiteComm * LiteComm::set_ins(uint8_t m_ins) {
+    LiteComm::m_ins = m_ins;
+    return this;
+  }
+
+  uint8_t LiteComm::get_p1() const {
+    return m_p1;
+  }
+
+  LiteComm * LiteComm::set_p1(uint8_t m_p1) {
+    LiteComm::m_p1 = m_p1;
+    return this;
+  }
+
+  uint8_t LiteComm::get_p2() const {
+    return m_p2;
+  }
+
+  LiteComm * LiteComm::set_p2(uint8_t m_p2) {
+    LiteComm::m_p2 = m_p2;
+    return this;
+  }
+
+  LiteComm * LiteComm::set_header(uint8_t ins, uint8_t p1, uint8_t p2) {
+    set_ins(ins);
+    set_p1(p1);
+    set_p2(p2);
+    m_r_len = 0;
+    return this;
+  }
+
+  LiteComm * LiteComm::set_header_noopt(uint8_t ins, uint8_t p1, uint8_t p2){
+    set_header(ins, p1, p2);
+    insert_u8(0);  // options
+    return this;
+  }
+
+  LiteComm * LiteComm::on_msg_received(const messages::monero::MoneroLiteAck *res) {
+    m_c_sw = res->sw();
+    m_c_offset = 0;
+
+    if (!res->has_data()){
+      m_c_len = 0;
+
+    } else {
+      auto & data = res->data();
+      if (data.size() > sizeof(m_r_buff)){
+        throw exc::CommunicationException("Response too big");
+      }
+
+      m_c_len = data.size();
+      memcpy(m_c_msg, data.data(), m_c_len);
+    }
+
+    // Reset response
+    m_ins = 0;
+    m_p1 = 0;
+    m_p2 = 0;
+
+    return this;
+  }
+
+  std::shared_ptr<messages::monero::MoneroLiteRequest> LiteComm::build_request() {
+    auto res = std::make_shared<messages::monero::MoneroLiteRequest>();
+    res->set_ins(m_ins);
+    res->set_p1(m_p1);
+    res->set_p2(m_p2);
+    res->set_data(m_r_buff, m_r_len);
+
+    // Reset output buffer
+    m_r_len = 0;
+    return res;
+  }
+
+  void LiteComm::assert_enough_read_data(size_t nbytes){
+    if (m_c_offset + nbytes > m_c_len){
+      throw std::invalid_argument("Read buffer too small");
+    }
+  }
+
+  void LiteComm::assert_enough_write_buff(size_t nbytes){
+    if (m_r_len + nbytes > sizeof(m_r_buff)){
+      throw std::invalid_argument("Write buffer too small");
+    }
+  }
+
+  LiteComm * LiteComm::read_skip(size_t nbytes){
+    assert_enough_read_data(nbytes);
+    m_c_offset += nbytes;
+    return this;
+  }
+
+  LiteComm * LiteComm::fetch(void * dst, size_t nbytes){
+    assert_enough_read_data(nbytes);
+    memmove(dst, m_c_msg + m_c_offset, nbytes);
+    m_c_offset += nbytes;
+    return this;
+  }
+
+  uint8_t LiteComm::fetch_u8(uint8_t * dst){
+    uint8_t res;
+    fetch(&res, 1);
+    if (dst != nullptr){
+      *dst = res;
+    }
+    return res;
+  }
+
+  uint16_t LiteComm::fetch_u16(uint16_t * dst){
+    uint8_t l0, l1;
+    uint16_t res;
+
+    fetch(&l0, 1);
+    fetch(&l1, 1);
+
+    res = l0 << 8 | l1;
+    if (dst != nullptr){
+      *dst = res;
+    }
+    return res;
+  }
+
+  uint32_t LiteComm::fetch_u32(uint32_t * dst){
+    uint8_t l0, l1, l2, l3;
+    uint32_t res;
+
+    fetch(&l0, 1);
+    fetch(&l1, 1);
+    fetch(&l2, 1);
+    fetch(&l3, 1);
+
+    res = l0 << 24 | l1 << 16 | l2 << 8 | l3;
+    if (dst != nullptr){
+      *dst = res;
+    }
+    return res;
+  }
+
+  LiteComm * LiteComm::insert_zero(size_t nbytes){
+    assert_enough_write_buff(nbytes);
+    if (nbytes > 0) {
+      memset(m_r_buff + m_r_len, 0, nbytes);
+      m_r_len += nbytes;
+    }
+    return this;
+  }
+
+  LiteComm * LiteComm::insert(const void * src, size_t nbytes){
+    assert_enough_write_buff(nbytes);
+    if (nbytes == 0){
+      return this;
+    }
+
+    memmove(m_r_buff + m_r_len, src, nbytes);
+    m_r_len += nbytes;
+    return this;
+  }
+
+  LiteComm * LiteComm::insert_u8(uint8_t x){
+    return insert(&x, 1);
+  }
+
+  LiteComm * LiteComm::insert_u16(uint16_t x){
+    insert_u8((x >> 8) & 0xff);
+    insert_u8(x & 0xff);
+    return this;
+  }
+
+  LiteComm * LiteComm::insert_u32(uint32_t x){
+    insert_u8((x >> 24) & 0xff);
+    insert_u8((x >> 16) & 0xff);
+    insert_u8((x >> 8) & 0xff);
+    insert_u8(x & 0xff);
+    return this;
+  }
+
+}
+
+#endif
+
 }
 }
 }
