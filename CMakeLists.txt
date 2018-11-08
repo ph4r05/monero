@@ -513,22 +513,8 @@ else (HIDAPI_FOUND)
   message(STATUS "Could not find HIDAPI")
 endif()
 
-# Protobuf, optional. Required for TREZOR.
-include(FindProtobuf)
-find_package(Protobuf)
-if(Protobuf_FOUND)
-  set(HAVE_PROTOBUF 1)
-  add_definitions(-DHAVE_PROTOBUF=1)
-else(Protobuf_FOUND)
-  message(STATUS "Could not find Protobuf")
-endif()
-
-find_package(LibUSB)
-find_library(LIBUSB-1.0_LIBRARY usb-1.0)
-if(LIBUSB-1.0_LIBRARY OR LibUSB_FOUND)
-  set(HAVE_LIBUSB 1)
-  add_definitions(-DHAVE_LIBUSB=1)
-endif()
+# Trezor support check
+include(CheckTrezor)
 
 if (TREZOR_DEBUG)
   add_definitions(-DWITH_TREZOR_DEBUG=1)

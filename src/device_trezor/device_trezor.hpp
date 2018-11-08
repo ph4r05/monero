@@ -50,7 +50,7 @@ namespace trezor {
   void register_all();
   void register_all(std::map<std::string, std::unique_ptr<device>> &registry);
 
-#if WITH_DEVICE_TREZOR
+#ifdef WITH_DEVICE_TREZOR
   class device_trezor;
 
   /**

@@ -292,7 +292,7 @@ namespace tx {
 
 }
 
-#if WITH_DEVICE_TREZOR and WITH_DEVICE_TREZOR_LITE
+#if defined(WITH_DEVICE_TREZOR) and defined(WITH_DEVICE_TREZOR_LITE)
 
 // Lite/proxy protocol
 namespace lite {
