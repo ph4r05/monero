@@ -1105,19 +1105,29 @@ namespace trezor{
 
   void enumerate(t_transport_vect & res){
     BridgeTransport bt;
-    bt.enumerate(res);
+    try{
+      bt.enumerate(res);
+    } catch (const std::exception & e){
+      MERROR("BridgeTransport enumeration failed:" << e.what());
+    }
 
 #ifdef WITH_DEVICE_TREZOR_WEBUSB
     hw::trezor::WebUsbTransport btw;
     try{
       btw.enumerate(res);
     } catch (const std::exception & e){
-      MERROR("WebUSB enumeration failed:" << e.what());
+      MERROR("WebUsbTransport enumeration failed:" << e.what());
     }
 #endif
 
+#ifdef WITH_DEVICE_TREZOR_UDP
     hw::trezor::UdpTransport btu;
-    btu.enumerate(res);
+    try{
+      btu.enumerate(res);
+    } catch (const std::exception & e){
+      MERROR("UdpTransport enumeration failed:" << e.what());
+    }
+#endif
   }
 
   std::shared_ptr<Transport> transport(const std::string & path){
