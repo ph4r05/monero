@@ -82,11 +82,18 @@ namespace hw {
            return false;
     }
 
+    class device_progress {
+    public:
+      virtual double progress() const { return 0; }
+      virtual bool indeterminate() const { return false; }
+    };
+
     class i_device_callback {
     public:
-        virtual void on_button_request() {}
-        virtual void on_pin_request(epee::wipeable_string & pin) {}
-        virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) {}
+        virtual void on_button_request(uint64_t code=0) {}
+        virtual boost::optional<epee::wipeable_string> on_pin_request() { return boost::none; }
+        virtual boost::optional<epee::wipeable_string> on_passphrase_request(bool on_device) { return boost::none; }
+        virtual void on_progress(const device_progress& event) {}
         virtual ~i_device_callback() = default;
     };
 
@@ -141,6 +148,9 @@ namespace hw {
         virtual device_protocol_t device_protocol() const { return PROTOCOL_DEFAULT; };
         virtual void set_callback(i_device_callback * callback) {};
         virtual void set_derivation_path(const std::string &derivation_path) {};
+
+        virtual void set_pin(const epee::wipeable_string & pin) {}
+        virtual void set_passphrase(const epee::wipeable_string & passphrase) {}
 
         /* ======================================================================= */
         /*  LOCKER                                                                 */

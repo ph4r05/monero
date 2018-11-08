@@ -102,9 +102,10 @@ namespace tools
     virtual void on_lw_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, uint64_t amount) {}
     virtual void on_lw_money_spent(uint64_t height, const crypto::hash &txid, uint64_t amount) {}
     // Device callbacks
-    virtual void on_button_request() {}
-    virtual void on_pin_request(epee::wipeable_string & pin) {}
-    virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) {}
+    virtual void on_device_button_request(uint64_t code) {}
+    virtual boost::optional<epee::wipeable_string> on_device_pin_request() { return boost::none; }
+    virtual boost::optional<epee::wipeable_string> on_device_passphrase_request(bool on_device) { return boost::none; }
+    virtual void on_device_progress(const hw::device_progress& event) {};
     // Common callbacks
     virtual void on_pool_tx_removed(const crypto::hash &txid) {}
     virtual ~i_wallet2_callback() {}
@@ -114,9 +115,10 @@ namespace tools
   {
   public:
     wallet_device_callback(wallet2 * wallet): wallet(wallet) {};
-    void on_button_request() override;
-    void on_pin_request(epee::wipeable_string & pin) override;
-    void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) override;
+    void on_button_request(uint64_t code=0) override;
+    boost::optional<epee::wipeable_string> on_pin_request() override;
+    boost::optional<epee::wipeable_string> on_passphrase_request(bool on_device) override;
+    void on_progress(const hw::device_progress& event) override;
   private:
     wallet2 * wallet;
   };
@@ -1331,9 +1333,10 @@ namespace tools
     void create_keys_file(const std::string &wallet_, bool watch_only, const epee::wipeable_string &password, bool create_address_file);
 
     wallet_device_callback * get_device_callback();
-    void on_button_request();
-    void on_pin_request(epee::wipeable_string & pin);
-    void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase);
+    void on_device_button_request(uint64_t code);
+    boost::optional<epee::wipeable_string> on_device_pin_request();
+    boost::optional<epee::wipeable_string> on_device_passphrase_request(bool on_device);
+    void on_device_progress(const hw::device_progress& event);
 
     std::string get_rpc_status(const std::string &s) const;
     void throw_on_rpc_response_error(const boost::optional<std::string> &status, const char *method) const;

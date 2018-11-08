@@ -74,6 +74,8 @@ namespace trezor {
       std::vector<unsigned int> m_wallet_deriv_path;
       std::string m_device_state;  // returned after passphrase entry, session
       std::shared_ptr<messages::management::Features> m_features;  // features from the last device reset
+      boost::optional<epee::wipeable_string> m_pin;
+      boost::optional<epee::wipeable_string> m_passphrase;
 
       cryptonote::network_type network_type;
 
@@ -236,6 +238,13 @@ namespace trezor {
     }
 
     void set_derivation_path(const std::string &deriv_path) override;
+
+    virtual void set_pin(const epee::wipeable_string & pin) override {
+      m_pin = pin;
+    }
+    virtual void set_passphrase(const epee::wipeable_string & passphrase) override {
+      m_passphrase = passphrase;
+    }
 
     /* ======================================================================= */
     /*                              SETUP/TEARDOWN                             */

@@ -923,22 +923,30 @@ wallet_keys_unlocker::~wallet_keys_unlocker()
   }
 }
 
-void wallet_device_callback::on_button_request()
+void wallet_device_callback::on_button_request(uint64_t code)
 {
   if (wallet)
-    wallet->on_button_request();
+    wallet->on_device_button_request(code);
 }
 
-void wallet_device_callback::on_pin_request(epee::wipeable_string & pin)
+boost::optional<epee::wipeable_string> wallet_device_callback::on_pin_request()
 {
   if (wallet)
-    wallet->on_pin_request(pin);
+    return wallet->on_device_pin_request();
+  return boost::none;
 }
 
-void wallet_device_callback::on_passphrase_request(bool on_device, epee::wipeable_string & passphrase)
+boost::optional<epee::wipeable_string> wallet_device_callback::on_passphrase_request(bool on_device)
 {
   if (wallet)
-    wallet->on_passphrase_request(on_device, passphrase);
+    return wallet->on_device_passphrase_request(on_device);
+  return boost::none;
+}
+
+void wallet_device_callback::on_progress(const hw::device_progress& event)
+{
+  if (wallet)
+    wallet->on_device_progress(event);
 }
 
 wallet2::wallet2(network_type nettype, uint64_t kdf_rounds, bool unattended):
@@ -12513,22 +12521,30 @@ wallet_device_callback * wallet2::get_device_callback()
   }
   return m_device_callback.get();
 }//----------------------------------------------------------------------------------------------------
-void wallet2::on_button_request()
+void wallet2::on_device_button_request(uint64_t code)
 {
-  if (0 != m_callback)
-    m_callback->on_button_request();
+  if (nullptr != m_callback)
+    m_callback->on_device_button_request(code);
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::on_pin_request(epee::wipeable_string & pin)
+boost::optional<epee::wipeable_string> wallet2::on_device_pin_request()
 {
-  if (0 != m_callback)
-    m_callback->on_pin_request(pin);
+  if (nullptr != m_callback)
+    return m_callback->on_device_pin_request();
+  return boost::none;
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::on_passphrase_request(bool on_device, epee::wipeable_string & passphrase)
+boost::optional<epee::wipeable_string> wallet2::on_device_passphrase_request(bool on_device)
 {
-  if (0 != m_callback)
-    m_callback->on_passphrase_request(on_device, passphrase);
+  if (nullptr != m_callback)
+    return m_callback->on_device_passphrase_request(on_device);
+  return boost::none;
+}
+//----------------------------------------------------------------------------------------------------
+void wallet2::on_device_progress(const hw::device_progress& event)
+{
+  if (nullptr != m_callback)
+    m_callback->on_device_progress(event);
 }
 //----------------------------------------------------------------------------------------------------
 std::string wallet2::get_rpc_status(const std::string &s) const

@@ -365,7 +365,7 @@ namespace trezor {
       write_raw(&ack);
 
       if (m_callback){
-        m_callback->on_button_request();
+        m_callback->on_button_request(static_cast<uint64_t>(msg->code()));
       }
 
       resp = read_raw();
@@ -376,15 +376,24 @@ namespace trezor {
       MDEBUG("on_pin_request");
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
 
-      epee::wipeable_string pin;
+      boost::optional<epee::wipeable_string> pin;
 
       if (m_callback){
-        m_callback->on_pin_request(pin);
+        boost::optional<epee::wipeable_string> res = m_callback->on_pin_request();
+        if (res){
+          pin = res.get();
+        }
+      }
+
+      if (!pin && m_pin){
+        pin = m_pin;
       }
 
       // TODO: remove PIN from memory
       messages::common::PinMatrixAck m;
-      m.set_pin(pin.data(), pin.size());
+      if (pin) {
+        m.set_pin(pin.get().data(), pin.get().size());
+      }
       resp = call_raw(&m);
     }
 
@@ -392,16 +401,25 @@ namespace trezor {
     {
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
       MDEBUG("on_passhprase_request, on device: " << msg->on_device());
-      epee::wipeable_string passphrase;
+      boost::optional<epee::wipeable_string> passphrase;
 
       if (m_callback){
-        m_callback->on_passphrase_request(msg->on_device(), passphrase);
+        boost::optional<epee::wipeable_string> res = m_callback->on_passphrase_request(msg->on_device());
+        if (res){
+          passphrase = res.get();
+        }
       }
 
+      if (!passphrase && m_passphrase){
+        passphrase = m_passphrase;
+      }
+
+      m_passphrase = boost::none;
+
       messages::common::PassphraseAck m;
-      if (!msg->on_device()){
+      if (!msg->on_device() && passphrase){
         // TODO: remove passphrase from memory
-        m.set_passphrase(passphrase.data(), passphrase.size());
+        m.set_passphrase(passphrase.get().data(), passphrase.get().size());
       }
 
       if (!m_device_state.empty()){

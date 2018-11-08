@@ -63,6 +63,7 @@ namespace trezor {
       std::unique_ptr<boost::thread> m_live_refresh_thread;
       std::atomic<bool> m_live_refresh_thread_running;
       bool m_live_refresh_enabled;
+      size_t m_num_transations_to_sign;
 
       void transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data);
       void transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg);

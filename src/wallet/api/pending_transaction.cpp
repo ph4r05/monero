@@ -109,6 +109,16 @@ bool PendingTransactionImpl::commit(const std::string &filename, bool overwrite)
         }
 
         m_wallet.pauseRefresh();
+
+        const bool tx_cold_signed = m_wallet.m_wallet->get_account().get_device().has_tx_cold_sign();
+        if (tx_cold_signed){
+          m_wallet.m_wallet->cold_tx_aux_import(m_pending_tx, m_tx_device_aux);
+          bool r = m_wallet.m_wallet->import_key_images(m_key_images);
+          if (!r){
+            throw runtime_error("Cold sign transaction submit failed - key image sync fail");
+          }
+        }
+
         while (!m_pending_tx.empty()) {
             auto & ptx = m_pending_tx.back();
             m_wallet.m_wallet->commit_tx(ptx);

@@ -54,6 +54,46 @@ namespace hw {
 
     using exported_key_image = std::vector<std::pair<crypto::key_image, crypto::signature>>;
 
+    class op_progress : public hw::device_progress {
+    public:
+      op_progress():m_progress(0), m_indeterminate(false) {};
+      explicit op_progress(double progress, bool indeterminate=false): m_progress(progress), m_indeterminate(indeterminate){}
+
+      double progress() const override { return m_progress; }
+      bool indeterminate() const override { return m_indeterminate; }
+    protected:
+      double m_progress;
+      bool m_indeterminate;
+    };
+
+    class tx_progress : public op_progress {
+    public:
+      tx_progress():
+        m_cur_tx(0), m_max_tx(1),
+        m_cur_step(0), m_max_step(1),
+        m_cur_substep(0), m_max_substep(1){};
+
+      tx_progress(size_t cur_tx, size_t max_tx, size_t cur_step, size_t max_step, size_t cur_substep, size_t max_substep):
+        m_cur_tx(cur_tx), m_max_tx(max_tx),
+        m_cur_step(cur_tx), m_max_step(max_tx),
+        m_cur_substep(cur_tx), m_max_substep(max_tx){}
+
+      double progress() const override {
+        return std::max(1.0, (double)m_cur_tx / m_max_tx
+          + (double)m_cur_step / (m_max_tx * m_max_step)
+          + (double)m_cur_substep / (m_max_tx * m_max_step * m_max_substep));
+      }
+      bool indeterminate() const override { return false; }
+
+    protected:
+      size_t m_cur_tx;
+      size_t m_max_tx;
+      size_t m_cur_step;
+      size_t m_max_step;
+      size_t m_cur_substep;
+      size_t m_max_substep;
+    };
+
     typedef struct {
       std::string salt1;
       std::string salt2;
