@@ -287,7 +287,6 @@ namespace trezor {
     int get_interface();
     unsigned char get_endpoint();
 
-    bool m_debug_mode;
     unsigned m_conn_count;
     std::shared_ptr<Protocol> m_proto;
 
@@ -299,6 +298,9 @@ namespace trezor {
     int m_bus_id;
     int m_device_addr;
 
+#ifdef WITH_TREZOR_DEBUG
+    bool m_debug_mode;
+#endif
   };
 
 #endif

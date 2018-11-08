@@ -809,7 +809,7 @@ namespace trezor{
   WebUsbTransport::WebUsbTransport(
       boost::optional<libusb_device_descriptor*> descriptor,
       boost::optional<std::shared_ptr<Protocol>> proto
-  ): m_conn_count(0), m_debug_mode(false),
+  ): m_conn_count(0),
      m_usb_session(nullptr), m_usb_device(nullptr), m_usb_device_handle(nullptr),
      m_bus_id(-1), m_device_addr(-1)
   {
@@ -820,6 +820,10 @@ namespace trezor{
     }
 
     m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
+
+#ifdef WITH_TREZOR_DEBUG
+    m_debug_mode = false;
+#endif
   }
 
   WebUsbTransport::~WebUsbTransport(){
