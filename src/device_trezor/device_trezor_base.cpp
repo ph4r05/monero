@@ -213,6 +213,7 @@ namespace trezor {
 
     void device_trezor_base::write_raw(const google::protobuf::Message * msg){
       require_connected();
+      CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
       this->getTransport()->write(*msg);
     }
 
