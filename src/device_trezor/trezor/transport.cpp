@@ -777,6 +777,7 @@ namespace trezor{
 
   static uint8_t get_trezor_dev_mask(libusb_device_descriptor * info){
     uint8_t mask = 0;
+    CHECK_AND_ASSERT_THROW_MES(info, "Empty device descriptor");
     mask |= is_trezor1(info) ? 1 : 0;
     mask |= is_trezor2(info) ? 2 : 0;
     mask |= is_trezor2_bl(info) ? 4 : 0;
