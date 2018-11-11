@@ -331,10 +331,6 @@ namespace trezor {
       MDEBUG("on_passhprase_state_request");
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
 
-      if (m_callback){
-        m_callback->on_passphrase_state_request(msg->state());
-      }
-
       messages::common::PassphraseStateAck m;
       resp = call_raw(&m);
     }
