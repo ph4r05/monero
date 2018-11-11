@@ -8,7 +8,6 @@ import os
 import re
 import shutil
 import subprocess
-import sys
 import glob
 import tempfile
 import hashlib
@@ -23,6 +22,9 @@ UNDEF_STATEMENT = """
 #endif
 """
 
+PROTOC = None
+PROTOC_INCLUDE = None
+
 
 def which(pgm):
     path = os.getenv('PATH')
@@ -30,15 +32,6 @@ def which(pgm):
         p = os.path.join(p, pgm)
         if os.path.exists(p) and os.access(p, os.X_OK):
             return p
-
-
-PROTOC = which("protoc")
-if not PROTOC:
-    print("protoc command not found")
-    sys.exit(1)
-
-PROTOC_PREFIX = os.path.dirname(os.path.dirname(PROTOC))
-PROTOC_INCLUDE = os.path.join(PROTOC_PREFIX, "include")
 
 
 def namespace_file(fpath, package):
@@ -82,7 +75,8 @@ def protoc(files, out_dir, additional_includes=(), package=None, force=False):
 
     include_dirs = set()
     include_dirs.add(PROTOC_INCLUDE)
-    include_dirs.update(additional_includes)
+    if additional_includes:
+        include_dirs.update(additional_includes)
 
     with tempfile.TemporaryDirectory() as tmpdir_protob, tempfile.TemporaryDirectory() as tmpdir_out:
         include_dirs.add(tmpdir_protob)
@@ -163,7 +157,8 @@ def strip_leader(s, prefix):
         return s
 
 
-if __name__ == "__main__":
+def main():
+    global PROTOC, PROTOC_INCLUDE
     logging.basicConfig(level=logging.DEBUG)
 
     parser = argparse.ArgumentParser()
@@ -179,8 +174,28 @@ if __name__ == "__main__":
 
     protoc_includes = args.protoc_include or (os.environ.get("PROTOC_INCLUDE"),)
 
+    PROTOBUF_INCLUDE_DIRS = os.getenv("PROTOBUF_INCLUDE_DIRS", None)
+    PROTOBUF_PROTOC_EXECUTABLE = os.getenv("PROTOBUF_PROTOC_EXECUTABLE", None)
+
+    if PROTOBUF_PROTOC_EXECUTABLE and not os.path.exists(PROTOBUF_PROTOC_EXECUTABLE):
+        raise ValueError('PROTOBUF_PROTOC_EXECUTABLE set but not found: %s' % PROTOBUF_PROTOC_EXECUTABLE)
+
+    elif PROTOBUF_PROTOC_EXECUTABLE:
+        PROTOC = PROTOBUF_PROTOC_EXECUTABLE
+
+    else:
+        PROTOC = which("protoc")
+
+    if not PROTOC:
+        raise ValueError("protoc command not found. Set PROTOBUF_PROTOC_EXECUTABLE env var to the protoc binary and optionally PROTOBUF_INCLUDE_DIRS")
+
+    PROTOC_PREFIX = os.path.dirname(os.path.dirname(PROTOC))
+    PROTOC_INCLUDE = PROTOBUF_INCLUDE_DIRS if PROTOBUF_INCLUDE_DIRS else os.path.join(PROTOC_PREFIX, "include")
+
     protoc(
         args.proto, args.out_dir, protoc_includes, package=args.namespace, force=args.force
     )
 
 
+if __name__ == "__main__":
+    main()

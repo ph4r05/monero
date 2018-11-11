@@ -22,6 +22,8 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR)
         set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
     endif()
 
+    set(ENV{PROTOBUF_INCLUDE_DIRS} "${PROTOBUF_INCLUDE_DIRS}")
+    set(ENV{PROTOBUF_PROTOC_EXECUTABLE} "${PROTOBUF_PROTOC_EXECUTABLE}")
     execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../src/device_trezor/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
     if(RET)
         message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
