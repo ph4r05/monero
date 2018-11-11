@@ -29,6 +29,9 @@
 
 #include "device_trezor_lite.hpp"
 #include "device_trezor_base.hpp"
+#include <boost/algorithm/string/classification.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/regex.hpp>
 
 namespace hw {
 namespace trezor {
@@ -253,6 +256,31 @@ namespace trezor {
       }
     }
 
+    void device_trezor_base::set_wallet_code(const std::string & wallet_code){
+      this->wallet_code.clear();
+
+      if (wallet_code.empty() || wallet_code == "-"){
+        return;
+      }
+
+      std::vector<std::string> fields;
+      boost::split(fields, wallet_code, boost::is_any_of("/"));
+
+      boost::regex rgx("^([0-9]+)'?$");
+      boost::cmatch match;
+
+      this->wallet_code.reserve(fields.size());
+      for(const std::string & cur : fields){
+        bool ok = boost::regex_match(cur.c_str(), match, rgx);
+        CHECK_AND_ASSERT_THROW_MES(ok, std::string("Invalid wallet code: ") + wallet_code + ". Invalid path element: " + cur);
+        CHECK_AND_ASSERT_THROW_MES(match[0].length() > 0, std::string("Invalid wallet code: ") + wallet_code + ". Invalid path element: " + cur);
+
+        auto cidx = std::stoul(match[0].str()) | 0x80000000;
+        CHECK_AND_ASSERT_THROW_MES(cidx < 0x100000000UL, std::string("Invalid wallet code: ") + wallet_code + ". Path element out of range: " + cur);
+
+        this->wallet_code.push_back(cidx);
+      }
+    }
 
     /* ======================================================================= */
     /*                              TREZOR PROTOCOL                            */

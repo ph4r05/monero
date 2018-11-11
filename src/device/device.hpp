@@ -138,6 +138,7 @@ namespace hw {
 
         virtual device_protocol_t device_protocol() const { return PROTOCOL_DEFAULT; };
         virtual void set_callback(i_device_callback * callback) {};
+        virtual void set_wallet_code(const std::string & wallet_code) {};
 
         /* ======================================================================= */
         /*  LOCKER                                                                 */
