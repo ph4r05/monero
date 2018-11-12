@@ -5146,8 +5146,9 @@ void wallet2::rescan_spent()
   }
 }
 //----------------------------------------------------------------------------------------------------
-void wallet2::rescan_blockchain(bool hard, bool refresh)
+void wallet2::rescan_blockchain(bool hard, bool refresh, bool keep_key_images)
 {
+  CHECK_AND_ASSERT_THROW_MES(!hard || !keep_key_images, "Cannot preserve key images on hard rescan");
   if(hard)
   {
     clear();
@@ -5157,7 +5158,8 @@ void wallet2::rescan_blockchain(bool hard, bool refresh)
   {
     m_blockchain.clear();
     m_transfers.clear();
-    m_key_images.clear();
+    if (!keep_key_images)
+      m_key_images.clear();
     m_pub_keys.clear();
     m_scanned_pool_txs[0].clear();
     m_scanned_pool_txs[1].clear();

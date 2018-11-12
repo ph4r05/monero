@@ -4365,7 +4365,7 @@ bool simple_wallet::refresh_main(uint64_t start_height, enum ResetType reset, bo
   LOCK_IDLE_SCOPE();
 
   if (reset != ResetNone)
-    m_wallet->rescan_blockchain(reset == ResetHard, false);
+    m_wallet->rescan_blockchain(reset == ResetHard, false, reset == ResetKeepKI);
 
 #ifdef HAVE_READLINE
   rdln::suspend_readline pause_readline;
@@ -4436,6 +4436,7 @@ bool simple_wallet::refresh_main(uint64_t start_height, enum ResetType reset, bo
 bool simple_wallet::refresh(const std::vector<std::string>& args)
 {
   uint64_t start_height = 0;
+  enum ResetType reset = ResetNone;
   if(!args.empty()){
     try
     {
@@ -4445,8 +4446,11 @@ bool simple_wallet::refresh(const std::vector<std::string>& args)
     {
         start_height = 0;
     }
+    if (args.size() > 1 && args[1] == "ki"){
+      reset = ResetKeepKI;
+    }
   }
-  return refresh_main(start_height, ResetNone);
+  return refresh_main(start_height, reset);
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::show_balance_unlocked(bool detailed)
