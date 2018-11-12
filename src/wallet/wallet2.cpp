@@ -892,7 +892,8 @@ wallet2::wallet2(network_type nettype, uint64_t kdf_rounds, bool unattended):
   m_ringdb(),
   m_last_block_reward(0),
   m_encrypt_keys_after_refresh(boost::none),
-  m_unattended(unattended)
+  m_unattended(unattended),
+  m_device_last_key_image_sync(0)
 {
 }
 
@@ -7061,7 +7062,8 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
             }
           }
           THROW_WALLET_EXCEPTION_IF(!own_found, error::wallet_internal_error,
-              "Known ring does not include the spent output: " + std::to_string(td.m_global_output_index));
+              "Known ring does not include the spent output: " + std::to_string(td.m_global_output_index) +
+              (m_account.get_device().has_tx_cold_sign() ? "Maybe try hw_key_images_sync and try again." : ""));
         }
       }
 
@@ -9227,9 +9229,7 @@ void wallet2::cold_sign_tx(const std::vector<pending_tx>& ptx_vector, signed_tx_
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
   auto & hwdev = get_account().get_device();
-  if (!hwdev.has_ki_cold_sync()){
-    throw std::invalid_argument("Device does not support cold ki sync protocol");
-  }
+  CHECK_AND_ASSERT_THROW_MES(hwdev.has_ki_cold_sync(), "Device does not support cold ki sync protocol");
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(&hwdev);
   CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
@@ -9240,7 +9240,11 @@ uint64_t wallet2::cold_key_image_sync(uint64_t &spent, uint64_t &unspent) {
 
   dev_cold->ki_sync(&wallet_shim, m_transfers, ski);
 
-  return import_key_images(ski, 0, spent, unspent);
+  // Call COMMAND_RPC_IS_KEY_IMAGE_SPENT only if daemon is trusted.
+  uint64_t import_res = import_key_images(ski, 0, spent, unspent, is_trusted_daemon());
+  m_device_last_key_image_sync = time(NULL);
+
+  return import_res;
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::get_hard_fork_info(uint8_t version, uint64_t &earliest_height) const
