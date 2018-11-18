@@ -1959,6 +1959,7 @@ void wallet2::process_outgoing(const crypto::hash &txid, const cryptonote::trans
     entry.first->second.m_subaddr_indices = subaddr_indices;
   }
 
+  entry.first->second.m_rings.clear();
   for (const auto &in: tx.vin)
   {
     if (in.type() != typeid(cryptonote::txin_to_key))
@@ -2330,7 +2331,7 @@ void wallet2::remove_obsolete_pool_txs(const std::vector<crypto::hash> &tx_hashe
 //----------------------------------------------------------------------------------------------------
 void wallet2::update_pool_state(bool refreshed)
 {
-  MDEBUG("update_pool_state start");
+  MTRACE("update_pool_state start");
 
   auto keys_reencryptor = epee::misc_utils::create_scope_leave_handler([&, this]() {
     if (m_encrypt_keys_after_refresh)
@@ -2349,7 +2350,7 @@ void wallet2::update_pool_state(bool refreshed)
   THROW_WALLET_EXCEPTION_IF(!r, error::no_connection_to_daemon, "get_transaction_pool_hashes.bin");
   THROW_WALLET_EXCEPTION_IF(res.status == CORE_RPC_STATUS_BUSY, error::daemon_busy, "get_transaction_pool_hashes.bin");
   THROW_WALLET_EXCEPTION_IF(res.status != CORE_RPC_STATUS_OK, error::get_tx_pool_error);
-  MDEBUG("update_pool_state got pool");
+  MTRACE("update_pool_state got pool");
 
   // remove any pending tx that's not in the pool
   std::unordered_map<crypto::hash, wallet2::unconfirmed_transfer_details>::iterator it = m_unconfirmed_txs.begin();
@@ -2406,7 +2407,7 @@ void wallet2::update_pool_state(bool refreshed)
       }
     }
   }
-  MDEBUG("update_pool_state done first loop");
+  MTRACE("update_pool_state done first loop");
 
   // remove pool txes to us that aren't in the pool anymore
   // but only if we just refreshed, so that the tx can go in
@@ -2415,7 +2416,7 @@ void wallet2::update_pool_state(bool refreshed)
   if (refreshed)
     remove_obsolete_pool_txs(res.tx_hashes);
 
-  MDEBUG("update_pool_state done second loop");
+  MTRACE("update_pool_state done second loop");
 
   // gather txids of new pool txes to us
   std::vector<std::pair<crypto::hash, bool>> txids;
@@ -2552,7 +2553,7 @@ void wallet2::update_pool_state(bool refreshed)
       LOG_PRINT_L0("Error calling gettransactions daemon RPC: r " << r << ", status " << res.status);
     }
   }
-  MDEBUG("update_pool_state end");
+  MTRACE("update_pool_state end");
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::fast_refresh(uint64_t stop_height, uint64_t &blocks_start_height, std::list<crypto::hash> &short_chain_history, bool force)
@@ -2760,7 +2761,7 @@ void wallet2::refresh(bool trusted_daemon, uint64_t start_height, uint64_t & blo
           short_chain_history.clear();
           get_short_chain_history(short_chain_history);
           fast_refresh(stop_height, blocks_start_height, short_chain_history, true);
-          THROW_WALLET_EXCEPTION_IF(m_blockchain.size() != stop_height, error::wallet_internal_error, "Unexpected hashchain size");
+          THROW_WALLET_EXCEPTION_IF((m_blockchain.size() == stop_height || (m_blockchain.size() == 1 && stop_height == 0) ? false : true), error::wallet_internal_error, "Unexpected hashchain size");
           THROW_WALLET_EXCEPTION_IF(m_blockchain.offset() != 0, error::wallet_internal_error, "Unexpected hashchain offset");
           for (const auto &h: tip)
             m_blockchain.push_back(h);
@@ -6070,10 +6071,7 @@ bool wallet2::sign_multisig_tx(multisig_tx_set &exported_txs, std::vector<crypto
     rct::RangeProofType range_proof_type = rct::RangeProofBorromean;
     if (sd.use_bulletproofs)
     {
-      range_proof_type = rct::RangeProofBulletproof;
-      for (const rct::Bulletproof &proof: ptx.tx.rct_signatures.p.bulletproofs)
-        if (proof.V.size() > 1)
-          range_proof_type = rct::RangeProofPaddedBulletproof;
+      range_proof_type = rct::RangeProofPaddedBulletproof;
     }
     bool r = cryptonote::construct_tx_with_tx_key(m_account.get_keys(), m_subaddresses, sources, sd.splitted_dsts, ptx.change_dts.addr, sd.extra, tx, sd.unlock_time, ptx.tx_key, ptx.additional_tx_keys, sd.use_rct, range_proof_type, &msout, false);
     THROW_WALLET_EXCEPTION_IF(!r, error::tx_not_constructed, sd.sources, sd.splitted_dsts, sd.unlock_time, m_nettype);
@@ -6884,21 +6882,23 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
     //static const double shape = m_testnet ? 17.02 : 17.28;
     static const double scale = 1/1.61;
     std::gamma_distribution<double> gamma(shape, scale);
+    THROW_WALLET_EXCEPTION_IF(rct_offsets.size() <= CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE, error::wallet_internal_error, "Bad offset calculation");
+    uint64_t last_usable_block = rct_offsets.size() - 1;
     auto pick_gamma = [&]()
     {
       double x = gamma(engine);
       x = exp(x);
       uint64_t block_offset = x / DIFFICULTY_TARGET_V2; // this assumes constant target over the whole rct range
-      if (block_offset >= rct_offsets.size() - 1)
+      if (block_offset > last_usable_block - CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE)
         return std::numeric_limits<uint64_t>::max(); // bad pick
-      block_offset = rct_offsets.size() - 2 - block_offset;
-      THROW_WALLET_EXCEPTION_IF(block_offset >= rct_offsets.size() - 1, error::wallet_internal_error, "Bad offset calculation");
-      THROW_WALLET_EXCEPTION_IF(rct_offsets[block_offset + 1] < rct_offsets[block_offset],
+      block_offset = last_usable_block - block_offset;
+      THROW_WALLET_EXCEPTION_IF(block_offset > last_usable_block, error::wallet_internal_error, "Bad offset calculation");
+      THROW_WALLET_EXCEPTION_IF(block_offset > 0 && rct_offsets[block_offset] < rct_offsets[block_offset - 1],
           error::get_output_distribution, "Decreasing offsets in rct distribution: " +
-          std::to_string(block_offset) + ": " + std::to_string(rct_offsets[block_offset]) + ", " +
-          std::to_string(block_offset + 1) + ": " + std::to_string(rct_offsets[block_offset + 1]));
+          std::to_string(block_offset - 1) + ": " + std::to_string(rct_offsets[block_offset - 1]) + ", " +
+          std::to_string(block_offset) + ": " + std::to_string(rct_offsets[block_offset]));
       uint64_t first_block_offset = block_offset, last_block_offset = block_offset;
-      for (size_t half_window = 0; half_window < GAMMA_PICK_HALF_WINDOW; ++half_window)
+      for (size_t half_window = 0; half_window <= GAMMA_PICK_HALF_WINDOW; ++half_window)
       {
         // end when we have a non empty block
         uint64_t cum0 = first_block_offset > 0 ? rct_offsets[first_block_offset] - rct_offsets[first_block_offset - 1] : rct_offsets[0];
@@ -6907,19 +6907,24 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
         uint64_t cum1 = last_block_offset > 0 ? rct_offsets[last_block_offset] - rct_offsets[last_block_offset - 1] : rct_offsets[0];
         if (cum1 > 1)
           break;
-        if (first_block_offset == 0 && last_block_offset >= rct_offsets.size() - 2)
+        if (first_block_offset == 0 && last_block_offset >= last_usable_block)
           break;
         // expand up to bounds
         if (first_block_offset > 0)
           --first_block_offset;
-        if (last_block_offset < rct_offsets.size() - 1)
+        else
+          return std::numeric_limits<uint64_t>::max(); // bad pick
+        if (last_block_offset < last_usable_block - CRYPTONOTE_DEFAULT_TX_SPENDABLE_AGE)
           ++last_block_offset;
+        else
+          return std::numeric_limits<uint64_t>::max(); // bad pick
       }
-      const uint64_t n_rct = rct_offsets[last_block_offset] - (first_block_offset == 0 ? 0 : rct_offsets[first_block_offset - 1]);
+      const uint64_t first_rct = first_block_offset == 0 ? 0 : rct_offsets[first_block_offset - 1];
+      const uint64_t n_rct = rct_offsets[last_block_offset] - first_rct;
       if (n_rct == 0)
         return rct_offsets[block_offset] ? rct_offsets[block_offset] - 1 : 0;
-      MDEBUG("Picking 1/" << n_rct << " in " << (last_block_offset - first_block_offset + 1) << " blocks centered around " << block_offset);
-      return rct_offsets[first_block_offset] + crypto::rand<uint64_t>() % n_rct;
+      MDEBUG("Picking 1/" << n_rct << " in " << (last_block_offset - first_block_offset + 1) << " blocks centered around " << block_offset + rct_start_height);
+      return first_rct + crypto::rand<uint64_t>() % n_rct;
     };
 
     size_t num_selected_transfers = 0;
