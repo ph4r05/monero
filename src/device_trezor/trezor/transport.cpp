@@ -923,7 +923,8 @@ namespace trezor{
   void WebUsbTransport::open() {
     const int interface = get_interface();
     if (m_conn_count > 0){
-      MTRACE("Already opened");
+      MTRACE("Already opened, count: " << m_conn_count);
+      m_conn_count += 1;
       return;
     }
 
