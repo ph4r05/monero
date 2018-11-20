@@ -40,7 +40,7 @@
 #include "messages/messages-common.pb.h"
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
-#define MONERO_DEFAULT_LOG_CATEGORY "device.trezor,transport"
+#define MONERO_DEFAULT_LOG_CATEGORY "device.trezor.transport"
 
 using namespace std;
 using json = rapidjson::Document;
@@ -903,6 +903,8 @@ namespace trezor{
       auto t = std::make_shared<WebUsbTransport>(boost::make_optional(&desc));
       t->m_bus_id = libusb_get_bus_number(devs[i]);
       t->m_device_addr = libusb_get_device_address(devs[i]);
+
+      // Port resolution may fail. Non-critical error, just addressing precision is decreased.
       get_libusb_ports(devs[i], t->m_port_numbers);
 
       res.push_back(t);
@@ -965,6 +967,8 @@ namespace trezor{
 
       auto bus_id = libusb_get_bus_number(devs[i]);
       std::vector<uint8_t> path;
+
+      // Port resolution may fail. Non-critical error, just addressing precision is decreased.
       get_libusb_ports(devs[i], path);
 
       MTRACE("Found Trezor device: " << desc.idVendor << ":" << desc.idProduct
@@ -1013,12 +1017,11 @@ namespace trezor{
       m_conn_count -= 1;
     }
 
-    if (m_conn_count <= 0){
-      MTRACE("Closing webusb device");
+    if (m_conn_count < 0){
+      MERROR("Close counter is negative: " << m_conn_count);
 
-      if (m_conn_count < 0){
-        MERROR("Close counter is negative: " << m_conn_count);
-      }
+    } else if (m_conn_count == 0){
+      MTRACE("Closing webusb device");
 
       m_proto->session_end(*this);
 
@@ -1037,8 +1040,6 @@ namespace trezor{
         libusb_exit(m_usb_session);
         m_usb_session = nullptr;
       }
-
-      m_conn_count = 0;
     }
   };
 
