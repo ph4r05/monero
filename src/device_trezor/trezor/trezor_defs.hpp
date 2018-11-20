@@ -50,6 +50,20 @@
 #define WITH_DEVICE_TREZOR_WEBUSB 1
 #endif
 
+// Enable / disable UDP in the enumeration
+#ifndef USE_DEVICE_TREZOR_UDP
+#define USE_DEVICE_TREZOR_UDP 1
+#endif
+
+// Enable / disable UDP in the enumeration for release
+#ifndef USE_DEVICE_TREZOR_UDP_RELEASE
+#define USE_DEVICE_TREZOR_UDP_RELEASE 0
+#endif
+
+#if USE_DEVICE_TREZOR_UDP && (USE_DEVICE_TREZOR_UDP_RELEASE || defined(TREZOR_DEBUG))
+#define WITH_DEVICE_TREZOR_WEBUSB 1
+#endif
+
 // Avoids protobuf undefined macro warning
 #ifndef PROTOBUF_INLINE_NOT_IN_HEADERS
 #define PROTOBUF_INLINE_NOT_IN_HEADERS 0

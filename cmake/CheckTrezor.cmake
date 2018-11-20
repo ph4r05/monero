@@ -1,5 +1,6 @@
 OPTION(USE_DEVICE_TREZOR "Trezor support compilation" ON)
 OPTION(USE_DEVICE_TREZOR_LIBUSB "Trezor LibUSB compilation" ON)
+OPTION(USE_DEVICE_TREZOR_UDP_RELEASE "Trezor UdpTransport in release mode" OFF)
 
 # Use Trezor master switch
 if (USE_DEVICE_TREZOR)
@@ -33,6 +34,14 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR)
         message(STATUS "Trezor protobuf messages regenerated ${OUT}")
         set(DEVICE_TREZOR_READY 1)
         add_definitions(-DDEVICE_TREZOR_READY=1)
+
+        if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+            add_definitions(-DTREZOR_DEBUG=1)
+        endif()
+
+        if(USE_DEVICE_TREZOR_UDP_RELEASE)
+            add_definitions(-DWITH_DEVICE_TREZOR_UDP_RELEASE=1)
+        endif()
 
         if (PROTOBUF_INCLUDE_DIR)
             include_directories(${PROTOBUF_INCLUDE_DIR})
