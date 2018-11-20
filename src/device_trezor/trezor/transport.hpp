@@ -287,7 +287,7 @@ namespace trezor {
     int get_interface() const;
     unsigned char get_endpoint() const;
 
-    unsigned m_conn_count;
+    int m_conn_count;
     std::shared_ptr<Protocol> m_proto;
 
     libusb_context        *m_usb_session;

@@ -790,12 +790,21 @@ namespace trezor{
   static void set_libusb_log(libusb_context *ctx){
     CHECK_AND_ASSERT_THROW_MES(ctx, "Null libusb context");
 
+    // http://libusb.sourceforge.net/api-1.0/group__libusb__lib.html
+#if defined(LIBUSB_API_VERSION) && (LIBUSB_API_VERSION >= 0x01000106)
+#  define TREZOR_LIBUSB_SET_DEBUG(ctx, level) libusb_set_option(ctx,  LIBUSB_OPTION_LOG_LEVEL, level)
+#else
+#  define TREZOR_LIBUSB_SET_DEBUG(ctx, level) libusb_set_debug(ctx, level)
+#endif
+
     if (ELPP->vRegistry()->allowed(el::Level::Debug, MONERO_DEFAULT_LOG_CATEGORY))
-      libusb_set_debug(ctx, 3);
+      TREZOR_LIBUSB_SET_DEBUG(ctx, 3);
     else if (ELPP->vRegistry()->allowed(el::Level::Warning, MONERO_DEFAULT_LOG_CATEGORY))
-      libusb_set_debug(ctx, 2);
+      TREZOR_LIBUSB_SET_DEBUG(ctx, 2);
     else if (ELPP->vRegistry()->allowed(el::Level::Error, MONERO_DEFAULT_LOG_CATEGORY))
-      libusb_set_debug(ctx, 1);
+      TREZOR_LIBUSB_SET_DEBUG(ctx, 1);
+
+#undef TREZOR_LIBUSB_SET_DEBUG
   }
 
   static int get_libusb_ports(libusb_device *dev, std::vector<uint8_t> &path){
