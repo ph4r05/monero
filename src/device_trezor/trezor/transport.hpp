@@ -159,12 +159,16 @@ namespace trezor {
     virtual void close(){};
     virtual void write(const google::protobuf::Message & req) =0;
     virtual void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
+    virtual std::shared_ptr<Transport> find_debug() { return nullptr; };
+    void session_begin();
+    void session_end();
 
     virtual void write_chunk(const void * buff, size_t size) { };
     virtual size_t read_chunk(void * buff, size_t size) { return 0; };
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
   protected:
     long m_open_counter;
+    long m_session_counter;
   };
 
   // Bridge transport
@@ -229,6 +233,7 @@ namespace trezor {
 
     void open() override;
     void close() override;
+    std::shared_ptr<Transport> find_debug() override;
 
     void write(const google::protobuf::Message &req) override;
     void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
@@ -276,6 +281,7 @@ namespace trezor {
 
     void open() override;
     void close() override;
+    std::shared_ptr<Transport> find_debug() override;
 
     void write(const google::protobuf::Message &req) override;
     void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) override;
@@ -301,7 +307,7 @@ namespace trezor {
     int m_bus_id;
     int m_device_addr;
 
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     bool m_debug_mode;
 #endif
   };
@@ -325,7 +331,7 @@ namespace trezor {
   /**
    * Transforms path to the particular transport
    */
-  template<class t_transport>
+  template<class t_transport=Transport>
   std::shared_ptr<t_transport> transport_typed(const std::string & path){
     auto t = transport(path);
     if (!t){
@@ -378,7 +384,7 @@ namespace trezor {
    * @throws UnexpectedMessageException if the response message type is different than expected.
    * Exception contains message type and the message itself.
    */
-  template<class t_message>
+  template<class t_message=google::protobuf::Message>
   std::shared_ptr<t_message>
       exchange_message(Transport & transport, const google::protobuf::Message & req,
                        boost::optional<messages::MessageType> resp_type = boost::none)

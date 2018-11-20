@@ -119,7 +119,7 @@ namespace trezor {
         auto res = get_view_key();
         CHECK_AND_ASSERT_MES(res->watch_key().size() == 32, false, "Trezor returned invalid view key");
 
-        spendkey = crypto::null_skey; // not given
+        //spendkey = crypto::null_skey; // not given
         memcpy(viewkey.data, res->watch_key().data(), 32);
 
         return true;
