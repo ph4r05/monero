@@ -282,10 +282,10 @@ namespace trezor {
     std::ostream& dump(std::ostream& o) const override;
 
   private:
-    void require_device();
-    void require_connected();
-    int get_interface();
-    unsigned char get_endpoint();
+    void require_device() const;
+    void require_connected() const;
+    int get_interface() const;
+    unsigned char get_endpoint() const;
 
     unsigned m_conn_count;
     std::shared_ptr<Protocol> m_proto;
@@ -362,7 +362,7 @@ namespace trezor {
   public:
     GenericMessage(): m_empty(true) {}
     GenericMessage(messages::MessageType m_type, const std::shared_ptr<google::protobuf::Message> &m_msg);
-    bool empty() { return m_empty; }
+    bool empty() const { return m_empty; }
 
     hw::trezor::messages::MessageType m_type;
     std::shared_ptr<google::protobuf::Message> m_msg;

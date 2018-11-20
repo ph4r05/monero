@@ -332,6 +332,7 @@ namespace trezor {
         m_callback->on_pin_request(pin);
       }
 
+      // TODO: remove PIN from memory
       messages::common::PinMatrixAck m;
       m.set_pin(pin.data(), pin.size());
       resp = call_raw(&m);
@@ -349,6 +350,7 @@ namespace trezor {
 
       messages::common::PassphraseAck m;
       if (!msg->on_device()){
+        // TODO: remove passphrase from memory
         m.set_passphrase(passphrase.data(), passphrase.size());
       }
       resp = call_raw(&m);

@@ -784,16 +784,30 @@ namespace trezor{
     return mask;
   }
 
-  static void get_libusb_ports(libusb_device *dev, std::vector<uint8_t> &path){
+  static void set_libusb_log(libusb_context *ctx){
+    CHECK_AND_ASSERT_THROW_MES(ctx, "Null libusb context");
+
+#if ELPP_TRACE_LOG || ELPP_DEBUG_LOG || ELPP_INFO_LOG
+    libusb_set_debug(ctx, 3);
+#elif ELPP_WARNING_LOG
+    libusb_set_debug(ctx, 2);
+#elif ELPP_ERROR_LOG
+    libusb_set_debug(ctx, 1);
+#endif
+  }
+
+  static int get_libusb_ports(libusb_device *dev, std::vector<uint8_t> &path){
     uint8_t tmp_path[16];
     int r = libusb_get_port_numbers(dev, tmp_path, sizeof(tmp_path));
-    CHECK_AND_ASSERT_THROW_MES(r != LIBUSB_ERROR_OVERFLOW, "Libusb path array too small");
-    CHECK_AND_ASSERT_THROW_MES(r >= 0, "Libusb path array error");
+    CHECK_AND_ASSERT_MES(r != LIBUSB_ERROR_OVERFLOW, -1, "Libusb path array too small");
+    CHECK_AND_ASSERT_MES(r >= 0, -1, "Libusb path array error");
 
-    path.resize(static_cast<unsigned long>(r));
+    path.resize(r);
     for (int i = 0; i < r; i++){
       path[i] = tmp_path[i];
     }
+
+    return 0;
   }
 
   static std::string get_usb_path(uint8_t bus_id, const std::vector<uint8_t> &path){
@@ -838,13 +852,13 @@ namespace trezor{
     }
   }
 
-  void WebUsbTransport::require_device(){
+  void WebUsbTransport::require_device() const{
     if (!m_usb_device_desc){
       throw std::runtime_error("No USB device specified");
     }
   }
 
-  void WebUsbTransport::require_connected(){
+  void WebUsbTransport::require_connected() const{
     require_device();
     if (!m_usb_device_handle){
       throw std::runtime_error("USB Device not opened");
@@ -859,8 +873,7 @@ namespace trezor{
     r = libusb_init(&ctx);
     CHECK_AND_ASSERT_THROW_MES(r >= 0, "Unable to init libusb");
 
-    // set verbosity level to 3, as suggested in the documentation
-    libusb_set_debug(ctx, 3);
+    set_libusb_log(ctx);
 
     ssize_t cnt = libusb_get_device_list(ctx, &devs);
     if (cnt < 0){
@@ -923,7 +936,7 @@ namespace trezor{
 
     r = libusb_init(&m_usb_session);
     CHECK_AND_ASSERT_THROW_MES(r >= 0, "Unable to init libusb");
-    libusb_set_debug(m_usb_session, 3);
+    set_libusb_log(m_usb_session);
 
     bool found = false;
     int open_res = 0;
@@ -998,9 +1011,14 @@ namespace trezor{
     }
 
     if (m_conn_count <= 0){
+      MTRACE("Closing webusb device");
+
+      if (m_conn_count < 0){
+        MERROR("Close counter is negative: " << m_conn_count);
+      }
+
       m_proto->session_end(*this);
 
-      MTRACE("Closing webusb device");
       int r = libusb_release_interface(m_usb_device_handle, get_interface());
       if (r != 0){
         MERROR("Could not release libusb interface: " << r);
@@ -1022,7 +1040,7 @@ namespace trezor{
   };
 
 
-  int WebUsbTransport::get_interface(){
+  int WebUsbTransport::get_interface() const{
     const int INTERFACE_NORMAL = 0;
 #ifdef WITH_TREZOR_DEBUG
     const int INTERFACE_DEBUG = 1;
@@ -1032,7 +1050,7 @@ namespace trezor{
 #endif
   }
 
-  unsigned char WebUsbTransport::get_endpoint(){
+  unsigned char WebUsbTransport::get_endpoint() const{
     const unsigned char ENDPOINT_NORMAL = 1;
 #ifdef WITH_TREZOR_DEBUG
     const unsigned char ENDPOINT_DEBUG = 2;
