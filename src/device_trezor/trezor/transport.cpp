@@ -398,8 +398,28 @@ namespace trezor{
     msg = msg_wrap;
   }
 
-  Transport::Transport(): m_open_counter(0) {
+  Transport::Transport(): m_open_counter(0), m_session_counter(0) {
 
+  }
+
+  void Transport::session_begin(){
+    if (m_session_counter <= 0){
+      open();
+      m_session_counter = 1;
+    } else {
+      m_session_counter += 1;
+    }
+  }
+
+  void Transport::session_end(){
+    m_session_counter -= 1;
+
+    if (m_session_counter < 0){
+      MDEBUG("Session already closed. ctr: " << m_session_counter);
+
+    } else if (m_session_counter == 0) {
+      close();
+    }
   }
 
   //
@@ -650,6 +670,19 @@ namespace trezor{
     m_socket = nullptr;
   }
 
+  std::shared_ptr<Transport> UdpTransport::find_debug() {
+#ifdef WITH_TREZOR_DEBUGGING
+    std::shared_ptr<UdpTransport> t = std::make_shared<UdpTransport>();
+    t->m_proto = std::make_shared<ProtocolV1>();
+    t->m_device_host = m_device_host;
+    t->m_device_port = m_device_port + 1;
+    return t;
+#else
+    MINFO("Debug link is disabled in production");
+    return nullptr;
+#endif
+  }
+
   void UdpTransport::write_chunk(const void * buff, size_t size){
     require_socket();
 
@@ -875,7 +908,7 @@ namespace trezor{
 
     m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
 
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     m_debug_mode = false;
 #endif
   }
@@ -1078,10 +1111,24 @@ namespace trezor{
     }
   };
 
+  std::shared_ptr<Transport> WebUsbTransport::find_debug() {
+#ifdef WITH_TREZOR_DEBUGGING
+    require_device();
+    auto t = std::make_shared<WebUsbTransport>(boost::make_optional(m_usb_device_desc.get()));
+    t->m_bus_id = m_bus_id;
+    t->m_device_addr = m_device_addr;
+    t->m_port_numbers = m_port_numbers;
+    t->m_debug_mode = true;
+    return t;
+#else
+      MINFO("Debug link is disabled in production");
+      return nullptr;
+#endif
+    }
 
   int WebUsbTransport::get_interface() const{
     const int INTERFACE_NORMAL = 0;
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     const int INTERFACE_DEBUG = 1;
     return m_debug_mode ? INTERFACE_DEBUG : INTERFACE_NORMAL;
 #else
@@ -1091,7 +1138,7 @@ namespace trezor{
 
   unsigned char WebUsbTransport::get_endpoint() const{
     const unsigned char ENDPOINT_NORMAL = 1;
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     const unsigned char ENDPOINT_DEBUG = 2;
     return m_debug_mode ? ENDPOINT_DEBUG : ENDPOINT_NORMAL;
 #else
