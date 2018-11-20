@@ -70,12 +70,10 @@ if(DEVICE_TREZOR_READY)
     message(STATUS "Trezor support enabled")
 
     add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
-    set ( libdevice_trezor_hdr "" )
-    set ( libdevice_trezor_lib "" )
 
+    set(TREZOR_LIBUSB_LIBRARIES "")
     if(LibUSB_COMPILE_TEST_PASSED)
-        list(APPEND libdevice_trezor_hdr ${LibUSB_INCLUDE_DIRS})
-        list(APPEND libdevice_trezor_lib ${LibUSB_LIBRARIES})
+        list(APPEND TREZOR_LIBUSB_LIBRARIES ${LibUSB_LIBRARIES})
         message(STATUS "Trezor compatible LibUSB found at: ${LibUSB_INCLUDE_DIRS}")
     endif()
 
@@ -97,12 +95,9 @@ if(DEVICE_TREZOR_READY)
             ${SODIUM_LIBRARY}
             ${Boost_CHRONO_LIBRARY}
             ${PROTOBUF_LIBRARY}
-            ${libdevice_trezor_lib}
+            ${TREZOR_LIBUSB_LIBRARIES}
             PRIVATE
             ${EXTRA_LIBRARIES})
-
-    # set(WITH_DEVICE_TREZOR 1 PARENT_SCOPE)
-    # add_definitions(-DWITH_DEVICE_TREZOR=1)
 
 else()
     message(STATUS "Trezor support disabled")
