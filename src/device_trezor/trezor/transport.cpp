@@ -39,6 +39,9 @@
 #include "transport.hpp"
 #include "messages/messages-common.pb.h"
 
+#undef MONERO_DEFAULT_LOG_CATEGORY
+#define MONERO_DEFAULT_LOG_CATEGORY "device.trezor,transport"
+
 using namespace std;
 using json = rapidjson::Document;
 
@@ -787,13 +790,12 @@ namespace trezor{
   static void set_libusb_log(libusb_context *ctx){
     CHECK_AND_ASSERT_THROW_MES(ctx, "Null libusb context");
 
-#if ELPP_TRACE_LOG || ELPP_DEBUG_LOG || ELPP_INFO_LOG
-    libusb_set_debug(ctx, 3);
-#elif ELPP_WARNING_LOG
-    libusb_set_debug(ctx, 2);
-#elif ELPP_ERROR_LOG
-    libusb_set_debug(ctx, 1);
-#endif
+    if (ELPP->vRegistry()->allowed(el::Level::Debug, MONERO_DEFAULT_LOG_CATEGORY))
+      libusb_set_debug(ctx, 3);
+    else if (ELPP->vRegistry()->allowed(el::Level::Warning, MONERO_DEFAULT_LOG_CATEGORY))
+      libusb_set_debug(ctx, 2);
+    else if (ELPP->vRegistry()->allowed(el::Level::Error, MONERO_DEFAULT_LOG_CATEGORY))
+      libusb_set_debug(ctx, 1);
   }
 
   static int get_libusb_ports(libusb_device *dev, std::vector<uint8_t> &path){
