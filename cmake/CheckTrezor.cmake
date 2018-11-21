@@ -15,17 +15,33 @@ else()
     message(STATUS "Trezor support disabled by USE_DEVICE_TREZOR")
 endif()
 
-# Try to build protobuf messages
 if(Protobuf_FOUND AND USE_DEVICE_TREZOR)
-    if ("$ENV{PYTHON3}" STREQUAL "")
-        set(PYTHON3 "python3")
+    if (NOT "$ENV{TREZOR_PYTHON}" STREQUAL "")
+        set(TREZOR_PYTHON "$ENV{TREZOR_PYTHON}" CACHE INTERNAL "Copied from environment variable TREZOR_PYTHON")
     else()
-        set(PYTHON3 "$ENV{PYTHON3}" CACHE INTERNAL "Copied from environment variable")
+        find_package(Python QUIET COMPONENTS Interpreter)  # cmake 3.12+
+        if(Python_Interpreter_FOUND)
+            set(TREZOR_PYTHON "${Python_EXECUTABLE}")
+        endif()
     endif()
 
-    set(ENV{PROTOBUF_INCLUDE_DIRS} "${PROTOBUF_INCLUDE_DIRS}")
-    set(ENV{PROTOBUF_PROTOC_EXECUTABLE} "${PROTOBUF_PROTOC_EXECUTABLE}")
-    execute_process(COMMAND ${PYTHON3} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../src/device_trezor/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
+    if(NOT TREZOR_PYTHON)
+        find_package(PythonInterp)
+        if(PYTHONINTERP_FOUND AND PYTHON_EXECUTABLE)
+            set(TREZOR_PYTHON "${PYTHON_EXECUTABLE}")
+        endif()
+    endif()
+
+    if(NOT TREZOR_PYTHON)
+        message(STATUS "Trezor: Python not found")
+    endif()
+endif()
+
+# Try to build protobuf messages
+if(Protobuf_FOUND AND USE_DEVICE_TREZOR AND TREZOR_PYTHON)
+    set(ENV{PROTOBUF_INCLUDE_DIRS} "${Protobuf_INCLUDE_DIRS}")
+    set(ENV{PROTOBUF_PROTOC_EXECUTABLE} "${Protobuf_PROTOC_EXECUTABLE}")
+    execute_process(COMMAND ${TREZOR_PYTHON} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../src/device_trezor/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
     if(RET)
         message(WARNING "Trezor protobuf messages could not be regenerated (err=${RET}, python ${PYTHON})."
                 "OUT: ${OUT}, ERR: ${ERR}."
@@ -43,8 +59,8 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR)
             add_definitions(-DWITH_DEVICE_TREZOR_UDP_RELEASE=1)
         endif()
 
-        if (PROTOBUF_INCLUDE_DIR)
-            include_directories(${PROTOBUF_INCLUDE_DIR})
+        if (Protobuf_INCLUDE_DIR)
+            include_directories(${Protobuf_INCLUDE_DIR})
         endif()
 
         # LibUSB support, check for particular version
