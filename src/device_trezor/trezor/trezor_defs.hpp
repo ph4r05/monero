@@ -61,7 +61,7 @@
 #endif
 
 #if USE_DEVICE_TREZOR_UDP && (USE_DEVICE_TREZOR_UDP_RELEASE || defined(TREZOR_DEBUG))
-#define WITH_DEVICE_TREZOR_WEBUSB 1
+#define WITH_DEVICE_TREZOR_UDP 1
 #endif
 
 // Avoids protobuf undefined macro warning
