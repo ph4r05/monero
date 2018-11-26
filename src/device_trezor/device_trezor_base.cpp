@@ -43,7 +43,7 @@ namespace trezor {
 
     const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000};
 
-    device_trezor_base::device_trezor_base() {
+    device_trezor_base::device_trezor_base(): m_callback(nullptr) {
 
     }
 
