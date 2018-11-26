@@ -1015,16 +1015,14 @@ namespace trezor{
       throw exc::DeviceAcquireException("Unable to claim libusb device");
     }
 
-    m_conn_count += 1;
+    m_conn_count = 1;
     m_proto->session_begin(*this);
     
 #undef TREZOR_DESTROY_SESSION
   };
 
   void WebUsbTransport::close() {
-    if (m_conn_count > 0){
-      m_conn_count -= 1;
-    }
+    m_conn_count -= 1;
 
     if (m_conn_count < 0){
       MERROR("Close counter is negative: " << m_conn_count);
