@@ -82,9 +82,9 @@ namespace hw {
 
     class i_device_callback {
     public:
-        virtual void on_button_request() {};
-        virtual void on_pin_request(epee::wipeable_string & pin) {};
-        virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) {};
+        virtual void on_button_request() {}
+        virtual void on_pin_request(epee::wipeable_string & pin) {}
+        virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) {}
         virtual ~i_device_callback() = default;
     };
 

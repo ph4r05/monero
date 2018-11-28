@@ -4335,7 +4335,7 @@ void simple_wallet::on_passphrase_request(bool on_device, epee::wipeable_string 
 #endif
   std::string msg = tr("Enter device passphrase");
   auto pwd_container = tools::password_container::prompt(false, msg.c_str());
-  THROW_WALLET_EXCEPTION_IF(!pwd_container, tools::error::password_entry_failed, tr("Failed to read device password"));
+  THROW_WALLET_EXCEPTION_IF(!pwd_container, tools::error::password_entry_failed, tr("Failed to read device passphrase"));
   passphrase = pwd_container->password();
 }
 //----------------------------------------------------------------------------------------------------
