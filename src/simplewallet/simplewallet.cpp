@@ -8179,7 +8179,7 @@ void simple_wallet::key_images_sync_intern(){
       success_msg_writer() << tr("Key images synchronized to height ") << height;
       if (!m_wallet->is_trusted_daemon())
       {
-        message_writer() << tr("Running untrusted daemon, cannot determine which transaction is spent. Use a trusted daemon with --trusted-daemon and run rescan_spent");
+        message_writer() << tr("Running untrusted daemon, cannot determine which transaction output is spent. Use a trusted daemon with --trusted-daemon and run rescan_spent");
       } else
       {
         success_msg_writer() << print_money(spent) << tr(" spent, ") << print_money(unspent) << tr(" unspent");

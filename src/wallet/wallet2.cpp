@@ -7072,8 +7072,7 @@ void wallet2::get_outs(std::vector<std::vector<tools::wallet2::get_outs_entry>> 
             }
           }
           THROW_WALLET_EXCEPTION_IF(!own_found, error::wallet_internal_error,
-              "Known ring does not include the spent output: " + std::to_string(td.m_global_output_index) +
-              (m_account.get_device().has_tx_cold_sign() ? "Maybe try hw_key_images_sync and try again." : ""));
+              "Known ring does not include the spent output: " + std::to_string(td.m_global_output_index));
         }
       }
 
