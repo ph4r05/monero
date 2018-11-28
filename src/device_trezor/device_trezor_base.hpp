@@ -72,6 +72,8 @@ namespace trezor {
 
       std::string full_name;
       std::vector<unsigned int> m_wallet_deriv_path;
+      std::string m_device_state;  // returned after passphrase entry, session
+      std::shared_ptr<messages::management::Features> m_features;  // features from the last device reset
 
       cryptonote::network_type network_type;
 
@@ -80,8 +82,10 @@ namespace trezor {
       //
 
       void require_connected();
+      void require_initialized();
       void call_ping_unsafe();
       void test_ping();
+      void device_state_reset_unsafe();
 
       // Communication methods
 
@@ -219,6 +223,10 @@ namespace trezor {
       return m_callback;
     }
 
+    std::shared_ptr<messages::management::Features> & get_features() {
+      return m_features;
+    }
+
     void set_derivation_path(const std::string &deriv_path) override;
 
     /* ======================================================================= */
@@ -247,6 +255,11 @@ namespace trezor {
      * Device ping, no-throw
      */
     bool ping();
+
+    /**
+     * Performs Initialize call to the Trezor, resets to known state.
+     */
+    void device_state_reset();
 
     // Protocol callbacks
     void on_button_request(GenericMessage & resp, const messages::common::ButtonRequest * msg);

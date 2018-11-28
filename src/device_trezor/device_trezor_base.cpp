@@ -139,6 +139,9 @@ namespace trezor {
     }
 
     bool device_trezor_base::disconnect() {
+      m_device_state.clear();
+      m_features.reset();
+
       if (m_transport){
         try {
           m_transport->close();
@@ -190,6 +193,25 @@ namespace trezor {
     void device_trezor_base::require_connected(){
       if (!m_transport){
         throw exc::NotConnectedException();
+      }
+    }
+
+    void device_trezor_base::require_initialized(){
+      if (!m_features){
+        throw exc::TrezorException("Device state not initialized");
+      }
+
+      if (m_features->has_bootloader_mode() && m_features->bootloader_mode()){
+        throw exc::TrezorException("Device is in the bootloader mode");
+      }
+
+      if (m_features->has_firmware_present() && !m_features->firmware_present()){
+        throw exc::TrezorException("Device has no firmware loaded");
+      }
+
+      // Hard requirement on initialized field, has to be there.
+      if (!m_features->has_initialized() || !m_features->initialized()){
+        throw exc::TrezorException("Device is not initialized");
       }
     }
 
@@ -304,6 +326,25 @@ namespace trezor {
       return false;
     }
 
+    void device_trezor_base::device_state_reset_unsafe()
+    {
+      require_connected();
+      auto initMsg = std::make_shared<messages::management::Initialize>();
+
+      if(!m_device_state.empty()) {
+        initMsg->set_allocated_state(&m_device_state);
+      }
+
+      m_features = this->client_exchange<messages::management::Features>(initMsg);
+      initMsg->release_state();
+    }
+
+    void device_trezor_base::device_state_reset()
+    {
+      AUTO_LOCK_CMD();
+      device_state_reset_unsafe();
+    }
+
     void device_trezor_base::on_button_request(GenericMessage & resp, const messages::common::ButtonRequest * msg)
     {
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
@@ -351,7 +392,13 @@ namespace trezor {
         // TODO: remove passphrase from memory
         m.set_passphrase(passphrase.data(), passphrase.size());
       }
+
+      if (!m_device_state.empty()){
+        m.set_allocated_state(&m_device_state);
+      }
+
       resp = call_raw(&m);
+      m.release_state();
     }
 
     void device_trezor_base::on_passphrase_state_request(GenericMessage & resp, const messages::common::PassphraseStateRequest * msg)
@@ -359,6 +406,7 @@ namespace trezor {
       MDEBUG("on_passhprase_state_request");
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
 
+      m_device_state = msg->state();
       messages::common::PassphraseStateAck m;
       resp = call_raw(&m);
     }
