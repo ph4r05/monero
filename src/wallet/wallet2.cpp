@@ -3010,6 +3010,7 @@ bool wallet2::clear()
   m_subaddresses.clear();
   m_subaddress_labels.clear();
   m_multisig_rounds_passed = 0;
+  m_device_last_key_image_sync = 0;
   return true;
 }
 
