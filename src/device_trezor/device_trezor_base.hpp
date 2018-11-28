@@ -71,7 +71,7 @@ namespace trezor {
       i_device_callback * m_callback;
 
       std::string full_name;
-      std::vector<unsigned int> wallet_code;
+      std::vector<unsigned int> m_wallet_deriv_path;
 
       cryptonote::network_type network_type;
 
@@ -180,7 +180,7 @@ namespace trezor {
           for (unsigned int i : DEFAULT_BIP44_PATH) {
             msg->add_address_n(i);
           }
-          for (unsigned int i : wallet_code) {
+          for (unsigned int i : m_wallet_deriv_path) {
             msg->add_address_n(i);
           }
         }
@@ -219,7 +219,7 @@ namespace trezor {
       return m_callback;
     }
 
-    void set_wallet_code(const std::string & wallet_code) override;
+    void set_derivation_path(const std::string &deriv_path) override;
 
     /* ======================================================================= */
     /*                              SETUP/TEARDOWN                             */

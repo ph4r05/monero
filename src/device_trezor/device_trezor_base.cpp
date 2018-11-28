@@ -256,27 +256,27 @@ namespace trezor {
       }
     }
 
-    void device_trezor_base::set_wallet_code(const std::string & wallet_code){
-      this->wallet_code.clear();
+    void device_trezor_base::set_derivation_path(const std::string &deriv_path){
+      this->m_wallet_deriv_path.clear();
 
-      if (wallet_code.empty() || wallet_code == "-"){
+      if (deriv_path.empty() || deriv_path == "-"){
         return;
       }
 
       std::vector<std::string> fields;
-      boost::split(fields, wallet_code, boost::is_any_of("/"));
+      boost::split(fields, deriv_path, boost::is_any_of("/"));
 
       boost::regex rgx("^([0-9]+)'?$");
       boost::cmatch match;
 
-      this->wallet_code.reserve(fields.size());
+      this->m_wallet_deriv_path.reserve(fields.size());
       for(const std::string & cur : fields){
         const bool ok = boost::regex_match(cur.c_str(), match, rgx);
-        CHECK_AND_ASSERT_THROW_MES(ok, "Invalid wallet code: " << wallet_code << ". Invalid path element: " << cur);
-        CHECK_AND_ASSERT_THROW_MES(match[0].length() > 0, "Invalid wallet code: " << wallet_code << ". Invalid path element: " << cur);
+        CHECK_AND_ASSERT_THROW_MES(ok, "Invalid wallet code: " << deriv_path << ". Invalid path element: " << cur);
+        CHECK_AND_ASSERT_THROW_MES(match[0].length() > 0, "Invalid wallet code: " << deriv_path << ". Invalid path element: " << cur);
 
         const unsigned long cidx = std::stoul(match[0].str()) | 0x80000000;
-        this->wallet_code.push_back((unsigned int)cidx);
+        this->m_wallet_deriv_path.push_back((unsigned int)cidx);
       }
     }
 
