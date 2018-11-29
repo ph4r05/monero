@@ -65,7 +65,7 @@ namespace trezor {
     }
 
     bool device_trezor_base::set_name(const std::string & name) {
-      this->full_name = name;
+      this->m_full_name = name;
       this->name = "";
 
       auto delim = name.find(':');
@@ -77,10 +77,10 @@ namespace trezor {
     }
 
     const std::string device_trezor_base::get_name() const {
-      if (this->full_name.empty()) {
+      if (this->m_full_name.empty()) {
         return std::string("<disconnected:").append(this->name).append(">");
       }
-      return this->full_name;
+      return this->m_full_name;
     }
 
     bool device_trezor_base::init() {
@@ -239,7 +239,7 @@ namespace trezor {
     void device_trezor_base::write_raw(const google::protobuf::Message * msg){
       require_connected();
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
-      this->getTransport()->write(*msg);
+      this->get_transport()->write(*msg);
     }
 
     GenericMessage device_trezor_base::read_raw(){
@@ -247,7 +247,7 @@ namespace trezor {
       std::shared_ptr<google::protobuf::Message> msg_resp;
       hw::trezor::messages::MessageType msg_resp_type;
 
-      this->getTransport()->read(msg_resp, &msg_resp_type);
+      this->get_transport()->read(msg_resp, &msg_resp_type);
       return GenericMessage(msg_resp_type, msg_resp);
     }
 

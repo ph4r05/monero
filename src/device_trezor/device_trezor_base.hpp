@@ -70,7 +70,7 @@ namespace trezor {
       std::shared_ptr<Transport> m_transport;
       i_device_callback * m_callback;
 
-      std::string full_name;
+      std::string m_full_name;
       std::vector<unsigned int> m_wallet_deriv_path;
       std::string m_device_state;  // returned after passphrase entry, session
       std::shared_ptr<messages::management::Features> m_features;  // features from the last device reset
@@ -133,7 +133,7 @@ namespace trezor {
         // Scoped session closer
         BOOST_SCOPE_EXIT_ALL(&, this) {
           if (open_session){
-            this->getTransport()->close();
+            this->get_transport()->close();
           }
         };
 
@@ -211,7 +211,7 @@ namespace trezor {
     // Default derivation path for Monero
     static const uint32_t DEFAULT_BIP44_PATH[3];
 
-    std::shared_ptr<Transport> getTransport(){
+    std::shared_ptr<Transport> get_transport(){
       return m_transport;
     }
 
@@ -219,7 +219,7 @@ namespace trezor {
       m_callback = callback;
     }
 
-    i_device_callback * getCallback(){
+    i_device_callback * get_callback(){
       return m_callback;
     }
 
