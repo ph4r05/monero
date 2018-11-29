@@ -25,17 +25,13 @@ export TREZOR_PYTHON=`which python3`
 ``` 
  
 
-### Python 2
+### Python 2.7+
 
-Workaround if there is no Python3 available:
+Python 3 has `tempfile.TemporaryDirectory` available but Python 2 lacks
+this class so the message generation code uses `backports.tempfile` package
+bundled in the repository.
 
-```bash
-pip install backports.tempfile
-```
-
-Python 3 has `tempfile.TemporaryDirectory` available but Python 2 lacks 
-this class so you need to install `backports.tempfile` so the message
-generator class can use this.
+The minimal Python versions are 2.7 and 3.4
 
 ### Regenerate messages
 
