@@ -957,7 +957,7 @@ std::pair<std::unique_ptr<wallet2>, password_container> wallet2::make_from_file(
     return {nullptr, password_container{}};
   }
   auto wallet = make_basic(vm, unattended, opts, password_prompter);
-  if (wallet)
+  if (wallet && !wallet_file.empty())
   {
     wallet->load(wallet_file, pwd->password());
   }
