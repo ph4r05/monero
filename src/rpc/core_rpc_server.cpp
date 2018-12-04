@@ -91,12 +91,10 @@ namespace cryptonote
   bool core_rpc_server::init(
       const boost::program_options::variables_map& vm
       , const bool restricted
-      , const network_type nettype
       , const std::string& port
     )
   {
     m_restricted = restricted;
-    m_nettype = nettype;
     m_net_server.set_threads_prefix("RPC");
 
     auto rpc_config = cryptonote::rpc_args::process(vm);
@@ -184,17 +182,19 @@ namespace cryptonote
     res.target = m_core.get_blockchain_storage().get_difficulty_target();
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
     res.tx_pool_size = m_core.get_pool_transactions_count();
-    res.alt_blocks_count = m_core.get_blockchain_storage().get_alternative_blocks_count();
-    uint64_t total_conn = m_p2p.get_connections_count();
-    res.outgoing_connections_count = m_p2p.get_outgoing_connections_count();
-    res.incoming_connections_count = total_conn - res.outgoing_connections_count;
-    res.rpc_connections_count = get_connections_count();
-    res.white_peerlist_size = m_p2p.get_peerlist_manager().get_white_peers_count();
-    res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
-    res.mainnet = m_nettype == MAINNET;
-    res.testnet = m_nettype == TESTNET;
-    res.stagenet = m_nettype == STAGENET;
-    res.nettype = m_nettype == MAINNET ? "mainnet" : m_nettype == TESTNET ? "testnet" : m_nettype == STAGENET ? "stagenet" : "fakechain";
+    res.alt_blocks_count = m_restricted ? 0 : m_core.get_blockchain_storage().get_alternative_blocks_count();
+    uint64_t total_conn = m_restricted ? 0 : m_p2p.get_connections_count();
+    res.outgoing_connections_count = m_restricted ? 0 : m_p2p.get_outgoing_connections_count();
+    res.incoming_connections_count = m_restricted ? 0 : (total_conn - res.outgoing_connections_count);
+    res.rpc_connections_count = m_restricted ? 0 : get_connections_count();
+    res.white_peerlist_size = m_restricted ? 0 : m_p2p.get_peerlist_manager().get_white_peers_count();
+    res.grey_peerlist_size = m_restricted ? 0 : m_p2p.get_peerlist_manager().get_gray_peers_count();
+
+    cryptonote::network_type net_type = nettype();
+    res.mainnet = net_type == MAINNET;
+    res.testnet = net_type == TESTNET;
+    res.stagenet = net_type == STAGENET;
+    res.nettype = net_type == MAINNET ? "mainnet" : net_type == TESTNET ? "testnet" : net_type == STAGENET ? "stagenet" : "fakechain";
     res.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(res.height - 1);
     res.block_size_limit = res.block_weight_limit = m_core.get_blockchain_storage().get_current_cumulative_block_weight_limit();
     res.block_size_median = res.block_weight_median = m_core.get_blockchain_storage().get_current_cumulative_block_weight_median();
@@ -202,14 +202,18 @@ namespace cryptonote
     res.start_time = m_restricted ? 0 : (uint64_t)m_core.get_start_time();
     res.free_space = m_restricted ? std::numeric_limits<uint64_t>::max() : m_core.get_free_space();
     res.offline = m_core.offline();
-    res.bootstrap_daemon_address = m_bootstrap_daemon_address;
-    res.height_without_bootstrap = res.height;
+    res.bootstrap_daemon_address = m_restricted ? "" : m_bootstrap_daemon_address;
+    res.height_without_bootstrap = m_restricted ? 0 : res.height;
+    if (m_restricted)
+      res.was_bootstrap_ever_used = false;
+    else
     {
       boost::shared_lock<boost::shared_mutex> lock(m_bootstrap_daemon_mutex);
       res.was_bootstrap_ever_used = m_was_bootstrap_ever_used;
     }
-    res.database_size = m_core.get_blockchain_storage().get_db().get_database_size();
-    res.update_available = m_core.is_update_available();
+    res.database_size = m_restricted ? 0 : m_core.get_blockchain_storage().get_db().get_database_size();
+    res.update_available = m_restricted ? false : m_core.is_update_available();
+    res.version = m_restricted ? "" : MONERO_VERSION;
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
@@ -750,7 +754,7 @@ namespace cryptonote
     PERF_TIMER(on_start_mining);
     CHECK_CORE_READY();
     cryptonote::address_parse_info info;
-    if(!get_account_address_from_str(info, m_nettype, req.miner_address))
+    if(!get_account_address_from_str(info, nettype(), req.miner_address))
     {
       res.status = "Failed, wrong address";
       LOG_PRINT_L0(res.status);
@@ -831,7 +835,7 @@ namespace cryptonote
       res.speed = lMiner.get_speed();
       res.threads_count = lMiner.get_threads_count();
       const account_public_address& lMiningAdr = lMiner.get_mining_address();
-      res.address = get_account_address_as_str(m_nettype, false, lMiningAdr);
+      res.address = get_account_address_as_str(nettype(), false, lMiningAdr);
     }
 
     res.status = CORE_RPC_STATUS_OK;
@@ -1026,7 +1030,7 @@ namespace cryptonote
   //------------------------------------------------------------------------------------------------------------------------------
   // equivalent of strstr, but with arbitrary bytes (ie, NULs)
   // This does not differentiate between "not found" and "found at offset 0"
-  uint64_t slow_memmem(const void* start_buff, size_t buflen,const void* pat,size_t patlen)
+  size_t slow_memmem(const void* start_buff, size_t buflen,const void* pat,size_t patlen)
   {
     const void* buf = start_buff;
     const void* end=(const char*)buf+buflen;
@@ -1064,7 +1068,7 @@ namespace cryptonote
 
     cryptonote::address_parse_info info;
 
-    if(!req.wallet_address.size() || !cryptonote::get_account_address_from_str(info, m_nettype, req.wallet_address))
+    if(!req.wallet_address.size() || !cryptonote::get_account_address_from_str(info, nettype(), req.wallet_address))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_WRONG_WALLET_ADDRESS;
       error_resp.message = "Failed to parse wallet address";
@@ -1077,7 +1081,7 @@ namespace cryptonote
       return false;
     }
 
-    block b = AUTO_VAL_INIT(b);
+    block b;
     cryptonote::blobdata blob_reserve;
     blob_reserve.resize(req.reserve_size, 0);
     if(!m_core.get_block_template(b, info.address, res.difficulty, res.height, res.expected_reward, blob_reserve))
@@ -1148,7 +1152,7 @@ namespace cryptonote
     
     // Fixing of high orphan issue for most pools
     // Thanks Boolberry!
-    block b = AUTO_VAL_INIT(b);
+    block b;
     if(!parse_and_validate_block_from_blob(blockblob, b))
     {
       error_resp.code = CORE_RPC_ERROR_CODE_WRONG_BLOCKBLOB;
@@ -1216,7 +1220,7 @@ namespace cryptonote
         error_resp.message = "Wrong block blob";
         return false;
       }
-      block b = AUTO_VAL_INIT(b);
+      block b;
       if(!parse_and_validate_block_from_blob(blockblob, b))
       {
         error_resp.code = CORE_RPC_ERROR_CODE_WRONG_BLOCKBLOB;
@@ -1583,32 +1587,39 @@ namespace cryptonote
     res.target = m_core.get_blockchain_storage().get_current_hard_fork_version() < 2 ? DIFFICULTY_TARGET_V1 : DIFFICULTY_TARGET_V2;
     res.tx_count = m_core.get_blockchain_storage().get_total_transactions() - res.height; //without coinbase
     res.tx_pool_size = m_core.get_pool_transactions_count();
-    res.alt_blocks_count = m_core.get_blockchain_storage().get_alternative_blocks_count();
-    uint64_t total_conn = m_p2p.get_connections_count();
-    res.outgoing_connections_count = m_p2p.get_outgoing_connections_count();
-    res.incoming_connections_count = total_conn - res.outgoing_connections_count;
-    res.rpc_connections_count = get_connections_count();
-    res.white_peerlist_size = m_p2p.get_peerlist_manager().get_white_peers_count();
-    res.grey_peerlist_size = m_p2p.get_peerlist_manager().get_gray_peers_count();
-    res.mainnet = m_nettype == MAINNET;
-    res.testnet = m_nettype == TESTNET;
-    res.stagenet = m_nettype == STAGENET;
-    res.nettype = m_nettype == MAINNET ? "mainnet" : m_nettype == TESTNET ? "testnet" : m_nettype == STAGENET ? "stagenet" : "fakechain";
+    res.alt_blocks_count = m_restricted ? 0 : m_core.get_blockchain_storage().get_alternative_blocks_count();
+    uint64_t total_conn = m_restricted ? 0 : m_p2p.get_connections_count();
+    res.outgoing_connections_count = m_restricted ? 0 : m_p2p.get_outgoing_connections_count();
+    res.incoming_connections_count = m_restricted ? 0 : (total_conn - res.outgoing_connections_count);
+    res.rpc_connections_count = m_restricted ? 0 : get_connections_count();
+    res.white_peerlist_size = m_restricted ? 0 : m_p2p.get_peerlist_manager().get_white_peers_count();
+    res.grey_peerlist_size = m_restricted ? 0 : m_p2p.get_peerlist_manager().get_gray_peers_count();
+
+    cryptonote::network_type net_type = nettype();
+    res.mainnet = net_type == MAINNET;
+    res.testnet = net_type == TESTNET;
+    res.stagenet = net_type == STAGENET;
+    res.nettype = net_type == MAINNET ? "mainnet" : net_type == TESTNET ? "testnet" : net_type == STAGENET ? "stagenet" : "fakechain";
+
     res.cumulative_difficulty = m_core.get_blockchain_storage().get_db().get_block_cumulative_difficulty(res.height - 1);
     res.block_size_limit = res.block_weight_limit = m_core.get_blockchain_storage().get_current_cumulative_block_weight_limit();
     res.block_size_median = res.block_weight_median = m_core.get_blockchain_storage().get_current_cumulative_block_weight_median();
     res.status = CORE_RPC_STATUS_OK;
-    res.start_time = (uint64_t)m_core.get_start_time();
+    res.start_time = m_restricted ? 0 : (uint64_t)m_core.get_start_time();
     res.free_space = m_restricted ? std::numeric_limits<uint64_t>::max() : m_core.get_free_space();
     res.offline = m_core.offline();
-    res.bootstrap_daemon_address = m_bootstrap_daemon_address;
-    res.height_without_bootstrap = res.height;
+    res.bootstrap_daemon_address = m_restricted ? "" : m_bootstrap_daemon_address;
+    res.height_without_bootstrap = m_restricted ? 0 : res.height;
+    if (m_restricted)
+      res.was_bootstrap_ever_used = false;
+    else
     {
       boost::shared_lock<boost::shared_mutex> lock(m_bootstrap_daemon_mutex);
       res.was_bootstrap_ever_used = m_was_bootstrap_ever_used;
     }
-    res.database_size = m_core.get_blockchain_storage().get_db().get_database_size();
-    res.update_available = m_core.is_update_available();
+    res.database_size = m_restricted ? 0 : m_core.get_blockchain_storage().get_db().get_database_size();
+    res.update_available = m_restricted ? false : m_core.is_update_available();
+    res.version = m_restricted ? "" : MONERO_VERSION;
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------

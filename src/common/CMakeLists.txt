@@ -43,7 +43,8 @@ set(common_sources
   spawn.cpp
   threadpool.cpp
   updates.cpp
-  aligned.c)
+  aligned.c
+  combinator.cpp)
 
 if (STACK_TRACE)
   list(APPEND common_sources stack_trace.cpp)
@@ -62,7 +63,6 @@ set(common_private_headers
   error.h
   expect.h
   http_connection.h
-  int-util.h
   notify.h
   pod-class.h
   rpc_client.h
@@ -77,7 +77,8 @@ set(common_private_headers
   stack_trace.h
   threadpool.h
   updates.h
-  aligned.h)
+  aligned.h
+  combinator.h)
 
 monero_private_headers(common
   ${common_private_headers})

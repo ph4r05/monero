@@ -1,21 +1,21 @@
 // Copyright (c) 2018, The Monero Project
-// 
+//
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without modification, are
 // permitted provided that the following conditions are met:
-// 
+//
 // 1. Redistributions of source code must retain the above copyright notice, this list of
 //    conditions and the following disclaimer.
-// 
+//
 // 2. Redistributions in binary form must reproduce the above copyright notice, this list
 //    of conditions and the following disclaimer in the documentation and/or other
 //    materials provided with the distribution.
-// 
+//
 // 3. Neither the name of the copyright holder nor the names of its contributors may be
 //    used to endorse or promote products derived from this software without specific
 //    prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 // MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL
@@ -25,55 +25,72 @@
 // INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Parts of this file are originally copyright (c) 2012-2013 The Cryptonote developers
 
-#ifdef __GLIBC__
-#include <sys/stat.h>
-#endif
+#pragma once
 
-#include "gtest/gtest.h"
+#include <iostream>
+#include <vector>
 
-#include <boost/filesystem.hpp>
+namespace tools {
 
-#include "misc_language.h"
-#include "string_tools.h"
-#include "file_io_utils.h"
-#include "common/notify.h"
+uint64_t combinations_count(uint32_t k, uint32_t n);
 
-TEST(notify, works)
+template<typename T>
+class Combinator {
+public:
+  Combinator(const std::vector<T>& v) : origin(v) { }
+
+  std::vector<std::vector<T>> combine(size_t k);
+
+private:
+  void doCombine(size_t from, size_t k);
+
+  std::vector<T> origin;
+  std::vector<std::vector<T>> combinations;
+  std::vector<size_t> current;
+};
+
+template<typename T>
+std::vector<std::vector<T>> Combinator<T>::combine(size_t k)
 {
-#ifdef __GLIBC__
-  mode_t prevmode = umask(077);
-#endif
-  const char *tmp = getenv("TEMP");
-  if (!tmp)
-    tmp = "/tmp";
-  static const char *filename = "monero-notify-unit-test-XXXXXX";
-  const size_t len = strlen(tmp) + 1 + strlen(filename);
-  std::unique_ptr<char[]> name_template_(new char[len + 1]);
-  char *name_template = name_template_.get();
-  ASSERT_TRUE(name_template != NULL);
-  snprintf(name_template, len + 1, "%s/%s", tmp, filename);
-  int fd = mkstemp(name_template);
-#ifdef __GLIBC__
-  umask(prevmode);
-#endif
-  ASSERT_TRUE(fd >= 0);
-  close(fd);
+  if (k > origin.size())
+  {
+    throw std::runtime_error("k must be smaller than elements number");
+  }
 
-  const std::string spec = epee::string_tools::get_current_module_folder() + "/test_notifier"
-#ifdef _WIN32
-      + ".exe"
-#endif
-      + " " + name_template + " %s";
+  if (k == 0)
+  {
+    throw std::runtime_error("k must be greater than zero");
+  }
 
-  tools::Notify notify(spec.c_str());
-  notify.notify("1111111111111111111111111111111111111111111111111111111111111111");
-
-  epee::misc_utils::sleep_no_w(100);
-
-  std::string s;
-  ASSERT_TRUE(epee::file_io_utils::load_file_to_string(name_template, s));
-  ASSERT_TRUE(s == "1111111111111111111111111111111111111111111111111111111111111111");
-
-  boost::filesystem::remove(name_template);
+  combinations.clear();
+  doCombine(0, k);
+  return combinations;
 }
+
+template<typename T>
+void Combinator<T>::doCombine(size_t from, size_t k)
+{
+  current.push_back(0);
+
+  for (size_t i = from; i <= origin.size() - k; ++i)
+  {
+    current.back() = i;
+
+    if (k > 1) {
+      doCombine(i + 1, k - 1);
+    } else {
+      std::vector<T> comb;
+      for (auto ind: current) {
+        comb.push_back(origin[ind]);
+      }
+      combinations.push_back(comb);
+    }
+  }
+
+  current.pop_back();
+}
+
+} //namespace tools

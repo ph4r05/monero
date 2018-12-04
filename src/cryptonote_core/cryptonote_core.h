@@ -34,7 +34,6 @@
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/variables_map.hpp>
-#include <boost/interprocess/sync/file_lock.hpp>
 
 #include "cryptonote_protocol/cryptonote_protocol_handler_common.h"
 #include "storages/portable_storage_template_helper.h"
@@ -242,13 +241,12 @@ namespace cryptonote
       * a miner instance with parameters given on the command line (or defaults)
       *
       * @param vm command line parameters
-      * @param config_subdir subdirectory for config storage
       * @param test_options configuration options for testing
       * @param get_checkpoints if set, will be called to get checkpoints data, must return checkpoints data pointer and size or nullptr if there ain't any checkpoints for specific network type
       *
       * @return false if one of the init steps fails, otherwise true
       */
-     bool init(const boost::program_options::variables_map& vm, const char *config_subdir = NULL, const test_options *test_options = NULL, const GetCheckpointsCallback& get_checkpoints = nullptr);
+     bool init(const boost::program_options::variables_map& vm, const test_options *test_options = NULL, const GetCheckpointsCallback& get_checkpoints = nullptr);
 
      /**
       * @copydoc Blockchain::reset_and_set_genesis_block

@@ -30,13 +30,11 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include "include_base_utils.h"
 #include "string_tools.h"
 using namespace epee;
 
 #include <unordered_set>
 #include "cryptonote_core.h"
-#include "common/command_line.h"
 #include "common/util.h"
 #include "common/updates.h"
 #include "common/download.h"
@@ -45,7 +43,6 @@ using namespace epee;
 #include "warnings.h"
 #include "crypto/crypto.h"
 #include "cryptonote_config.h"
-#include "cryptonote_tx_utils.h"
 #include "misc_language.h"
 #include "file_io_utils.h"
 #include <csignal>
@@ -389,7 +386,7 @@ namespace cryptonote
     return m_blockchain_storage.get_alternative_blocks_count();
   }
   //-----------------------------------------------------------------------------------------------
-  bool core::init(const boost::program_options::variables_map& vm, const char *config_subdir, const cryptonote::test_options *test_options, const GetCheckpointsCallback& get_checkpoints/* = nullptr */)
+  bool core::init(const boost::program_options::variables_map& vm, const cryptonote::test_options *test_options, const GetCheckpointsCallback& get_checkpoints/* = nullptr */)
   {
     start_time = std::time(nullptr);
 
@@ -399,10 +396,6 @@ namespace cryptonote
       m_nettype = FAKECHAIN;
     }
     bool r = handle_command_line(vm);
-    std::string m_config_folder_mempool = m_config_folder;
-
-    if (config_subdir)
-      m_config_folder_mempool = m_config_folder_mempool + "/" + config_subdir;
 
     std::string db_type = command_line::get_arg(vm, cryptonote::arg_db_type);
     std::string db_sync_mode = command_line::get_arg(vm, cryptonote::arg_db_sync_mode);
@@ -834,7 +827,7 @@ namespace cryptonote
     TRY_ENTRY();
     CRITICAL_REGION_LOCAL(m_incoming_tx_lock);
 
-    struct result { bool res; cryptonote::transaction tx; crypto::hash hash; crypto::hash prefix_hash; bool in_txpool; bool in_blockchain; };
+    struct result { bool res; cryptonote::transaction tx; crypto::hash hash; crypto::hash prefix_hash; };
     std::vector<result> results(tx_blobs.size());
 
     tvc.resize(tx_blobs.size());

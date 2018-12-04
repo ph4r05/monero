@@ -33,13 +33,11 @@
 #include <stdlib.h>
 #include "include_base_utils.h"
 #include <random>
-#include <boost/filesystem/fstream.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/algorithm/string/join.hpp>
 #include <boost/optional.hpp>
 using namespace epee;
-namespace bf = boost::filesystem;
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "net.dns"
@@ -305,7 +303,7 @@ std::vector<std::string> DNSResolver::get_record(const std::string& url, int rec
   // call DNS resolver, blocking.  if return value not zero, something went wrong
   if (!ub_resolve(m_data->m_ub_context, string_copy(url.c_str()), record_type, DNS_CLASS_IN, &result))
   {
-    dnssec_available = (result->secure || (!result->secure && result->bogus));
+    dnssec_available = (result->secure || result->bogus);
     dnssec_valid = result->secure && !result->bogus;
     if (result->havedata)
     {
