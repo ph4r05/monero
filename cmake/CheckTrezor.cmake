@@ -37,8 +37,21 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR)
     endif()
 endif()
 
-# Try to build protobuf messages
+# Protobuf compilation test
 if(Protobuf_FOUND AND USE_DEVICE_TREZOR AND TREZOR_PYTHON)
+    try_compile(Protobuf_COMPILE_TEST_PASSED
+        ${CMAKE_BINARY_DIR}
+        "${CMAKE_SOURCE_DIR}/cmake/test-protobuf.cpp"
+        CMAKE_FLAGS
+        "-DINCLUDE_DIRECTORIES=${Protobuf_INCLUDE_DIR}"
+        LINK_LIBRARIES ${Protobuf_LIBRARY}
+        OUTPUT_VARIABLE OUTPUT
+    )
+    message(STATUS "Protobuf Compilation test: ${Protobuf_COMPILE_TEST_PASSED}. Protob lib: ${Protobuf_LIBRARY}, inc: ${Protobuf_INCLUDE_DIR}")
+endif()
+
+# Try to build protobuf messages
+if(Protobuf_FOUND AND USE_DEVICE_TREZOR AND TREZOR_PYTHON AND Protobuf_COMPILE_TEST_PASSED)
     set(ENV{PROTOBUF_INCLUDE_DIRS} "${Protobuf_INCLUDE_DIRS}")
     set(ENV{PROTOBUF_PROTOC_EXECUTABLE} "${Protobuf_PROTOC_EXECUTABLE}")
     execute_process(COMMAND ${TREZOR_PYTHON} tools/build_protob.py WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}/../src/device_trezor/trezor RESULT_VARIABLE RET OUTPUT_VARIABLE OUT ERROR_VARIABLE ERR)
@@ -47,7 +60,7 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR AND TREZOR_PYTHON)
                 "OUT: ${OUT}, ERR: ${ERR}."
                 "Please read src/device_trezor/trezor/tools/README.md")
     else()
-        message(STATUS "Trezor protobuf messages regenerated ${OUT}")
+        message(STATUS "Trezor protobuf messages regenerated out: \"${OUT}.\"")
         set(DEVICE_TREZOR_READY 1)
         add_definitions(-DDEVICE_TREZOR_READY=1)
 
