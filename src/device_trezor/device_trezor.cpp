@@ -387,7 +387,10 @@ namespace trezor {
       if (nonce_required){
         // Versions 2.0.9 and lower do not support payment ID
         CHECK_AND_ASSERT_THROW_MES(m_features->has_major_version() && m_features->has_minor_version() && m_features->has_patch_version(), "Invalid Trezor firmware version information");
-        if (m_features->major_version() <= 2 && m_features->minor_version() <= 0 && m_features->patch_version() <= 9){
+        const uint32_t vma = m_features->major_version();
+        const uint32_t vmi = m_features->minor_version();
+        const uint32_t vpa = m_features->patch_version();
+        if (vma < 2 || (vma == 2 && vmi == 0 && vpa <= 9)) {
           throw exc::TrezorException("Trezor firmware 2.0.9 and lower does not support transactions with short payment IDs or integrated addresses. Please update.");
         }
       }
