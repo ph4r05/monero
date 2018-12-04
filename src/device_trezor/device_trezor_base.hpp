@@ -86,6 +86,7 @@ namespace trezor {
       void call_ping_unsafe();
       void test_ping();
       void device_state_reset_unsafe();
+      void ensure_derivation_path() noexcept;
 
       // Communication methods
 
@@ -181,6 +182,7 @@ namespace trezor {
             msg->add_address_n(x);
           }
         } else {
+          ensure_derivation_path();
           for (unsigned int i : DEFAULT_BIP44_PATH) {
             msg->add_address_n(i);
           }
@@ -209,7 +211,7 @@ namespace trezor {
     bool reset();
 
     // Default derivation path for Monero
-    static const uint32_t DEFAULT_BIP44_PATH[3];
+    static const uint32_t DEFAULT_BIP44_PATH[2];
 
     std::shared_ptr<Transport> get_transport(){
       return m_transport;

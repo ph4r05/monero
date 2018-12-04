@@ -40,8 +40,9 @@ namespace trezor {
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "device.trezor"
+#define TREZOR_BIP44_HARDENED_ZERO 0x80000000
 
-    const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080, 0x80000000};
+    const uint32_t device_trezor_base::DEFAULT_BIP44_PATH[] = {0x8000002c, 0x80000080};
 
     device_trezor_base::device_trezor_base(): m_callback(nullptr) {
 
@@ -278,15 +279,25 @@ namespace trezor {
       }
     }
 
+    void device_trezor_base::ensure_derivation_path() noexcept {
+      if (m_wallet_deriv_path.empty()){
+        m_wallet_deriv_path.push_back(TREZOR_BIP44_HARDENED_ZERO);  // default 0'
+      }
+    }
+
     void device_trezor_base::set_derivation_path(const std::string &deriv_path){
       this->m_wallet_deriv_path.clear();
 
       if (deriv_path.empty() || deriv_path == "-"){
+        ensure_derivation_path();
         return;
       }
 
+      CHECK_AND_ASSERT_THROW_MES(deriv_path.size() <= 255, "Derivation path is too long");
+
       std::vector<std::string> fields;
       boost::split(fields, deriv_path, boost::is_any_of("/"));
+      CHECK_AND_ASSERT_THROW_MES(fields.size() <= 10, "Derivation path is too long");
 
       boost::regex rgx("^([0-9]+)'?$");
       boost::cmatch match;
@@ -297,7 +308,7 @@ namespace trezor {
         CHECK_AND_ASSERT_THROW_MES(ok, "Invalid wallet code: " << deriv_path << ". Invalid path element: " << cur);
         CHECK_AND_ASSERT_THROW_MES(match[0].length() > 0, "Invalid wallet code: " << deriv_path << ". Invalid path element: " << cur);
 
-        const unsigned long cidx = std::stoul(match[0].str()) | 0x80000000;
+        const unsigned long cidx = std::stoul(match[0].str()) | TREZOR_BIP44_HARDENED_ZERO;
         this->m_wallet_deriv_path.push_back((unsigned int)cidx);
       }
     }
