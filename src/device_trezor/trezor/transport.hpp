@@ -147,7 +147,7 @@ namespace trezor {
 
   class Transport {
   public:
-    Transport() = default;
+    Transport();
     virtual ~Transport() = default;
 
     virtual bool ping() { return false; };
@@ -161,6 +161,8 @@ namespace trezor {
     virtual void write_chunk(const void * buff, size_t size) { };
     virtual size_t read_chunk(void * buff, size_t size) { return 0; };
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
+  protected:
+    long m_open_counter;
   };
 
   // Bridge transport
@@ -287,7 +289,6 @@ namespace trezor {
     int get_interface() const;
     unsigned char get_endpoint() const;
 
-    int m_conn_count;
     std::shared_ptr<Protocol> m_proto;
 
     libusb_context        *m_usb_session;
