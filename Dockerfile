@@ -20,7 +20,8 @@ RUN set -ex && \
         automake \
         bzip2 \
         xsltproc \
-        gperf
+        gperf \
+        unzip
 
 WORKDIR /usr/local
 
@@ -155,6 +156,7 @@ RUN set -ex \
     && cd protobuf \
     && test `git rev-parse HEAD` = ${PROTOBUF_HASH} || exit 1 \
     && git submodule update --init --recursive \
+    && ./autogen.sh \
     && CFLAGS="-fPIC" CXXFLAGS="-fPIC" ./configure --enable-static --disable-shared \
     && make \
     && make install \
