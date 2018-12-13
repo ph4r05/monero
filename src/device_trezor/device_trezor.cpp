@@ -384,13 +384,9 @@ namespace trezor {
       CHECK_AND_ASSERT_THROW_MES(m_features, "Device state not initialized");  // make sure the caller did not reset features
       const bool nonce_required = init_msg->tsx_data().has_payment_id() && init_msg->tsx_data().payment_id().size() > 0;
 
-      if (nonce_required){
+      if (nonce_required && init_msg->tsx_data().payment_id().size() == 8){
         // Versions 2.0.9 and lower do not support payment ID
-        CHECK_AND_ASSERT_THROW_MES(m_features->has_major_version() && m_features->has_minor_version() && m_features->has_patch_version(), "Invalid Trezor firmware version information");
-        const uint32_t vma = m_features->major_version();
-        const uint32_t vmi = m_features->minor_version();
-        const uint32_t vpa = m_features->patch_version();
-        if (vma < 2 || (vma == 2 && vmi == 0 && vpa <= 9)) {
+        if (get_version() <= pack_version(2, 0, 9)) {
           throw exc::TrezorException("Trezor firmware 2.0.9 and lower does not support transactions with short payment IDs or integrated addresses. Please update.");
         }
       }

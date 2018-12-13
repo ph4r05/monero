@@ -84,6 +84,17 @@ namespace trezor{
     return std::string(in.GetString());
   }
 
+  uint64_t pack_version(uint32_t major, uint32_t minor, uint32_t patch)
+  {
+    // packing (major, minor, patch) to 64 B: 16 B | 24 B | 24 B
+    const unsigned bits_1 = 16;
+    const unsigned bits_2 = 24;
+    const uint32_t mask_1 = (1 << bits_1) - 1;
+    const uint32_t mask_2 = (1 << bits_2) - 1;
+    CHECK_AND_ASSERT_THROW_MES(major <= mask_1 && minor <= mask_2 && patch <= mask_2, "Version numbers overflow packing scheme");
+    return patch | (((uint64_t)minor) << bits_2) | (((uint64_t)major) << (bits_1 + bits_2));
+  }
+
   //
   // Helpers
   //

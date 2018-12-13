@@ -62,6 +62,8 @@ namespace trezor {
 
   const std::string DEFAULT_BRIDGE = "127.0.0.1:21325";
 
+  uint64_t pack_version(uint32_t major, uint32_t minor=0, uint32_t patch=0);
+
   // Base HTTP comm serialization.
   bool t_serialize(const std::string & in, std::string & out);
   bool t_serialize(const json_val & in, std::string & out);
