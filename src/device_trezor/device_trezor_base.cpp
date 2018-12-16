@@ -365,7 +365,7 @@ namespace trezor {
       write_raw(&ack);
 
       if (m_callback){
-        m_callback->on_button_request();
+        m_callback->on_button_request(static_cast<uint64_t>(msg->code()));
       }
 
       resp = read_raw();

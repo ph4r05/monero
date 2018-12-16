@@ -923,10 +923,10 @@ wallet_keys_unlocker::~wallet_keys_unlocker()
   }
 }
 
-void wallet_device_callback::on_button_request()
+void wallet_device_callback::on_button_request(uint64_t code)
 {
   if (wallet)
-    wallet->on_button_request();
+    wallet->on_button_request(code);
 }
 
 void wallet_device_callback::on_pin_request(epee::wipeable_string & pin)
@@ -12440,10 +12440,10 @@ wallet_device_callback * wallet2::get_device_callback()
   }
   return m_device_callback.get();
 }//----------------------------------------------------------------------------------------------------
-void wallet2::on_button_request()
+void wallet2::on_button_request(uint64_t code)
 {
   if (0 != m_callback)
-    m_callback->on_button_request();
+    m_callback->on_button_request(code);
 }
 //----------------------------------------------------------------------------------------------------
 void wallet2::on_pin_request(epee::wipeable_string & pin)

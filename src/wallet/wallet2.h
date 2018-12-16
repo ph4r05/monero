@@ -102,7 +102,7 @@ namespace tools
     virtual void on_lw_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, uint64_t amount) {}
     virtual void on_lw_money_spent(uint64_t height, const crypto::hash &txid, uint64_t amount) {}
     // Device callbacks
-    virtual void on_button_request() {}
+    virtual void on_button_request(uint64_t code) {}
     virtual void on_pin_request(epee::wipeable_string & pin) {}
     virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) {}
     // Common callbacks
@@ -114,7 +114,7 @@ namespace tools
   {
   public:
     wallet_device_callback(wallet2 * wallet): wallet(wallet) {};
-    void on_button_request() override;
+    void on_button_request(uint64_t code=0) override;
     void on_pin_request(epee::wipeable_string & pin) override;
     void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase) override;
   private:
@@ -1330,7 +1330,7 @@ namespace tools
     void create_keys_file(const std::string &wallet_, bool watch_only, const epee::wipeable_string &password, bool create_address_file);
 
     wallet_device_callback * get_device_callback();
-    void on_button_request();
+    void on_button_request(uint64_t code);
     void on_pin_request(epee::wipeable_string & pin);
     void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase);
 

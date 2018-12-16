@@ -4686,7 +4686,7 @@ boost::optional<epee::wipeable_string> simple_wallet::on_get_password(const char
   return pwd_container->password();
 }
 //----------------------------------------------------------------------------------------------------
-void simple_wallet::on_button_request()
+void simple_wallet::on_button_request(uint64_t code)
 {
   message_writer(console_color_white, false) << tr("Device requires attention");
 }
