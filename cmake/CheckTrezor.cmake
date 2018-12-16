@@ -88,6 +88,7 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR AND TREZOR_PYTHON AND Protobuf_COMPILE_T
         message(STATUS "Trezor protobuf messages regenerated out: \"${OUT}.\"")
         set(DEVICE_TREZOR_READY 1)
         add_definitions(-DDEVICE_TREZOR_READY=1)
+        add_definitions(-DPROTOBUF_INLINE_NOT_IN_HEADERS=0)
 
         if(CMAKE_BUILD_TYPE STREQUAL "Debug")
             add_definitions(-DTREZOR_DEBUG=1)
@@ -111,6 +112,27 @@ if(Protobuf_FOUND AND USE_DEVICE_TREZOR AND TREZOR_PYTHON AND Protobuf_COMPILE_T
             add_definitions(-DHAVE_TREZOR_LIBUSB=1)
             if(LibUSB_INCLUDE_DIRS)
                 include_directories(${LibUSB_INCLUDE_DIRS})
+            endif()
+        endif()
+
+        set(TREZOR_LIBUSB_LIBRARIES "")
+        if(LibUSB_COMPILE_TEST_PASSED)
+            list(APPEND TREZOR_LIBUSB_LIBRARIES ${LibUSB_LIBRARIES})
+            message(STATUS "Trezor compatible LibUSB found at: ${LibUSB_INCLUDE_DIRS}")
+        endif()
+
+        if (BUILD_GUI_DEPS)
+            set(TREZOR_DEP_LIBS "")
+            set(TREZOR_DEP_LINKER "")
+
+            if (Protobuf_LIBRARY)
+                list(APPEND TREZOR_DEP_LIBS ${Protobuf_LIBRARY})
+                string(APPEND TREZOR_DEP_LINKER " -lprotobuf")
+            endif()
+
+            if (TREZOR_LIBUSB_LIBRARIES)
+                list(APPEND TREZOR_DEP_LIBS ${TREZOR_LIBUSB_LIBRARIES})
+                string(APPEND TREZOR_DEP_LINKER " -lusb-1.0")
             endif()
         endif()
     endif()
