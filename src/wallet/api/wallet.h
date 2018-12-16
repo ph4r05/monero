@@ -198,6 +198,7 @@ public:
     virtual bool lockKeysFile() override;
     virtual bool unlockKeysFile() override;
     virtual bool isKeysFileLocked() override;
+    virtual uint64_t cold_key_image_sync(uint64_t &spent, uint64_t &unspent) override;
 
 private:
     void clearStatus() const;

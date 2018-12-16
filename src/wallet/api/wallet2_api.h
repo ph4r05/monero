@@ -364,6 +364,25 @@ struct WalletListener
      * @brief refreshed - called when wallet refreshed by background thread or explicitly refreshed by calling "refresh" synchronously
      */
     virtual void refreshed() = 0;
+
+    /**
+     * @brief called by device if the action is required
+     */
+    virtual void on_button_request(uint64_t code) {}
+
+    /**
+     * @brief called by device when PIN is needed
+     */
+    virtual void on_pin_request(std::string & pin) {
+        throw std::runtime_error("Not supported");
+    }
+
+    /**
+     * @brief called by device when passp
+     */
+    virtual void on_passphrase_request(bool on_device, std::string & passphrase) {
+        if (!on_device) throw std::runtime_error("Not supported");
+    }
 };
 
 
@@ -375,7 +394,8 @@ struct Wallet
 {
     enum Device {
         Device_Software = 0,
-        Device_Ledger = 1
+        Device_Ledger = 1,
+        Device_Trezor = 2
     };
 
     enum Status {
@@ -947,6 +967,9 @@ struct Wallet
      * \return Device they are on
      */
     virtual Device getDeviceType() const = 0;
+
+    //! cold-device protocol key image sync
+    virtual uint64_t cold_key_image_sync(uint64_t &spent, uint64_t &unspent) = 0;
 };
 
 /**

@@ -242,6 +242,35 @@ struct Wallet2CallbackImpl : public tools::i_wallet2_callback
       }
     }
 
+    virtual void on_button_request(uint64_t code)
+    {
+      if (m_listener) {
+        m_listener->on_button_request(code);
+      }
+    }
+
+    virtual void on_pin_request(epee::wipeable_string & pin)
+    {
+      if (m_listener) {
+        std::string pin2;
+        m_listener->on_pin_request(pin2);
+        pin.clear();
+        pin.append(pin2.data(), pin2.size());
+      }
+    }
+
+    virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase)
+    {
+      if (m_listener) {
+        std::string passphrase2;
+        m_listener->on_passphrase_request(on_device, passphrase2);
+        if (!on_device) {
+          passphrase.clear();
+          passphrase.append(passphrase2.data(), passphrase2.size());
+        }
+      }
+    }
+
     WalletListener * m_listener;
     WalletImpl     * m_wallet;
 };
@@ -2342,6 +2371,11 @@ bool WalletImpl::unlockKeysFile()
 bool WalletImpl::isKeysFileLocked()
 {
     return m_wallet->is_keys_file_locked();
+}
+
+uint64_t WalletImpl::cold_key_image_sync(uint64_t &spent, uint64_t &unspent)
+{
+    return m_wallet->cold_key_image_sync(spent, unspent);
 }
 } // namespace
 
