@@ -2,11 +2,38 @@ OPTION(USE_DEVICE_TREZOR "Trezor support compilation" ON)
 OPTION(USE_DEVICE_TREZOR_LIBUSB "Trezor LibUSB compilation" ON)
 OPTION(USE_DEVICE_TREZOR_UDP_RELEASE "Trezor UdpTransport in release mode" OFF)
 
+# Helper function to fix cmake < 3.6.0 FindProtobuf variables
+function(_trezor_protobuf_fix_vars)
+    if(${CMAKE_VERSION} VERSION_LESS "3.6.0")
+        foreach(UPPER
+                PROTOBUF_SRC_ROOT_FOLDER
+                PROTOBUF_IMPORT_DIRS
+                PROTOBUF_DEBUG
+                PROTOBUF_LIBRARY
+                PROTOBUF_PROTOC_LIBRARY
+                PROTOBUF_INCLUDE_DIR
+                PROTOBUF_PROTOC_EXECUTABLE
+                PROTOBUF_LIBRARY_DEBUG
+                PROTOBUF_PROTOC_LIBRARY_DEBUG
+                PROTOBUF_LITE_LIBRARY
+                PROTOBUF_LITE_LIBRARY_DEBUG
+                )
+            if (DEFINED ${UPPER})
+                string(REPLACE "PROTOBUF_" "Protobuf_" Camel ${UPPER})
+                if (NOT DEFINED ${Camel})
+                    set(${Camel} ${${UPPER}} PARENT_SCOPE)
+                endif()
+            endif()
+        endforeach()
+    endif()
+endfunction()
+
 # Use Trezor master switch
 if (USE_DEVICE_TREZOR)
     # Protobuf is required to build protobuf messages for Trezor
     include(FindProtobuf OPTIONAL)
     find_package(Protobuf)
+    _trezor_protobuf_fix_vars()
 
     # Protobuf handling the cache variables set in docker.
     if(NOT Protobuf_FOUND AND NOT Protobuf_LIBRARY AND NOT Protobuf_PROTOC_EXECUTABLE AND NOT Protobuf_INCLUDE_DIR)
