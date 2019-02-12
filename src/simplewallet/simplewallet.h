@@ -142,6 +142,7 @@ namespace cryptonote
     bool set_subaddress_lookahead(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_segregation_height(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_ignore_fractional_outputs(const std::vector<std::string> &args = std::vector<std::string>());
+    bool set_track_uses(const std::vector<std::string> &args = std::vector<std::string>());
     bool set_device_name(const std::vector<std::string> &args = std::vector<std::string>());
     bool help(const std::vector<std::string> &args = std::vector<std::string>());
     bool start_mining(const std::vector<std::string> &args);
@@ -251,9 +252,11 @@ namespace cryptonote
     bool print_seed(bool encrypted);
     void key_images_sync_intern();
     void on_refresh_finished(uint64_t start_height, uint64_t fetched_blocks, bool is_init, bool received_money);
+    std::pair<std::string, std::string> show_outputs_line(const std::vector<uint64_t> &heights, uint64_t blockchain_height, uint64_t highlight_height = std::numeric_limits<uint64_t>::max()) const;
 
     struct transfer_view
     {
+      std::string type;
       boost::variant<uint64_t, std::string> block;
       uint64_t timestamp;
       std::string direction;
@@ -367,6 +370,7 @@ namespace cryptonote
     std::string m_mnemonic_language;
     std::string m_import_path;
     std::string m_subaddress_lookahead;
+    std::string m_restore_date;  // optional - converted to m_restore_height
 
     epee::wipeable_string m_electrum_seed;  // electrum-style seed parameter
 
@@ -394,6 +398,8 @@ namespace cryptonote
     bool m_auto_refresh_refreshing;
     std::atomic<bool> m_in_manual_refresh;
     uint32_t m_current_subaddress_account;
+
+    bool m_long_payment_id_support;
     
     // MMS
     mms::message_store& get_message_store() const { return m_wallet->get_message_store(); };
