@@ -138,7 +138,14 @@ namespace trezor {
         auto res = get_view_key();
         CHECK_AND_ASSERT_MES(res->watch_key().size() == 32, false, "Trezor returned invalid view key");
 
-        //spendkey = crypto::null_skey; // not given
+        // Trezor does not make use of spendkey of the device API.
+        // Ledger loads encrypted spendkey, Trezor loads null key (never leaves device).
+        // In the test (debugging mode) we need to leave this field intact as it is already set by
+        // the debugging code and need to remain same for the testing purposes.
+#ifndef WITH_TREZOR_DEBUGGING
+        spendkey = crypto::null_skey; // not given
+#endif
+
         memcpy(viewkey.data, res->watch_key().data(), 32);
 
         return true;

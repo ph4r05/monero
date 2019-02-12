@@ -392,7 +392,7 @@ namespace trezor {
     }
 
 #else
-#define TREZOR_CALLBACK(method, ...) if (m_callback) m_callback->method(__VA_ARGS__)
+#define TREZOR_CALLBACK(method, ...) do { if (m_callback) m_callback->method(__VA_ARGS__); } while(0)
 #endif
 
     void device_trezor_base::on_button_request(GenericMessage & resp, const messages::common::ButtonRequest * msg)
