@@ -45,12 +45,12 @@ namespace trezor{
   void DebugLink::init(std::shared_ptr<Transport> & transport){
     CHECK_AND_ASSERT_THROW_MES(!m_transport, "Already initialized");
     m_transport = transport;
-    m_transport->session_begin();
+    m_transport->open();
   }
 
   void DebugLink::close(){
     CHECK_AND_ASSERT_THROW_MES(m_transport, "Not initialized");
-    if (m_transport) m_transport->session_end();
+    if (m_transport) m_transport->close();
   }
 
   std::shared_ptr<messages::debug::DebugLinkState> DebugLink::state(){
