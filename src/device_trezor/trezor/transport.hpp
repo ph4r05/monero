@@ -160,15 +160,15 @@ namespace trezor {
     virtual void write(const google::protobuf::Message & req) =0;
     virtual void read(std::shared_ptr<google::protobuf::Message> & msg, messages::MessageType * msg_type=nullptr) =0;
     virtual std::shared_ptr<Transport> find_debug() { return nullptr; };
-    void session_begin();
-    void session_end();
 
     virtual void write_chunk(const void * buff, size_t size) { };
     virtual size_t read_chunk(void * buff, size_t size) { return 0; };
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
   protected:
     long m_open_counter;
-    long m_session_counter;
+
+    virtual bool pre_open();
+    virtual bool pre_close();
   };
 
   // Bridge transport
