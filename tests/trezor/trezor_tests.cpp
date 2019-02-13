@@ -194,7 +194,7 @@ static void rollback_chain(cryptonote::core * core, const cryptonote::block & he
 static void add_hforks(std::vector<test_event_entry>& events, const v_hardforks_t& hard_forks)
 {
   event_replay_settings repl_set;
-  repl_set.hard_forks = boost::make_optional<v_hardforks_t>(hard_forks);
+  repl_set.hard_forks = boost::make_optional(hard_forks);
   events.push_back(repl_set);
 }
 
@@ -368,8 +368,9 @@ static void construct_pending_tx(
   std::vector<crypto::secret_key> additional_tx_keys;
   std::vector<tx_destination_entry> destinations_copy = destinations;
   auto change_addr = src_wallet->get_account().get_keys().m_account_address;
+  const rct::RCTConfig rct_config = { rct::RangeProofPaddedBulletproof, 0 };
   bool r = construct_tx_and_get_tx_key(src_wallet->get_account().get_keys(), subaddresses, sources, destinations_copy,
-                                       change_addr, extra ? extra.get() : std::vector<uint8_t>(), tx, 0, tx_key, additional_tx_keys, true, rct::RangeProofPaddedBulletproof, nullptr);
+                                       change_addr, extra ? extra.get() : std::vector<uint8_t>(), tx, 0, tx_key, additional_tx_keys, true, rct_config, nullptr);
 
   CHECK_AND_ASSERT_THROW_MES(r, "Transaction construction failed");
 
