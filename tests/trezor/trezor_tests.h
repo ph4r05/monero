@@ -79,7 +79,7 @@ protected:
   void setup_trezor();
 
   test_generator m_generator;
-  Block_tracker m_bt;
+  block_tracker m_bt;
 
   v_hardforks_t m_hard_forks;
   cryptonote::block m_head;

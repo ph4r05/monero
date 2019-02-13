@@ -363,7 +363,7 @@ static void construct_pending_tx(
 {
   cryptonote::transaction tx;
 
-  subaddresses_t & subaddresses = Wallet_Accessor_Test::get_subaddresses(src_wallet);
+  subaddresses_t & subaddresses = wallet_accessor_test::get_subaddresses(src_wallet);
   crypto::secret_key tx_key;
   std::vector<crypto::secret_key> additional_tx_keys;
   std::vector<tx_destination_entry> destinations_copy = destinations;
@@ -483,7 +483,7 @@ void gen_trezor_base::fork(gen_trezor_base & other)
 void gen_trezor_base::clear()
 {
   m_generator = test_generator();
-  m_bt = Block_tracker();
+  m_bt = block_tracker();
   m_events.clear();
   m_hard_forks.clear();
   m_trezor = nullptr;
@@ -574,8 +574,8 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   // RCT transactions, wallets have to be used, wallet init
   m_wl_alice.reset(new tools::wallet2(MAINNET, 1, true));
   m_wl_bob.reset(new tools::wallet2(MAINNET, 1, true));
-  Wallet_Accessor_Test::set_account(m_wl_alice.get(), m_alice_account);
-  Wallet_Accessor_Test::set_account(m_wl_bob.get(), m_bob_account);
+  wallet_accessor_test::set_account(m_wl_alice.get(), m_alice_account);
+  wallet_accessor_test::set_account(m_wl_bob.get(), m_bob_account);
 
   auto addr_alice_sub_0_1 = m_wl_alice->get_subaddress({0, 1});
   auto addr_alice_sub_0_2 = m_wl_alice->get_subaddress({0, 2});
@@ -630,14 +630,14 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   REWIND_BLOCKS_HF(events, blk_5r, blk_5, m_miner_account, 9);  // rewind to unlock
 
   // RCT transactions, wallets have to be used
-  Wallet_Tools::process_transactions(m_wl_alice.get(), events, blk_5r, bt);
-  Wallet_Tools::process_transactions(m_wl_bob.get(), events, blk_5r, bt);
+  wallet_tools::process_transactions(m_wl_alice.get(), events, blk_5r, bt);
+  wallet_tools::process_transactions(m_wl_bob.get(), events, blk_5r, bt);
 
   // Send Alice -> Bob, manually constructed. Simple TX test, precondition.
   cryptonote::transaction tx_1;
   std::vector<size_t> selected_transfers;
   std::vector<tx_source_entry> sources;
-  bool res = Wallet_Tools::fill_tx_sources(m_wl_alice.get(), sources, TREZOR_TEST_MIXIN, boost::none, MK_COINS(2), bt, selected_transfers, num_blocks(events) - 1, 0, 1);
+  bool res = wallet_tools::fill_tx_sources(m_wl_alice.get(), sources, TREZOR_TEST_MIXIN, boost::none, MK_COINS(2), bt, selected_transfers, num_blocks(events) - 1, 0, 1);
   CHECK_AND_ASSERT_THROW_MES(res, "TX Fill sources failed");
 
   construct_tx_to_key(tx_1, m_wl_alice.get(), m_bob_account, MK_COINS(1), sources, TREZOR_TEST_FEE, true, rct::RangeProofPaddedBulletproof);
@@ -668,12 +668,12 @@ void gen_trezor_base::test_setup(std::vector<test_event_entry>& events)
   m_wl_alice.reset(new tools::wallet2(MAINNET, 1, true));
   m_wl_bob.reset(new tools::wallet2(MAINNET, 1, true));
   m_wl_eve.reset(new tools::wallet2(MAINNET, 1, true));
-  Wallet_Accessor_Test::set_account(m_wl_alice.get(), m_alice_account);
-  Wallet_Accessor_Test::set_account(m_wl_bob.get(), m_bob_account);
-  Wallet_Accessor_Test::set_account(m_wl_eve.get(), m_eve_account);
-  Wallet_Tools::process_transactions(m_wl_alice.get(), events, m_head, m_bt);
-  Wallet_Tools::process_transactions(m_wl_bob.get(), events, m_head, m_bt);
-  Wallet_Tools::process_transactions(m_wl_eve.get(), events, m_head, m_bt);
+  wallet_accessor_test::set_account(m_wl_alice.get(), m_alice_account);
+  wallet_accessor_test::set_account(m_wl_bob.get(), m_bob_account);
+  wallet_accessor_test::set_account(m_wl_eve.get(), m_eve_account);
+  wallet_tools::process_transactions(m_wl_alice.get(), events, m_head, m_bt);
+  wallet_tools::process_transactions(m_wl_bob.get(), events, m_head, m_bt);
+  wallet_tools::process_transactions(m_wl_eve.get(), events, m_head, m_bt);
 }
 
 void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std::vector<tools::wallet2::pending_tx>& ptxs, std::vector<cryptonote::address_parse_info>& dsts_info, test_generator &generator, std::vector<tools::wallet2*> wallets, bool is_sweep)
@@ -689,7 +689,7 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
   for(auto &ptx : ptxs) {
     txs.txes.push_back(get_construction_data_with_decrypted_short_payment_id(ptx, *m_trezor));
   }
-  txs.transfers = std::make_pair(0, Wallet_Accessor_Test::get_transfers(m_wl_alice.get()));
+  txs.transfers = std::make_pair(0, wallet_accessor_test::get_transfers(m_wl_alice.get()));
 
   auto dev_cold = dynamic_cast<::hw::device_cold*>(m_trezor);
   CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
@@ -759,7 +759,7 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
       const bool sender = widx == 0;
       tools::wallet2 *wl = wallets[widx];
 
-      Wallet_Tools::process_transactions(wl, events, blk_7, m_bt, boost::make_optional(head_hash));
+      wallet_tools::process_transactions(wl, events, blk_7, m_bt, boost::make_optional(head_hash));
 
       tools::wallet2::transfer_container m_trans;
       tools::wallet2::transfer_container m_trans_txid;
@@ -867,7 +867,7 @@ tsx_builder * tsx_builder::compute_sources(boost::optional<size_t> num_utxo, boo
   };
 
   fnc_accept_to_use = fnc_acc;
-  bool res = Wallet_Tools::fill_tx_sources(m_from, m_sources, m_mixin, num_utxo, min_amount, m_tester->m_bt, m_selected_transfers, m_cur_height, offset, step, fnc_accept_to_use);
+  bool res = wallet_tools::fill_tx_sources(m_from, m_sources, m_mixin, num_utxo, min_amount, m_tester->m_bt, m_selected_transfers, m_cur_height, offset, step, fnc_accept_to_use);
   CHECK_AND_ASSERT_THROW_MES(res, "Tx source fill error");
   return this;
 }

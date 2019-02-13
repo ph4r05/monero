@@ -460,17 +460,17 @@ bool fill_tx_destination(tx_destination_entry &de, const cryptonote::account_pub
 static std::random_device RD;
 static std::mt19937 MT(RD());
 
-map_txid_output_t::iterator Block_tracker::find_out(const crypto::hash &txid, size_t out)
+map_txid_output_t::iterator block_tracker::find_out(const crypto::hash &txid, size_t out)
 {
   return find_out(std::make_pair(txid, out));
 }
 
-map_txid_output_t::iterator Block_tracker::find_out(const output_hasher &id)
+map_txid_output_t::iterator block_tracker::find_out(const output_hasher &id)
 {
   return m_map_outs.find(id);
 }
 
-void Block_tracker::process(const std::vector<cryptonote::block>& blockchain, const map_hash2tx_t& mtx)
+void block_tracker::process(const std::vector<cryptonote::block>& blockchain, const map_hash2tx_t& mtx)
 {
   std::vector<const cryptonote::block*> blks;
   blks.reserve(blockchain.size());
@@ -488,7 +488,7 @@ void Block_tracker::process(const std::vector<cryptonote::block>& blockchain, co
   process(blks, mtx);
 }
 
-void Block_tracker::process(const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t& mtx)
+void block_tracker::process(const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t& mtx)
 {
   BOOST_FOREACH (const block* blk, blockchain) {
     vector<const transaction*> vtx;
@@ -506,7 +506,7 @@ void Block_tracker::process(const std::vector<const cryptonote::block*>& blockch
   }
 }
 
-void Block_tracker::process(const block* blk, const transaction * tx, size_t i)
+void block_tracker::process(const block* blk, const transaction * tx, size_t i)
 {
   for (size_t j = 0; j < tx->vout.size(); ++j) {
     const tx_out &out = tx->vout[j];
@@ -531,7 +531,7 @@ void Block_tracker::process(const block* blk, const transaction * tx, size_t i)
   }
 }
 
-void Block_tracker::global_indices(const cryptonote::transaction *tx, std::vector<uint64_t> &indices)
+void block_tracker::global_indices(const cryptonote::transaction *tx, std::vector<uint64_t> &indices)
 {
   indices.clear();
 
@@ -543,7 +543,7 @@ void Block_tracker::global_indices(const cryptonote::transaction *tx, std::vecto
   }
 }
 
-void Block_tracker::get_decoys(size_t decoys, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs){
+void block_tracker::get_decoys(size_t decoys, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs){
   auto & vct = m_outs[amount];
   const size_t n_outs = vct.size();
 
@@ -580,7 +580,7 @@ void Block_tracker::get_decoys(size_t decoys, uint64_t amount, uint64_t global_i
   }
 }
 
-std::string Block_tracker::dump_data()
+std::string block_tracker::dump_data()
 {
   ostringstream ss;
   for (auto &m_out : m_outs)
@@ -605,7 +605,7 @@ std::string Block_tracker::dump_data()
   return ss.str();
 }
 
-void Block_tracker::dump_data(const std::string & fname)
+void block_tracker::dump_data(const std::string & fname)
 {
   ofstream myfile;
   myfile.open (fname);
@@ -703,7 +703,7 @@ cryptonote::account_public_address get_address(const tools::wallet2 * inp)
   return inp->get_account().get_keys().m_account_address;
 }
 
-void Wallet_Accessor_Test::set_account(tools::wallet2 * wallet, cryptonote::account_base& account)
+void wallet_accessor_test::set_account(tools::wallet2 * wallet, cryptonote::account_base& account)
 {
   wallet->clear();
   wallet->m_account = account;
@@ -723,12 +723,12 @@ void Wallet_Accessor_Test::set_account(tools::wallet2 * wallet, cryptonote::acco
   wallet->setup_new_blockchain();  // generates also subadress register
 }
 
-void Wallet_Accessor_Test::process_parsed_blocks(tools::wallet2 * wallet, uint64_t start_height, const std::vector<cryptonote::block_complete_entry> &blocks, const std::vector<tools::wallet2::parsed_block> &parsed_blocks, uint64_t& blocks_added)
+void wallet_accessor_test::process_parsed_blocks(tools::wallet2 * wallet, uint64_t start_height, const std::vector<cryptonote::block_complete_entry> &blocks, const std::vector<tools::wallet2::parsed_block> &parsed_blocks, uint64_t& blocks_added)
 {
   wallet->process_parsed_blocks(start_height, blocks, parsed_blocks, blocks_added);
 }
 
-void Wallet_Tools::process_transactions(tools::wallet2 * wallet, const std::vector<test_event_entry>& events, const cryptonote::block& blk_head, Block_tracker &bt, const boost::optional<crypto::hash>& blk_tail)
+void wallet_tools::process_transactions(tools::wallet2 * wallet, const std::vector<test_event_entry>& events, const cryptonote::block& blk_head, block_tracker &bt, const boost::optional<crypto::hash>& blk_tail)
 {
   map_hash2tx_t mtx;
   std::vector<const cryptonote::block*> blockchain;
@@ -741,7 +741,7 @@ void Wallet_Tools::process_transactions(tools::wallet2 * wallet, const std::vect
   process_transactions(wallet, blockchain, mtx, bt);
 }
 
-void Wallet_Tools::process_transactions(tools::wallet2 * wallet, const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t & mtx, Block_tracker &bt)
+void wallet_tools::process_transactions(tools::wallet2 * wallet, const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t & mtx, block_tracker &bt)
 {
   uint64_t start_height=0, blocks_added=0;
   std::vector<cryptonote::block_complete_entry> v_bche;
@@ -758,18 +758,18 @@ void Wallet_Tools::process_transactions(tools::wallet2 * wallet, const std::vect
     v_bche.emplace_back();
     v_parsed_block.emplace_back();
 
-    Wallet_Tools::gen_block_data(bt, bl, mtx, v_bche.back(), v_parsed_block.back(), idx == 1 ? start_height : height);
+    wallet_tools::gen_block_data(bt, bl, mtx, v_bche.back(), v_parsed_block.back(), idx == 1 ? start_height : height);
   }
 
-  Wallet_Accessor_Test::process_parsed_blocks(wallet, start_height, v_bche, v_parsed_block, blocks_added);
+  wallet_accessor_test::process_parsed_blocks(wallet, start_height, v_bche, v_parsed_block, blocks_added);
 }
 
-bool Wallet_Tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptonote::tx_source_entry>& sources, size_t mixin, const boost::optional<size_t>& num_utxo, const boost::optional<uint64_t>& min_amount, Block_tracker &bt, std::vector<size_t> &selected, uint64_t cur_height, ssize_t offset, int step, const boost::optional<fnc_accept_tx_source_t>& fnc_accept)
+bool wallet_tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptonote::tx_source_entry>& sources, size_t mixin, const boost::optional<size_t>& num_utxo, const boost::optional<uint64_t>& min_amount, block_tracker &bt, std::vector<size_t> &selected, uint64_t cur_height, ssize_t offset, int step, const boost::optional<fnc_accept_tx_source_t>& fnc_accept)
 {
   CHECK_AND_ASSERT_THROW_MES(step != 0, "Step is zero");
   sources.clear();
 
-  auto & transfers = Wallet_Accessor_Test::get_transfers(wallet);
+  auto & transfers = wallet_accessor_test::get_transfers(wallet);
   std::unordered_set<size_t> selected_idx;
   std::unordered_set<crypto::key_image> selected_kis;
   const size_t ntrans = wallet->get_num_transfer_details();
@@ -812,7 +812,7 @@ bool Wallet_Tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptono
 
     try {
       cryptonote::tx_source_entry src;
-      Wallet_Tools::gen_tx_src(mixin, cur_height, td, src, bt);
+      wallet_tools::gen_tx_src(mixin, cur_height, td, src, bt);
 
       // Acceptor function
       if (fnc_accept){
@@ -851,7 +851,7 @@ bool Wallet_Tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptono
 #undef EVAL_BRK_COND
 }
 
-void Wallet_Tools::gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wallet2::transfer_details & td, cryptonote::tx_source_entry & src, Block_tracker &bt)
+void wallet_tools::gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wallet2::transfer_details & td, cryptonote::tx_source_entry & src, block_tracker &bt)
 {
   src.amount = td.amount();
   src.rct = td.is_rct();
@@ -894,7 +894,7 @@ void Wallet_Tools::gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wa
   src.multisig_kLRki = rct::multisig_kLRki({rct::zero(), rct::zero(), rct::zero(), rct::zero()});
 }
 
-void Wallet_Tools::gen_block_data(Block_tracker &bt, const cryptonote::block *bl, const map_hash2tx_t &mtx, cryptonote::block_complete_entry &bche, tools::wallet2::parsed_block &parsed_block, uint64_t &height)
+void wallet_tools::gen_block_data(block_tracker &bt, const cryptonote::block *bl, const map_hash2tx_t &mtx, cryptonote::block_complete_entry &bche, tools::wallet2::parsed_block &parsed_block, uint64_t &height)
 {
   vector<const transaction*> vtx;
   vtx.push_back(&(bl->miner_tx));
@@ -929,7 +929,7 @@ void Wallet_Tools::gen_block_data(Block_tracker &bt, const cryptonote::block *bl
   }
 }
 
-void Wallet_Tools::compute_subaddresses(std::unordered_map<crypto::public_key, cryptonote::subaddress_index> &subaddresses, cryptonote::account_base & creds, size_t account, size_t minors)
+void wallet_tools::compute_subaddresses(std::unordered_map<crypto::public_key, cryptonote::subaddress_index> &subaddresses, cryptonote::account_base & creds, size_t account, size_t minors)
 {
   auto &hwdev = hw::get_device("default");
   const std::vector<crypto::public_key> pkeys = hwdev.get_subaddress_spend_public_keys(creds.get_keys(), account, 0, minors);
@@ -1192,7 +1192,7 @@ bool construct_tx_rct(const cryptonote::account_keys& sender_account_keys, std::
 
 bool construct_tx_rct(tools::wallet2 * sender_wallet, std::vector<cryptonote::tx_source_entry>& sources, const std::vector<cryptonote::tx_destination_entry>& destinations, const boost::optional<cryptonote::account_public_address>& change_addr, std::vector<uint8_t> extra, cryptonote::transaction& tx, uint64_t unlock_time, bool rct, rct::RangeProofType range_proof_type, int bp_version)
 {
-  subaddresses_t & subaddresses = Wallet_Accessor_Test::get_subaddresses(sender_wallet);
+  subaddresses_t & subaddresses = wallet_accessor_test::get_subaddresses(sender_wallet);
   crypto::secret_key tx_key;
   std::vector<crypto::secret_key> additional_tx_keys;
   std::vector<tx_destination_entry> destinations_copy = destinations;
