@@ -380,7 +380,7 @@ namespace trezor {
         return;
       }
 
-      if (m_debug && !m_debug_callback){
+      if (!m_debug_callback){
         CHECK_AND_ASSERT_THROW_MES(m_transport, "Transport does not exist");
         auto debug_transport = m_transport->find_debug();
         if (debug_transport) {
