@@ -336,15 +336,15 @@ typedef struct {
 } dest_wrapper_t;
 
 // Daemon functionality
-class Block_tracker
+class block_tracker
 {
 public:
   map_output_idx_t m_outs;
   map_txid_output_t m_map_outs;  // mapping (txid, out) -> output_index
   map_block_t m_blocks;
 
-  Block_tracker() = default;
-  Block_tracker(const Block_tracker &bt): m_outs(bt.m_outs), m_map_outs(bt.m_map_outs), m_blocks(bt.m_blocks) {};
+  block_tracker() = default;
+  block_tracker(const block_tracker &bt): m_outs(bt.m_outs), m_map_outs(bt.m_map_outs), m_blocks(bt.m_blocks) {};
   map_txid_output_t::iterator find_out(const crypto::hash &txid, size_t out);
   map_txid_output_t::iterator find_out(const output_hasher &id);
   void process(const std::vector<cryptonote::block>& blockchain, const map_hash2tx_t& mtx);
@@ -380,7 +380,7 @@ typedef struct {
 typedef std::function<bool(const tx_source_info_crate_t &info, bool &abort)> fnc_accept_tx_source_t;
 
 // Wallet friend, direct access to required fields and private methods
-class Wallet_Accessor_Test
+class wallet_accessor_test
 {
 public:
   static void set_account(tools::wallet2 * wallet, cryptonote::account_base& account);
@@ -389,14 +389,15 @@ public:
   static void process_parsed_blocks(tools::wallet2 * wallet, uint64_t start_height, const std::vector<cryptonote::block_complete_entry> &blocks, const std::vector<tools::wallet2::parsed_block> &parsed_blocks, uint64_t& blocks_added);
 };
 
-class Wallet_Tools {
+class wallet_tools
+{
 public:
-  static void gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wallet2::transfer_details & td, cryptonote::tx_source_entry & src, Block_tracker &bt);
-  static void gen_block_data(Block_tracker &bt, const cryptonote::block *bl, const map_hash2tx_t & mtx, cryptonote::block_complete_entry &bche, tools::wallet2::parsed_block &parsed_block, uint64_t &height);
+  static void gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wallet2::transfer_details & td, cryptonote::tx_source_entry & src, block_tracker &bt);
+  static void gen_block_data(block_tracker &bt, const cryptonote::block *bl, const map_hash2tx_t & mtx, cryptonote::block_complete_entry &bche, tools::wallet2::parsed_block &parsed_block, uint64_t &height);
   static void compute_subaddresses(std::unordered_map<crypto::public_key, cryptonote::subaddress_index> &subaddresses, cryptonote::account_base & creds, size_t account, size_t minors);
-  static void process_transactions(tools::wallet2 * wallet, const std::vector<test_event_entry>& events, const cryptonote::block& blk_head, Block_tracker &bt, const boost::optional<crypto::hash>& blk_tail=boost::none);
-  static void process_transactions(tools::wallet2 * wallet, const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t & mtx, Block_tracker &bt);
-  static bool fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptonote::tx_source_entry>& sources, size_t mixin, const boost::optional<size_t>& num_utxo, const boost::optional<uint64_t>& min_amount, Block_tracker &bt, std::vector<size_t> &selected, uint64_t cur_height, ssize_t offset=0, int step=1, const boost::optional<fnc_accept_tx_source_t>& fnc_accept=boost::none);
+  static void process_transactions(tools::wallet2 * wallet, const std::vector<test_event_entry>& events, const cryptonote::block& blk_head, block_tracker &bt, const boost::optional<crypto::hash>& blk_tail=boost::none);
+  static void process_transactions(tools::wallet2 * wallet, const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t & mtx, block_tracker &bt);
+  static bool fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptonote::tx_source_entry>& sources, size_t mixin, const boost::optional<size_t>& num_utxo, const boost::optional<uint64_t>& min_amount, block_tracker &bt, std::vector<size_t> &selected, uint64_t cur_height, ssize_t offset=0, int step=1, const boost::optional<fnc_accept_tx_source_t>& fnc_accept=boost::none);
 };
 
 inline cryptonote::difficulty_type get_test_difficulty(const boost::optional<uint8_t>& hf_ver=boost::none) {return !hf_ver || hf_ver.get() <= 1 ? 1 : 2;}
