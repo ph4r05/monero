@@ -368,7 +368,7 @@ static void construct_pending_tx(
   std::vector<crypto::secret_key> additional_tx_keys;
   std::vector<tx_destination_entry> destinations_copy = destinations;
   auto change_addr = src_wallet->get_account().get_keys().m_account_address;
-  const rct::RCTConfig rct_config = { rct::RangeProofPaddedBulletproof, 0 };
+  const rct::RCTConfig rct_config = { rct::RangeProofPaddedBulletproof, 1 };
   bool r = construct_tx_and_get_tx_key(src_wallet->get_account().get_keys(), subaddresses, sources, destinations_copy,
                                        change_addr, extra ? extra.get() : std::vector<uint8_t>(), tx, 0, tx_key, additional_tx_keys, true, rct_config, nullptr);
 
@@ -593,33 +593,33 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   const size_t target_rct = m_heavy_tests ? 105 : 15;
   for(size_t i = 0; i < target_rct; ++i)
   {
-    MAKE_TX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(1) >> 2, 10, blk_4);
+    MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(1) >> 2, 10, blk_4);
   }
 
   // Sub-address destinations
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_1, true, MK_COINS(1) >> 1), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_2, true, MK_COINS(1) >> 1), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_3, true, MK_COINS(1) >> 1), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_4, true, MK_COINS(1) >> 1), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_1, true, MK_COINS(1) >> 1), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_2, true, MK_COINS(1) >> 1), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_3, true, MK_COINS(1) >> 1), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_0_4, true, MK_COINS(1) >> 1), 10, blk_4);
 
   // Sub-address destinations + multi out to force use of additional keys
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_0_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}}), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_0_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{m_miner_account, false, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{m_miner_account, false, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_0_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_0_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{m_miner_account, false, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{m_miner_account, false, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
 
   // Transfer to other accounts
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_1_0, true, MK_COINS(1) >> 1), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_1_1, true, MK_COINS(1) >> 1), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_1_0, true, MK_COINS(1) >> 1}, {addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}}), 10, blk_4);
-  MAKE_TX_LIST_DEST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_1_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_5, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_1_0, true, MK_COINS(1) >> 1), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts(addr_alice_sub_1_1, true, MK_COINS(1) >> 1), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_1_0, true, MK_COINS(1) >> 1}, {addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_3, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_2, true, MK_COINS(1) >> 1}}), 10, blk_4);
+  MAKE_TX_MIX_DEST_LIST_RCT(events, txs_blk_5, m_miner_account, build_dsts({{addr_alice_sub_1_2, true, MK_COINS(1) >> 1}, {addr_alice_sub_1_1, true, MK_COINS(1) >> 1}, {addr_alice_sub_0_5, true, MK_COINS(1) >> 1}}), 10, blk_4);
 
   // Simple RCT transactions
-  MAKE_TX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(7), 10, blk_4);
-  MAKE_TX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(1), 10, blk_4);
-  MAKE_TX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(3), 10, blk_4);
-  MAKE_TX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(4), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(7), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(1), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(3), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(4), 10, blk_4);
   MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_5, blk_4r, m_miner_account, txs_blk_5, 9);
 
   // Simple transaction check
@@ -641,7 +641,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   bool res = wallet_tools::fill_tx_sources(m_wl_alice.get(), sources, TREZOR_TEST_MIXIN, boost::none, MK_COINS(2), bt, selected_transfers, num_blocks(events) - 1, 0, 1);
   CHECK_AND_ASSERT_THROW_MES(res, "TX Fill sources failed");
 
-  construct_tx_to_key(tx_1, m_wl_alice.get(), m_bob_account, MK_COINS(1), sources, TREZOR_TEST_FEE, true, rct::RangeProofPaddedBulletproof);
+  construct_tx_to_key(tx_1, m_wl_alice.get(), m_bob_account, MK_COINS(1), sources, TREZOR_TEST_FEE, true, rct::RangeProofPaddedBulletproof, 1);
   events.push_back(tx_1);
   MAKE_NEXT_BLOCK_TX1_HF(events, blk_6, blk_5r, m_miner_account, tx_1, 9);
   MDEBUG("Post 1st tsx: " << (num_blocks(events) - 1) << " at block: " << get_block_hash(blk_6));
