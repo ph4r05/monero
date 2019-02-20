@@ -761,7 +761,8 @@ void wallet_tools::process_transactions(tools::wallet2 * wallet, const std::vect
     wallet_tools::gen_block_data(bt, bl, mtx, v_bche.back(), v_parsed_block.back(), idx == 1 ? start_height : height);
   }
 
-  wallet_accessor_test::process_parsed_blocks(wallet, start_height, v_bche, v_parsed_block, blocks_added);
+  if (wallet)
+    wallet_accessor_test::process_parsed_blocks(wallet, start_height, v_bche, v_parsed_block, blocks_added);
 }
 
 bool wallet_tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptonote::tx_source_entry>& sources, size_t mixin, const boost::optional<size_t>& num_utxo, const boost::optional<uint64_t>& min_amount, block_tracker &bt, std::vector<size_t> &selected, uint64_t cur_height, ssize_t offset, int step, const boost::optional<fnc_accept_tx_source_t>& fnc_accept)
@@ -898,14 +899,14 @@ void wallet_tools::gen_block_data(block_tracker &bt, const cryptonote::block *bl
 {
   vector<const transaction*> vtx;
   vtx.push_back(&(bl->miner_tx));
+  height = boost::get<txin_gen>(*bl->miner_tx.vin.begin()).height;
 
   BOOST_FOREACH(const crypto::hash &h, bl->tx_hashes) {
     const map_hash2tx_t::const_iterator cit = mtx.find(h);
-    CHECK_AND_ASSERT_THROW_MES(mtx.end() != cit, "block contains an unknown tx hash");
+    CHECK_AND_ASSERT_THROW_MES(mtx.end() != cit, "block contains an unknown tx hash @ " << height << ", " << h);
     vtx.push_back(cit->second);
   }
 
-  height = boost::get<txin_gen>(*bl->miner_tx.vin.begin()).height;
   bche.block = "NA";
   bche.txs.resize(bl->tx_hashes.size());
 
