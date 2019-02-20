@@ -47,9 +47,13 @@ public:
 
   gen_trezor_base();
   gen_trezor_base(const gen_trezor_base &other);
+  virtual ~gen_trezor_base() {};
 
   void setup_args(const std::string & trezor_path, bool heavy_tests=false);
   virtual bool generate(std::vector<test_event_entry>& events);
+  virtual void load(std::vector<test_event_entry>& events);       // load events, init test obj
+  void update_trackers(std::vector<test_event_entry>& events);
+
   void fork(gen_trezor_base & other);                             // fork generated chain to another test
   void clear();                                                   // clears m_events, bt, generator, hforks
   void add_shared_events(std::vector<test_event_entry>& events);  // m_events -> events
@@ -77,6 +81,7 @@ public:
 
 protected:
   void setup_trezor();
+  void init_fields();
 
   test_generator m_generator;
   block_tracker m_bt;
@@ -95,6 +100,14 @@ protected:
   std::unique_ptr<tools::wallet2> m_wl_alice;
   std::unique_ptr<tools::wallet2> m_wl_bob;
   std::unique_ptr<tools::wallet2> m_wl_eve;
+
+  friend class boost::serialization::access;
+
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int /*version*/)
+  {
+    ar & m_generator;
+  }
 };
 
 class tsx_builder {

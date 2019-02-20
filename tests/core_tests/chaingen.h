@@ -41,6 +41,7 @@
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/variant.hpp>
 #include <boost/serialization/optional.hpp>
+#include <boost/serialization/unordered_map.hpp>
 #include <boost/functional/hash.hpp>
 
 #include "include_base_utils.h"
@@ -196,6 +197,17 @@ public:
     crypto::hash prev_id;
     uint64_t already_generated_coins;
     size_t block_weight;
+
+  private:
+    friend class boost::serialization::access;
+
+    template<class Archive>
+    void serialize(Archive & ar, const unsigned int /*version*/)
+    {
+      ar & prev_id;
+      ar & already_generated_coins;
+      ar & block_weight;
+    }
   };
 
   enum block_fields
@@ -241,6 +253,14 @@ public:
 
 private:
   std::unordered_map<crypto::hash, block_info> m_blocks_info;
+
+  friend class boost::serialization::access;
+
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int /*version*/)
+  {
+    ar & m_blocks_info;
+  }
 };
 
 template<typename T>
@@ -355,6 +375,17 @@ public:
 
   std::string dump_data();
   void dump_data(const std::string & fname);
+
+private:
+  friend class boost::serialization::access;
+
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int /*version*/)
+  {
+    ar & m_outs;
+    ar & m_map_outs;
+    ar & m_blocks;
+  }
 };
 
 std::string dump_data(const cryptonote::transaction &tx);
