@@ -681,17 +681,8 @@ namespace trezor{
       throw exc::CommunicationException("Socket is already closed");
     }
 
-    if (m_open_counter < 0){
-      MERROR("Open counter is negative: " << m_open_counter);
-
-    } else if (m_open_counter == 0) {
-      if (!m_socket) {
-        throw exc::CommunicationException("Socket is already closed");
-      }
-
-      m_proto->session_end(*this);
-      m_socket->close();
-    }
+    m_proto->session_end(*this);
+    m_socket->close();
     m_socket = nullptr;
   }
 
