@@ -268,7 +268,6 @@ namespace tx {
   }
 
   TData::TData() {
-    in_memory = false;
     rsig_type = 0;
     cur_input_idx = 0;
     cur_output_idx = 0;
@@ -437,7 +436,6 @@ namespace tx {
   }
 
   void Signer::step_init_ack(std::shared_ptr<const messages::monero::MoneroTransactionInitAck> ack){
-    m_ct.in_memory = false;
     if (ack->has_rsig_data()){
       m_ct.rsig_param = std::make_shared<MoneroRsigData>(ack->rsig_data());
     }
@@ -505,10 +503,6 @@ namespace tx {
   std::shared_ptr<messages::monero::MoneroTransactionInputsPermutationRequest> Signer::step_permutation(){
     sort_ki();
 
-    if (in_memory()){
-      return nullptr;
-    }
-
     auto res = std::make_shared<messages::monero::MoneroTransactionInputsPermutationRequest>();
     assign_to_repeatable(res->mutable_perm(), m_ct.source_permutation.begin(), m_ct.source_permutation.end());
 
@@ -516,15 +510,10 @@ namespace tx {
   }
 
   void Signer::step_permutation_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputsPermutationAck> ack){
-    if (in_memory()){
-      return;
-    }
+
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionInputViniRequest> Signer::step_set_vini_input(size_t idx){
-    if (in_memory()){
-      return nullptr;
-    }
     CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.sources.size(), "Invalid transaction index");
     CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx.vin.size(), "Invalid transaction index");
     CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_in_hmacs.size(), "Invalid transaction index");
@@ -536,20 +525,17 @@ namespace tx {
     translate_src_entry(res->mutable_src_entr(), &(tx.sources[idx]));
     res->set_vini(cryptonote::t_serializable_object_to_blob(vini));
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
-    if (!in_memory()) {
-      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
-      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
-      res->set_pseudo_out(m_ct.pseudo_outs[idx]);
-      res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
-    }
+    
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
+    res->set_pseudo_out(m_ct.pseudo_outs[idx]);
+    res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
 
     return res;
   }
 
   void Signer::step_set_vini_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputViniAck> ack){
-    if (in_memory()){
-      return;
-    }
+
   }
 
   std::shared_ptr<messages::monero::MoneroTransactionAllInputsSetRequest> Signer::step_all_inputs_set(){
@@ -814,12 +800,11 @@ namespace tx {
     res->set_vini_hmac(m_ct.tx_in_hmacs[idx]);
     res->set_pseudo_out_alpha(m_ct.alphas[idx]);
     res->set_spend_key(m_ct.spend_encs[idx]);
-    if (!in_memory()){
-      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
-      CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
-      res->set_pseudo_out(m_ct.pseudo_outs[idx]);
-      res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
-    }
+
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs.size(), "Invalid transaction index");
+    CHECK_AND_ASSERT_THROW_MES(idx < m_ct.pseudo_outs_hmac.size(), "Invalid transaction index");
+    res->set_pseudo_out(m_ct.pseudo_outs[idx]);
+    res->set_pseudo_out_hmac(m_ct.pseudo_outs_hmac[idx]);
     return res;
   }
 

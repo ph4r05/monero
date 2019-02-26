@@ -164,7 +164,6 @@ namespace tx {
     TsxData tsx_data;
     tx_construction_data tx_data;
     cryptonote::transaction tx;
-    bool in_memory;
     unsigned rsig_type;
     std::vector<uint64_t> grouping_vct;
     std::shared_ptr<MoneroRsigData> rsig_param;
@@ -248,10 +247,6 @@ namespace tx {
     void step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack);
 
     std::string store_tx_aux_info();
-
-    bool in_memory() const {
-      return m_ct.in_memory;
-    }
 
     bool is_simple() const {
       if (!m_ct.rv){
