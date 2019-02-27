@@ -598,12 +598,10 @@ namespace tx {
     // Range sig offloading to the host
     // ClientV0 sends offloaded BP with the last message in the batch.
     // ClientV1 needs additional message after the last message in the batch as BP uses deterministic masks.
-    if (client_version() == 0 && (!is_offloading() || !should_compute_bp_now())) {
-      return res;
+    if (client_version() == 0 && is_offloading() && should_compute_bp_now()) {
+      auto rsig_data = res->mutable_rsig_data();
+      compute_bproof(*rsig_data);
     }
-
-    auto rsig_data = res->mutable_rsig_data();
-    compute_bproof(*rsig_data);
 
     return res;
   }
@@ -724,6 +722,7 @@ namespace tx {
     res->set_dst_entr_hmac(m_ct.tx_out_entr_hmacs[idx]);
 
     compute_bproof(*(res->mutable_rsig_data()));
+    res->set_is_offloaded_bp(true);
     return res;
   }
 

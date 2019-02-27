@@ -367,7 +367,7 @@ namespace trezor {
         // If BP is offloaded to host, another step with computed BP may be needed.
         auto offloaded_bp = signer->step_rsig(cur_dst);
         if (offloaded_bp){
-          auto bp_ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(src);
+          auto bp_ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(offloaded_bp);
           signer->step_set_rsig_ack(ack);
         }
       }
