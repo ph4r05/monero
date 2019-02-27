@@ -52,6 +52,7 @@ public:
   void setup_args(const std::string & trezor_path, bool heavy_tests=false);
   virtual bool generate(std::vector<test_event_entry>& events);
   virtual void load(std::vector<test_event_entry>& events);       // load events, init test obj
+  void fix_hf(std::vector<test_event_entry>& events);
   void update_trackers(std::vector<test_event_entry>& events);
 
   void fork(gen_trezor_base & other);                             // fork generated chain to another test
@@ -69,6 +70,8 @@ public:
   crypto::hash head_hash() { return get_block_hash(m_head); }
   cryptonote::block head_block() { return m_head; }
   bool heavy_tests() { return m_heavy_tests; }
+  void rct_config(rct::RCTConfig rct_config) { m_rct_config = rct_config; }
+  uint8_t cur_hf(){ return m_hard_forks.size() > 0 ? m_hard_forks.back().first : 0; }
 
   // Static configuration
   static const uint64_t m_ts_start;
@@ -92,6 +95,8 @@ protected:
 
   std::string m_trezor_path;
   bool m_heavy_tests;
+  rct::RCTConfig m_rct_config;
+
   cryptonote::account_base m_miner_account;
   cryptonote::account_base m_bob_account;
   cryptonote::account_base m_alice_account;
@@ -112,8 +117,12 @@ protected:
 
 class tsx_builder {
 public:
-  tsx_builder(): m_tester(nullptr), m_from(nullptr), m_account(0), m_mixin(TREZOR_TEST_MIXIN), m_fee(TREZOR_TEST_FEE) {}
-  tsx_builder(gen_trezor_base * tester): m_tester(tester), m_from(nullptr), m_account(0), m_mixin(TREZOR_TEST_MIXIN), m_fee(TREZOR_TEST_FEE) {}
+  tsx_builder(): m_tester(nullptr), m_from(nullptr), m_account(0), m_mixin(TREZOR_TEST_MIXIN), m_fee(TREZOR_TEST_FEE),
+  m_rct_config({rct::RangeProofPaddedBulletproof, 1 }){}
+
+  tsx_builder(gen_trezor_base * tester): m_tester(tester), m_from(nullptr), m_account(0),
+  m_mixin(TREZOR_TEST_MIXIN), m_fee(TREZOR_TEST_FEE),
+  m_rct_config({rct::RangeProofPaddedBulletproof, 1 }){}
 
   tsx_builder * cur_height(uint64_t cur_height) { m_cur_height = cur_height; return this; }
   tsx_builder * mixin(size_t mixin=TREZOR_TEST_MIXIN) { m_mixin = mixin; return this; }
@@ -129,7 +138,10 @@ public:
   tsx_builder * add_destination(const cryptonote::tx_destination_entry &dst);
   tsx_builder * add_destination(const var_addr_t addr, bool is_subaddr=false, uint64_t amount=1000);
   tsx_builder * set_integrated(size_t idx);
+  tsx_builder * rct_config(const rct::RCTConfig & rct_config) {m_rct_config = rct_config; return this; };
+
   tsx_builder * build_tx();
+  tsx_builder * construct_pending_tx(tools::wallet2::pending_tx &ptx, boost::optional<std::vector<uint8_t>> extra = boost::none);
   tsx_builder * clear_current();
   std::vector<tools::wallet2::pending_tx> build();
   std::vector<cryptonote::address_parse_info> dest_info(){ return m_dsts_info; }
@@ -152,6 +164,7 @@ protected:
   std::vector<cryptonote::address_parse_info> m_dsts_info;
   std::unordered_set<size_t> m_integrated;
   std::string m_payment_id;
+  rct::RCTConfig m_rct_config;
 };
 
 class gen_trezor_ki_sync : public gen_trezor_base

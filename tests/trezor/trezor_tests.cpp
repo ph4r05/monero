@@ -54,6 +54,7 @@ namespace
   const command_line::arg_descriptor<std::string> arg_trezor_path                 = {"trezor_path", "Path to the trezor device to use, has to support debug link", ""};
   const command_line::arg_descriptor<bool>        arg_heavy_tests                 = {"heavy_tests", "Runs expensive tests (volume tests with real device)", false};
   const command_line::arg_descriptor<std::string> arg_chain_path                  = {"chain_path", "Path to the serialized blockchain, speeds up testing", ""};
+  const command_line::arg_descriptor<bool>        arg_fix_chain                   = {"fix_chain", "If chain_patch is given and file cannot be used, it is ignored and overwriten", false};
 }
 
 
@@ -66,8 +67,17 @@ namespace
     GENERATE_AND_PLAY_INSTANCE(genclass, ctest, *(CORE));                                                       \
   }
 
+#define TREZOR_SETUP_CHAIN(NAME) do {                                                                           \
+  ++tests_count;                                                                                                \
+  try {                                                                                                         \
+    setup_chain(&core, trezor_base, chain_path, fix_chain);                                                     \
+  } catch (const std::exception& ex) {                                                                          \
+    failed_tests.emplace_back("gen_trezor_base " #NAME);                                                        \
+  }                                                                                                             \
+} while(0)
+
 static void rollback_chain(cryptonote::core * core, const cryptonote::block & head);
-static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base, std::string chain_path);
+static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base, std::string chain_path, bool fix_chain);
 
 int main(int argc, char* argv[])
 {
@@ -85,6 +95,7 @@ int main(int argc, char* argv[])
     command_line::add_arg(desc_options, arg_trezor_path);
     command_line::add_arg(desc_options, arg_heavy_tests);
     command_line::add_arg(desc_options, arg_chain_path);
+    command_line::add_arg(desc_options, arg_fix_chain);
 
     po::variables_map vm;
     bool r = command_line::handle_error_helper(desc_options, [&]()
@@ -110,25 +121,23 @@ int main(int argc, char* argv[])
     std::string trezor_path = command_line::get_arg(vm, arg_trezor_path);
     std::string chain_path = command_line::get_arg(vm, arg_chain_path);
     const bool heavy_tests = command_line::get_arg(vm, arg_heavy_tests);
+    const bool fix_chain = command_line::get_arg(vm, arg_fix_chain);
 
     hw::trezor::register_all();
 
     // Bootstrapping common chain & accounts
+    cryptonote::core * core = nullptr;
+
     gen_trezor_base trezor_base;
     trezor_base.setup_args(trezor_path, heavy_tests);
+    trezor_base.rct_config({rct::RangeProofPaddedBulletproof, 1});  // HF9 tests
 
-    cryptonote::core * core = nullptr;
-    {
-      ++tests_count;
-      try {
-        setup_chain(&core, trezor_base, chain_path);
-      } catch (const std::exception& ex) {
-        failed_tests.emplace_back("gen_trezor_base");
-      }
-    }
+    TREZOR_SETUP_CHAIN("HF9");
 
     // Individual test cases using shared pre-generated blockchain.
     TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync, core, trezor_base);
+
+    // Transaction tests
     TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo, core, trezor_base);
     TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_short, core, trezor_base);
     TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_short_integrated, core, trezor_base);
@@ -234,7 +243,7 @@ static bool serialize_chain_to_file(std::vector<test_event_entry>& events, gen_t
   CATCH_ENTRY_L0("serialize_chain_to_file", false);
 }
 
-static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base, std::string chain_path)
+static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base, std::string chain_path, bool fix_chain)
 {
   std::vector<test_event_entry> events;
   const bool do_serialize = !chain_path.empty();
@@ -247,12 +256,16 @@ static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base,
     if (!unserialize_chain_from_file(events, trezor_base, chain_path))
     {
       MERROR("Failed to deserialize data from file: " << chain_path);
-      throw std::runtime_error("Chain load error");
+      if (!fix_chain)
+      {
+        throw std::runtime_error("Chain load error");
+      }
+    } else
+    {
+      trezor_base.load(events);
+      generated = true;
+      loaded = true;
     }
-
-    trezor_base.load(events);
-    generated = true;
-    loaded = true;
   }
 
   if (!generated)
@@ -263,18 +276,17 @@ static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base,
 
       if (generated && !loaded && do_serialize)
       {
-        // Update block trackers
         trezor_base.update_trackers(events);
-
         if (!serialize_chain_to_file(events, trezor_base, chain_path))
         {
-            MERROR("Failed to serialize data to file: " << chain_path);
+          MERROR("Failed to serialize data to file: " << chain_path);
         }
       }
     }
     CATCH_REPLAY(gen_trezor_base);
   }
 
+  trezor_base.fix_hf(events);
   if (generated && do_replay_events_get_core<gen_trezor_base>(events, core))
   {
     MGINFO_GREEN("#TEST-chain-init# Succeeded ");
@@ -290,6 +302,15 @@ static void add_hforks(std::vector<test_event_entry>& events, const v_hardforks_
 {
   event_replay_settings repl_set;
   repl_set.hard_forks = boost::make_optional(hard_forks);
+  events.push_back(repl_set);
+}
+
+static void add_top_hfork(std::vector<test_event_entry>& events, const v_hardforks_t& hard_forks)
+{
+  event_replay_settings repl_set;
+  v_hardforks_t top_fork;
+  top_fork.push_back(hard_forks.back());
+  repl_set.hard_forks = boost::make_optional(top_fork);
   events.push_back(repl_set);
 }
 
@@ -435,7 +456,7 @@ static void expand_tsx(cryptonote::transaction &tx)
     for (size_t n = 0; n < tx.vin.size(); ++n)
       rv.p.MGs[0].II[n] = rct::ki2rct(boost::get<txin_to_key>(tx.vin[n]).k_image);
   }
-  else if (rv.type == rct::RCTTypeSimple || rv.type == rct::RCTTypeBulletproof)
+  else if (rv.type == rct::RCTTypeSimple || rv.type == rct::RCTTypeBulletproof || rv.type == rct::RCTTypeBulletproof2)
   {
     CHECK_AND_ASSERT_THROW_MES(rv.p.MGs.size() == tx.vin.size(), "Bad MGs size");
     for (size_t n = 0; n < tx.vin.size(); ++n)
@@ -444,55 +465,6 @@ static void expand_tsx(cryptonote::transaction &tx)
       rv.p.MGs[n].II[0] = rct::ki2rct(boost::get<txin_to_key>(tx.vin[n]).k_image);
     }
   }
-}
-
-static void construct_pending_tx(
-    tools::wallet2 * src_wallet,
-    std::vector<tx_source_entry> &sources,
-    std::vector<size_t> &selected_transfers,
-    std::vector<tx_destination_entry> &destinations,
-    std::vector<tx_destination_entry> &destinations_orig,
-    tools::wallet2::pending_tx &ptx,
-    boost::optional<std::vector<uint8_t>> extra = boost::none)
-{
-  cryptonote::transaction tx;
-
-  subaddresses_t & subaddresses = wallet_accessor_test::get_subaddresses(src_wallet);
-  crypto::secret_key tx_key;
-  std::vector<crypto::secret_key> additional_tx_keys;
-  std::vector<tx_destination_entry> destinations_copy = destinations;
-  auto change_addr = src_wallet->get_account().get_keys().m_account_address;
-  const rct::RCTConfig rct_config = { rct::RangeProofPaddedBulletproof, 1 };
-  bool r = construct_tx_and_get_tx_key(src_wallet->get_account().get_keys(), subaddresses, sources, destinations_copy,
-                                       change_addr, extra ? extra.get() : std::vector<uint8_t>(), tx, 0, tx_key, additional_tx_keys, true, rct_config, nullptr);
-
-  CHECK_AND_ASSERT_THROW_MES(r, "Transaction construction failed");
-
-  ptx.key_images = "";
-  ptx.fee = TESTS_DEFAULT_FEE;
-  ptx.dust = 0;
-  ptx.dust_added_to_fee = false;
-  ptx.tx = tx;
-  ptx.change_dts = destinations.back();
-  ptx.selected_transfers = selected_transfers;
-  ptx.tx_key = tx_key;
-  ptx.additional_tx_keys = additional_tx_keys;
-  ptx.dests = destinations;
-  ptx.multisig_sigs.clear();
-  ptx.construction_data.sources = sources;
-  ptx.construction_data.change_dts = destinations.back();
-  ptx.construction_data.splitted_dsts = destinations;
-  ptx.construction_data.selected_transfers = ptx.selected_transfers;
-  ptx.construction_data.extra = tx.extra;
-  ptx.construction_data.unlock_time = 0;
-  ptx.construction_data.use_rct = true;
-  ptx.construction_data.use_bulletproofs = true;
-  ptx.construction_data.dests = destinations_orig;
-
-  ptx.construction_data.subaddr_account = 0;
-  ptx.construction_data.subaddr_indices.clear();
-  for(uint32_t i = 0; i < 20; ++i)
-    ptx.construction_data.subaddr_indices.insert(i);
 }
 
 static std::vector<tools::wallet2*> vct_wallets(tools::wallet2* w1=nullptr, tools::wallet2* w2=nullptr, tools::wallet2* w3=nullptr, tools::wallet2* w4=nullptr, tools::wallet2* w5=nullptr)
@@ -521,13 +493,13 @@ const std::string gen_trezor_base::m_alice_spend_private = m_master_seed_str;
 const std::string gen_trezor_base::m_alice_view_private = "a6ccd4ac344a295d1387f8d18c81bdd394f1845de84188e204514ef9370fd403";
 
 gen_trezor_base::gen_trezor_base(){
-
+  m_rct_config = {rct::RangeProofPaddedBulletproof, 1};
 }
 
 gen_trezor_base::gen_trezor_base(const gen_trezor_base &other):
     m_generator(other.m_generator), m_bt(other.m_bt), m_miner_account(other.m_miner_account),
     m_bob_account(other.m_bob_account), m_alice_account(other.m_alice_account), m_eve_account(other.m_eve_account),
-    m_hard_forks(other.m_hard_forks), m_trezor(other.m_trezor)
+    m_hard_forks(other.m_hard_forks), m_trezor(other.m_trezor), m_rct_config(other.m_rct_config)
 {
 
 }
@@ -567,6 +539,7 @@ void gen_trezor_base::fork(gen_trezor_base & other)
   other.m_hard_forks = m_hard_forks;
   other.m_trezor_path = m_trezor_path;
   other.m_heavy_tests = m_heavy_tests;
+  other.m_rct_config = m_rct_config;
 
   other.m_miner_account = m_miner_account;
   other.m_bob_account = m_bob_account;
@@ -664,8 +637,9 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   REWIND_BLOCKS(events, blk_4r, blk_4, m_miner_account);  // rewind to unlock
 
   // Hard fork to bulletproofs version, v9.
+  const uint8_t CUR_HF = 9;
   auto hardfork_height = num_blocks(events);  // next block is v9
-  ADD_HARDFORK(m_hard_forks, 9, hardfork_height);
+  ADD_HARDFORK(m_hard_forks, CUR_HF, hardfork_height);
   add_hforks(events, m_hard_forks);
   MDEBUG("Hardfork height: " << hardfork_height << " at block: " << get_block_hash(blk_4r));
 
@@ -717,7 +691,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(1), 10, blk_4);
   MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(3), 10, blk_4);
   MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(4), 10, blk_4);
-  MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_5, blk_4r, m_miner_account, txs_blk_5, 9);
+  MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_5, blk_4r, m_miner_account, txs_blk_5, CUR_HF);
 
   // Simple transaction check
   bool resx = rct::verRctSemanticsSimple(txs_blk_5.begin()->rct_signatures);
@@ -725,7 +699,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   CHECK_AND_ASSERT_THROW_MES(resx, "Tsx5[0] semantics failed");
   CHECK_AND_ASSERT_THROW_MES(resy, "Tsx5[0] non-semantics failed");
 
-  REWIND_BLOCKS_HF(events, blk_5r, blk_5, m_miner_account, 9);  // rewind to unlock
+  REWIND_BLOCKS_HF(events, blk_5r, blk_5, m_miner_account, CUR_HF);  // rewind to unlock
 
   // RCT transactions, wallets have to be used
   wallet_tools::process_transactions(m_wl_alice.get(), events, blk_5r, m_bt);
@@ -740,7 +714,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
 
   construct_tx_to_key(tx_1, m_wl_alice.get(), m_bob_account, MK_COINS(1), sources, TREZOR_TEST_FEE, true, rct::RangeProofPaddedBulletproof, 1);
   events.push_back(tx_1);
-  MAKE_NEXT_BLOCK_TX1_HF(events, blk_6, blk_5r, m_miner_account, tx_1, 9);
+  MAKE_NEXT_BLOCK_TX1_HF(events, blk_6, blk_5r, m_miner_account, tx_1, CUR_HF);
   MDEBUG("Post 1st tsx: " << (num_blocks(events) - 1) << " at block: " << get_block_hash(blk_6));
 
   // Simple transaction check
@@ -749,7 +723,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   CHECK_AND_ASSERT_THROW_MES(resx, "tx_1 semantics failed");
   CHECK_AND_ASSERT_THROW_MES(resy, "tx_1 non-semantics failed");
 
-  REWIND_BLOCKS_HF(events, blk_6r, blk_6, m_miner_account, 9);
+  REWIND_BLOCKS_HF(events, blk_6r, blk_6, m_miner_account, CUR_HF);
   m_head = blk_6r;
   m_events = events;
   return true;
@@ -808,6 +782,18 @@ void gen_trezor_base::load(std::vector<test_event_entry>& events)
   wallet_tools::process_transactions(m_wl_bob.get(), events, m_head, m_bt);
 }
 
+void gen_trezor_base::fix_hf(std::vector<test_event_entry>& events)
+{
+  // If current test requires higher hard-fork, move it up
+  const auto current_hf = m_hard_forks.back().first;
+  if (m_rct_config.bp_version == 2 && current_hf < 10){
+    auto hardfork_height = num_blocks(events);
+    ADD_HARDFORK(m_hard_forks, 10, hardfork_height);
+    add_top_hfork(events, m_hard_forks);
+    MDEBUG("Hardfork height: " << hardfork_height);
+  }
+}
+
 void gen_trezor_base::update_trackers(std::vector<test_event_entry>& events)
 {
   wallet_tools::process_transactions(nullptr, events, m_head, m_bt);
@@ -838,6 +824,13 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
   const uint64_t height_pre = num_blocks(events) - 1;
   cryptonote::block head_block = get_head_block(events);
   const crypto::hash head_hash = get_block_hash(head_block);
+
+  // If current test requires higher hard-fork, move it up
+  const auto current_hf = m_hard_forks.back().first;
+  const uint8_t tx_hf = m_rct_config.bp_version == 2 ? 10 : 9;
+  if (tx_hf > current_hf){
+    throw std::runtime_error("Too late for HF change");
+  }
 
   tools::wallet2::unsigned_tx_set txs;
   std::list<cryptonote::transaction> tx_list;
@@ -877,7 +870,7 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
     MDEBUG("Transaction: " << dump_data(c_ptx.tx));
   }
 
-  MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_7, m_head, m_miner_account, tx_list, 9);
+  MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_7, m_head, m_miner_account, tx_list, tx_hf);
   MDEBUG("Trezor tsx: " << (num_blocks(events) - 1) << " at block: " << get_block_hash(blk_7));
 
   // TX receive test
@@ -899,7 +892,8 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
     size_t num_payment_id_checks_done = 0;
 
     CHECK_AND_ASSERT_THROW_MES(exp_payment_id.empty() || exp_payment_id.size() == 8 || exp_payment_id.size() == 32, "Required payment ID invalid");
-    CHECK_AND_ASSERT_THROW_MES(exp_payment_id.size() == enc_payment_id.size(), "Required and built payment ID size mismatch");
+    CHECK_AND_ASSERT_THROW_MES((exp_payment_id.size() == 32) == (enc_payment_id.size() == 32), "Required and built payment ID size mismatch");
+    CHECK_AND_ASSERT_THROW_MES(exp_payment_id.size() <= enc_payment_id.size(), "Required and built payment ID size mismatch");
 
     for(auto &src : c_ptx.construction_data.sources){
       cur_sum_in += src.amount;
@@ -1111,7 +1105,8 @@ tsx_builder * tsx_builder::build_tx()
 
   std::vector<uint8_t> extra = build_payment_id_extra(m_payment_id);
   fill_tx_destinations(m_from->get_subaddress({m_account, 0}), m_destinations_orig, m_fee, m_sources, m_destinations, true);
-  construct_pending_tx(m_from, m_sources, m_selected_transfers, m_destinations, m_destinations_orig, ptx, extra);
+  construct_pending_tx(ptx, extra);
+
   ptx.construction_data.subaddr_account = m_account;
 
   // Build destinations parse info
@@ -1126,6 +1121,52 @@ tsx_builder * tsx_builder::build_tx()
 
     m_dsts_info.push_back(info);
   }
+
+  return this;
+}
+
+tsx_builder * tsx_builder::construct_pending_tx(tools::wallet2::pending_tx &ptx, boost::optional<std::vector<uint8_t>> extra)
+{
+  CHECK_AND_ASSERT_THROW_MES(m_from, "Wallet not provided");
+
+  cryptonote::transaction tx;
+  subaddresses_t & subaddresses = wallet_accessor_test::get_subaddresses(m_from);
+  crypto::secret_key tx_key;
+  std::vector<crypto::secret_key> additional_tx_keys;
+  std::vector<tx_destination_entry> destinations_copy = m_destinations;
+
+  auto change_addr = m_from->get_account().get_keys().m_account_address;
+  bool r = construct_tx_and_get_tx_key(m_from->get_account().get_keys(), subaddresses, m_sources, destinations_copy,
+                                       change_addr, extra ? extra.get() : std::vector<uint8_t>(), tx, 0, tx_key,
+                                       additional_tx_keys, true, m_rct_config, nullptr);
+
+  CHECK_AND_ASSERT_THROW_MES(r, "Transaction construction failed");
+
+  ptx.key_images = "";
+  ptx.fee = TESTS_DEFAULT_FEE;
+  ptx.dust = 0;
+  ptx.dust_added_to_fee = false;
+  ptx.tx = tx;
+  ptx.change_dts = m_destinations.back();
+  ptx.selected_transfers = m_selected_transfers;
+  ptx.tx_key = tx_key;
+  ptx.additional_tx_keys = additional_tx_keys;
+  ptx.dests = m_destinations;
+  ptx.multisig_sigs.clear();
+  ptx.construction_data.sources = m_sources;
+  ptx.construction_data.change_dts = m_destinations.back();
+  ptx.construction_data.splitted_dsts = m_destinations;
+  ptx.construction_data.selected_transfers = ptx.selected_transfers;
+  ptx.construction_data.extra = tx.extra;
+  ptx.construction_data.unlock_time = 0;
+  ptx.construction_data.use_rct = true;
+  ptx.construction_data.use_bulletproofs = true;
+  ptx.construction_data.dests = m_destinations_orig;
+
+  ptx.construction_data.subaddr_account = 0;
+  ptx.construction_data.subaddr_indices.clear();
+  for(uint32_t i = 0; i < 20; ++i)
+    ptx.construction_data.subaddr_indices.insert(i);
 
   return this;
 }
@@ -1172,6 +1213,7 @@ bool gen_trezor_1utxo::generate(std::vector<test_event_entry>& events)
            ->from(m_wl_alice.get(), 0)
            ->compute_sources(boost::none, MK_COINS(1), -1, -1)
            ->add_destination(m_eve_account, false, 1000)
+           ->rct_config(m_rct_config)
            ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1188,6 +1230,7 @@ bool gen_trezor_1utxo_paymentid_short::generate(std::vector<test_event_entry>& e
       ->compute_sources(boost::none, MK_COINS(1), -1, -1)
       ->add_destination(m_eve_account, false, 1000)
       ->payment_id(TREZOR_TEST_PAYMENT_ID)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1205,6 +1248,7 @@ bool gen_trezor_1utxo_paymentid_short_integrated::generate(std::vector<test_even
       ->add_destination(m_eve_account, false, 1000)
       ->payment_id(TREZOR_TEST_PAYMENT_ID)
       ->set_integrated(0)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1220,6 +1264,7 @@ bool gen_trezor_1utxo_paymentid_long::generate(std::vector<test_event_entry>& ev
       ->compute_sources(boost::none, MK_COINS(1), -1, -1)
       ->add_destination(m_eve_account, false, 1000)
       ->payment_id(TREZOR_TEST_PAYMENT_ID_LONG)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1234,6 +1279,7 @@ bool gen_trezor_4utxo::generate(std::vector<test_event_entry>& events)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
       ->add_destination(m_eve_account, false, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1248,6 +1294,7 @@ bool gen_trezor_4utxo_acc1::generate(std::vector<test_event_entry>& events)
       ->from(m_wl_alice.get(), 1)
       ->compute_sources(4, MK_COINS(1), -1, -1)
       ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1262,6 +1309,7 @@ bool gen_trezor_4utxo_to_sub::generate(std::vector<test_event_entry>& events)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
       ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1277,6 +1325,7 @@ bool gen_trezor_4utxo_to_2sub::generate(std::vector<test_event_entry>& events)
       ->compute_sources(4, MK_COINS(1), -1, -1)
       ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
       ->add_destination(m_wl_eve->get_subaddress({1, 3}), true, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1293,6 +1342,7 @@ bool gen_trezor_4utxo_to_1norm_2sub::generate(std::vector<test_event_entry>& eve
       ->add_destination(m_wl_eve->get_subaddress({1, 1}), true, 1000)
       ->add_destination(m_wl_eve->get_subaddress({2, 1}), true, 1000)
       ->add_destination(m_wl_eve.get(), false, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1309,6 +1359,7 @@ bool gen_trezor_2utxo_sub_acc_to_1norm_2sub::generate(std::vector<test_event_ent
       ->add_destination(m_wl_eve->get_subaddress({1, 1}), true, 1000)
       ->add_destination(m_wl_eve->get_subaddress({2, 1}), true, 1000)
       ->add_destination(m_wl_eve.get(), false, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1329,6 +1380,7 @@ bool gen_trezor_4utxo_to_7outs::generate(std::vector<test_event_entry>& events)
       ->add_destination(m_wl_eve->get_subaddress({0, 3}), true, 1000)
       ->add_destination(m_wl_eve->get_subaddress({0, 4}), true, 1000)
       ->add_destination(m_wl_eve.get(), false, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
@@ -1343,6 +1395,7 @@ bool gen_trezor_many_utxo::generate(std::vector<test_event_entry>& events)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(110, MK_COINS(1), -1, -1)
       ->add_destination(m_eve_account, false, 1000)
+      ->rct_config(m_rct_config)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
