@@ -848,6 +848,7 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
   hw::wallet_shim wallet_shim;
   setup_shim(&wallet_shim);
   aux_data.tx_recipients = dsts_info;
+  aux_data.bp_version = m_rct_config.bp_version;
   dev_cold->tx_sign(&wallet_shim, txs, exported_txs, aux_data);
 
   MDEBUG("Signed tx data from hw: " << exported_txs.ptx.size() << " transactions");
