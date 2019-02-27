@@ -237,6 +237,13 @@ namespace trezor {
                                 hw::tx_aux_data & aux_data)
     {
       CHECK_AND_ASSERT_THROW_MES(unsigned_tx.transfers.first == 0, "Unsuported non zero offset");
+
+      AUTO_LOCK_CMD();
+      require_connected();
+      device_state_reset_unsafe();
+      require_initialized();
+      transaction_versions_check(unsigned_tx, aux_data);
+
       size_t num_tx = unsigned_tx.txes.size();
       signed_tx.key_images.clear();
       signed_tx.key_images.resize(unsigned_tx.transfers.second.size());
@@ -305,9 +312,10 @@ namespace trezor {
                    hw::tx_aux_data & aux_data,
                    std::shared_ptr<protocol::tx::Signer> & signer)
     {
-      AUTO_LOCK_CMD();
       require_connected();
-      device_state_reset_unsafe();
+      if (idx > 0)
+        device_state_reset_unsafe();
+
       require_initialized();
 
       CHECK_AND_ASSERT_THROW_MES(idx < unsigned_tx.txes.size(), "Invalid transaction index");
@@ -339,12 +347,10 @@ namespace trezor {
       }
 
       // Step: input_vini
-      if (!signer->in_memory()){
-        for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
-          auto src = signer->step_set_vini_input(cur_src);
-          auto ack = this->client_exchange<messages::monero::MoneroTransactionInputViniAck>(src);
-          signer->step_set_vini_input_ack(ack);
-        }
+      for(size_t cur_src = 0; cur_src < num_sources; ++cur_src){
+        auto src = signer->step_set_vini_input(cur_src);
+        auto ack = this->client_exchange<messages::monero::MoneroTransactionInputViniAck>(src);
+        signer->step_set_vini_input_ack(ack);
       }
 
       // Step: all inputs set
@@ -357,6 +363,13 @@ namespace trezor {
         auto src = signer->step_set_output(cur_dst);
         auto ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(src);
         signer->step_set_output_ack(ack);
+
+        // If BP is offloaded to host, another step with computed BP may be needed.
+        auto offloaded_bp = signer->step_rsig(cur_dst);
+        if (offloaded_bp){
+          auto bp_ack = this->client_exchange<messages::monero::MoneroTransactionSetOutputAck>(src);
+          signer->step_set_rsig_ack(ack);
+        }
       }
 
       // Step: all outs set
@@ -375,6 +388,30 @@ namespace trezor {
       auto final_msg = signer->step_final();
       auto ack_final = this->client_exchange<messages::monero::MoneroTransactionFinalAck>(final_msg);
       signer->step_final_ack(ack_final);
+    }
+
+    void device_trezor::transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data)
+    {
+      auto trezor_version = get_version();
+      unsigned client_version = 1;  // default client version for tx
+
+      if (trezor_version <= pack_version(2, 0, 10)){
+        client_version = 0;
+      }
+
+      if (aux_data.client_version){
+        auto wanted_client_version = aux_data.client_version.get();
+        if (wanted_client_version > client_version){
+          throw exc::TrezorException("Trezor firmware 2.0.10 and lower does not support current transaction sign protocol. Please update.");
+        } else {
+          client_version = wanted_client_version;
+        }
+      }
+      aux_data.client_version = client_version;
+
+      if (client_version == 0 && aux_data.bp_version && aux_data.bp_version.get() != 1){
+        throw exc::TrezorException("Trezor firmware 2.0.10 and lower does not support current transaction sign protocol (BPv2+). Please update.");
+      }
     }
 
     void device_trezor::transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg)

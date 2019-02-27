@@ -58,8 +58,18 @@ namespace trezor {
    */
   class device_trezor : public hw::trezor::device_trezor_base, public hw::device_cold {
     protected:
+      void transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data);
       void transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg);
       void transaction_check(const protocol::tx::TData & tdata, const hw::tx_aux_data & aux_data);
+
+      /**
+       * Signs particular transaction idx in the unsigned set, keeps state in the signer
+       */
+      void tx_sign(wallet_shim * wallet,
+                   const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
+                   size_t idx,
+                   hw::tx_aux_data & aux_data,
+                   std::shared_ptr<protocol::tx::Signer> & signer);
 
     public:
       device_trezor();
@@ -106,15 +116,6 @@ namespace trezor {
       void ki_sync(wallet_shim * wallet,
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
-
-      /**
-       * Signs particular transaction idx in the unsigned set, keeps state in the signer
-       */
-      void tx_sign(wallet_shim * wallet,
-                   const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
-                   size_t idx,
-                   hw::tx_aux_data & aux_data,
-                   std::shared_ptr<protocol::tx::Signer> & signer);
 
       /**
        * Signs unsigned transaction with the Trezor.

@@ -165,6 +165,7 @@ namespace tx {
     tx_construction_data tx_data;
     cryptonote::transaction tx;
     unsigned rsig_type;
+    int bp_version;
     std::vector<uint64_t> grouping_vct;
     std::shared_ptr<MoneroRsigData> rsig_param;
     size_t cur_input_idx;
@@ -205,6 +206,7 @@ namespace tx {
     const unsigned_tx_set * m_unsigned_tx;
     hw::tx_aux_data * m_aux_data;
 
+    unsigned m_client_version;
     bool m_multisig;
 
     const tx_construction_data & cur_tx(){
@@ -214,6 +216,9 @@ namespace tx {
 
     void extract_payment_id();
     void compute_integrated_indices(TsxData * tsx_data);
+    bool should_compute_bp_now();
+    void compute_bproof(messages::monero::MoneroTransactionRsigData & rsig_data);
+    void process_bproof(rct::Bulletproof & bproof);
 
   public:
     Signer(wallet_shim * wallet2, const unsigned_tx_set * unsigned_tx, size_t tx_idx = 0, hw::tx_aux_data * aux_data = nullptr);
@@ -237,6 +242,9 @@ namespace tx {
     std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> step_set_output(size_t idx);
     void step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack);
 
+    std::shared_ptr<messages::monero::MoneroTransactionSetOutputRequest> step_rsig(size_t idx);
+    void step_set_rsig_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack);
+
     std::shared_ptr<messages::monero::MoneroTransactionAllOutSetRequest> step_all_outs_set();
     void step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack, hw::device &hwdev);
 
@@ -247,6 +255,10 @@ namespace tx {
     void step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack);
 
     std::string store_tx_aux_info();
+
+    unsigned client_version() const {
+      return m_client_version;
+    }
 
     bool is_simple() const {
       if (!m_ct.rv){
