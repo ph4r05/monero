@@ -32,6 +32,7 @@
 
 #include <device_trezor/device_trezor.hpp>
 #include "../core_tests/chaingen.h"
+#include "../core_tests/wallet_tools.h"
 
 #define TREZOR_TEST_FEE 90000000000
 #define TREZOR_TEST_MIXIN 11
@@ -136,6 +137,7 @@ public:
 
   tsx_builder * destinations(std::vector<cryptonote::tx_destination_entry> &dsts);
   tsx_builder * add_destination(const cryptonote::tx_destination_entry &dst);
+  tsx_builder * add_destination(const tools::wallet2 * wallet, bool is_subaddr=false, uint64_t amount=1000);
   tsx_builder * add_destination(const var_addr_t addr, bool is_subaddr=false, uint64_t amount=1000);
   tsx_builder * set_integrated(size_t idx);
   tsx_builder * rct_config(const rct::RCTConfig & rct_config) {m_rct_config = rct_config; return this; };

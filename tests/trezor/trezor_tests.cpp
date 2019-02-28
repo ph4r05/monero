@@ -1070,6 +1070,12 @@ tsx_builder * tsx_builder::add_destination(const var_addr_t addr, bool is_subadd
   return this;
 }
 
+tsx_builder * tsx_builder::add_destination(const tools::wallet2 * wallet, bool is_subaddr, uint64_t amount)
+{
+  m_destinations_orig.push_back(build_dst(get_address(wallet), is_subaddr, amount));
+  return this;
+}
+
 tsx_builder * tsx_builder::set_integrated(size_t idx)
 {
   m_integrated.insert(idx);
