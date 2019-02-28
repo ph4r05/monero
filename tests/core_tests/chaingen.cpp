@@ -433,7 +433,7 @@ bool fill_tx_sources(std::vector<tx_source_entry>& sources, const std::vector<te
             ts.rct = false;
             ts.mask = rct::identity();  // non-rct has identity mask by definition
 
-            rct::key comm = rct::commit(ts.amount, ts.mask);
+            rct::key comm = rct::zeroCommit(ts.amount);
             for(auto & ot : ts.outputs)
               ot.second.mask = comm;
 
@@ -511,7 +511,7 @@ void block_tracker::process(const block* blk, const transaction * tx, size_t i)
   for (size_t j = 0; j < tx->vout.size(); ++j) {
     const tx_out &out = tx->vout[j];
 
-    if (2 != out.target.which()) { // out_to_key
+    if (typeid(cryptonote::txout_to_key) != out.target.type()) { // out_to_key
       continue;
     }
 
