@@ -371,7 +371,7 @@ public:
   void process(const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t& mtx);
   void process(const cryptonote::block* blk, const cryptonote::transaction * tx, size_t i);
   void global_indices(const cryptonote::transaction *tx, std::vector<uint64_t> &indices);
-  void get_decoys(size_t decoys, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs);
+  void get_fake_outs(size_t num_outs, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs);
 
   std::string dump_data();
   void dump_data(const std::string & fname);

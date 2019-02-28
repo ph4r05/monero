@@ -543,7 +543,7 @@ void block_tracker::global_indices(const cryptonote::transaction *tx, std::vecto
   }
 }
 
-void block_tracker::get_decoys(size_t decoys, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs){
+void block_tracker::get_fake_outs(size_t num_outs, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs){
   auto & vct = m_outs[amount];
   const size_t n_outs = vct.size();
 
@@ -555,12 +555,12 @@ void block_tracker::get_decoys(size_t decoys, uint64_t amount, uint64_t global_i
 
   size_t n_iters = 0;
   ssize_t idx = -1;
-  outs.reserve(decoys);
-  while(outs.size() < decoys){
+  outs.reserve(num_outs);
+  while(outs.size() < num_outs){
     n_iters += 1;
     idx = (idx + 1) % n_outs;
     size_t oi_idx = choices[(size_t)idx];
-    CHECK_AND_ASSERT_THROW_MES((n_iters / n_outs) <= outs.size(), "Decoy pick selection problem");
+    CHECK_AND_ASSERT_THROW_MES((n_iters / n_outs) <= outs.size(), "Fake out pick selection problem");
 
     auto & oi = vct[oi_idx];
     if (oi.idx == global_index)
@@ -779,21 +779,21 @@ bool wallet_tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptono
   uint64_t sum = 0;
   size_t cur_utxo = 0;
   bool abort = false;
-  unsigned brk = 0;
+  unsigned brk_cond = 0;
   unsigned brk_thresh = num_utxo && min_amount ? 2 : (num_utxo || min_amount ? 1 : 0);
 
 #define EVAL_BRK_COND() do {                         \
-  brk = 0;                                           \
+  brk_cond = 0;                                      \
   if (num_utxo && num_utxo.get() <= cur_utxo)        \
-    brk += 1;                                        \
+    brk_cond += 1;                                   \
   if (min_amount && min_amount.get() <= sum)         \
-    brk += 1;                                        \
+    brk_cond += 1;                                   \
   } while(0)
 
   for(ssize_t i = roffset; iters < ntrans && !abort; i += step, ++iters)
   {
     EVAL_BRK_COND();
-    if (brk >= brk_thresh)
+    if (brk_cond >= brk_thresh)
       break;
 
     i = i < 0 ? (i + ntrans) : i % ntrans;
@@ -803,11 +803,11 @@ bool wallet_tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptono
     if (td.m_block_height + CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW > cur_height)
       continue;
     if (selected_idx.find((size_t)i) != selected_idx.end()){
-      MINFO("Should not happen: " << i);
+      MERROR("Should not happen (selected_idx not found): " << i);
       continue;
     }
     if (selected_kis.find(td.m_key_image) != selected_kis.end()){
-      MINFO("Should not happen: " << i << "ki: " << dump_keys(td.m_key_image.data));
+      MERROR("Should not happen (selected KI): " << i << "ki: " << dump_keys(td.m_key_image.data));
       continue;
     }
 
@@ -848,7 +848,7 @@ bool wallet_tools::fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptono
   }
 
   EVAL_BRK_COND();
-  return brk >= brk_thresh;
+  return brk_cond >= brk_thresh;
 #undef EVAL_BRK_COND
 }
 
@@ -858,7 +858,7 @@ void wallet_tools::gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wa
   src.rct = td.is_rct();
 
   std::vector<tools::wallet2::get_outs_entry> outs;
-  bt.get_decoys(mixin, td.is_rct() ? 0 : td.amount(), td.m_global_output_index, cur_height, outs);
+  bt.get_fake_outs(mixin, td.is_rct() ? 0 : td.amount(), td.m_global_output_index, cur_height, outs);
 
   for (size_t n = 0; n < mixin; ++n)
   {
