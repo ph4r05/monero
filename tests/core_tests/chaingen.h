@@ -288,6 +288,8 @@ struct output_index {
   size_t tx_no; // index of transaction in block
   size_t out_no; // index of out in transaction
   size_t idx;
+  uint64_t unlock_time;
+  bool is_coin_base;
   bool spent;
   bool rct;
   rct::key comm;
@@ -295,14 +297,16 @@ struct output_index {
   const cryptonote::transaction *p_tx;
 
   output_index(const cryptonote::txout_target_v &_out, uint64_t _a, size_t _h, size_t tno, size_t ono, const cryptonote::block *_pb, const cryptonote::transaction *_pt)
-      : out(_out), amount(_a), blk_height(_h), tx_no(tno), out_no(ono), idx(0), spent(false), rct(false), p_blk(_pb), p_tx(_pt)
+      : out(_out), amount(_a), blk_height(_h), tx_no(tno), out_no(ono), idx(0), unlock_time(0),
+      is_coin_base(false), spent(false), rct(false), p_blk(_pb), p_tx(_pt)
   {
 
   }
 
   output_index(const output_index &other)
       : out(other.out), amount(other.amount), blk_height(other.blk_height), tx_no(other.tx_no), rct(other.rct),
-      out_no(other.out_no), idx(other.idx), spent(other.spent), comm(other.comm), p_blk(other.p_blk), p_tx(other.p_tx) {  }
+      out_no(other.out_no), idx(other.idx), unlock_time(other.unlock_time), is_coin_base(other.is_coin_base),
+      spent(other.spent), comm(other.comm), p_blk(other.p_blk), p_tx(other.p_tx) {  }
 
   void set_rct(bool arct) {
     rct = arct;
@@ -324,7 +328,9 @@ struct output_index {
        << " out_no=" << out_no
        << " amount=" << amount
        << " idx=" << idx
+       << " unlock_time=" << unlock_time
        << " spent=" << spent
+       << " is_coin_base=" << is_coin_base
        << " rct=" << rct
        << " comm=" << dump_keys(comm.bytes)
        << "}";

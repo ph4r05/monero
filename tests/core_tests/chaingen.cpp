@@ -304,6 +304,8 @@ bool init_output_indices(map_output_idx_t& outs, std::map<uint64_t, std::vector<
 
                 output_index oi(out.target, out.amount, boost::get<txin_gen>(*blk.miner_tx.vin.begin()).height, i, j, &blk, vtx[i]);
                 oi.set_rct(tx.version == 2);
+                oi.unlock_time = tx.unlock_time;
+                oi.is_coin_base = i == 0;
 
                 if (2 == out.target.which()) { // out_to_key
                     outs[out.amount].push_back(oi);
@@ -525,6 +527,8 @@ void block_tracker::process(const block* blk, const transaction * tx, size_t i)
     output_index oi(out.target, out.amount, boost::get<txin_gen>(blk->miner_tx.vin.front()).height, i, j, blk, tx);
     oi.set_rct(tx->version == 2);
     oi.idx = m_outs[rct_amount].size();
+    oi.unlock_time = tx->unlock_time;
+    oi.is_coin_base = tx->vin.size() == 1 && tx->vin.back().type() == typeid(cryptonote::txin_gen);
 
     m_outs[rct_amount].push_back(oi);
     m_map_outs.insert({hid, oi});
@@ -567,7 +571,7 @@ void block_tracker::get_fake_outs(size_t num_outs, uint64_t amount, uint64_t glo
       continue;
     if (oi.out.type() != typeid(cryptonote::txout_to_key))
       continue;
-    if (oi.blk_height + CRYPTONOTE_MINED_MONEY_UNLOCK_WINDOW > cur_height)
+    if (oi.unlock_time > cur_height)
       continue;
     if (used.find(oi_idx) != used.end())
       continue;
