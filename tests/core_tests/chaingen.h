@@ -55,7 +55,6 @@
 #include "cryptonote_core/cryptonote_core.h"
 #include "cryptonote_basic/cryptonote_boost_serialization.h"
 #include "misc_language.h"
-#include "wallet/wallet2.h"
 
 #undef MONERO_DEFAULT_LOG_CATEGORY
 #define MONERO_DEFAULT_LOG_CATEGORY "tests.core"
@@ -345,6 +344,7 @@ struct output_index {
   }
 };
 
+typedef std::tuple<uint64_t, crypto::public_key, rct::key> get_outs_entry;
 typedef std::pair<crypto::hash, size_t> output_hasher;
 typedef boost::hash<output_hasher> output_hasher_hasher;
 typedef std::map<uint64_t, std::vector<size_t> > map_output_t;
@@ -354,7 +354,7 @@ typedef std::unordered_map<output_hasher, output_index, output_hasher_hasher> ma
 typedef std::unordered_map<crypto::public_key, cryptonote::subaddress_index> subaddresses_t;
 typedef std::pair<uint64_t, size_t>  outloc_t;
 
-typedef boost::variant<cryptonote::account_public_address, cryptonote::account_keys, cryptonote::account_base, cryptonote::tx_destination_entry, tools::wallet2*> var_addr_t;
+typedef boost::variant<cryptonote::account_public_address, cryptonote::account_keys, cryptonote::account_base, cryptonote::tx_destination_entry> var_addr_t;
 typedef struct {
   const var_addr_t addr;
   bool is_subaddr;
@@ -377,7 +377,7 @@ public:
   void process(const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t& mtx);
   void process(const cryptonote::block* blk, const cryptonote::transaction * tx, size_t i);
   void global_indices(const cryptonote::transaction *tx, std::vector<uint64_t> &indices);
-  void get_fake_outs(size_t num_outs, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<tools::wallet2::get_outs_entry> &outs);
+  void get_fake_outs(size_t num_outs, uint64_t amount, uint64_t global_index, uint64_t cur_height, std::vector<get_outs_entry> &outs);
 
   std::string dump_data();
   void dump_data(const std::string & fname);
@@ -400,42 +400,6 @@ cryptonote::account_public_address get_address(const cryptonote::account_public_
 cryptonote::account_public_address get_address(const cryptonote::account_keys& inp);
 cryptonote::account_public_address get_address(const cryptonote::account_base& inp);
 cryptonote::account_public_address get_address(const cryptonote::tx_destination_entry& inp);
-cryptonote::account_public_address get_address(const tools::wallet2 * inp);
-
-typedef struct {
-  tools::wallet2::transfer_details * td;
-  cryptonote::tx_source_entry * src;
-
-  std::unordered_set<size_t> * selected_idx;
-  std::unordered_set<crypto::key_image> * selected_kis;
-  size_t ntrans;
-  size_t iters;
-  uint64_t sum;
-  size_t cur_utxo;
-} tx_source_info_crate_t;
-
-typedef std::function<bool(const tx_source_info_crate_t &info, bool &abort)> fnc_accept_tx_source_t;
-
-// Wallet friend, direct access to required fields and private methods
-class wallet_accessor_test
-{
-public:
-  static void set_account(tools::wallet2 * wallet, cryptonote::account_base& account);
-  static tools::wallet2::transfer_container & get_transfers(tools::wallet2 * wallet) { return wallet->m_transfers; }
-  static subaddresses_t & get_subaddresses(tools::wallet2 * wallet) { return wallet->m_subaddresses; }
-  static void process_parsed_blocks(tools::wallet2 * wallet, uint64_t start_height, const std::vector<cryptonote::block_complete_entry> &blocks, const std::vector<tools::wallet2::parsed_block> &parsed_blocks, uint64_t& blocks_added);
-};
-
-class wallet_tools
-{
-public:
-  static void gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wallet2::transfer_details & td, cryptonote::tx_source_entry & src, block_tracker &bt);
-  static void gen_block_data(block_tracker &bt, const cryptonote::block *bl, const map_hash2tx_t & mtx, cryptonote::block_complete_entry &bche, tools::wallet2::parsed_block &parsed_block, uint64_t &height);
-  static void compute_subaddresses(std::unordered_map<crypto::public_key, cryptonote::subaddress_index> &subaddresses, cryptonote::account_base & creds, size_t account, size_t minors);
-  static void process_transactions(tools::wallet2 * wallet, const std::vector<test_event_entry>& events, const cryptonote::block& blk_head, block_tracker &bt, const boost::optional<crypto::hash>& blk_tail=boost::none);
-  static void process_transactions(tools::wallet2 * wallet, const std::vector<const cryptonote::block*>& blockchain, const map_hash2tx_t & mtx, block_tracker &bt);
-  static bool fill_tx_sources(tools::wallet2 * wallet, std::vector<cryptonote::tx_source_entry>& sources, size_t mixin, const boost::optional<size_t>& num_utxo, const boost::optional<uint64_t>& min_amount, block_tracker &bt, std::vector<size_t> &selected, uint64_t cur_height, ssize_t offset=0, int step=1, const boost::optional<fnc_accept_tx_source_t>& fnc_accept=boost::none);
-};
 
 inline cryptonote::difficulty_type get_test_difficulty(const boost::optional<uint8_t>& hf_ver=boost::none) {return !hf_ver || hf_ver.get() <= 1 ? 1 : 2;}
 inline uint64_t current_difficulty_window(const boost::optional<uint8_t>& hf_ver=boost::none){ return !hf_ver || hf_ver.get() <= 1 ? DIFFICULTY_TARGET_V1 : DIFFICULTY_TARGET_V2; }
@@ -467,26 +431,11 @@ bool construct_tx_to_key(cryptonote::transaction& tx, const cryptonote::account_
                          std::vector<cryptonote::tx_source_entry> &sources,
                          uint64_t fee, bool rct, rct::RangeProofType range_proof_type, int bp_version = 0);
 
-bool construct_tx_to_key(cryptonote::transaction& tx, tools::wallet2 * from_wallet, const var_addr_t& to, uint64_t amount,
-                         std::vector<cryptonote::tx_source_entry> &sources,
-                         uint64_t fee, bool rct=false, rct::RangeProofType range_proof_type=rct::RangeProofBorromean, int bp_version = 0);
-
-bool construct_tx_to_key(cryptonote::transaction& tx, tools::wallet2 * sender_wallet, const std::vector<cryptonote::tx_destination_entry>& destinations,
-                         std::vector<cryptonote::tx_source_entry> &sources,
-                         uint64_t fee, bool rct, rct::RangeProofType range_proof_type, int bp_version = 0);
-
 cryptonote::transaction construct_tx_with_fee(std::vector<test_event_entry>& events, const cryptonote::block& blk_head,
                                             const cryptonote::account_base& acc_from, const var_addr_t& to,
                                             uint64_t amount, uint64_t fee);
 
 bool construct_tx_rct(const cryptonote::account_keys& sender_account_keys,
-    std::vector<cryptonote::tx_source_entry>& sources,
-    const std::vector<cryptonote::tx_destination_entry>& destinations,
-    const boost::optional<cryptonote::account_public_address>& change_addr,
-    std::vector<uint8_t> extra, cryptonote::transaction& tx, uint64_t unlock_time,
-    bool rct=false, rct::RangeProofType range_proof_type=rct::RangeProofBorromean, int bp_version = 0);
-
-bool construct_tx_rct(tools::wallet2 * sender_wallet,
     std::vector<cryptonote::tx_source_entry>& sources,
     const std::vector<cryptonote::tx_destination_entry>& destinations,
     const boost::optional<cryptonote::account_public_address>& change_addr,

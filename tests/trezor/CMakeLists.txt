@@ -28,11 +28,13 @@
 
 set(trezor_tests_sources
         trezor_tests.cpp
-        ../core_tests/chaingen.cpp)
+        ../core_tests/chaingen.cpp
+        ../core_tests/wallet_tools.cpp)
 
 set(trezor_tests_headers
         trezor_tests.h
-        ../core_tests/chaingen.h)
+        ../core_tests/chaingen.h
+        ../core_tests/wallet_tools.h)
 
 add_executable(trezor_tests
   ${trezor_tests_sources}
