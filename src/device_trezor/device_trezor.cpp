@@ -280,6 +280,12 @@ namespace trezor {
       }
     }
 
+    bool device_trezor::is_live_refresh_supported()
+    {
+      require_initialized();
+      return get_version() > pack_version(2, 0, 10);
+    }
+
     void device_trezor::live_refresh_start()
     {
       AUTO_LOCK_CMD();
@@ -334,6 +340,28 @@ namespace trezor {
       require_connected();
       CHECK_AND_ASSERT_THROW_MES(m_live_refresh_in_progress, "Live refresh not running");
       live_refresh_finish_unsafe();
+    }
+
+    bool device_trezor::compute_key_image(
+        const ::cryptonote::account_keys& ack,
+        const ::crypto::public_key& out_key,
+        const ::crypto::key_derivation& recv_derivation,
+        size_t real_output_index,
+        const ::cryptonote::subaddress_index& received_index,
+        ::cryptonote::keypair& in_ephemeral,
+        ::crypto::key_image& ki)
+    {
+      if (!is_live_refresh_supported())
+      {
+        return false;
+      }
+
+      AUTO_LOCK_CMD();
+      require_connected();
+      require_initialized();
+
+      live_refresh(ack.m_view_secret_key, out_key, recv_derivation, real_output_index, received_index, in_ephemeral, ki);
+      return true;
     }
 
     void device_trezor::tx_sign(wallet_shim * wallet,

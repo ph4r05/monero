@@ -140,6 +140,8 @@ namespace trezor {
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
 
+      bool is_live_refresh_supported();
+
       void live_refresh_start();
 
       void live_refresh(
@@ -153,6 +155,15 @@ namespace trezor {
           );
 
       void live_refresh_finish();
+
+      bool compute_key_image(
+          const ::cryptonote::account_keys& ack,
+          const ::crypto::public_key& out_key,
+          const ::crypto::key_derivation& recv_derivation,
+          size_t real_output_index,
+          const ::cryptonote::subaddress_index& received_index,
+          ::cryptonote::keypair& in_ephemeral,
+          ::crypto::key_image& ki) override;
 
       /**
        * Signs unsigned transaction with the Trezor.
