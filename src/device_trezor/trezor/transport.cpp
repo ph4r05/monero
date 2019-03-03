@@ -223,6 +223,11 @@ namespace trezor{
     msg = msg_wrap;
   }
 
+
+  Transport::Transport(): m_open_counter(0) {
+
+  }
+
   //
   // Bridge transport
   //
@@ -434,6 +439,12 @@ namespace trezor{
   }
 
   void UdpTransport::open() {
+    if (m_open_counter > 0){
+      MTRACE("Already opened, count: " << m_open_counter);
+      m_open_counter += 1;
+      return;
+    }
+
     udp::resolver resolver(m_io_service);
     udp::resolver::query query(udp::v4(), m_device_host, std::to_string(m_device_port));
     m_endpoint = *resolver.resolve(query);
@@ -445,15 +456,23 @@ namespace trezor{
     check_deadline();
 
     m_proto->session_begin(*this);
+    m_open_counter = 1;
   }
 
   void UdpTransport::close() {
-    if (!m_socket){
-      throw exc::CommunicationException("Socket is already closed");
-    }
+    m_open_counter -= 1;
 
-    m_proto->session_end(*this);
-    m_socket->close();
+    if (m_open_counter < 0){
+      MERROR("Open counter is negative: " << m_open_counter);
+
+    } else if (m_open_counter == 0) {
+      if (!m_socket) {
+        throw exc::CommunicationException("Socket is already closed");
+      }
+
+      m_proto->session_end(*this);
+      m_socket->close();
+    }
     m_socket = nullptr;
   }
 
@@ -671,8 +690,7 @@ namespace trezor{
   WebUsbTransport::WebUsbTransport(
       boost::optional<libusb_device_descriptor*> descriptor,
       boost::optional<std::shared_ptr<Protocol>> proto
-  ): m_conn_count(0),
-     m_usb_session(nullptr), m_usb_device(nullptr), m_usb_device_handle(nullptr),
+  ): m_usb_session(nullptr), m_usb_device(nullptr), m_usb_device_handle(nullptr),
      m_bus_id(-1), m_device_addr(-1)
   {
     if (descriptor){
@@ -769,9 +787,9 @@ namespace trezor{
 
   void WebUsbTransport::open() {
     const int interface = get_interface();
-    if (m_conn_count > 0){
-      MTRACE("Already opened, count: " << m_conn_count);
-      m_conn_count += 1;
+    if (m_open_counter > 0){
+      MTRACE("Already opened, count: " << m_open_counter);
+      m_open_counter += 1;
       return;
     }
 
@@ -851,19 +869,19 @@ namespace trezor{
       throw exc::DeviceAcquireException("Unable to claim libusb device");
     }
 
-    m_conn_count = 1;
+    m_open_counter = 1;
     m_proto->session_begin(*this);
     
 #undef TREZOR_DESTROY_SESSION
   };
 
   void WebUsbTransport::close() {
-    m_conn_count -= 1;
+    m_open_counter -= 1;
 
-    if (m_conn_count < 0){
-      MERROR("Close counter is negative: " << m_conn_count);
+    if (m_open_counter < 0){
+      MERROR("Close counter is negative: " << m_open_counter);
 
-    } else if (m_conn_count == 0){
+    } else if (m_open_counter == 0){
       MTRACE("Closing webusb device");
 
       m_proto->session_end(*this);
@@ -1057,5 +1075,4 @@ namespace trezor{
 
 }
 }
-
 

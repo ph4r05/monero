@@ -57,7 +57,8 @@ namespace trezor {
     }
 
     device_trezor::device_trezor() {
-
+      m_live_refresh_in_progress = false;
+      m_live_refresh_enabled = true;
     }
 
     device_trezor::~device_trezor() {
@@ -66,6 +67,67 @@ namespace trezor {
         release();
       } catch(std::exception const& e){
         MWARNING("Could not disconnect and release: " << e.what());
+      }
+    }
+
+    bool device_trezor::init()
+    {
+      bool r = device_trezor_base::init();
+      if (r && !m_live_refresh_thread)
+      {
+        m_live_refresh_thread_running = true;
+        m_live_refresh_thread.reset(new boost::thread(boost::bind(&device_trezor::live_refresh_thread_main, this)));
+      }
+      return r;
+    }
+
+    bool device_trezor::release()
+    {
+      bool r = device_trezor_base::release();
+      m_live_refresh_thread_running = false;
+      if (m_live_refresh_thread)
+      {
+        m_live_refresh_thread->detach();
+        m_live_refresh_thread.release();
+      }
+      return r;
+    }
+
+    void device_trezor::device_state_reset_unsafe()
+    {
+      require_connected();
+      if (m_live_refresh_in_progress)
+      {
+        try
+        {
+          live_refresh_finish_unsafe();
+        }
+        catch(const std::exception & e)
+        {
+          MERROR("Live refresh could not be terminated: " << e.what());
+        }
+      }
+
+      m_live_refresh_in_progress = false;
+      device_trezor_base::device_state_reset_unsafe();
+    }
+
+    void device_trezor::live_refresh_thread_main()
+    {
+      while(m_live_refresh_thread_running)
+      {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        if (!m_transport || !m_live_refresh_in_progress)
+        {
+          continue;
+        }
+
+        auto current_time = std::chrono::system_clock::now();
+        if (current_time - m_last_live_refresh_time.load() > std::chrono::seconds(20))
+        {
+          MTRACE("Closing live refresh process due to innactivity");
+          live_refresh_finish();
+        }
       }
     }
 
@@ -148,6 +210,37 @@ namespace trezor {
       return response;
     }
 
+    bool device_trezor::is_get_tx_key_supported()
+    {
+      require_initialized();
+      return get_version() > pack_version(2, 0, 10);
+    }
+
+    void device_trezor::load_tx_key_data(::hw::device_cold::tx_key_data_t & res, const std::string & tx_aux_data)
+    {
+      protocol::tx::load_tx_key_data(res, tx_aux_data);
+    }
+
+    void device_trezor::get_tx_key(
+        std::vector<::crypto::secret_key> & tx_keys,
+        const ::hw::device_cold::tx_key_data_t & tx_aux_data,
+        const ::crypto::secret_key & view_key_priv,
+        const boost::optional<std::string> & view_public_key)
+    {
+      AUTO_LOCK_CMD();
+      require_connected();
+      device_state_reset_unsafe();
+      require_initialized();
+
+      auto req = protocol::tx::get_tx_key(tx_aux_data, view_public_key);
+      this->set_msg_addr<messages::monero::MoneroGetTxKeyRequest>(req.get());
+
+      auto response = this->client_exchange<messages::monero::MoneroGetTxKeyAck>(req);
+      MTRACE("Get TX key response received");
+
+      protocol::tx::get_tx_key_ack(tx_keys, tx_aux_data.tx_prefix_hash, view_key_priv, response);
+    }
+
     void device_trezor::ki_sync(wallet_shim * wallet,
                                 const std::vector<tools::wallet2::transfer_details> & transfers,
                                 hw::device_cold::exported_key_image & ski)
@@ -195,9 +288,12 @@ namespace trezor {
 
       for(auto & sub : kis){
         char buff[32*3];
+        size_t buff_len = 32*3;
+
         protocol::crypto::chacha::decrypt(sub.blob().data(), sub.blob().size(),
                                           reinterpret_cast<const uint8_t *>(final_ack->enc_key().data()),
-                                          reinterpret_cast<const uint8_t *>(sub.iv().data()), buff);
+                                          reinterpret_cast<const uint8_t *>(sub.iv().data()), buff, &buff_len);
+        CHECK_AND_ASSERT_THROW_MES(buff_len == 32*3, "Plaintext size invalid");
 
         ::crypto::signature sig{};
         ::crypto::key_image ki;
@@ -208,6 +304,110 @@ namespace trezor {
       }
     }
 
+    bool device_trezor::is_live_refresh_supported()
+    {
+      require_initialized();
+      return get_version() > pack_version(2, 0, 10);
+    }
+
+    void device_trezor::live_refresh_start()
+    {
+      AUTO_LOCK_CMD();
+      require_connected();
+      device_state_reset_unsafe();
+      require_initialized();
+
+      auto req = std::make_shared<messages::monero::MoneroLiveRefreshStartRequest>();
+      this->set_msg_addr<messages::monero::MoneroLiveRefreshStartRequest>(req.get());
+      this->client_exchange<messages::monero::MoneroLiveRefreshStartAck>(req);
+      m_live_refresh_in_progress = true;
+    }
+
+    void device_trezor::live_refresh(
+        const ::crypto::secret_key & view_key_priv,
+        const crypto::public_key& out_key,
+        const crypto::key_derivation& recv_derivation,
+        size_t real_output_index,
+        const cryptonote::subaddress_index& received_index,
+        cryptonote::keypair& in_ephemeral,
+        crypto::key_image& ki
+    )
+    {
+      require_connected();
+      if (!m_live_refresh_in_progress)
+      {
+        live_refresh_start();
+      }
+
+      m_last_live_refresh_time = std::chrono::system_clock::now();
+
+      AUTO_LOCK_CMD();
+      auto req = std::make_shared<messages::monero::MoneroLiveRefreshStepRequest>();
+      req->set_out_key(out_key.data, 32);
+      req->set_recv_deriv(recv_derivation.data, 32);
+      req->set_real_out_idx(real_output_index);
+      req->set_sub_addr_major(received_index.major);
+      req->set_sub_addr_minor(received_index.minor);
+
+      auto ack = this->client_exchange<messages::monero::MoneroLiveRefreshStepAck>(req);
+      protocol::ki::live_refresh_ack(view_key_priv, out_key, ack, in_ephemeral, ki);
+    }
+
+    void device_trezor::live_refresh_finish_unsafe()
+    {
+      auto req = std::make_shared<messages::monero::MoneroLiveRefreshFinalRequest>();
+      this->client_exchange<messages::monero::MoneroLiveRefreshFinalAck>(req);
+      m_live_refresh_in_progress = false;
+    }
+
+    void device_trezor::live_refresh_finish()
+    {
+      AUTO_LOCK_CMD();
+      require_connected();
+      if (m_live_refresh_in_progress)
+      {
+        live_refresh_finish_unsafe();
+      }
+    }
+
+    void device_trezor::computing_key_images(bool started)
+    {
+      try
+      {
+        if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE) || !m_live_refresh_enabled)
+        {
+          return;
+        }
+
+        // React only on termination as the process can auto-start itself.
+        if (!started && m_live_refresh_in_progress)
+        {
+          live_refresh_finish();
+        }
+      }
+      catch(const std::exception & e)
+      {
+        MWARNING("KI computation state change failed, started: " << started << ", e: " << e.what());
+      }
+    }
+
+    bool device_trezor::compute_key_image(
+        const ::cryptonote::account_keys& ack,
+        const ::crypto::public_key& out_key,
+        const ::crypto::key_derivation& recv_derivation,
+        size_t real_output_index,
+        const ::cryptonote::subaddress_index& received_index,
+        ::cryptonote::keypair& in_ephemeral,
+        ::crypto::key_image& ki)
+    {
+      if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE) || !m_live_refresh_enabled)
+      {
+        return false;
+      }
+
+      live_refresh(ack.m_view_secret_key, out_key, recv_derivation, real_output_index, received_index, in_ephemeral, ki);
+      return true;
+    }
 
     void device_trezor::tx_sign(wallet_shim * wallet,
                                 const tools::wallet2::unsigned_tx_set & unsigned_tx,

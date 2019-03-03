@@ -57,9 +57,18 @@ namespace trezor {
    */
   class device_trezor : public hw::trezor::device_trezor_base, public hw::device_cold {
     protected:
+      std::atomic<bool> m_live_refresh_in_progress;
+      std::atomic<std::chrono::system_clock::time_point> m_last_live_refresh_time;
+      std::unique_ptr<boost::thread> m_live_refresh_thread;
+      std::atomic<bool> m_live_refresh_thread_running;
+      bool m_live_refresh_enabled;
+
       void transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data);
       void transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg);
       void transaction_check(const protocol::tx::TData & tdata, const hw::tx_aux_data & aux_data);
+      void device_state_reset_unsafe() override;
+      void live_refresh_finish_unsafe();
+      void live_refresh_thread_main();
 
       /**
        * Signs particular transaction idx in the unsigned set, keeps state in the signer
@@ -79,11 +88,16 @@ namespace trezor {
 
       explicit operator bool() const override {return true;}
 
+      bool init() override;
+      bool release() override;
+
       device_protocol_t device_protocol() const override { return PROTOCOL_COLD; };
 
       bool  has_ki_cold_sync() const override { return true; }
       bool  has_tx_cold_sign() const override { return true; }
       void  set_network_type(cryptonote::network_type network_type) override { this->network_type = network_type; }
+      void  set_live_refresh_enabled(bool enabled) { m_live_refresh_enabled = enabled; }
+      bool  live_refresh_enabled() { return m_live_refresh_enabled; }
 
       /* ======================================================================= */
       /*                             WALLET & ADDRESS                            */
@@ -110,11 +124,65 @@ namespace trezor {
           const boost::optional<cryptonote::network_type> & network_type = boost::none);
 
       /**
+       * Get_tx_key support check
+       */
+      bool is_get_tx_key_supported() override;
+
+      /**
+       * Loads tx aux data
+       */
+      void load_tx_key_data(::hw::device_cold::tx_key_data_t & res, const std::string & tx_aux_data) override;
+
+      /**
+       * TX key load with the Trezor
+       */
+      void get_tx_key(
+        std::vector<::crypto::secret_key> & tx_keys,
+        const ::hw::device_cold::tx_key_data_t & tx_aux_data,
+        const ::crypto::secret_key & view_key_priv,
+        const boost::optional<std::string> & view_public_key) override;
+
+      /**
        * Key image sync with the Trezor.
        */
       void ki_sync(wallet_shim * wallet,
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
+
+      bool is_live_refresh_supported() override;
+
+      void live_refresh_start() override;
+
+      void live_refresh(
+          const ::crypto::secret_key & view_key_priv,
+          const crypto::public_key& out_key,
+          const crypto::key_derivation& recv_derivation,
+          size_t real_output_index,
+          const cryptonote::subaddress_index& received_index,
+          cryptonote::keypair& in_ephemeral,
+          crypto::key_image& ki
+          ) override;
+
+      void live_refresh_finish() override;
+
+      /**
+       * Letting device know the KI computation started / ended.
+       * During refresh
+       */
+      void computing_key_images(bool started) override;
+
+      /**
+       * Implements hw::device interface
+       * called from generate_key_image_helper_precomp()
+       */
+      bool compute_key_image(
+          const ::cryptonote::account_keys& ack,
+          const ::crypto::public_key& out_key,
+          const ::crypto::key_derivation& recv_derivation,
+          size_t real_output_index,
+          const ::cryptonote::subaddress_index& received_index,
+          ::cryptonote::keypair& in_ephemeral,
+          ::crypto::key_image& ki) override;
 
       /**
        * Signs unsigned transaction with the Trezor.
