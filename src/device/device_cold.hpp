@@ -54,6 +54,13 @@ namespace hw {
 
     using exported_key_image = std::vector<std::pair<crypto::key_image, crypto::signature>>;
 
+    typedef struct {
+      std::string salt1;
+      std::string salt2;
+      std::string tx_enc_keys;
+      std::string tx_prefix_hash;
+    } tx_key_data_t;
+
     /**
      * Key image sync with the cold protocol.
      */
@@ -68,6 +75,26 @@ namespace hw {
                  const ::tools::wallet2::unsigned_tx_set & unsigned_tx,
                  ::tools::wallet2::signed_tx_set & signed_tx,
                  tx_aux_data & aux_data) =0;
+
+    /**
+     * Get tx key support check.
+     */
+    virtual bool is_get_tx_key_supported() { return false; }
+
+    /**
+     * Loads TX aux data required for tx key.
+     */
+    virtual void load_tx_key_data(tx_key_data_t & res, const std::string & tx_aux_data) =0;
+
+    /**
+     * Decrypts TX keys.
+     * If view_public_key is set, derivations are computed instead of the tx private keys.
+     */
+    virtual void get_tx_key(
+        std::vector<::crypto::secret_key> & tx_keys,
+        const tx_key_data_t & tx_aux_data,
+        const ::crypto::secret_key & view_key_priv,
+        const boost::optional<std::string> & view_public_key) =0;
   };
 }
 

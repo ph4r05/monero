@@ -170,6 +170,37 @@ namespace trezor {
       return response;
     }
 
+    bool device_trezor::is_get_tx_key_supported()
+    {
+      require_initialized();
+      return get_version() > pack_version(2, 0, 10);
+    }
+
+    void device_trezor::load_tx_key_data(::hw::device_cold::tx_key_data_t & res, const std::string & tx_aux_data)
+    {
+      protocol::tx::load_tx_key_data(res, tx_aux_data);
+    }
+
+    void device_trezor::get_tx_key(
+        std::vector<::crypto::secret_key> & tx_keys,
+        const ::hw::device_cold::tx_key_data_t & tx_aux_data,
+        const ::crypto::secret_key & view_key_priv,
+        const boost::optional<std::string> & view_public_key)
+    {
+      AUTO_LOCK_CMD();
+      require_connected();
+      device_state_reset_unsafe();
+      require_initialized();
+
+      auto req = protocol::tx::get_tx_key(tx_aux_data, view_public_key);
+      this->set_msg_addr<messages::monero::MoneroGetTxKeyRequest>(req.get());
+
+      auto response = this->client_exchange<messages::monero::MoneroGetTxKeyAck>(req);
+      MTRACE("Get TX key response received");
+
+      protocol::tx::get_tx_key_ack(tx_keys, tx_aux_data.tx_prefix_hash, view_key_priv, response);
+    }
+
     void device_trezor::ki_sync(wallet_shim * wallet,
                                 const std::vector<tools::wallet2::transfer_details> & transfers,
                                 hw::device_cold::exported_key_image & ski)

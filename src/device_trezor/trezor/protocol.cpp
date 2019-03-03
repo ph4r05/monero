@@ -33,12 +33,36 @@
 #include <utility>
 #include <boost/endian/conversion.hpp>
 #include <common/apply_permutation.h>
+#include <common/json_util.h>
 #include <ringct/rctSigs.h>
 #include <ringct/bulletproofs.h>
 #include "cryptonote_config.h"
 #include <sodium.h>
 #include <sodium/crypto_verify_32.h>
 #include <sodium/crypto_aead_chacha20poly1305.h>
+
+
+#define GET_FIELD_FROM_JSON(json, name, type, jtype, mandatory, def) \
+  type field_##name = static_cast<type>(def);                        \
+  bool field_##name##_found = false;                                 \
+  (void)field_##name##_found;                                        \
+  do if (json.HasMember(#name))                                      \
+  {                                                                  \
+    if (json[#name].Is##jtype())                                     \
+    {                                                                \
+      field_##name = static_cast<type>(json[#name].Get##jtype());    \
+      field_##name##_found = true;                                   \
+    }                                                                \
+    else                                                             \
+    {                                                                \
+      throw std::invalid_argument("Field " #name " found in JSON, but not " #jtype); \
+    }                                                                \
+  }                                                                  \
+  else if (mandatory)                                                \
+  {                                                                  \
+    throw std::invalid_argument("Field " #name " not found in JSON");\
+  } while(0)
+
 
 namespace hw{
 namespace trezor{
@@ -267,6 +291,25 @@ namespace tx {
     }
 
     return std::string(buff, offset);
+  }
+
+  ::crypto::secret_key compute_enc_key(const ::crypto::secret_key & private_view_key, const std::string & aux, const std::string & salt)
+  {
+    uint8_t hash[32];
+    KECCAK_CTX ctx;
+    ::crypto::secret_key res;
+
+    keccak_init(&ctx);
+    keccak_update(&ctx, (const uint8_t *) private_view_key.data, 32);
+    if (!aux.empty()){
+      keccak_update(&ctx, (const uint8_t *) aux.data(), aux.size());
+    }
+    keccak_finish(&ctx, hash);
+    keccak(hash, 32, hash, 32);
+
+    hmac_keccak_hash(hash, (const uint8_t *) salt.data(), salt.size(), hash, 32);
+    memcpy(res.data, hash, 32);
+    return res;
   }
 
   TData::TData() {
@@ -905,6 +948,88 @@ namespace tx {
     return sb.GetString();
   }
 
+  void load_tx_key_data(hw::device_cold::tx_key_data_t & res, const std::string & data)
+  {
+    rapidjson::Document json;
+
+    // The contents should be JSON if the wallet follows the new format.
+    if (json.Parse(data.c_str()).HasParseError())
+    {
+      throw std::invalid_argument("Data parsing error");
+    }
+    else if(!json.IsObject())
+    {
+      throw std::invalid_argument("Data parsing error - not an object");
+    }
+
+    GET_FIELD_FROM_JSON(json, version,  int, Int, true, -1);
+    GET_FIELD_FROM_JSON(json, salt1, std::string, String, true, std::string());
+    GET_FIELD_FROM_JSON(json, salt2, std::string, String, true, std::string());
+    GET_FIELD_FROM_JSON(json, enc_keys, std::string, String, true, std::string());
+    GET_FIELD_FROM_JSON(json, tx_prefix_hash, std::string, String, false, std::string());
+
+    if (field_version != 1)
+    {
+      throw std::invalid_argument("Unknown version");
+    }
+
+    res.salt1 = field_salt1;
+    res.salt2 = field_salt2;
+    res.tx_enc_keys = field_enc_keys;
+    res.tx_prefix_hash = field_tx_prefix_hash;
+  }
+
+  std::shared_ptr<messages::monero::MoneroGetTxKeyRequest> get_tx_key(
+      const hw::device_cold::tx_key_data_t & tx_data,
+      const boost::optional<std::string> & view_public_key)
+  {
+    auto req = std::make_shared<messages::monero::MoneroGetTxKeyRequest>();
+    req->set_salt1(tx_data.salt1);
+    req->set_salt2(tx_data.salt2);
+    req->set_tx_enc_keys(tx_data.tx_enc_keys);
+    req->set_tx_prefix_hash(tx_data.tx_prefix_hash);
+
+    if (view_public_key) {
+      req->set_view_public_key(view_public_key.get());
+      req->set_reason(1);
+    } else {
+      req->set_reason(0);
+    }
+
+    return req;
+  }
+
+  void get_tx_key_ack(
+      std::vector<::crypto::secret_key> & tx_keys,
+      const std::string & tx_prefix_hash,
+      const ::crypto::secret_key & view_key_priv,
+      std::shared_ptr<const messages::monero::MoneroGetTxKeyAck> ack
+  )
+  {
+    auto enc_key = protocol::tx::compute_enc_key(view_key_priv, tx_prefix_hash, ack->salt());
+    auto & encrypted_keys = ack->has_tx_derivations() ? ack->tx_derivations() : ack->tx_keys();
+
+    const size_t len_ciphertext = encrypted_keys.size();  // IV || keys
+    CHECK_AND_ASSERT_THROW_MES(len_ciphertext > crypto::chacha::IV_SIZE, "Invalid size");
+
+    const size_t keys_len = len_ciphertext - crypto::chacha::IV_SIZE;
+    CHECK_AND_ASSERT_THROW_MES(keys_len % 32 == 0, "Invalid size");
+    std::unique_ptr<uint8_t[]> plaintext(new uint8_t[keys_len]);
+
+    protocol::crypto::chacha::decrypt(
+        encrypted_keys.data() + crypto::chacha::IV_SIZE,
+        keys_len,
+        reinterpret_cast<const uint8_t *>(enc_key.data),
+        reinterpret_cast<const uint8_t *>(encrypted_keys.data()),
+        reinterpret_cast<char *>(plaintext.get()));
+
+    tx_keys.resize(keys_len / 32);
+
+    for(unsigned i = 0; i < keys_len / 32; ++i)
+    {
+      memcpy(tx_keys[i].data, plaintext.get() + 32 * i, 32);
+    }
+  }
 
 }
 

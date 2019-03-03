@@ -111,6 +111,25 @@ namespace trezor {
           const boost::optional<cryptonote::network_type> & network_type = boost::none);
 
       /**
+       * Get_tx_key support check
+       */
+      bool is_get_tx_key_supported() override;
+
+      /**
+       * Loads tx aux data
+       */
+      void load_tx_key_data(::hw::device_cold::tx_key_data_t & res, const std::string & tx_aux_data) override;
+
+      /**
+       * TX key load with the Trezor
+       */
+      void get_tx_key(
+        std::vector<::crypto::secret_key> & tx_keys,
+        const ::hw::device_cold::tx_key_data_t & tx_aux_data,
+        const ::crypto::secret_key & view_key_priv,
+        const boost::optional<std::string> & view_public_key) override;
+
+      /**
        * Key image sync with the Trezor.
        */
       void ki_sync(wallet_shim * wallet,
