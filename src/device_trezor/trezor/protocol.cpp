@@ -209,6 +209,49 @@ namespace ki {
     }
   }
 
+  void live_refresh_ack(const ::crypto::secret_key & view_key_priv,
+                        const ::crypto::public_key& out_key,
+                        const std::shared_ptr<messages::monero::MoneroLiveRefreshStepAck> & ack,
+                        ::cryptonote::keypair& in_ephemeral,
+                        ::crypto::key_image& ki)
+  {
+    std::string str_out_key(out_key.data, 32);
+    auto enc_key = protocol::tx::compute_enc_key(view_key_priv, str_out_key, ack->salt());
+
+    const size_t len_ciphertext = ack->key_image().size();  // IV || keys
+    CHECK_AND_ASSERT_THROW_MES(len_ciphertext > crypto::chacha::IV_SIZE, "Invalid size");
+
+    const size_t ki_len = len_ciphertext - crypto::chacha::IV_SIZE;
+    CHECK_AND_ASSERT_THROW_MES(ki_len % 32 == 0, "Invalid size");
+    std::unique_ptr<uint8_t[]> plaintext(new uint8_t[ki_len]);
+    uint8_t * buff = plaintext.get();
+
+    protocol::crypto::chacha::decrypt(
+        ack->key_image().data() + crypto::chacha::IV_SIZE,
+        ki_len,
+        reinterpret_cast<const uint8_t *>(enc_key.data),
+        reinterpret_cast<const uint8_t *>(ack->key_image().data()),
+        reinterpret_cast<char *>(buff));
+
+    ::crypto::signature sig{};
+    memcpy(ki.data, buff, 32);
+    memcpy(sig.c.data, buff + 32, 32);
+    memcpy(sig.r.data, buff + 64, 32);
+    in_ephemeral.pub = out_key;
+    in_ephemeral.sec = ::crypto::null_skey;
+
+    // Verification
+    std::vector<const ::crypto::public_key*> pkeys;
+    pkeys.push_back(&out_key);
+
+    CHECK_AND_ASSERT_THROW_MES(!(rct::scalarmultKey(rct::ki2rct(ki), rct::curveOrder()) == rct::identity()),
+                               "Key image out of validity domain: key image " << epee::string_tools::pod_to_hex(ki));
+
+    CHECK_AND_ASSERT_THROW_MES(!::crypto::check_ring_signature((const ::crypto::hash&)ki, ki, pkeys, &sig),
+                               "Signature failed for key image " << epee::string_tools::pod_to_hex(ki)
+                                                                 << ", signature " + epee::string_tools::pod_to_hex(sig)
+                                                                 << ", pubkey " + epee::string_tools::pod_to_hex(*pkeys[0]));
+  }
 }
 
 // Cold transaction signing
@@ -902,14 +945,14 @@ namespace tx {
     if (m_multisig){
       auto & cout_key = ack->cout_key();
       for(auto & cur : m_ct.couts){
-        if (cur.size() != 12 + 32){
+        if (cur.size() != crypto::chacha::IV_SIZE + 32){
           throw std::invalid_argument("Encrypted cout has invalid length");
         }
 
         char buff[32];
         auto data = cur.data();
 
-        crypto::chacha::decrypt(data + 12, 32, reinterpret_cast<const uint8_t *>(cout_key.data()), reinterpret_cast<const uint8_t *>(data), buff);
+        crypto::chacha::decrypt(data + crypto::chacha::IV_SIZE, 32, reinterpret_cast<const uint8_t *>(cout_key.data()), reinterpret_cast<const uint8_t *>(data), buff);
         m_ct.couts_dec.emplace_back(buff, 32);
       }
     }

@@ -85,7 +85,7 @@ namespace trezor {
       void require_initialized();
       void call_ping_unsafe();
       void test_ping();
-      void device_state_reset_unsafe();
+      virtual void device_state_reset_unsafe();
       void ensure_derivation_path() noexcept;
 
       // Communication methods
