@@ -140,9 +140,9 @@ namespace trezor {
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
 
-      bool is_live_refresh_supported();
+      bool is_live_refresh_supported() override;
 
-      void live_refresh_start();
+      void live_refresh_start() override;
 
       void live_refresh(
           const ::crypto::secret_key & view_key_priv,
@@ -152,10 +152,14 @@ namespace trezor {
           const cryptonote::subaddress_index& received_index,
           cryptonote::keypair& in_ephemeral,
           crypto::key_image& ki
-          );
+          ) override;
 
-      void live_refresh_finish();
+      void live_refresh_finish() override;
 
+      /**
+       * Implements hw::device interface
+       * called from generate_key_image_helper_precomp()
+       */
       bool compute_key_image(
           const ::cryptonote::account_keys& ack,
           const ::crypto::public_key& out_key,

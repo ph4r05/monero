@@ -95,6 +95,34 @@ namespace hw {
         const tx_key_data_t & tx_aux_data,
         const ::crypto::secret_key & view_key_priv,
         const boost::optional<std::string> & view_public_key) =0;
+
+    /**
+     * Live refresh support check
+     */
+    virtual bool is_live_refresh_supported() { return false; };
+
+    /**
+     * Starts live refresh process with the device
+     */
+    virtual void live_refresh_start() =0;
+
+    /**
+     * One live refresh step
+     */
+    virtual void live_refresh(
+        const ::crypto::secret_key & view_key_priv,
+        const crypto::public_key& out_key,
+        const crypto::key_derivation& recv_derivation,
+        size_t real_output_index,
+        const cryptonote::subaddress_index& received_index,
+        cryptonote::keypair& in_ephemeral,
+        crypto::key_image& ki
+    ) =0;
+
+    /**
+     * Live refresh process termination
+     */
+    virtual void live_refresh_finish() =0;
   };
 }
 
