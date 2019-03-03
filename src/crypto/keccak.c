@@ -212,3 +212,51 @@ void keccak_finish(KECCAK_CTX * ctx, uint8_t *md){
         memcpy_swap64le(md, ctx->hash, KECCAK_DIGESTSIZE / sizeof(uint64_t));
     }
 }
+
+void hmac_keccak_init(hmac_keccak_state *S, const uint8_t *_key, uint64_t keylen) {
+    const uint8_t *key = _key;
+    uint8_t keyhash[HASH_SIZE];
+    uint8_t pad[KECCAK_BLOCKLEN];
+    uint64_t i;
+
+    if (keylen > KECCAK_BLOCKLEN) {
+        keccak(key, keylen, keyhash, HASH_SIZE);
+        key = keyhash;
+        keylen = HASH_SIZE;
+    }
+
+    keccak_init(&S->inner);
+    memset(pad, 0x36, KECCAK_BLOCKLEN);
+    for (i = 0; i < keylen; ++i) {
+        pad[i] ^= key[i];
+    }
+    keccak_update(&S->inner, pad, KECCAK_BLOCKLEN);
+
+    keccak_init(&S->outer);
+    memset(pad, 0x5c, KECCAK_BLOCKLEN);
+    for (i = 0; i < keylen; ++i) {
+        pad[i] ^= key[i];
+    }
+    keccak_update(&S->outer, pad, KECCAK_BLOCKLEN);
+
+    memset(keyhash, 0, HASH_SIZE);
+}
+
+void hmac_keccak_update(hmac_keccak_state *S, const uint8_t *data, uint64_t datalen) {
+    keccak_update(&S->inner, data, datalen);
+}
+
+void hmac_keccak_finish(hmac_keccak_state *S, uint8_t *digest) {
+    uint8_t ihash[HASH_SIZE];
+    keccak_finish(&S->inner, ihash);
+    keccak_update(&S->outer, ihash, HASH_SIZE);
+    keccak_finish(&S->outer, digest);
+    memset(ihash, 0, 32);
+}
+
+void hmac_keccak_hash(uint8_t *out, const uint8_t *key, uint64_t keylen, const uint8_t *in, uint64_t inlen) {
+    hmac_keccak_state S;
+    hmac_keccak_init(&S, key, keylen);
+    hmac_keccak_update(&S, in, inlen);
+    hmac_keccak_finish(&S, out);
+}
