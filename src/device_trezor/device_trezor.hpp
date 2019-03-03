@@ -58,9 +58,13 @@ namespace trezor {
    */
   class device_trezor : public hw::trezor::device_trezor_base, public hw::device_cold {
     protected:
+      bool m_live_refresh_in_progress;
+
       void transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data);
       void transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg);
       void transaction_check(const protocol::tx::TData & tdata, const hw::tx_aux_data & aux_data);
+      void device_state_reset_unsafe() override;
+      void live_refresh_finish_unsafe();
 
       /**
        * Signs particular transaction idx in the unsigned set, keeps state in the signer
@@ -135,6 +139,35 @@ namespace trezor {
       void ki_sync(wallet_shim * wallet,
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
+
+      bool is_live_refresh_supported() override;
+
+      void live_refresh_start() override;
+
+      void live_refresh(
+          const ::crypto::secret_key & view_key_priv,
+          const crypto::public_key& out_key,
+          const crypto::key_derivation& recv_derivation,
+          size_t real_output_index,
+          const cryptonote::subaddress_index& received_index,
+          cryptonote::keypair& in_ephemeral,
+          crypto::key_image& ki
+          ) override;
+
+      void live_refresh_finish() override;
+
+      /**
+       * Implements hw::device interface
+       * called from generate_key_image_helper_precomp()
+       */
+      bool compute_key_image(
+          const ::cryptonote::account_keys& ack,
+          const ::crypto::public_key& out_key,
+          const ::crypto::key_derivation& recv_derivation,
+          size_t real_output_index,
+          const ::cryptonote::subaddress_index& received_index,
+          ::cryptonote::keypair& in_ephemeral,
+          ::crypto::key_image& ki) override;
 
       /**
        * Signs unsigned transaction with the Trezor.

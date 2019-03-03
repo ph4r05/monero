@@ -130,6 +130,14 @@ namespace ki {
                            const std::vector<tools::wallet2::transfer_details> & transfers,
                            std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> & req);
 
+  /**
+   * Processes Live refresh step response, parses KI, checks the signature
+   */
+  void live_refresh_ack(const ::crypto::secret_key & view_key_priv,
+                        const ::crypto::public_key& out_key,
+                        const std::shared_ptr<messages::monero::MoneroLiveRefreshStepAck> & ack,
+                        ::cryptonote::keypair& in_ephemeral,
+                        ::crypto::key_image& ki);
 }
 
 // Cold transaction signing
