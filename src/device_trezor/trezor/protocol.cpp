@@ -1057,10 +1057,9 @@ namespace tx {
     auto & encrypted_keys = ack->has_tx_derivations() ? ack->tx_derivations() : ack->tx_keys();
 
     const size_t len_ciphertext = encrypted_keys.size();  // IV || keys
-    CHECK_AND_ASSERT_THROW_MES(len_ciphertext > crypto::chacha::IV_SIZE, "Invalid size");
+    CHECK_AND_ASSERT_THROW_MES(len_ciphertext > crypto::chacha::IV_SIZE + crypto::chacha::TAG_SIZE, "Invalid size");
 
-    const size_t keys_len = len_ciphertext - crypto::chacha::IV_SIZE;
-    CHECK_AND_ASSERT_THROW_MES(keys_len % 32 == 0, "Invalid size");
+    size_t keys_len = len_ciphertext - crypto::chacha::IV_SIZE;
     std::unique_ptr<uint8_t[]> plaintext(new uint8_t[keys_len]);
 
     protocol::crypto::chacha::decrypt(
