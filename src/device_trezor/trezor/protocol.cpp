@@ -223,10 +223,9 @@ namespace ki {
     auto enc_key = protocol::tx::compute_enc_key(view_key_priv, str_out_key, ack->salt());
 
     const size_t len_ciphertext = ack->key_image().size();  // IV || keys
-    CHECK_AND_ASSERT_THROW_MES(len_ciphertext > crypto::chacha::IV_SIZE, "Invalid size");
+    CHECK_AND_ASSERT_THROW_MES(len_ciphertext > crypto::chacha::IV_SIZE + crypto::chacha::TAG_SIZE, "Invalid size");
 
-    const size_t ki_len = len_ciphertext - crypto::chacha::IV_SIZE;
-    CHECK_AND_ASSERT_THROW_MES(ki_len % 32 == 0, "Invalid size");
+    size_t ki_len = len_ciphertext - crypto::chacha::IV_SIZE;
     std::unique_ptr<uint8_t[]> plaintext(new uint8_t[ki_len]);
     uint8_t * buff = plaintext.get();
 
@@ -235,8 +234,9 @@ namespace ki {
         ki_len,
         reinterpret_cast<const uint8_t *>(enc_key.data),
         reinterpret_cast<const uint8_t *>(ack->key_image().data()),
-        reinterpret_cast<char *>(buff));
+        reinterpret_cast<char *>(buff), &ki_len);
 
+    CHECK_AND_ASSERT_THROW_MES(ki_len == 3*32, "Invalid size");
     ::crypto::signature sig{};
     memcpy(ki.data, buff, 32);
     memcpy(sig.c.data, buff + 32, 32);
