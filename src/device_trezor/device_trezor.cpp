@@ -361,7 +361,7 @@ namespace trezor {
         ::cryptonote::keypair& in_ephemeral,
         ::crypto::key_image& ki)
     {
-      if (!is_live_refresh_supported())
+      if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE))
       {
         return false;
       }
