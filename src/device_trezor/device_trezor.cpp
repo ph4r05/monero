@@ -300,7 +300,7 @@ namespace trezor {
       device_state_reset_unsafe();
       require_initialized();
 
-      std::shared_ptr<messages::monero::MoneroLiveRefreshStartRequest> req;
+      auto req = std::make_shared<messages::monero::MoneroLiveRefreshStartRequest>();
       this->set_msg_addr<messages::monero::MoneroLiveRefreshStartRequest>(req.get());
       this->client_exchange<messages::monero::MoneroLiveRefreshStartAck>(req);
       m_live_refresh_in_progress = true;
@@ -323,7 +323,7 @@ namespace trezor {
       }
 
       AUTO_LOCK_CMD();
-      std::shared_ptr<messages::monero::MoneroLiveRefreshStepRequest> req;
+      auto req = std::make_shared<messages::monero::MoneroLiveRefreshStepRequest>();
       req->set_out_key(out_key.data, 32);
       req->set_recv_deriv(recv_derivation.data, 32);
       req->set_real_out_idx(real_output_index);
@@ -336,7 +336,7 @@ namespace trezor {
 
     void device_trezor::live_refresh_finish_unsafe()
     {
-      std::shared_ptr<messages::monero::MoneroLiveRefreshFinalRequest> req;
+      auto req = std::make_shared<messages::monero::MoneroLiveRefreshFinalRequest>();
       this->client_exchange<messages::monero::MoneroLiveRefreshFinalAck>(req);
       m_live_refresh_in_progress = false;
     }
@@ -362,7 +362,7 @@ namespace trezor {
       {
         return false;
       }
-      
+
       live_refresh(ack.m_view_secret_key, out_key, recv_derivation, real_output_index, received_index, in_ephemeral, ki);
       return true;
     }
