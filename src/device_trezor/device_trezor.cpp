@@ -362,11 +362,7 @@ namespace trezor {
       {
         return false;
       }
-
-      AUTO_LOCK_CMD();
-      require_connected();
-      require_initialized();
-
+      
       live_refresh(ack.m_view_secret_key, out_key, recv_derivation, real_output_index, received_index, in_ephemeral, ki);
       return true;
     }
