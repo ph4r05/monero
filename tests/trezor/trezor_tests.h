@@ -175,6 +175,12 @@ public:
   bool generate(std::vector<test_event_entry>& events) override;
 };
 
+class gen_trezor_live_refresh : public gen_trezor_base
+{
+public:
+  bool generate(std::vector<test_event_entry>& events) override;
+};
+
 class gen_trezor_1utxo : public gen_trezor_base
 {
 public:

@@ -136,6 +136,7 @@ int main(int argc, char* argv[])
 
     // Individual test cases using shared pre-generated blockchain.
     TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync, core, trezor_base);
+    TREZOR_COMMON_TEST_CASE(gen_trezor_live_refresh, core, trezor_base);
 
     // Transaction tests
     for(uint8_t hf=9; hf <= 10; ++hf)
@@ -1218,6 +1219,72 @@ bool gen_trezor_ki_sync::generate(std::vector<test_event_entry>& events)
 
   uint64_t spent = 0, unspent = 0;
   m_wl_alice->import_key_images(ski, 0, spent, unspent, false);
+  return true;
+}
+
+bool gen_trezor_live_refresh::generate(std::vector<test_event_entry>& events)
+{
+  test_generator generator(m_generator);
+  test_setup(events);
+
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(m_trezor);
+  CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
+
+  if (!dev_cold->is_live_refresh_supported()){
+    MDEBUG("Trezor does not support live refresh");
+    return true;
+  }
+
+  hw::device & sw_device = hw::get_device("default");
+
+  dev_cold->live_refresh_start();
+  for(unsigned i=0; i<5; ++i)
+  {
+    cryptonote::subaddress_index subaddr = {0, i};
+
+    ::crypto::secret_key r;
+    ::crypto::public_key R;
+    ::crypto::key_derivation D;
+    ::crypto::public_key pub_ver;
+    ::crypto::key_image ki;
+
+    ::crypto::random32_unbiased((unsigned char*)r.data);
+    ::crypto::secret_key_to_public_key(r, R);
+    memcpy(D.data, rct::scalarmultKey(rct::pk2rct(R), rct::sk2rct(m_alice_account.get_keys().m_view_secret_key)).bytes, 32);
+
+    ::crypto::secret_key scalar_step1;
+    ::crypto::secret_key scalar_step2;
+    ::crypto::derive_secret_key(D, i, m_alice_account.get_keys().m_spend_secret_key, scalar_step1);
+    if (i == 0)
+    {
+      scalar_step2 = scalar_step1;
+    }
+    else
+    {
+      ::crypto::secret_key subaddr_sk = sw_device.get_subaddress_secret_key(m_alice_account.get_keys().m_view_secret_key, subaddr);
+      sw_device.sc_secret_add(scalar_step2, scalar_step1, subaddr_sk);
+    }
+
+    ::crypto::secret_key_to_public_key(scalar_step2, pub_ver);
+    ::crypto::generate_key_image(pub_ver, scalar_step2, ki);
+
+    cryptonote::keypair in_ephemeral;
+    ::crypto::key_image ki2;
+
+    dev_cold->live_refresh(
+        m_alice_account.get_keys().m_view_secret_key,
+        pub_ver,
+        D,
+        i,
+        subaddr,
+        in_ephemeral,
+        ki2
+    );
+
+    CHECK_AND_ASSERT_THROW_MES(ki == ki2, "Key image inconsistent");
+  }
+
+  dev_cold->live_refresh_finish();
   return true;
 }
 
