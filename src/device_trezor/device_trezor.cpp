@@ -91,6 +91,29 @@ namespace trezor {
       }
     }
 
+    bool device_trezor::init()
+    {
+      bool r = device_trezor_base::init();
+      if (r && !m_live_refresh_thread)
+      {
+        m_live_refresh_thread_running = true;
+        m_live_refresh_thread.reset(new boost::thread(boost::bind(&device_trezor::live_refresh_thread_main, this)));
+      }
+      return r;
+    }
+
+    bool device_trezor::release()
+    {
+      bool r = device_trezor_base::release();
+      m_live_refresh_thread_running = false;
+      if (m_live_refresh_thread)
+      {
+        m_live_refresh_thread->detach();
+        m_live_refresh_thread.release();
+      }
+      return r;
+    }
+
     void device_trezor::device_state_reset_unsafe()
     {
       require_connected();
@@ -108,6 +131,25 @@ namespace trezor {
 
       m_live_refresh_in_progress = false;
       device_trezor_base::device_state_reset_unsafe();
+    }
+
+    void device_trezor::live_refresh_thread_main()
+    {
+      while(m_live_refresh_thread_running)
+      {
+        boost::this_thread::sleep_for(boost::chrono::milliseconds(10));
+        if (!m_transport || !m_live_refresh_in_progress)
+        {
+          continue;
+        }
+
+        auto current_time = std::chrono::system_clock::now();
+        if (current_time - m_last_live_refresh_time.load() > std::chrono::seconds(20))
+        {
+          MTRACE("Closing live refresh process due to innactivity");
+          live_refresh_finish();
+        }
+      }
     }
 
     /* ======================================================================= */
@@ -318,6 +360,8 @@ namespace trezor {
         live_refresh_start();
       }
 
+      m_last_live_refresh_time = std::chrono::system_clock::now();
+
       AUTO_LOCK_CMD();
       auto req = std::make_shared<messages::monero::MoneroLiveRefreshStepRequest>();
       req->set_out_key(out_key.data, 32);
@@ -341,8 +385,10 @@ namespace trezor {
     {
       AUTO_LOCK_CMD();
       require_connected();
-      CHECK_AND_ASSERT_THROW_MES(m_live_refresh_in_progress, "Live refresh not running");
-      live_refresh_finish_unsafe();
+      if (m_live_refresh_in_progress)
+      {
+        live_refresh_finish_unsafe();
+      }
     }
 
     void device_trezor::computing_key_images(bool started)
