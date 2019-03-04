@@ -58,13 +58,17 @@ namespace trezor {
    */
   class device_trezor : public hw::trezor::device_trezor_base, public hw::device_cold {
     protected:
-      bool m_live_refresh_in_progress;
+      std::atomic<bool> m_live_refresh_in_progress;
+      std::atomic<std::chrono::system_clock::time_point> m_last_live_refresh_time;
+      std::unique_ptr<boost::thread> m_live_refresh_thread;
+      std::atomic<bool> m_live_refresh_thread_running;
 
       void transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data);
       void transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg);
       void transaction_check(const protocol::tx::TData & tdata, const hw::tx_aux_data & aux_data);
       void device_state_reset_unsafe() override;
       void live_refresh_finish_unsafe();
+      void live_refresh_thread_main();
 
       /**
        * Signs particular transaction idx in the unsigned set, keeps state in the signer
@@ -83,6 +87,9 @@ namespace trezor {
       device_trezor& operator=(const device_trezor &device) = delete;
 
       explicit operator bool() const override {return true;}
+
+      bool init() override;
+      bool release() override;
 
       device_protocol_t device_protocol() const override { return PROTOCOL_COLD; };
 
