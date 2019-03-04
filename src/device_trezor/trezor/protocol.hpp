@@ -93,11 +93,12 @@ namespace protocol{
 namespace crypto {
 namespace chacha {
   const unsigned IV_SIZE = 12;
+  const unsigned TAG_SIZE = 16;  // crypto_aead_chacha20poly1305_IETF_ABYTES;
 
   /**
    * Chacha20Poly1305 decryption with tag verification. RFC 7539.
    */
-  void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext);
+  void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext, size_t *plaintext_len=nullptr);
 
 }
 }

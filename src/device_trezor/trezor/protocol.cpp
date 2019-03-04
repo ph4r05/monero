@@ -108,18 +108,22 @@ namespace protocol{
 namespace crypto {
 namespace chacha {
 
-  void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext){
+  void decrypt(const void* ciphertext, size_t length, const uint8_t* key, const uint8_t* iv, char* plaintext, size_t *plaintext_len){
     if (length < 16){
       throw std::invalid_argument("Ciphertext length too small");
     }
 
-    unsigned long long int cip_len = length;
+    unsigned long long int res_len = plaintext_len ? *plaintext_len : length;
     auto r = crypto_aead_chacha20poly1305_ietf_decrypt(
-        reinterpret_cast<unsigned char *>(plaintext), &cip_len, nullptr,
+        reinterpret_cast<unsigned char *>(plaintext), &res_len, nullptr,
         static_cast<const unsigned char *>(ciphertext), length, nullptr, 0, iv, key);
 
     if (r != 0){
       throw exc::Poly1305TagInvalid();
+    }
+
+    if (plaintext_len){
+      *plaintext_len = (size_t) res_len;
     }
   }
 
