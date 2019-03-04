@@ -6756,7 +6756,7 @@ bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
 {
   std::vector<std::string> local_args = args_;
 
-  if (m_wallet->key_on_device())
+  if (m_wallet->key_on_device() && m_wallet->get_account().get_device().get_type() != hw::device::TREZOR)
   {
     fail_msg_writer() << tr("command not supported by HW wallet");
     return true;
@@ -6777,7 +6777,14 @@ bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
 
   crypto::secret_key tx_key;
   std::vector<crypto::secret_key> additional_tx_keys;
-  if (m_wallet->get_tx_key(txid, tx_key, additional_tx_keys))
+
+  bool found_tx_key = m_wallet->get_tx_key(txid, tx_key, additional_tx_keys);
+  if (!found_tx_key)
+  {
+    found_tx_key = m_wallet->get_tx_key_device(txid, tx_key, additional_tx_keys);
+  }
+
+  if (found_tx_key)
   {
     ostringstream oss;
     oss << epee::string_tools::pod_to_hex(tx_key);
@@ -6853,7 +6860,7 @@ bool simple_wallet::set_tx_key(const std::vector<std::string> &args_)
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::get_tx_proof(const std::vector<std::string> &args)
 {
-  if (m_wallet->key_on_device())
+  if (m_wallet->key_on_device() && m_wallet->get_account().get_device().get_type() != hw::device::TREZOR)
   {
     fail_msg_writer() << tr("command not supported by HW wallet");
     return true;
