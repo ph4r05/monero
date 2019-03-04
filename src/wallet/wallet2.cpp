@@ -10331,7 +10331,13 @@ std::string wallet2::get_tx_proof(const crypto::hash &txid, const cryptonote::ac
   {
     crypto::secret_key tx_key;
     std::vector<crypto::secret_key> additional_tx_keys;
-    THROW_WALLET_EXCEPTION_IF(!get_tx_key(txid, tx_key, additional_tx_keys), error::wallet_internal_error, "Tx secret key wasn't found in the wallet file.");
+    bool found_tx_key = get_tx_key(txid, tx_key, additional_tx_keys);
+    if (!found_tx_key)
+    {
+      found_tx_key = get_tx_key_device(txid, tx_key, additional_tx_keys);
+    }
+
+    THROW_WALLET_EXCEPTION_IF(!found_tx_key, error::wallet_internal_error, "Tx secret key wasn't found in the wallet file.");
 
     const size_t num_sigs = 1 + additional_tx_keys.size();
     shared_secret.resize(num_sigs);
