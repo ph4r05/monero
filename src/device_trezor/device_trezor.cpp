@@ -274,9 +274,12 @@ namespace trezor {
 
       for(auto & sub : kis){
         char buff[32*3];
+        size_t buff_len = 32*3;
+
         protocol::crypto::chacha::decrypt(sub.blob().data(), sub.blob().size(),
                                           reinterpret_cast<const uint8_t *>(final_ack->enc_key().data()),
-                                          reinterpret_cast<const uint8_t *>(sub.iv().data()), buff);
+                                          reinterpret_cast<const uint8_t *>(sub.iv().data()), buff, &buff_len);
+        CHECK_AND_ASSERT_THROW_MES(buff_len == 32*3, "Plaintext size invalid");
 
         ::crypto::signature sig{};
         ::crypto::key_image ki;
