@@ -407,11 +407,8 @@ namespace trezor {
           return;
         }
 
-        if (started && !m_live_refresh_in_progress)
-        {
-          live_refresh_start();
-        }
-        else if (!started && m_live_refresh_in_progress)
+        // React only on termination as the process can auto-start itself.
+        if (!started && m_live_refresh_in_progress)
         {
           live_refresh_finish();
         }
