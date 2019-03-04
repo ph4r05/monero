@@ -157,6 +157,12 @@ namespace trezor {
       void live_refresh_finish() override;
 
       /**
+       * Letting device know the KI computation started / ended.
+       * During refresh
+       */
+      void computing_key_images(bool started) override;
+
+      /**
        * Implements hw::device interface
        * called from generate_key_image_helper_precomp()
        */
