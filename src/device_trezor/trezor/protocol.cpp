@@ -1067,8 +1067,9 @@ namespace tx {
         keys_len,
         reinterpret_cast<const uint8_t *>(enc_key.data),
         reinterpret_cast<const uint8_t *>(encrypted_keys.data()),
-        reinterpret_cast<char *>(plaintext.get()));
+        reinterpret_cast<char *>(plaintext.get()), &keys_len);
 
+    CHECK_AND_ASSERT_THROW_MES(keys_len % 32 == 0, "Invalid size");
     tx_keys.resize(keys_len / 32);
 
     for(unsigned i = 0; i < keys_len / 32; ++i)
