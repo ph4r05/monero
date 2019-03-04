@@ -248,10 +248,10 @@ namespace ki {
     std::vector<const ::crypto::public_key*> pkeys;
     pkeys.push_back(&out_key);
 
-    CHECK_AND_ASSERT_THROW_MES(!(rct::scalarmultKey(rct::ki2rct(ki), rct::curveOrder()) == rct::identity()),
+    CHECK_AND_ASSERT_THROW_MES(rct::scalarmultKey(rct::ki2rct(ki), rct::curveOrder()) == rct::identity(),
                                "Key image out of validity domain: key image " << epee::string_tools::pod_to_hex(ki));
 
-    CHECK_AND_ASSERT_THROW_MES(!::crypto::check_ring_signature((const ::crypto::hash&)ki, ki, pkeys, &sig),
+    CHECK_AND_ASSERT_THROW_MES(::crypto::check_ring_signature((const ::crypto::hash&)ki, ki, pkeys, &sig),
                                "Signature failed for key image " << epee::string_tools::pod_to_hex(ki)
                                                                  << ", signature " + epee::string_tools::pod_to_hex(sig)
                                                                  << ", pubkey " + epee::string_tools::pod_to_hex(*pkeys[0]));
