@@ -117,7 +117,7 @@ namespace trezor {
       /**
        * Get_tx_key support check
        */
-      bool is_get_tx_key_supported();
+      bool is_get_tx_key_supported() override;
 
       /**
        * Loads tx aux data
