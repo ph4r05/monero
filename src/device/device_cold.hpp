@@ -79,7 +79,7 @@ namespace hw {
     /**
      * Get tx key support check.
      */
-    bool is_get_tx_key_supported() { return false; }
+    virtual bool is_get_tx_key_supported() { return false; }
 
     /**
      * Loads TX aux data required for tx key.
