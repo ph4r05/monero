@@ -352,6 +352,30 @@ namespace trezor {
       live_refresh_finish_unsafe();
     }
 
+    void device_trezor::computing_key_images(bool started)
+    {
+      try
+      {
+        if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE))
+        {
+          return;
+        }
+
+        if (started && !m_live_refresh_in_progress)
+        {
+          live_refresh_start();
+        }
+        else if (!started && m_live_refresh_in_progress)
+        {
+          live_refresh_finish();
+        }
+      }
+      catch(const std::exception & e)
+      {
+        MWARNING("KI computation state change failed, started: " << started << ", e: " << e.what());
+      }
+    }
+
     bool device_trezor::compute_key_image(
         const ::cryptonote::account_keys& ack,
         const ::crypto::public_key& out_key,
