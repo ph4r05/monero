@@ -165,6 +165,9 @@ namespace trezor {
     virtual std::ostream& dump(std::ostream& o) const { return o << "Transport<>"; }
   protected:
     long m_open_counter;
+
+    virtual bool pre_open();
+    virtual bool pre_close();
   };
 
   // Bridge transport
