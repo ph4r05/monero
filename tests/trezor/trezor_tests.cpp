@@ -135,8 +135,9 @@ int main(int argc, char* argv[])
     TREZOR_SETUP_CHAIN("HF9");
 
     // Individual test cases using shared pre-generated blockchain.
-    TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync, core, trezor_base);
+    TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync_without_refresh, core, trezor_base);
     TREZOR_COMMON_TEST_CASE(gen_trezor_live_refresh, core, trezor_base);
+    TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync_with_refresh, core, trezor_base);
 
     // Transaction tests
     TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo, core, trezor_base);
@@ -578,10 +579,22 @@ void gen_trezor_base::init_fields()
   m_alice_account.set_createtime(m_wallet_ts);
 }
 
+void gen_trezor_base::update_client_settings()
+{
+  auto dev_trezor = dynamic_cast<::hw::trezor::device_trezor*>(m_trezor);
+  CHECK_AND_ASSERT_THROW_MES(dev_trezor, "Could not cast to device_trezor");
+
+  dev_trezor->set_live_refresh_enabled(m_live_refresh_enabled);
+}
+
 bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
 {
   init_fields();
   setup_trezor();
+
+  m_live_refresh_enabled = false;
+  update_client_settings();
+
   m_alice_account.create_from_device(*m_trezor);
   m_alice_account.set_createtime(m_wallet_ts);
 
@@ -769,6 +782,7 @@ void gen_trezor_base::load(std::vector<test_event_entry>& events)
   m_eve_account.set_createtime(m_wallet_ts);
 
   setup_trezor();
+  update_client_settings();
   m_alice_account.create_from_device(*m_trezor);
   m_alice_account.set_createtime(m_wallet_ts);
 
@@ -805,6 +819,8 @@ void gen_trezor_base::test_setup(std::vector<test_event_entry>& events)
   add_shared_events(events);
 
   setup_trezor();
+  update_client_settings();
+
   m_alice_account.create_from_device(*m_trezor);
   m_alice_account.set_createtime(m_wallet_ts);
 
@@ -1210,6 +1226,18 @@ bool gen_trezor_ki_sync::generate(std::vector<test_event_entry>& events)
   uint64_t spent = 0, unspent = 0;
   m_wl_alice->import_key_images(ski, 0, spent, unspent, false);
   return true;
+}
+
+bool gen_trezor_ki_sync_with_refresh::generate(std::vector<test_event_entry>& events)
+{
+  m_live_refresh_enabled = true;
+  return gen_trezor_ki_sync::generate(events);
+}
+
+bool gen_trezor_ki_sync_without_refresh::generate(std::vector<test_event_entry>& events)
+{
+  m_live_refresh_enabled = false;
+  return gen_trezor_ki_sync::generate(events);
 }
 
 bool gen_trezor_live_refresh::generate(std::vector<test_event_entry>& events)
