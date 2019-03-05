@@ -80,6 +80,7 @@ namespace trezor {
 
     device_trezor::device_trezor() {
       m_live_refresh_in_progress = false;
+      m_live_refresh_enabled = true;
     }
 
     device_trezor::~device_trezor() {
@@ -402,7 +403,7 @@ namespace trezor {
     {
       try
       {
-        if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE))
+        if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE) || !m_live_refresh_enabled)
         {
           return;
         }
@@ -428,7 +429,7 @@ namespace trezor {
         ::cryptonote::keypair& in_ephemeral,
         ::crypto::key_image& ki)
     {
-      if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE))
+      if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE) || !m_live_refresh_enabled)
       {
         return false;
       }
