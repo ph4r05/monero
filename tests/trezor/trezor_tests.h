@@ -68,6 +68,12 @@ public:
       std::vector<tools::wallet2*> wallets,
       bool is_sweep=false);
 
+  void test_get_tx(std::vector<test_event_entry>& events,
+      std::vector<tools::wallet2::pending_tx>& ptxs,
+      std::vector<tools::wallet2*> wallets,
+      const tools::wallet2::signed_tx_set &exported_txs,
+      const hw::tx_aux_data & aux_data);
+
   crypto::hash head_hash() { return get_block_hash(m_head); }
   cryptonote::block head_block() { return m_head; }
   bool heavy_tests() { return m_heavy_tests; }
@@ -87,6 +93,7 @@ protected:
   void setup_trezor();
   void init_fields();
   void update_client_settings();
+  bool verify_tx_key(const ::crypto::secret_key & tx_priv, const ::crypto::public_key & tx_pub, const subaddresses_t & subs);
 
   test_generator m_generator;
   block_tracker m_bt;
@@ -97,6 +104,7 @@ protected:
 
   std::string m_trezor_path;
   bool m_heavy_tests;
+  bool m_test_get_tx_key;
   rct::RCTConfig m_rct_config;
   bool m_live_refresh_enabled;
 

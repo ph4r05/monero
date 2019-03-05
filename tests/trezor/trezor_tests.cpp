@@ -506,12 +506,14 @@ const std::string gen_trezor_base::m_alice_view_private = "a6ccd4ac344a295d1387f
 
 gen_trezor_base::gen_trezor_base(){
   m_rct_config = {rct::RangeProofPaddedBulletproof, 1};
+  m_test_get_tx_key = true;
 }
 
 gen_trezor_base::gen_trezor_base(const gen_trezor_base &other):
     m_generator(other.m_generator), m_bt(other.m_bt), m_miner_account(other.m_miner_account),
     m_bob_account(other.m_bob_account), m_alice_account(other.m_alice_account), m_eve_account(other.m_eve_account),
-    m_hard_forks(other.m_hard_forks), m_trezor(other.m_trezor), m_rct_config(other.m_rct_config)
+    m_hard_forks(other.m_hard_forks), m_trezor(other.m_trezor), m_rct_config(other.m_rct_config),
+    m_heavy_tests(other.m_heavy_tests), m_test_get_tx_key(other.m_test_get_tx_key), m_live_refresh_enabled(other.m_live_refresh_enabled)
 {
 
 }
@@ -552,6 +554,8 @@ void gen_trezor_base::fork(gen_trezor_base & other)
   other.m_trezor_path = m_trezor_path;
   other.m_heavy_tests = m_heavy_tests;
   other.m_rct_config = m_rct_config;
+  other.m_test_get_tx_key = m_test_get_tx_key;
+  other.m_live_refresh_enabled = m_live_refresh_enabled;
 
   other.m_miner_account = m_miner_account;
   other.m_bob_account = m_bob_account;
@@ -1000,6 +1004,80 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
   }
 
   CHECK_AND_ASSERT_THROW_MES(sum_in == sum_out, "Tx amount mismatch");
+
+  test_get_tx(events, ptxs, wallets, exported_txs, aux_data);
+}
+
+bool gen_trezor_base::verify_tx_key(const ::crypto::secret_key & tx_priv, const ::crypto::public_key & tx_pub, const subaddresses_t & subs)
+{
+  ::crypto::public_key tx_pub_c;
+  ::crypto::secret_key_to_public_key(tx_priv, tx_pub_c);
+  if (tx_pub == tx_pub_c)
+    return true;
+
+  for(const auto & elem : subs)
+  {
+    tx_pub_c = rct::rct2pk(rct::scalarmultKey(rct::pk2rct(elem.first), rct::sk2rct(tx_priv)));
+    if (tx_pub == tx_pub_c)
+      return true;
+  }
+  return false;
+}
+
+void gen_trezor_base::test_get_tx(
+    std::vector<test_event_entry>& events,
+    std::vector<tools::wallet2::pending_tx>& ptxs,
+    std::vector<tools::wallet2*> wallets,
+    const tools::wallet2::signed_tx_set &exported_txs,
+    const hw::tx_aux_data & aux_data)
+{
+  if (!m_test_get_tx_key)
+  {
+    return;
+  }
+
+  auto dev_cold = dynamic_cast<::hw::device_cold*>(m_trezor);
+  CHECK_AND_ASSERT_THROW_MES(dev_cold, "Device does not implement cold signing interface");
+
+  if (!dev_cold->is_get_tx_key_supported())
+  {
+    MERROR("Get TX key is not supported by the connected Trezor");
+    return;
+  }
+
+  subaddresses_t all_subs;
+  for(tools::wallet2 * wlt : wallets)
+  {
+    wlt->expand_subaddresses({10, 20});
+
+    const subaddresses_t & cur_sub = wallet_accessor_test::get_subaddresses(wlt);
+    all_subs.insert(cur_sub.begin(), cur_sub.end());
+  }
+
+  for(size_t txid = 0; txid < exported_txs.ptx.size(); ++txid) {
+    const auto &c_ptx = exported_txs.ptx[txid];
+    const auto &c_tx = c_ptx.tx;
+    const ::crypto::hash tx_prefix_hash = cryptonote::get_transaction_prefix_hash(c_tx);
+
+    auto tx_pub = cryptonote::get_tx_pub_key_from_extra(c_tx.extra);
+    auto additional_pub_keys = cryptonote::get_additional_tx_pub_keys_from_extra(c_tx.extra);
+
+    hw::device_cold:: tx_key_data_t tx_key_data;
+    std::vector<::crypto::secret_key> tx_keys;
+
+    dev_cold->load_tx_key_data(tx_key_data, aux_data.tx_device_aux[txid]);
+    CHECK_AND_ASSERT_THROW_MES(std::string(tx_prefix_hash.data, 32) == tx_key_data.tx_prefix_hash, "TX prefix mismatch");
+
+    dev_cold->get_tx_key(tx_keys, tx_key_data, m_alice_account.get_keys().m_view_secret_key, boost::none);
+    CHECK_AND_ASSERT_THROW_MES(!tx_keys.empty(), "Empty TX keys");
+    CHECK_AND_ASSERT_THROW_MES(verify_tx_key(tx_keys[0], tx_pub, all_subs), "Tx pub mismatch");
+    CHECK_AND_ASSERT_THROW_MES(additional_pub_keys.size() == tx_keys.size() - 1, "Invalid additional keys count");
+
+    for(size_t i = 0; i < additional_pub_keys.size(); ++i)
+    {
+      CHECK_AND_ASSERT_THROW_MES(verify_tx_key(tx_keys[i + 1], additional_pub_keys[i], all_subs), "Tx pub mismatch");
+    }
+  }
 }
 
 #define TREZOR_TEST_PREFIX()                              \
