@@ -41,8 +41,16 @@
 #include <sodium/crypto_verify_32.h>
 #include <sodium/crypto_aead_chacha20poly1305.h>
 
+#define GET_FIELD_STRING(name, type, jtype) field_##name = std::string(json[#name].GetString(), json[#name].GetStringLength())
+#define GET_FIELD_OTHER(name, type, jtype) field_##name = static_cast<type>(json[#name].Get##jtype())
+
+#define GET_STRING_FROM_JSON(json, name, type, mandatory, def) \
+  GET_FIELD_FROM_JSON_EX(json, name, type, String, mandatory, def, GET_FIELD_STRING)
 
 #define GET_FIELD_FROM_JSON(json, name, type, jtype, mandatory, def) \
+  GET_FIELD_FROM_JSON_EX(json, name, type, jtype, mandatory, def, GET_FIELD_OTHER)
+
+#define GET_FIELD_FROM_JSON_EX(json, name, type, jtype, mandatory, def, VAL) \
   type field_##name = static_cast<type>(def);                        \
   bool field_##name##_found = false;                                 \
   (void)field_##name##_found;                                        \
@@ -50,7 +58,7 @@
   {                                                                  \
     if (json[#name].Is##jtype())                                     \
     {                                                                \
-      field_##name = static_cast<type>(json[#name].Get##jtype());    \
+      VAL(name, type, jtype);                                        \
       field_##name##_found = true;                                   \
     }                                                                \
     else                                                             \
@@ -1009,11 +1017,11 @@ namespace tx {
       throw std::invalid_argument("Data parsing error - not an object");
     }
 
-    GET_FIELD_FROM_JSON(json, version,  int, Int, true, -1);
-    GET_FIELD_FROM_JSON(json, salt1, std::string, String, true, std::string());
-    GET_FIELD_FROM_JSON(json, salt2, std::string, String, true, std::string());
-    GET_FIELD_FROM_JSON(json, enc_keys, std::string, String, true, std::string());
-    GET_FIELD_FROM_JSON(json, tx_prefix_hash, std::string, String, false, std::string());
+    GET_FIELD_FROM_JSON(json, version, int, Int, true, -1);
+    GET_STRING_FROM_JSON(json, salt1, std::string, true, std::string());
+    GET_STRING_FROM_JSON(json, salt2, std::string, true, std::string());
+    GET_STRING_FROM_JSON(json, enc_keys, std::string, true, std::string());
+    GET_STRING_FROM_JSON(json, tx_prefix_hash, std::string, false, std::string());
 
     if (field_version != 1)
     {

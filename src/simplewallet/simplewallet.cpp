@@ -4749,7 +4749,7 @@ bool simple_wallet::refresh_main(uint64_t start_height, enum ResetType reset, bo
   LOCK_IDLE_SCOPE();
 
   if (reset != ResetNone)
-    m_wallet->rescan_blockchain(reset == ResetHard, false);
+    m_wallet->rescan_blockchain(reset == ResetHard, false, reset == ResetKeepKI);
 
 #ifdef HAVE_READLINE
   rdln::suspend_readline pause_readline;
@@ -4820,6 +4820,7 @@ bool simple_wallet::refresh_main(uint64_t start_height, enum ResetType reset, bo
 bool simple_wallet::refresh(const std::vector<std::string>& args)
 {
   uint64_t start_height = 0;
+  enum ResetType reset = ResetNone;
   if(!args.empty()){
     try
     {
@@ -4829,8 +4830,11 @@ bool simple_wallet::refresh(const std::vector<std::string>& args)
     {
         start_height = 0;
     }
+    if (args.size() > 1 && args[1] == "ki"){
+      reset = ResetKeepKI;
+    }
   }
-  return refresh_main(start_height, ResetNone);
+  return refresh_main(start_height, reset);
 }
 //----------------------------------------------------------------------------------------------------
 bool simple_wallet::show_balance_unlocked(bool detailed)
@@ -6774,10 +6778,10 @@ bool simple_wallet::get_tx_key(const std::vector<std::string> &args_)
   crypto::secret_key tx_key;
   std::vector<crypto::secret_key> additional_tx_keys;
 
-  bool found_tx_key = get_tx_key(txid, tx_key, additional_tx_keys);
+  bool found_tx_key = m_wallet->get_tx_key(txid, tx_key, additional_tx_keys);
   if (!found_tx_key)
   {
-    found_tx_key = get_tx_key_device(txid, tx_key, additional_tx_keys);
+    found_tx_key = m_wallet->get_tx_key_device(txid, tx_key, additional_tx_keys);
   }
 
   if (found_tx_key)
