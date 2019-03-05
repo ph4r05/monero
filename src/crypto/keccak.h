@@ -37,4 +37,15 @@ void keccak1600(const uint8_t *in, size_t inlen, uint8_t *md);
 void keccak_init(KECCAK_CTX * ctx);
 void keccak_update(KECCAK_CTX * ctx, const uint8_t *in, size_t inlen);
 void keccak_finish(KECCAK_CTX * ctx, uint8_t *md);
+
+typedef struct {
+  KECCAK_CTX inner;
+  KECCAK_CTX outer;
+} hmac_keccak_state;
+
+void hmac_keccak_init(hmac_keccak_state *S, const uint8_t *_key, uint64_t keylen);
+void hmac_keccak_update(hmac_keccak_state *S, const uint8_t *data, uint64_t datalen);
+void hmac_keccak_finish(hmac_keccak_state *S, uint8_t *digest);
+void hmac_keccak_hash(uint8_t *out, const uint8_t *key, uint64_t keylen, const uint8_t *in, uint64_t inlen);
+
 #endif
