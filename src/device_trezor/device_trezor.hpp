@@ -62,6 +62,7 @@ namespace trezor {
       std::atomic<std::chrono::system_clock::time_point> m_last_live_refresh_time;
       std::unique_ptr<boost::thread> m_live_refresh_thread;
       std::atomic<bool> m_live_refresh_thread_running;
+      bool m_live_refresh_enabled;
 
       void transaction_versions_check(const ::tools::wallet2::unsigned_tx_set & unsigned_tx, hw::tx_aux_data & aux_data);
       void transaction_pre_check(std::shared_ptr<messages::monero::MoneroTransactionInitRequest> init_msg);
@@ -96,6 +97,8 @@ namespace trezor {
       bool  has_ki_cold_sync() const override { return true; }
       bool  has_tx_cold_sign() const override { return true; }
       void  set_network_type(cryptonote::network_type network_type) override { this->network_type = network_type; }
+      void  set_live_refresh_enabled(bool enabled) { m_live_refresh_enabled = enabled; }
+      bool  live_refresh_enabled() { return m_live_refresh_enabled; }
 
       /* ======================================================================= */
       /*                             WALLET & ADDRESS                            */
