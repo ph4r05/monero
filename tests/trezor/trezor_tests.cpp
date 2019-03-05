@@ -138,17 +138,27 @@ int main(int argc, char* argv[])
     TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync, core, trezor_base);
 
     // Transaction tests
-    TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_short, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_short_integrated, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_long, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_acc1, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_sub, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_2sub, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_1norm_2sub, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_2utxo_sub_acc_to_1norm_2sub, core, trezor_base);
-    TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_7outs, core, trezor_base);
+    for(uint8_t hf=9; hf <= 10; ++hf)
+    {
+      MDEBUG("Transaction tests for HF " << (int)hf);
+      if (hf == 10)
+      {
+        trezor_base.rct_config({rct::RangeProofPaddedBulletproof, 2});
+        TREZOR_SETUP_CHAIN("HF10");
+      }
+
+      TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_short, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_short_integrated, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo_paymentid_long, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_acc1, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_sub, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_2sub, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_1norm_2sub, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_2utxo_sub_acc_to_1norm_2sub, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_7outs, core, trezor_base);
+    }
 
     if (trezor_base.heavy_tests())
     {
