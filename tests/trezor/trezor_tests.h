@@ -86,6 +86,7 @@ public:
 protected:
   void setup_trezor();
   void init_fields();
+  void update_client_settings();
 
   test_generator m_generator;
   block_tracker m_bt;
@@ -97,6 +98,7 @@ protected:
   std::string m_trezor_path;
   bool m_heavy_tests;
   rct::RCTConfig m_rct_config;
+  bool m_live_refresh_enabled;
 
   cryptonote::account_base m_miner_account;
   cryptonote::account_base m_bob_account;
@@ -170,6 +172,18 @@ protected:
 };
 
 class gen_trezor_ki_sync : public gen_trezor_base
+{
+public:
+  bool generate(std::vector<test_event_entry>& events) override;
+};
+
+class gen_trezor_ki_sync_with_refresh : public gen_trezor_ki_sync
+{
+public:
+  bool generate(std::vector<test_event_entry>& events) override;
+};
+
+class gen_trezor_ki_sync_without_refresh : public gen_trezor_ki_sync
 {
 public:
   bool generate(std::vector<test_event_entry>& events) override;
