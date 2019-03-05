@@ -11,8 +11,7 @@ using namespace crypto;
 using namespace cryptonote;
 
 // Shared random generator
-static std::random_device RD;
-static std::mt19937 MT(RD());
+static std::default_random_engine RND(crypto::rand<unsigned>());
 
 void wallet_accessor_test::set_account(tools::wallet2 * wallet, cryptonote::account_base& account)
 {
@@ -180,8 +179,7 @@ void wallet_tools::gen_tx_src(size_t mixin, uint64_t cur_height, const tools::wa
     src.outputs.push_back(oe);
   }
 
-  std::uniform_int_distribution<> dis(0, mixin - 1);
-  size_t real_idx = (size_t)dis(MT);
+  size_t real_idx = crypto::rand<size_t>() % mixin;
 
   cryptonote::tx_source_entry::output_entry &real_oe = src.outputs[real_idx];
   real_oe.first = td.m_global_output_index;
