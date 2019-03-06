@@ -495,6 +495,16 @@ static std::vector<tools::wallet2*> vct_wallets(tools::wallet2* w1=nullptr, tool
   return res;
 }
 
+static uint64_t get_available_funds(tools::wallet2* wallet, uint32_t account=0)
+{
+  uint64_t sum = 0;
+  for(const auto & cur : wallet_accessor_test::get_transfers(wallet))
+  {
+    sum += !cur.m_spent && cur.m_subaddr_index.major == account ? cur.amount() : 0;
+  }
+  return sum;
+}
+
 // gen_trezor_base
 const uint64_t gen_trezor_base::m_ts_start = 1338224400;
 const uint64_t gen_trezor_base::m_wallet_ts = m_ts_start - 60*60*24*4;
@@ -732,6 +742,8 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   // RCT transactions, wallets have to be used
   wallet_tools::process_transactions(m_wl_alice.get(), events, blk_5r, m_bt);
   wallet_tools::process_transactions(m_wl_bob.get(), events, blk_5r, m_bt);
+  MDEBUG("Available funds on Alice: " << get_available_funds(m_wl_alice.get()));
+  MDEBUG("Available funds on Bob: " << get_available_funds(m_wl_bob.get()));
 
   // Send Alice -> Bob, manually constructed. Simple TX test, precondition.
   cryptonote::transaction tx_1;
@@ -809,6 +821,8 @@ void gen_trezor_base::load(std::vector<test_event_entry>& events)
 
   wallet_tools::process_transactions(m_wl_alice.get(), events, m_head, m_bt);
   wallet_tools::process_transactions(m_wl_bob.get(), events, m_head, m_bt);
+  MDEBUG("Available funds on Alice: " << get_available_funds(m_wl_alice.get()));
+  MDEBUG("Available funds on Bob: " << get_available_funds(m_wl_bob.get()));
 }
 
 void gen_trezor_base::fix_hf(std::vector<test_event_entry>& events)
