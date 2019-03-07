@@ -239,6 +239,8 @@ namespace trezor {
 
     void set_derivation_path(const std::string &deriv_path) override;
 
+    virtual bool has_ki_live_refresh(void) const override { return false; }
+
     virtual void set_pin(const epee::wipeable_string & pin) override {
       m_pin = pin;
     }

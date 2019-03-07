@@ -337,6 +337,11 @@ namespace trezor {
       return get_version() > pack_version(2, 0, 10);
     }
 
+    bool device_trezor::has_ki_live_refresh() const
+    {
+      return is_live_refresh_supported() && (mode == NONE || mode == TRANSACTION_PARSE) && m_live_refresh_enabled;
+    }
+
     void device_trezor::live_refresh_start()
     {
       AUTO_LOCK_CMD();

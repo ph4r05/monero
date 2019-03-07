@@ -4721,7 +4721,7 @@ boost::optional<epee::wipeable_string> simple_wallet::on_device_passphrase_reque
 void simple_wallet::on_refresh_finished(uint64_t start_height, uint64_t fetched_blocks, bool is_init, bool received_money)
 {
   // Key image sync after the first refresh
-  if (!m_wallet->get_account().get_device().has_tx_cold_sign()) {
+  if (!m_wallet->get_account().get_device().has_tx_cold_sign() || m_wallet->get_account().get_device().has_ki_live_refresh()) {
     return;
   }
 

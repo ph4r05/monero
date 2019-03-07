@@ -153,6 +153,8 @@ namespace trezor {
 
       bool is_live_refresh_supported() const override;
 
+      bool has_ki_live_refresh() const override;
+
       void live_refresh_start() override;
 
       void live_refresh(
