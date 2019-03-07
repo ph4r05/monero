@@ -337,9 +337,19 @@ namespace trezor {
       return get_version() > pack_version(2, 0, 10);
     }
 
-    bool device_trezor::has_ki_live_refresh() const
+    bool device_trezor::is_live_refresh_enabled() const
     {
       return is_live_refresh_supported() && (mode == NONE || mode == TRANSACTION_PARSE) && m_live_refresh_enabled;
+    }
+
+    bool device_trezor::has_ki_live_refresh() const
+    {
+      try{
+        return is_live_refresh_enabled();
+      } catch(const std::exception & e){
+        MERROR("Could not detect if live refresh is enabled: " << e.what());
+      }
+      return false;
     }
 
     void device_trezor::live_refresh_start()
@@ -406,7 +416,7 @@ namespace trezor {
     {
       try
       {
-        if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE) || !m_live_refresh_enabled)
+        if (!is_live_refresh_enabled())
         {
           return;
         }
@@ -432,7 +442,7 @@ namespace trezor {
         ::cryptonote::keypair& in_ephemeral,
         ::crypto::key_image& ki)
     {
-      if (!is_live_refresh_supported() || (mode != NONE && mode != TRANSACTION_PARSE) || !m_live_refresh_enabled)
+      if (!is_live_refresh_enabled())
       {
         return false;
       }
