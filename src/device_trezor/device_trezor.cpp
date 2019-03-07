@@ -232,7 +232,7 @@ namespace trezor {
       return response;
     }
 
-    bool device_trezor::is_get_tx_key_supported()
+    bool device_trezor::is_get_tx_key_supported() const
     {
       require_initialized();
       return get_version() > pack_version(2, 0, 10);
@@ -331,7 +331,7 @@ namespace trezor {
 #undef EVENT_PROGRESS
     }
 
-    bool device_trezor::is_live_refresh_supported()
+    bool device_trezor::is_live_refresh_supported() const
     {
       require_initialized();
       return get_version() > pack_version(2, 0, 10);

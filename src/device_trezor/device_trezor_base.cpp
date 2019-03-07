@@ -191,13 +191,13 @@ namespace trezor {
     /*  Helpers                                                                */
     /* ======================================================================= */
 
-    void device_trezor_base::require_connected(){
+    void device_trezor_base::require_connected() const {
       if (!m_transport){
         throw exc::NotConnectedException();
       }
     }
 
-    void device_trezor_base::require_initialized(){
+    void device_trezor_base::require_initialized() const {
       if (!m_features){
         throw exc::TrezorException("Device state not initialized");
       }

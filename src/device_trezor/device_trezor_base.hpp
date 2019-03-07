@@ -83,8 +83,8 @@ namespace trezor {
       // Internal methods
       //
 
-      void require_connected();
-      void require_initialized();
+      void require_connected() const;
+      void require_initialized() const;
       void call_ping_unsafe();
       void test_ping();
       virtual void device_state_reset_unsafe();
@@ -231,7 +231,7 @@ namespace trezor {
       return m_features;
     }
 
-    uint64_t get_version() {
+    uint64_t get_version() const {
       CHECK_AND_ASSERT_THROW_MES(m_features, "Features not loaded");
       CHECK_AND_ASSERT_THROW_MES(m_features->has_major_version() && m_features->has_minor_version() && m_features->has_patch_version(), "Invalid Trezor firmware version information");
       return pack_version(m_features->major_version(), m_features->minor_version(), m_features->patch_version());

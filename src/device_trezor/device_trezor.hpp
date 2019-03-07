@@ -128,7 +128,7 @@ namespace trezor {
       /**
        * Get_tx_key support check
        */
-      bool is_get_tx_key_supported() override;
+      bool is_get_tx_key_supported() const override;
 
       /**
        * Loads tx aux data
@@ -151,7 +151,7 @@ namespace trezor {
                    const std::vector<::tools::wallet2::transfer_details> & transfers,
                    hw::device_cold::exported_key_image & ski) override;
 
-      bool is_live_refresh_supported() override;
+      bool is_live_refresh_supported() const override;
 
       void live_refresh_start() override;
 

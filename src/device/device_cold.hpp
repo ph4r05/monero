@@ -119,7 +119,7 @@ namespace hw {
     /**
      * Get tx key support check.
      */
-    virtual bool is_get_tx_key_supported() { return false; }
+    virtual bool is_get_tx_key_supported() const { return false; }
 
     /**
      * Loads TX aux data required for tx key.
@@ -139,7 +139,7 @@ namespace hw {
     /**
      * Live refresh support check
      */
-    virtual bool is_live_refresh_supported() { return false; };
+    virtual bool is_live_refresh_supported() const { return false; };
 
     /**
      * Starts live refresh process with the device
