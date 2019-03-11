@@ -87,7 +87,7 @@ namespace trezor {
       m_live_refresh_thread_running = false;
       if (m_live_refresh_thread)
       {
-        m_live_refresh_thread->detach();
+        m_live_refresh_thread->join();
         m_live_refresh_thread.release();
       }
       return r;

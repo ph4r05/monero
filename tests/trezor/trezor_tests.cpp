@@ -41,6 +41,7 @@ using namespace cryptonote;
 #include "common/util.h"
 #include "common/command_line.h"
 #include "trezor_tests.h"
+#include "tools.h"
 #include "device/device_cold.hpp"
 #include "device_trezor/device_trezor.hpp"
 
@@ -70,14 +71,14 @@ namespace
 #define TREZOR_SETUP_CHAIN(NAME) do {                                                                           \
   ++tests_count;                                                                                                \
   try {                                                                                                         \
-    setup_chain(&core, trezor_base, chain_path, fix_chain);                                                     \
+    setup_chain(core, trezor_base, chain_path, fix_chain, vm_core);                                            \
   } catch (const std::exception& ex) {                                                                          \
     failed_tests.emplace_back("gen_trezor_base " #NAME);                                                        \
   }                                                                                                             \
 } while(0)
 
 static void rollback_chain(cryptonote::core * core, const cryptonote::block & head);
-static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base, std::string chain_path, bool fix_chain);
+static void setup_chain(cryptonote::core * core, gen_trezor_base & trezor_base, std::string chain_path, bool fix_chain, const po::variables_map & vm_core);
 
 int main(int argc, char* argv[])
 {
@@ -126,18 +127,35 @@ int main(int argc, char* argv[])
     hw::trezor::register_all();
 
     // Bootstrapping common chain & accounts
-    cryptonote::core * core = nullptr;
+    cryptonote::core core_obj(nullptr);
+    cryptonote::core * const core = &core_obj;
+    std::shared_ptr<mock_daemon> daemon = nullptr;
 
     gen_trezor_base trezor_base;
     trezor_base.setup_args(trezor_path, heavy_tests);
     trezor_base.rct_config({rct::RangeProofPaddedBulletproof, 1});  // HF9 tests
 
+    // Arguments for core & daemon
+    po::variables_map vm_core;
+    po::options_description desc_params_core("Core");
+    mock_daemon::init_options(desc_params_core);
+    tools::options::build_options(vm_core, desc_params_core);
+    mock_daemon::default_options(vm_core);
+
     TREZOR_SETUP_CHAIN("HF9");
+
+    // Daemon init after core has been setup.
+    daemon = std::make_shared<mock_daemon>(core, vm_core);
+    trezor_base.daemon(daemon);
+    CHECK_AND_ASSERT_THROW_MES(daemon->nettype() == trezor_base.nettype(), "Serialized chain network type does not match");
+    daemon->init();
+    daemon->run();
 
     // Individual test cases using shared pre-generated blockchain.
     TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync_without_refresh, core, trezor_base);
     TREZOR_COMMON_TEST_CASE(gen_trezor_live_refresh, core, trezor_base);
     TREZOR_COMMON_TEST_CASE(gen_trezor_ki_sync_with_refresh, core, trezor_base);
+    TREZOR_COMMON_TEST_CASE(wallet_api_tests, core, trezor_base);
 
     // Transaction tests
     for(uint8_t hf=9; hf <= 10; ++hf)
@@ -145,8 +163,14 @@ int main(int argc, char* argv[])
       MDEBUG("Transaction tests for HF " << (int)hf);
       if (hf == 10)
       {
+        daemon->stop();
+
         trezor_base.rct_config({rct::RangeProofPaddedBulletproof, 2});
         TREZOR_SETUP_CHAIN("HF10");
+
+        daemon = std::make_shared<mock_daemon>(core, vm_core);
+        daemon->init();
+        daemon->run();
       }
 
       TREZOR_COMMON_TEST_CASE(gen_trezor_1utxo, core, trezor_base);
@@ -167,6 +191,7 @@ int main(int argc, char* argv[])
       TREZOR_COMMON_TEST_CASE(gen_trezor_many_utxo, core, trezor_base);
     }
 
+    daemon->stop();
     core->deinit();
     el::Level level = (failed_tests.empty() ? el::Level::Info : el::Level::Error);
     MLOG(level, "\nREPORT:");
@@ -255,7 +280,35 @@ static bool serialize_chain_to_file(std::vector<test_event_entry>& events, gen_t
   CATCH_ENTRY_L0("serialize_chain_to_file", false);
 }
 
-static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base, std::string chain_path, bool fix_chain)
+template<class t_test_class>
+static bool init_core_replay_events(std::vector<test_event_entry>& events, cryptonote::core * core, const po::variables_map & vm_core)
+{
+  // this test needs for it to be so.
+  get_test_options<t_test_class> gto;
+
+  // Hardforks can be specified in events.
+  v_hardforks_t hardforks;
+  cryptonote::test_options test_options_tmp{};
+  const cryptonote::test_options * test_options_ = &gto.test_options;
+  if (extract_hard_forks(events, hardforks)){
+    hardforks.push_back(std::make_pair((uint8_t)0, (uint64_t)0));  // terminator
+    test_options_tmp.hard_forks = hardforks.data();
+    test_options_ = &test_options_tmp;
+  }
+
+  CHECK_AND_ASSERT_THROW_MES(core->init(vm_core, test_options_), "Core init failed");
+  core->get_blockchain_storage().get_db().set_batch_transactions(true);
+
+  // start with a clean pool
+  std::vector<crypto::hash> pool_txs;
+  CHECK_AND_ASSERT_THROW_MES(core->get_pool_transaction_hashes(pool_txs), "Failed to flush txpool");
+  core->get_blockchain_storage().flush_txes_from_pool(pool_txs);
+
+  t_test_class validator;
+  return replay_events_through_core<t_test_class>(*core, events, validator);
+}
+
+static void setup_chain(cryptonote::core * core, gen_trezor_base & trezor_base, std::string chain_path, bool fix_chain, const po::variables_map & vm_core)
 {
   std::vector<test_event_entry> events;
   const bool do_serialize = !chain_path.empty();
@@ -299,7 +352,7 @@ static void setup_chain(cryptonote::core ** core, gen_trezor_base & trezor_base,
   }
 
   trezor_base.fix_hf(events);
-  if (generated && do_replay_events_get_core<gen_trezor_base>(events, core))
+  if (generated && init_core_replay_events<gen_trezor_base>(events, core, vm_core))
   {
     MGINFO_GREEN("#TEST-chain-init# Succeeded ");
   }
@@ -496,7 +549,7 @@ static std::vector<tools::wallet2*> vct_wallets(tools::wallet2* w1=nullptr, tool
 }
 
 // gen_trezor_base
-const uint64_t gen_trezor_base::m_ts_start = 1338224400;
+const uint64_t gen_trezor_base::m_ts_start = 1397862000;  // As default wallet timestamp is 1397516400
 const uint64_t gen_trezor_base::m_wallet_ts = m_ts_start - 60*60*24*4;
 const std::string gen_trezor_base::m_device_name = "Trezor:udp";
 const std::string gen_trezor_base::m_master_seed_str = "14821d0bc5659b24cafbc889dc4fc60785ee08b65d71c525f81eeaba4f3a570f";
@@ -507,13 +560,15 @@ const std::string gen_trezor_base::m_alice_view_private = "a6ccd4ac344a295d1387f
 gen_trezor_base::gen_trezor_base(){
   m_rct_config = {rct::RangeProofPaddedBulletproof, 1};
   m_test_get_tx_key = true;
+  m_network_type = cryptonote::TESTNET;
 }
 
 gen_trezor_base::gen_trezor_base(const gen_trezor_base &other):
     m_generator(other.m_generator), m_bt(other.m_bt), m_miner_account(other.m_miner_account),
     m_bob_account(other.m_bob_account), m_alice_account(other.m_alice_account), m_eve_account(other.m_eve_account),
     m_hard_forks(other.m_hard_forks), m_trezor(other.m_trezor), m_rct_config(other.m_rct_config),
-    m_heavy_tests(other.m_heavy_tests), m_test_get_tx_key(other.m_test_get_tx_key), m_live_refresh_enabled(other.m_live_refresh_enabled)
+    m_heavy_tests(other.m_heavy_tests), m_test_get_tx_key(other.m_test_get_tx_key), m_live_refresh_enabled(other.m_live_refresh_enabled),
+    m_network_type(other.m_network_type), m_daemon(other.m_daemon)
 {
 
 }
@@ -527,27 +582,19 @@ void gen_trezor_base::setup_args(const std::string & trezor_path, bool heavy_tes
 void gen_trezor_base::setup_trezor()
 {
   hw::device &hwdev = hw::get_device(m_trezor_path);
-  m_trezor = dynamic_cast<hw::trezor::device_trezor *>(&hwdev);
-  CHECK_AND_ASSERT_THROW_MES(m_trezor, "Dynamic cast failed");
+  auto trezor = dynamic_cast<device_trezor_test *>(&hwdev);
+  CHECK_AND_ASSERT_THROW_MES(trezor, "Dynamic cast failed");
 
-  m_trezor->set_debug(true);  // debugging commands on Trezor (auto-confirm transactions)
-
-  CHECK_AND_ASSERT_THROW_MES(m_trezor->set_name(m_trezor_path), "Could not set device name " << m_trezor_path);
-  m_trezor->set_network_type(MAINNET);
-  m_trezor->set_derivation_path("");  // empty derivation path
-
-  CHECK_AND_ASSERT_THROW_MES(m_trezor->init(), "Could not initialize the device " << m_trezor_path);
-  CHECK_AND_ASSERT_THROW_MES(m_trezor->connect(), "Could not connect to the device " << m_trezor_path);
-  m_trezor->wipe_device();
-  m_trezor->load_device(m_device_seed);
-  m_trezor->release();
-  m_trezor->disconnect();
+  trezor->setup_for_tests(m_trezor_path, m_device_seed, m_network_type);
+  m_trezor = trezor;
 }
 
 void gen_trezor_base::fork(gen_trezor_base & other)
 {
   other.m_generator = m_generator;
   other.m_bt = m_bt;
+  other.m_network_type = m_network_type;
+  other.m_daemon = m_daemon;
   other.m_events = m_events;
   other.m_head = m_head;
   other.m_hard_forks = m_hard_forks;
@@ -617,7 +664,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
 
   cryptonote::block blk_gen;
   std::vector<size_t> block_weights;
-  generate_genesis_block(blk_gen, get_config(MAINNET).GENESIS_TX, get_config(MAINNET).GENESIS_NONCE);
+  generate_genesis_block(blk_gen, get_config(m_network_type).GENESIS_TX, get_config(m_network_type).GENESIS_NONCE);
   events.push_back(blk_gen);
   generator.add_block(blk_gen, 0, block_weights, 0);
 
@@ -672,8 +719,8 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   MDEBUG("Hardfork height: " << hardfork_height << " at block: " << get_block_hash(blk_4r));
 
   // RCT transactions, wallets have to be used, wallet init
-  m_wl_alice.reset(new tools::wallet2(MAINNET, 1, true));
-  m_wl_bob.reset(new tools::wallet2(MAINNET, 1, true));
+  m_wl_alice.reset(new tools::wallet2(m_network_type, 1, true));
+  m_wl_bob.reset(new tools::wallet2(m_network_type, 1, true));
   wallet_accessor_test::set_account(m_wl_alice.get(), m_alice_account);
   wallet_accessor_test::set_account(m_wl_bob.get(), m_bob_account);
 
@@ -687,7 +734,7 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
   auto addr_alice_sub_1_2 = m_wl_alice->get_subaddress({1, 2});
 
   // Miner -> Bob, RCT funds
-  MAKE_TX_LIST_START_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(5), 10, blk_4);
+  MAKE_TX_LIST_START_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(50), 10, blk_4);
 
   const size_t target_rct = m_heavy_tests ? 105 : 15;
   for(size_t i = 0; i < target_rct; ++i)
@@ -716,9 +763,9 @@ bool gen_trezor_base::generate(std::vector<test_event_entry>& events)
 
   // Simple RCT transactions
   MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(7), 10, blk_4);
-  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(1), 10, blk_4);
-  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(3), 10, blk_4);
-  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(4), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(10), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(30), 10, blk_4);
+  MAKE_TX_MIX_LIST_RCT(events, txs_blk_5, m_miner_account, m_alice_account, MK_COINS(40), 10, blk_4);
   MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_5, blk_4r, m_miner_account, txs_blk_5, CUR_HF);
 
   // Simple transaction check
@@ -800,9 +847,9 @@ void gen_trezor_base::load(std::vector<test_event_entry>& events)
   m_alice_account.create_from_device(*m_trezor);
   m_alice_account.set_createtime(m_wallet_ts);
 
-  m_wl_alice.reset(new tools::wallet2(MAINNET, 1, true));
-  m_wl_bob.reset(new tools::wallet2(MAINNET, 1, true));
-  m_wl_eve.reset(new tools::wallet2(MAINNET, 1, true));
+  m_wl_alice.reset(new tools::wallet2(m_network_type, 1, true));
+  m_wl_bob.reset(new tools::wallet2(m_network_type, 1, true));
+  m_wl_eve.reset(new tools::wallet2(m_network_type, 1, true));
   wallet_accessor_test::set_account(m_wl_alice.get(), m_alice_account);
   wallet_accessor_test::set_account(m_wl_bob.get(), m_bob_account);
   wallet_accessor_test::set_account(m_wl_eve.get(), m_eve_account);
@@ -838,15 +885,40 @@ void gen_trezor_base::test_setup(std::vector<test_event_entry>& events)
   m_alice_account.create_from_device(*m_trezor);
   m_alice_account.set_createtime(m_wallet_ts);
 
-  m_wl_alice.reset(new tools::wallet2(MAINNET, 1, true));
-  m_wl_bob.reset(new tools::wallet2(MAINNET, 1, true));
-  m_wl_eve.reset(new tools::wallet2(MAINNET, 1, true));
+  m_wl_alice.reset(new tools::wallet2(m_network_type, 1, true));
+  m_wl_bob.reset(new tools::wallet2(m_network_type, 1, true));
+  m_wl_eve.reset(new tools::wallet2(m_network_type, 1, true));
   wallet_accessor_test::set_account(m_wl_alice.get(), m_alice_account);
   wallet_accessor_test::set_account(m_wl_bob.get(), m_bob_account);
   wallet_accessor_test::set_account(m_wl_eve.get(), m_eve_account);
   wallet_tools::process_transactions(m_wl_alice.get(), events, m_head, m_bt);
   wallet_tools::process_transactions(m_wl_bob.get(), events, m_head, m_bt);
   wallet_tools::process_transactions(m_wl_eve.get(), events, m_head, m_bt);
+}
+
+void gen_trezor_base::add_transactions_to_events(
+    std::vector<test_event_entry>& events,
+    test_generator &generator,
+    const std::vector<cryptonote::transaction> &txs)
+{
+  // If current test requires higher hard-fork, move it up
+  const auto current_hf = m_hard_forks.back().first;
+  const uint8_t tx_hf = m_rct_config.bp_version == 2 ? 10 : 9;
+  if (tx_hf > current_hf){
+    throw std::runtime_error("Too late for HF change");
+  }
+
+  std::list<cryptonote::transaction> tx_list;
+  for(const auto & tx : txs)
+  {
+    events.push_back(tx);
+    tx_list.push_back(tx);
+  }
+
+  MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_new, m_head, m_miner_account, tx_list, tx_hf);
+  MDEBUG("New tsx: " << (num_blocks(events) - 1) << " at block: " << get_block_hash(blk_new));
+
+  m_head = blk_new;
 }
 
 void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std::vector<tools::wallet2::pending_tx>& ptxs, std::vector<cryptonote::address_parse_info>& dsts_info, test_generator &generator, std::vector<tools::wallet2*> wallets, bool is_sweep)
@@ -856,15 +928,8 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
   cryptonote::block head_block = get_head_block(events);
   const crypto::hash head_hash = get_block_hash(head_block);
 
-  // If current test requires higher hard-fork, move it up
-  const auto current_hf = m_hard_forks.back().first;
-  const uint8_t tx_hf = m_rct_config.bp_version == 2 ? 10 : 9;
-  if (tx_hf > current_hf){
-    throw std::runtime_error("Too late for HF change");
-  }
-
   tools::wallet2::unsigned_tx_set txs;
-  std::list<cryptonote::transaction> tx_list;
+  std::vector<cryptonote::transaction> tx_list;
 
   for(auto &ptx : ptxs) {
     txs.txes.push_back(get_construction_data_with_decrypted_short_payment_id(ptx, *m_trezor));
@@ -897,13 +962,11 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
     CHECK_AND_ASSERT_THROW_MES(resx, "Trezor tx_1 semantics failed");
     CHECK_AND_ASSERT_THROW_MES(resy, "Trezor tx_1 Nonsemantics failed");
 
-    events.push_back(c_ptx.tx);
     tx_list.push_back(c_ptx.tx);
     MDEBUG("Transaction: " << dump_data(c_ptx.tx));
   }
 
-  MAKE_NEXT_BLOCK_TX_LIST_HF(events, blk_7, m_head, m_miner_account, tx_list, tx_hf);
-  MDEBUG("Trezor tsx: " << (num_blocks(events) - 1) << " at block: " << get_block_hash(blk_7));
+  add_transactions_to_events(events, generator, tx_list);
 
   // TX receive test
   uint64_t sum_in = 0;
@@ -941,7 +1004,7 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
       const bool sender = widx == 0;
       tools::wallet2 *wl = wallets[widx];
 
-      wallet_tools::process_transactions(wl, events, blk_7, m_bt, boost::make_optional(head_hash));
+      wallet_tools::process_transactions(wl, events, m_head, m_bt, boost::make_optional(head_hash));
 
       tools::wallet2::transfer_container m_trans;
       tools::wallet2::transfer_container m_trans_txid;
@@ -1005,7 +1068,8 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
 
   CHECK_AND_ASSERT_THROW_MES(sum_in == sum_out, "Tx amount mismatch");
 
-  test_get_tx(events, ptxs, wallets, exported_txs, aux_data);
+  // Test get_tx_key feature for stored private tx keys
+  test_get_tx(events, wallets, exported_txs.ptx, aux_data.tx_device_aux);
 }
 
 bool gen_trezor_base::verify_tx_key(const ::crypto::secret_key & tx_priv, const ::crypto::public_key & tx_pub, const subaddresses_t & subs)
@@ -1026,10 +1090,9 @@ bool gen_trezor_base::verify_tx_key(const ::crypto::secret_key & tx_priv, const 
 
 void gen_trezor_base::test_get_tx(
     std::vector<test_event_entry>& events,
-    std::vector<tools::wallet2::pending_tx>& ptxs,
     std::vector<tools::wallet2*> wallets,
-    const tools::wallet2::signed_tx_set &exported_txs,
-    const hw::tx_aux_data & aux_data)
+    const std::vector<tools::wallet2::pending_tx> &ptxs,
+    const std::vector<std::string> &aux_tx_info)
 {
   if (!m_test_get_tx_key)
   {
@@ -1054,8 +1117,9 @@ void gen_trezor_base::test_get_tx(
     all_subs.insert(cur_sub.begin(), cur_sub.end());
   }
 
-  for(size_t txid = 0; txid < exported_txs.ptx.size(); ++txid) {
-    const auto &c_ptx = exported_txs.ptx[txid];
+  for(size_t txid = 0; txid < ptxs.size(); ++txid)
+  {
+    const auto &c_ptx = ptxs[txid];
     const auto &c_tx = c_ptx.tx;
     const ::crypto::hash tx_prefix_hash = cryptonote::get_transaction_prefix_hash(c_tx);
 
@@ -1065,7 +1129,7 @@ void gen_trezor_base::test_get_tx(
     hw::device_cold:: tx_key_data_t tx_key_data;
     std::vector<::crypto::secret_key> tx_keys;
 
-    dev_cold->load_tx_key_data(tx_key_data, aux_data.tx_device_aux[txid]);
+    dev_cold->load_tx_key_data(tx_key_data, aux_tx_info[txid]);
     CHECK_AND_ASSERT_THROW_MES(std::string(tx_prefix_hash.data, 32) == tx_key_data.tx_prefix_hash, "TX prefix mismatch");
 
     dev_cold->get_tx_key(tx_keys, tx_key_data, m_alice_account.get_keys().m_view_secret_key, boost::none);
@@ -1078,6 +1142,33 @@ void gen_trezor_base::test_get_tx(
       CHECK_AND_ASSERT_THROW_MES(verify_tx_key(tx_keys[i + 1], additional_pub_keys[i], all_subs), "Tx pub mismatch");
     }
   }
+}
+
+void gen_trezor_base::mine_and_test(std::vector<test_event_entry>& events)
+{
+  cryptonote::core * core = daemon()->core();
+  const uint64_t height_before_mining = daemon()->get_height();
+
+  const auto miner_address = cryptonote::get_account_address_as_str(FAKECHAIN, false, get_address(m_miner_account));
+  daemon()->mine_blocks(1, miner_address);
+
+  const uint64_t cur_height = daemon()->get_height();
+  CHECK_AND_ASSERT_THROW_MES(height_before_mining < cur_height, "Mining fail");
+
+  const crypto::hash top_hash = core->get_blockchain_storage().get_block_id_by_height(height_before_mining);
+  cryptonote::block top_block{};
+  CHECK_AND_ASSERT_THROW_MES(core->get_blockchain_storage().get_block_by_hash(top_hash, top_block), "Block fetch fail");
+  CHECK_AND_ASSERT_THROW_MES(!top_block.tx_hashes.empty(), "Mined block is empty");
+
+  std::vector<cryptonote::transaction> txs_found;
+  std::vector<crypto::hash> txs_missed;
+  bool r = core->get_blockchain_storage().get_transactions(top_block.tx_hashes, txs_found, txs_missed);
+  CHECK_AND_ASSERT_THROW_MES(r, "Transaction lookup fail");
+  CHECK_AND_ASSERT_THROW_MES(!txs_found.empty(), "Transaction lookup fail");
+
+  // Transaction is not expanded, but mining verified it.
+  events.push_back(txs_found[0]);
+  events.push_back(top_block);
 }
 
 #define TREZOR_TEST_PREFIX()                              \
@@ -1286,6 +1377,48 @@ tsx_builder * tsx_builder::construct_pending_tx(tools::wallet2::pending_tx &ptx,
 std::vector<tools::wallet2::pending_tx> tsx_builder::build()
 {
   return m_ptxs;
+}
+
+device_trezor_test::device_trezor_test(): m_tx_sign_ctr(0), m_compute_key_image_ctr(0) {}
+
+void device_trezor_test::clear_test_counters(){
+  m_tx_sign_ctr = 0;
+  m_compute_key_image_ctr = 0;
+}
+
+void device_trezor_test::setup_for_tests(const std::string & trezor_path, const std::string & seed, cryptonote::network_type network_type){
+  this->clear_test_counters();
+  this->set_callback(nullptr);
+  this->set_debug(true);  // debugging commands on Trezor (auto-confirm transactions)
+
+  CHECK_AND_ASSERT_THROW_MES(this->set_name(trezor_path), "Could not set device name " << trezor_path);
+  this->set_network_type(network_type);
+  this->set_derivation_path("");  // empty derivation path
+
+  CHECK_AND_ASSERT_THROW_MES(this->init(), "Could not initialize the device " << trezor_path);
+  CHECK_AND_ASSERT_THROW_MES(this->connect(), "Could not connect to the device " << trezor_path);
+  this->wipe_device();
+  this->load_device(seed);
+  this->release();
+  this->disconnect();
+}
+
+bool device_trezor_test::compute_key_image(const ::cryptonote::account_keys &ack, const ::crypto::public_key &out_key,
+                                           const ::crypto::key_derivation &recv_derivation, size_t real_output_index,
+                                           const ::cryptonote::subaddress_index &received_index,
+                                           ::cryptonote::keypair &in_ephemeral, ::crypto::key_image &ki) {
+
+  bool res = device_trezor::compute_key_image(ack, out_key, recv_derivation, real_output_index, received_index,
+                                          in_ephemeral, ki);
+  m_compute_key_image_ctr += res;
+  return res;
+}
+
+void
+device_trezor_test::tx_sign(hw::wallet_shim *wallet, const ::tools::wallet2::unsigned_tx_set &unsigned_tx, size_t idx,
+                            hw::tx_aux_data &aux_data, std::shared_ptr<hw::trezor::protocol::tx::Signer> &signer) {
+  m_tx_sign_ctr += 1;
+  device_trezor::tx_sign(wallet, unsigned_tx, idx, aux_data, signer);
 }
 
 bool gen_trezor_ki_sync::generate(std::vector<test_event_entry>& events)
@@ -1589,5 +1722,64 @@ bool gen_trezor_many_utxo::generate(std::vector<test_event_entry>& events)
       ->build_tx();
 
   TREZOR_TEST_SUFFIX();
+}
+
+void wallet_api_tests::init()
+{
+  m_wallet_dir = boost::filesystem::unique_path();
+  boost::filesystem::create_directories(m_wallet_dir);
+}
+
+wallet_api_tests::~wallet_api_tests()
+{
+  try
+  {
+    if (!m_wallet_dir.empty() && boost::filesystem::exists(m_wallet_dir))
+    {
+      boost::filesystem::remove_all(m_wallet_dir);
+    }
+  }
+  catch(...)
+  {
+    MERROR("Could not remove wallet directory");
+  }
+}
+
+bool wallet_api_tests::generate(std::vector<test_event_entry>& events)
+{
+  init();
+  test_setup(events);
+  const std::string wallet_path = (m_wallet_dir / "wallet").string();
+  const auto api_net_type = m_network_type == TESTNET ? Monero::TESTNET : Monero::MAINNET;
+
+  Monero::WalletManager *wmgr = Monero::WalletManagerFactory::getWalletManager();
+  std::unique_ptr<Monero::Wallet> w{wmgr->createWalletFromDevice(wallet_path, "", api_net_type, m_trezor_path, 1)};
+  CHECK_AND_ASSERT_THROW_MES(w->init(daemon()->rpc_addr(), 0), "Wallet init fail");
+  CHECK_AND_ASSERT_THROW_MES(w->refresh(), "Refresh fail");
+  uint64_t balance = w->balance(0);
+  MINFO("Balance: " << balance);
+  CHECK_AND_ASSERT_THROW_MES(w->status() == Monero::PendingTransaction::Status_Ok, "Status nok");
+
+  auto addr = get_address(m_eve_account);
+  auto recepient_address = cryptonote::get_account_address_as_str(m_network_type, false, addr);
+  Monero::PendingTransaction * transaction = w->createTransaction(recepient_address,
+                                                                  "",
+                                                                  MK_COINS(10),
+                                                                  TREZOR_TEST_MIXIN,
+                                                                  Monero::PendingTransaction::Priority_Medium,
+                                                                  0,
+                                                                  std::set<uint32_t>{});
+  CHECK_AND_ASSERT_THROW_MES(transaction->status() == Monero::PendingTransaction::Status_Ok, "Status nok");
+  w->refresh();
+
+  CHECK_AND_ASSERT_THROW_MES(w->balance(0) == balance, "Err");
+  CHECK_AND_ASSERT_THROW_MES(transaction->amount() == MK_COINS(10), "Err");
+  CHECK_AND_ASSERT_THROW_MES(transaction->commit(), "Err");
+  CHECK_AND_ASSERT_THROW_MES(w->balance(0) != balance, "Err");
+  CHECK_AND_ASSERT_THROW_MES(wmgr->closeWallet(w.get()), "Err");
+  (void)w.release();
+
+  mine_and_test(events);
+  return true;
 }
 
