@@ -11508,27 +11508,46 @@ uint64_t wallet2::import_key_images(const std::vector<std::pair<crypto::key_imag
   return m_transfers[signed_key_images.size() - 1].m_block_height;
 }
 
-bool wallet2::import_key_images(std::vector<crypto::key_image> key_images)
+bool wallet2::import_key_images(std::vector<crypto::key_image> key_images, size_t offset, boost::optional<std::unordered_set<size_t>> selected_transfers)
 {
-  if (key_images.size() > m_transfers.size())
+  if (key_images.size() + offset > m_transfers.size())
   {
     LOG_PRINT_L1("More key images returned that we know outputs for");
     return false;
   }
   for (size_t i = 0; i < key_images.size(); ++i)
   {
-    transfer_details &td = m_transfers[i];
+    const size_t idx = i + offset;
+    if (selected_transfers && selected_transfers.get().find(idx) == selected_transfers.get().end())
+      continue;
+
+    transfer_details &td = m_transfers[idx];
     if (td.m_key_image_known && !td.m_key_image_partial && td.m_key_image != key_images[i])
       LOG_PRINT_L0("WARNING: imported key image differs from previously known key image at index " << i << ": trusting imported one");
     td.m_key_image = key_images[i];
-    m_key_images[m_transfers[i].m_key_image] = i;
+    m_key_images[td.m_key_image] = i;
     td.m_key_image_known = true;
     td.m_key_image_request = false;
     td.m_key_image_partial = false;
-    m_pub_keys[m_transfers[i].get_public_key()] = i;
+    m_pub_keys[td.get_public_key()] = i;
   }
 
   return true;
+}
+
+bool wallet2::import_key_images(signed_tx_set & signed_tx, size_t offset, bool only_selected_transfers)
+{
+  std::unordered_set<size_t> selected_transfers;
+  if (only_selected_transfers)
+  {
+    for (const pending_tx & ptx : signed_tx.ptx)
+    {
+      for (const size_t s: ptx.selected_transfers)
+        selected_transfers.insert(s);
+    }
+  }
+
+  return import_key_images(signed_tx.key_images, offset, only_selected_transfers ? boost::make_optional(selected_transfers) : boost::none);
 }
 
 wallet2::payment_container wallet2::export_payments() const

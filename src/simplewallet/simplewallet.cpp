@@ -2049,7 +2049,7 @@ bool simple_wallet::cold_sign_tx(const std::vector<tools::wallet2::pending_tx>& 
   m_wallet->cold_tx_aux_import(exported_txs.ptx, tx_aux);
 
   // import key images
-  return m_wallet->import_key_images(exported_txs.key_images);
+  return m_wallet->import_key_images(exported_txs, 0, true);
 }
 
 bool simple_wallet::set_always_confirm_transfers(const std::vector<std::string> &args/* = std::vector<std::string>()*/)

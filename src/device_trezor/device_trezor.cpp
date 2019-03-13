@@ -474,6 +474,10 @@ namespace trezor {
         cpend.key_images = key_images;
 
         // KI sync
+        for(size_t cidx=0, trans_max=unsigned_tx.transfers.second.size(); cidx < trans_max; ++cidx){
+          signed_tx.key_images[cidx] = unsigned_tx.transfers.second[cidx].m_key_image;
+        }
+
         size_t num_sources = cdata.tx_data.sources.size();
         CHECK_AND_ASSERT_THROW_MES(num_sources == cdata.source_permutation.size(), "Invalid permutation size");
         CHECK_AND_ASSERT_THROW_MES(num_sources == cdata.tx.vin.size(), "Invalid tx.vin size");
@@ -483,9 +487,12 @@ namespace trezor {
           CHECK_AND_ASSERT_THROW_MES(src_idx < cdata.tx.vin.size(), "Invalid idx_mapped");
 
           size_t idx_map_src = cdata.tx_data.selected_transfers[idx_mapped];
-          auto vini = boost::get<cryptonote::txin_to_key>(cdata.tx.vin[src_idx]);
+          CHECK_AND_ASSERT_THROW_MES(idx_map_src >= unsigned_tx.transfers.first, "Invalid offset");
 
+          idx_map_src -= unsigned_tx.transfers.first;
           CHECK_AND_ASSERT_THROW_MES(idx_map_src < signed_tx.key_images.size(), "Invalid key image index");
+
+          const auto vini = boost::get<cryptonote::txin_to_key>(cdata.tx.vin[src_idx]);
           signed_tx.key_images[idx_map_src] = vini.k_image;
         }
       }
