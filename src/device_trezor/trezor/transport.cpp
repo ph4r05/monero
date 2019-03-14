@@ -402,6 +402,36 @@ namespace trezor{
 
   }
 
+  bool Transport::pre_open(){
+    if (m_open_counter > 0){
+      MTRACE("Already opened, count: " << m_open_counter);
+      m_open_counter += 1;
+      return false;
+
+    } else if (m_open_counter < 0){
+      MTRACE("Negative open value: " << m_open_counter);
+
+    }
+
+    // Caller should set m_open_counter to 1 after open
+    m_open_counter = 0;
+    return true;
+  }
+
+  bool Transport::pre_close(){
+    m_open_counter -= 1;
+
+    if (m_open_counter < 0){
+      MDEBUG("Already closed. Counter " << m_open_counter);
+
+    } else if (m_open_counter == 0) {
+      return true;
+
+    }
+
+    return false;
+  }
+
   //
   // Bridge transport
   //
@@ -436,6 +466,10 @@ namespace trezor{
   }
 
   void BridgeTransport::open() {
+    if (!pre_open()){
+      return;
+    }
+
     if (!m_device_path){
       throw exc::CommunicationException("Coud not open, empty device path");
     }
@@ -449,9 +483,15 @@ namespace trezor{
     }
 
     m_session = boost::make_optional(json_get_string(bridge_res["session"]));
+    m_open_counter = 1;
   }
 
   void BridgeTransport::close() {
+    if (!pre_close()){
+      return;
+    }
+
+    MTRACE("Closing Trezor:BridgeTransport");
     if (!m_device_path || !m_session){
       throw exc::CommunicationException("Device not open");
     }
@@ -613,9 +653,7 @@ namespace trezor{
   }
 
   void UdpTransport::open() {
-    if (m_open_counter > 0){
-      MTRACE("Already opened, count: " << m_open_counter);
-      m_open_counter += 1;
+    if (!pre_open()){
       return;
     }
 
@@ -634,7 +672,14 @@ namespace trezor{
   }
 
   void UdpTransport::close() {
-    m_open_counter -= 1;
+    if (!pre_close()){
+      return;
+    }
+
+    MTRACE("Closing Trezor:UdpTransport");
+    if (!m_socket) {
+      throw exc::CommunicationException("Socket is already closed");
+    }
 
     if (m_open_counter < 0){
       MERROR("Open counter is negative: " << m_open_counter);
@@ -648,6 +693,19 @@ namespace trezor{
       m_socket->close();
     }
     m_socket = nullptr;
+  }
+
+  std::shared_ptr<Transport> UdpTransport::find_debug() {
+#ifdef WITH_TREZOR_DEBUGGING
+    std::shared_ptr<UdpTransport> t = std::make_shared<UdpTransport>();
+    t->m_proto = std::make_shared<ProtocolV1>();
+    t->m_device_host = m_device_host;
+    t->m_device_port = m_device_port + 1;
+    return t;
+#else
+    MINFO("Debug link is disabled in production");
+    return nullptr;
+#endif
   }
 
   void UdpTransport::write_chunk(const void * buff, size_t size){
@@ -875,7 +933,7 @@ namespace trezor{
 
     m_proto = proto ? proto.get() : std::make_shared<ProtocolV1>();
 
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     m_debug_mode = false;
 #endif
   }
@@ -960,12 +1018,10 @@ namespace trezor{
   };
 
   void WebUsbTransport::open() {
-    const int interface = get_interface();
-    if (m_open_counter > 0){
-      MTRACE("Already opened, count: " << m_open_counter);
-      m_open_counter += 1;
+    if (!pre_open()){
       return;
     }
+    const int interface = get_interface();
 
 #define TREZOR_DESTROY_SESSION() do { libusb_exit(m_usb_session); m_usb_session = nullptr; } while(0)
 
@@ -1050,38 +1106,48 @@ namespace trezor{
   };
 
   void WebUsbTransport::close() {
-    m_open_counter -= 1;
+    if (!pre_close()){
+      return;
+    }
 
-    if (m_open_counter < 0){
-      MERROR("Close counter is negative: " << m_open_counter);
+    MTRACE("Closing Trezor:WebUsbTransport");
+    m_proto->session_end(*this);
 
-    } else if (m_open_counter == 0){
-      MTRACE("Closing webusb device");
+    int r = libusb_release_interface(m_usb_device_handle, get_interface());
+    if (r != 0){
+      MERROR("Could not release libusb interface: " << r);
+    }
 
-      m_proto->session_end(*this);
+    m_usb_device = nullptr;
+    if (m_usb_device_handle) {
+      libusb_close(m_usb_device_handle);
+      m_usb_device_handle = nullptr;
+    }
 
-      int r = libusb_release_interface(m_usb_device_handle, get_interface());
-      if (r != 0){
-        MERROR("Could not release libusb interface: " << r);
-      }
-
-      m_usb_device = nullptr;
-      if (m_usb_device_handle) {
-        libusb_close(m_usb_device_handle);
-        m_usb_device_handle = nullptr;
-      }
-
-      if (m_usb_session) {
-        libusb_exit(m_usb_session);
-        m_usb_session = nullptr;
-      }
+    if (m_usb_session) {
+      libusb_exit(m_usb_session);
+      m_usb_session = nullptr;
     }
   };
 
+  std::shared_ptr<Transport> WebUsbTransport::find_debug() {
+#ifdef WITH_TREZOR_DEBUGGING
+    require_device();
+    auto t = std::make_shared<WebUsbTransport>(boost::make_optional(m_usb_device_desc.get()));
+    t->m_bus_id = m_bus_id;
+    t->m_device_addr = m_device_addr;
+    t->m_port_numbers = m_port_numbers;
+    t->m_debug_mode = true;
+    return t;
+#else
+      MINFO("Debug link is disabled in production");
+      return nullptr;
+#endif
+    }
 
   int WebUsbTransport::get_interface() const{
     const int INTERFACE_NORMAL = 0;
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     const int INTERFACE_DEBUG = 1;
     return m_debug_mode ? INTERFACE_DEBUG : INTERFACE_NORMAL;
 #else
@@ -1091,7 +1157,7 @@ namespace trezor{
 
   unsigned char WebUsbTransport::get_endpoint() const{
     const unsigned char ENDPOINT_NORMAL = 1;
-#ifdef WITH_TREZOR_DEBUG
+#ifdef WITH_TREZOR_DEBUGGING
     const unsigned char ENDPOINT_DEBUG = 2;
     return m_debug_mode ? ENDPOINT_DEBUG : ENDPOINT_NORMAL;
 #else

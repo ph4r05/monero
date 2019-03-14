@@ -67,6 +67,7 @@
 #define MONERO_DEFAULT_LOG_CATEGORY "wallet.wallet2"
 
 class Serialization_portability_wallet_Test;
+class wallet_accessor_test;
 
 namespace tools
 {
@@ -171,6 +172,7 @@ namespace tools
   class wallet2
   {
     friend class ::Serialization_portability_wallet_Test;
+    friend class ::wallet_accessor_test;
     friend class wallet_keys_unlocker;
     friend class wallet_device_callback;
   public:
@@ -680,7 +682,8 @@ namespace tools
       bool trusted_daemon = true,
       epee::net_utils::ssl_support_t ssl_support = epee::net_utils::ssl_support_t::e_ssl_support_autodetect,
       const std::pair<std::string, std::string> &private_key_and_certificate_path = {},
-      const std::list<std::string> &allowed_certificates = {}, bool allow_any_cert = false);
+      const std::list<std::string> &allowed_certificates = {}, const std::vector<std::vector<uint8_t>> &allowed_fingerprints = {},
+      bool allow_any_cert = false);
 
     void stop() { m_run.store(false, std::memory_order_relaxed); m_message_store.stop(); }
 
