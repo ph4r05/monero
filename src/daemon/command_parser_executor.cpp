@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018, The Monero Project
+// Copyright (c) 2014-2019, The Monero Project
 // 
 // All rights reserved.
 // 
@@ -409,6 +409,11 @@ bool t_command_parser_executor::stop_mining(const std::vector<std::string>& args
   if (!args.empty()) return false;
 
   return m_executor.stop_mining();
+}
+
+bool t_command_parser_executor::mining_status(const std::vector<std::string>& args)
+{
+  return m_executor.mining_status();
 }
 
 bool t_command_parser_executor::stop_daemon(const std::vector<std::string>& args)

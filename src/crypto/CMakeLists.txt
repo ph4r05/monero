@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2018, The Monero Project
+# Copyright (c) 2014-2019, The Monero Project
 #
 # All rights reserved.
 #
@@ -39,6 +39,7 @@ set(crypto_sources
   hash-extra-jh.c
   hash-extra-skein.c
   hash.c
+  hmac-keccak.c
   jh.c
   keccak.c
   oaes_lib.c
@@ -64,6 +65,7 @@ set(crypto_private_headers
   groestl_tables.h
   hash-ops.h
   hash.h
+  hmac-keccak.h
   initializer.h
   jh.h
   keccak.h

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018, The Monero Project
+// Copyright (c) 2014-2019, The Monero Project
 // 
 // All rights reserved.
 // 
@@ -84,7 +84,7 @@ namespace cryptonote
     std::string get_command_usage(const std::vector<std::string> &args);
   private:
 
-    enum ResetType { ResetNone, ResetSoft, ResetHard, ResetKeepKI };
+    enum ResetType { ResetNone, ResetSoft, ResetHard, ResetSoftKeepKI };
 
     bool handle_command_line(const boost::program_options::variables_map& vm);
 
@@ -300,9 +300,9 @@ namespace cryptonote
     virtual void on_money_spent(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& in_tx, uint64_t amount, const cryptonote::transaction& spend_tx, const cryptonote::subaddress_index& subaddr_index);
     virtual void on_skip_transaction(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx);
     virtual boost::optional<epee::wipeable_string> on_get_password(const char *reason);
-    virtual void on_button_request();
-    virtual void on_pin_request(epee::wipeable_string & pin);
-    virtual void on_passphrase_request(bool on_device, epee::wipeable_string & passphrase);
+    virtual void on_device_button_request(uint64_t code);
+    virtual boost::optional<epee::wipeable_string> on_device_pin_request();
+    virtual boost::optional<epee::wipeable_string> on_device_passphrase_request(bool on_device);
     //----------------------------------------------------------
 
     friend class refresh_progress_reporter_t;

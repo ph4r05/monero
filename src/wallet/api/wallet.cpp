@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018, The Monero Project
+// Copyright (c) 2014-2019, The Monero Project
 //
 // All rights reserved.
 //
@@ -239,6 +239,42 @@ struct Wallet2CallbackImpl : public tools::i_wallet2_callback
       if (m_listener) {
         std::string tx_hash =  epee::string_tools::pod_to_hex(txid);
         m_listener->moneySpent(tx_hash, amount);
+      }
+    }
+
+    virtual void on_device_button_request(uint64_t code)
+    {
+      if (m_listener) {
+        m_listener->onDeviceButtonRequest(code);
+      }
+    }
+
+    virtual boost::optional<epee::wipeable_string> on_device_pin_request()
+    {
+      if (m_listener) {
+        auto pin = m_listener->onDevicePinRequest();
+        if (pin){
+          return boost::make_optional(epee::wipeable_string((*pin).data(), (*pin).size()));
+        }
+      }
+      return boost::none;
+    }
+
+    virtual boost::optional<epee::wipeable_string> on_device_passphrase_request(bool on_device)
+    {
+      if (m_listener) {
+        auto passphrase = m_listener->onDevicePassphraseRequest(on_device);
+        if (!on_device && passphrase) {
+          return boost::make_optional(epee::wipeable_string((*passphrase).data(), (*passphrase).size()));
+        }
+      }
+      return boost::none;
+    }
+
+    virtual void on_device_progress(const hw::device_progress & event)
+    {
+      if (m_listener) {
+        m_listener->onDeviceProgress(DeviceProgress(event.progress(), event.indeterminate()));
       }
     }
 
@@ -779,6 +815,28 @@ bool WalletImpl::setPassword(const std::string &password)
     try {
         m_wallet->change_password(m_wallet->get_wallet_file(), m_password, password);
         m_password = password;
+    } catch (const std::exception &e) {
+        setStatusError(e.what());
+    }
+    return status() == Status_Ok;
+}
+
+bool WalletImpl::setDevicePin(const std::string &pin)
+{
+    clearStatus();
+    try {
+        m_wallet->get_account().get_device().set_pin(epee::wipeable_string(pin.data(), pin.size()));
+    } catch (const std::exception &e) {
+        setStatusError(e.what());
+    }
+    return status() == Status_Ok;
+}
+
+bool WalletImpl::setDevicePassphrase(const std::string &passphrase)
+{
+    clearStatus();
+    try {
+        m_wallet->get_account().get_device().set_passphrase(epee::wipeable_string(passphrase.data(), passphrase.size()));
     } catch (const std::exception &e) {
         setStatusError(e.what());
     }
@@ -1428,8 +1486,12 @@ PendingTransaction *WalletImpl::createTransaction(const string &dst_addr, const 
                                                                           extra, subaddr_account, subaddr_indices);
             }
 
+            pendingTxPostProcess(transaction);
+
             if (multisig().isMultisig) {
-                transaction->m_signers = m_wallet->make_multisig_tx_set(transaction->m_pending_tx).m_signers;
+                auto tx_set = m_wallet->make_multisig_tx_set(transaction->m_pending_tx);
+                transaction->m_pending_tx = tx_set.m_ptx;
+                transaction->m_signers = tx_set.m_signers;
             }
         } catch (const tools::error::daemon_busy&) {
             // TODO: make it translatable with "tr"?
@@ -1511,6 +1573,7 @@ PendingTransaction *WalletImpl::createSweepUnmixableTransaction()
     do {
         try {
             transaction->m_pending_tx = m_wallet->create_unmixable_sweep_transactions();
+            pendingTxPostProcess(transaction);
 
         } catch (const tools::error::daemon_busy&) {
             // TODO: make it translatable with "tr"?
@@ -2093,6 +2156,21 @@ bool WalletImpl::isNewWallet() const
     return !(blockChainHeight() > 1 || m_recoveringFromSeed || m_recoveringFromDevice || m_rebuildWalletCache) && !watchOnly();
 }
 
+void WalletImpl::pendingTxPostProcess(PendingTransactionImpl * pending)
+{
+  // If the device being used is HW device with cold signing protocol, cold sign then.
+  if (!m_wallet->get_account().get_device().has_tx_cold_sign()){
+    return;
+  }
+
+  tools::wallet2::signed_tx_set exported_txs;
+  std::vector<cryptonote::address_parse_info> dsts_info;
+
+  m_wallet->cold_sign_tx(pending->m_pending_tx, exported_txs, dsts_info, pending->m_tx_device_aux);
+  pending->m_key_images = exported_txs.key_images;
+  pending->m_pending_tx = exported_txs.ptx;
+}
+
 bool WalletImpl::doInit(const string &daemon_address, uint64_t upper_transaction_size_limit, bool ssl)
 {
     // claim RPC so there's no in-memory encryption for now
@@ -2324,6 +2402,11 @@ bool WalletImpl::unlockKeysFile()
 bool WalletImpl::isKeysFileLocked()
 {
     return m_wallet->is_keys_file_locked();
+}
+
+uint64_t WalletImpl::coldKeyImageSync(uint64_t &spent, uint64_t &unspent)
+{
+    return m_wallet->cold_key_image_sync(spent, unspent);
 }
 } // namespace
 

@@ -1,4 +1,4 @@
-// Copyright (c) 2014-2018, The Monero Project
+// Copyright (c) 2014-2019, The Monero Project
 // 
 // All rights reserved.
 // 
@@ -317,9 +317,12 @@ void HardFork::on_block_popped(uint64_t nblocks)
   uint64_t height;
   for (height = old_chain_height - 1; height >= new_chain_height; --height)
   {
+    version = versions.back();
+    last_versions[version]--;
     versions.pop_back();
     version = db.get_hard_fork_version(height);
     versions.push_front(version);
+    last_versions[version]++;
   }
 
   // does not take voting into account
