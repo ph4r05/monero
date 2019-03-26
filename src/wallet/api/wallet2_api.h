@@ -337,6 +337,7 @@ protected:
     bool m_indeterminate;
 };
 
+struct Wallet;
 struct WalletListener
 {
     virtual ~WalletListener() = 0;
@@ -402,6 +403,11 @@ struct WalletListener
      * @brief Signalizes device operation progress
      */
     virtual void onDeviceProgress(const DeviceProgress & event) {};
+
+    /**
+     * @brief If the listener is created before the wallet this enables to set created wallet object
+     */
+    virtual void onSetWallet(Wallet * wallet) {};
 };
 
 
@@ -1020,9 +1026,10 @@ struct WalletManager
      * \param  password       Password of wallet file
      * \param  nettype        Network type
      * \param  kdf_rounds     Number of rounds for key derivation function
+     * \param  listener       Wallet listener to set to the wallet after creation
      * \return                Wallet instance (Wallet::status() needs to be called to check if opened successfully)
      */
-    virtual Wallet * openWallet(const std::string &path, const std::string &password, NetworkType nettype, uint64_t kdf_rounds = 1) = 0;
+    virtual Wallet * openWallet(const std::string &path, const std::string &password, NetworkType nettype, uint64_t kdf_rounds = 1, WalletListener * listener = nullptr) = 0;
     Wallet * openWallet(const std::string &path, const std::string &password, bool testnet = false)     // deprecated
     {
         return openWallet(path, password, testnet ? TESTNET : MAINNET);
@@ -1134,6 +1141,7 @@ struct WalletManager
      * \param  restoreHeight        restore from start height (0 sets to current height)
      * \param  subaddressLookahead  Size of subaddress lookahead (empty sets to some default low value)
      * \param  kdf_rounds           Number of rounds for key derivation function
+     * \param  listener             Wallet listener to set to the wallet after creation
      * \return                      Wallet instance (Wallet::status() needs to be called to check if recovered successfully)
      */
     virtual Wallet * createWalletFromDevice(const std::string &path,
@@ -1142,7 +1150,8 @@ struct WalletManager
                                             const std::string &deviceName,
                                             uint64_t restoreHeight = 0,
                                             const std::string &subaddressLookahead = "",
-                                            uint64_t kdf_rounds = 1) = 0;
+                                            uint64_t kdf_rounds = 1,
+                                            WalletListener * listener = nullptr) = 0;
 
     /*!
      * \brief Closes wallet. In case operation succeeded, wallet object deleted. in case operation failed, wallet object not deleted
