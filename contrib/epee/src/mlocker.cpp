@@ -188,7 +188,7 @@ namespace epee
     std::map<size_t, unsigned int>::iterator i = map().find(page);
     if (i == map().end())
     {
-      MERROR("Attempt to unlock unlocked page at " << (void*)(page * page_size));
+      //MERROR("Attempt to unlock unlocked page at " << (void*)(page * page_size));
     }
     else
     {
