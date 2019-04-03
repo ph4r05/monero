@@ -11,7 +11,7 @@ endef
 
 define $(package)_config_cmds
   ./bootstrap &&\
-  ./configure $($(package)_config_opts)
+  ./configure $($(package)_config_opts) --prefix=$($(package)_staging_prefix_dir) 
 endef
 
 define $(package)_build_cmd
@@ -19,5 +19,6 @@ define $(package)_build_cmd
 endef
 
 define $(package)_stage_cmds
-  $(MAKE) DESTDIR=$($(package)_staging_dir) install
+  $(MAKE) install 
 endef
+

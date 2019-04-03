@@ -110,3 +110,6 @@ nbproject
 /testnet
 
 __pycache__/
+cmake-*
+build_*
+
