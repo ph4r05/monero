@@ -114,3 +114,5 @@ nbproject
 __pycache__/
 *.pyc
 *.log
+cmake-*
+build_*
