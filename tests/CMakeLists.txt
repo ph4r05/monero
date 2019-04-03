@@ -159,7 +159,8 @@ set(enabled_tests
     hash
     performance_tests
     fuzz
-    unit_tests)
+    unit_tests
+        keccak_tests)
 
 add_custom_target(tests DEPENDS enabled_tests)
 set_property(TARGET tests PROPERTY FOLDER "${folder}")
