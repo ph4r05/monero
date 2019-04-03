@@ -63,6 +63,7 @@ target_link_libraries(wallet
     cryptonote_core
     mnemonics
     device_trezor
+    net
     ${LMDB_LIBRARY}
     ${Boost_CHRONO_LIBRARY}
     ${Boost_SERIALIZATION_LIBRARY}
@@ -126,6 +127,7 @@ if (BUILD_GUI_DEPS)
             ringct_basic
             checkpoints
             version
+            net
             device_trezor)
 
     foreach(lib ${libs_to_merge})
