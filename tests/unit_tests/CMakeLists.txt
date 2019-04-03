@@ -138,3 +138,33 @@ add_test(
 add_executable(test_notifier test_notifier.cpp)
 target_link_libraries(test_notifier ${EXTRA_LIBRARIES})
 set_property(TARGET test_notifier PROPERTY FOLDER "tests")
+
+set(keccak_tests_sources
+        hmac_keccak.cpp)
+set(keccak_tests_headers)
+add_executable(keccak_tests
+        ${keccak_tests_sources}
+        ${keccak_tests_headers})
+target_link_libraries(keccak_tests
+        PRIVATE
+        ringct
+        cryptonote_protocol
+        cryptonote_core
+        blockchain_db
+        rpc
+        net
+        serialization
+        wallet
+        p2p
+        version
+        ${Boost_CHRONO_LIBRARY}
+        ${Boost_THREAD_LIBRARY}
+        ${GTEST_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${EXTRA_LIBRARIES})
+set_property(TARGET keccak_tests
+        PROPERTY
+        FOLDER "tests")
+add_test(
+        NAME    keccak_tests
+        COMMAND keccak_tests --data-dir "${TEST_DATA_DIR}")

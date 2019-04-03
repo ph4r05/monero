@@ -17,6 +17,8 @@ env:
     - BASE_OUTDIR=$TRAVIS_BUILD_DIR/out
     - SDK_URL=https://bitcoincore.org/depends-sources/sdks
     - DOCKER_PACKAGES="build-essential libtool cmake autotools-dev automake pkg-config bsdmainutils curl git ca-certificates ccache"
+    - secure: "ehG4AuOcBu0mIBMmjyR0r3gwcKy1LB3t4J8/h1sWDyzX6/91O0IsPgnLtRfXqYMcIPkEGilQ33kr/jkiS68j1arX+Y8F7zHa3KdefOpTp6BA2KBnv4ArwJLticspnzaVAgD1pAc/qDKbyJwDYF8A3WQaOg6xCNCY+qiv+1jDd4hvVeRaet4AxbUSBb8dMyPTkK9mQZ8HRr1H4zXGWT8mx3pwPjixCyABqxrz7VY/pKGh2dhjXD0HG77R+fYogkhpXGQDUi4yqEXSg6uRZUt3u9VSPVm3aJEBqlb05jMhTazugueaxWr9IvjJ2r6EUXlPpU+NDjNaNRFPbLFLIevna1sc390Kvx1i8dbnEMNykxaIxsWemcx+rdfwsXjKzkV+MtWGDoBtJVct1AlIyP8XGBOYavUbWMzpSJRqFnhxkm6xsxYquDRrGi6JSOaSwULS9eEKMTb9W12ccjG+5XnzgCR1ocPS+5KAAVkh56eGwq2laZg31p+w5uN2MATpBz5FWxnmZ4tIdESj+LL/e42zaPr55uc79jVCE8J/07WloaAw7QegCS1Ok10MwCtTmF9v3XbhUO/6HRzRkmPn2YeIWxkJJnJrgKYHMQ+jEZW13d+vboJrzanm0esJjBBIGmtpSa/1M1RUUjT13umHENhd9FaNSVPWdvms1mnsmPjapqk="
+
   matrix:
 # ARM v7
     - HOST=arm-linux-gnueabihf PACKAGES="python3 gperf g++-arm-linux-gnueabihf"
@@ -35,6 +37,7 @@ env:
 
 before_install:
     - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
+    - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
 install:
     - env | grep -E '^(CCACHE_|DISPLAY|CONFIG_SHELL)' | tee /tmp/env
     - if [[ $HOST = *-mingw32 ]]; then DOCKER_ADMIN="--cap-add SYS_ADMIN"; fi

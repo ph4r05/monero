@@ -340,9 +340,28 @@ if(SANITIZE)
   if (MSVC)
     message(FATAL_ERROR "Cannot sanitize with MSVC")
   else()
-    message(STATUS "Using ASAN")
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    message(STATUS "Using SANITIZERS")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-omit-frame-pointer")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fno-omit-frame-pointer")
+    if (NOT "$ENV{SAN_BLACKLIST}" STREQUAL "")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize-blacklist=$ENV{SAN_BLACKLIST}")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize-blacklist=$ENV{SAN_BLACKLIST}")
+      message(STATUS "Using blacklist file: $ENV{SAN_BLACKLIST}")
+    endif()
+
+    # options:
+    #   - address 
+    #   - thread
+    #   - memory,undefined
+    if(NOT "$ENV{SAN_USE}" STREQUAL "")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=$ENV{SAN_USE}")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=$ENV{SAN_USE}")
+      message(STATUS "Using defined SANITIZERS: $ENV{SAN_USE}")
+    else()
+      message(STATUS "Using ASAN")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=address")
+      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+    endif()
   endif()
 endif()
 
