@@ -74,3 +74,43 @@ set_property(TARGET trezor_tests
 add_test(
   NAME    trezor_tests
   COMMAND trezor_tests)
+
+
+set(http_client_tests_sources
+        tools.cpp
+        daemon.cpp
+        http_client.cpp)
+
+set(http_client_tests_headers)
+add_executable(http_client_tests
+        ${http_client_tests_sources}
+        ${http_client_tests_headers})
+target_link_libraries(http_client_tests
+        PRIVATE
+        ringct
+        cryptonote_protocol
+        cryptonote_core
+        blockchain_db
+        rpc
+        net
+        epee
+        version
+        serialization
+        wallet
+        p2p
+        version
+        daemon_rpc_server
+        ${Boost_CHRONO_LIBRARY}
+        ${Boost_THREAD_LIBRARY}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${ZMQ_LIB}
+        ${GTEST_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${EXTRA_LIBRARIES})
+set_property(TARGET http_client_tests
+        PROPERTY
+        FOLDER "tests")
+add_test(
+        NAME    http_client_tests
+        COMMAND http_client_tests)
