@@ -90,6 +90,7 @@ public:
   bool prune_blockchain(uint32_t pruning_seed = 0) { return true; }
   bool is_within_compiled_block_hash_area(uint64_t height) const { return false; }
   bool has_block_weights(uint64_t height, uint64_t nblocks) const { return false; }
+  float get_blockchain_height_plausibility(uint64_t height) { return 0.0f; }
   void stop() {}
 };
 

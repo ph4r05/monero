@@ -844,6 +844,15 @@ namespace cryptonote
       */
      void flush_bad_txs_cache();
 
+     /**
+      * @brief checks how likely a given blockchain height is at the current time
+      *
+      * @param height the height to check
+      *
+      * @return a 0-1 probability
+      */
+     float get_blockchain_height_plausibility(uint64_t height) const;
+
    private:
 
      /**
