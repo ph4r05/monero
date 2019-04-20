@@ -1397,6 +1397,11 @@ private:
     uint64_t credits() const { return m_rpc_payment_state.credits; }
     void credit_report(uint64_t &expected_spent, uint64_t &discrepancy) const { expected_spent = m_rpc_payment_state.expected_spent; discrepancy = m_rpc_payment_state.discrepancy; }
 
+    typedef boost::variant<uint64_t, uint32_t, std::pair<bool, uint64_t>, std::pair<uint32_t, std::vector<std::pair<uint32_t, std::string>>>, bool, std::string> configuration_element_t;
+    typedef std::function<bool(const configuration_element_t&, const password_container&)> configuration_function_t;
+    std::vector<std::pair<std::string, std::vector<std::tuple<const char*, tools::wallet2::configuration_element_t, configuration_function_t>>>> configure(const password_container &pwd_container);
+    void on_configuration_changed(const std::vector<std::pair<std::string, std::vector<std::tuple<const char*, tools::wallet2::configuration_element_t, tools::wallet2::configuration_function_t>>>> &v, const password_container &pwd_container);
+
   private:
     /*!
      * \brief  Stores wallet information to wallet file.
