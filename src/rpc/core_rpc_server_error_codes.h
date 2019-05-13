@@ -48,6 +48,7 @@
 #define CORE_RPC_ERROR_CODE_PAYMENT_TOO_LOW       -16
 #define CORE_RPC_ERROR_CODE_DUPLICATE_PAYMENT     -17
 #define CORE_RPC_ERROR_CODE_STALE_PAYMENT         -18
+#define CORE_RPC_ERROR_CODE_RESTRICTED            -19
 
 static inline const char *get_rpc_server_error_message(int64_t code)
 {

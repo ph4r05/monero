@@ -171,6 +171,8 @@ public:
   bool rpc_payments();
 
   bool flush_cache(bool bad_txs);
+
+  bool block_rate(uint64_t seconds);
 };
 
 } // namespace daemonize
