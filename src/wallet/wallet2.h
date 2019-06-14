@@ -39,6 +39,7 @@
 #include <boost/serialization/deque.hpp>
 #include <boost/thread/lock_guard.hpp>
 #include <atomic>
+#include <random>
 
 #include "include_base_utils.h"
 #include "cryptonote_basic/account.h"
@@ -76,6 +77,30 @@ namespace tools
   class wallet2;
   class Notify;
 
+  class gamma_picker
+  {
+  public:
+    uint64_t pick();
+    gamma_picker(const std::vector<uint64_t> &rct_offsets);
+    gamma_picker(const std::vector<uint64_t> &rct_offsets, double shape, double scale);
+
+  private:
+    struct gamma_engine
+    {
+      typedef uint64_t result_type;
+      static constexpr result_type min() { return 0; }
+      static constexpr result_type max() { return std::numeric_limits<result_type>::max(); }
+      result_type operator()() { return crypto::rand<result_type>(); }
+    } engine;
+
+private:
+    std::gamma_distribution<double> gamma;
+    const std::vector<uint64_t> &rct_offsets;
+    const uint64_t *begin, *end;
+    uint64_t num_rct_outputs;
+    double average_output_time;
+  };
+
   class wallet_keys_unlocker
   {
   public:
@@ -93,7 +118,7 @@ namespace tools
   public:
     // Full wallet callbacks
     virtual void on_new_block(uint64_t height, const cryptonote::block& block) {}
-    virtual void on_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {}
+    virtual void on_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index, uint64_t unlock_time) {}
     virtual void on_unconfirmed_money_received(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx, uint64_t amount, const cryptonote::subaddress_index& subaddr_index) {}
     virtual void on_money_spent(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& in_tx, uint64_t amount, const cryptonote::transaction& spend_tx, const cryptonote::subaddress_index& subaddr_index) {}
     virtual void on_skip_transaction(uint64_t height, const crypto::hash &txid, const cryptonote::transaction& tx) {}
@@ -1139,8 +1164,8 @@ namespace tools
     bool verify_with_public_key(const std::string &data, const crypto::public_key &public_key, const std::string &signature) const;
 
     // Import/Export wallet data
-    std::pair<size_t, std::vector<tools::wallet2::transfer_details>> export_outputs() const;
-    std::string export_outputs_to_str() const;
+    std::pair<size_t, std::vector<tools::wallet2::transfer_details>> export_outputs(bool all = false) const;
+    std::string export_outputs_to_str(bool all = false) const;
     size_t import_outputs(const std::pair<size_t, std::vector<tools::wallet2::transfer_details>> &outputs);
     size_t import_outputs_from_str(const std::string &outputs_st);
     payment_container export_payments() const;
@@ -1232,19 +1257,22 @@ namespace tools
     template<class t_request, class t_response>
     inline bool invoke_http_json(const boost::string_ref uri, const t_request& req, t_response& res, std::chrono::milliseconds timeout = std::chrono::seconds(15), const boost::string_ref http_method = "GET")
     {
-      boost::lock_guard<boost::mutex> lock(m_daemon_rpc_mutex);
+      if (m_offline) return false;
+      boost::lock_guard<boost::recursive_mutex> lock(m_daemon_rpc_mutex);
       return epee::net_utils::invoke_http_json(uri, req, res, m_http_client, timeout, http_method);
     }
     template<class t_request, class t_response>
     inline bool invoke_http_bin(const boost::string_ref uri, const t_request& req, t_response& res, std::chrono::milliseconds timeout = std::chrono::seconds(15), const boost::string_ref http_method = "GET")
     {
-      boost::lock_guard<boost::mutex> lock(m_daemon_rpc_mutex);
+      if (m_offline) return false;
+      boost::lock_guard<boost::recursive_mutex> lock(m_daemon_rpc_mutex);
       return epee::net_utils::invoke_http_bin(uri, req, res, m_http_client, timeout, http_method);
     }
     template<class t_request, class t_response>
     inline bool invoke_http_json_rpc(const boost::string_ref uri, const std::string& method_name, const t_request& req, t_response& res, std::chrono::milliseconds timeout = std::chrono::seconds(15), const boost::string_ref http_method = "GET", const std::string& req_id = "0")
     {
-      boost::lock_guard<boost::mutex> lock(m_daemon_rpc_mutex);
+      if (m_offline) return false;
+      boost::lock_guard<boost::recursive_mutex> lock(m_daemon_rpc_mutex);
       return epee::net_utils::invoke_http_json_rpc(uri, method_name, req, res, m_http_client, timeout, http_method, req_id);
     }
 
@@ -1291,6 +1319,7 @@ namespace tools
     uint64_t hash_m_transfers(int64_t transfer_height, crypto::hash &hash) const;
     void finish_rescan_bc_keep_key_images(uint64_t transfer_height, const crypto::hash &hash);
     void enable_dns(bool enable) { m_use_dns = enable; }
+    void set_offline(bool offline = true);
 
   private:
     /*!
@@ -1422,7 +1451,7 @@ namespace tools
 
     std::atomic<bool> m_run;
 
-    boost::mutex m_daemon_rpc_mutex;
+    boost::recursive_mutex m_daemon_rpc_mutex;
 
     bool m_trusted_daemon;
     i_wallet2_callback* m_callback;
@@ -1474,6 +1503,7 @@ namespace tools
     std::string m_device_derivation_path;
     uint64_t m_device_last_key_image_sync;
     bool m_use_dns;
+    bool m_offline;
 
     // Aux transaction data from device
     std::unordered_map<crypto::hash, std::string> m_tx_device;

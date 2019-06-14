@@ -116,10 +116,14 @@ namespace trezor {
 
         MDEBUG("Enumerating Trezor devices...");
         enumerate(trans);
+        sort_transports_by_env(trans);
 
-        MDEBUG("Enumeration yielded " << trans.size() << " devices");
+        MDEBUG("Enumeration yielded " << trans.size() << " Trezor devices");
         for (auto &cur : trans) {
           MDEBUG("  device: " << *(cur.get()));
+        }
+
+        for (auto &cur : trans) {
           std::string cur_path = cur->get_path();
           if (boost::starts_with(cur_path, this->name)) {
             MDEBUG("Device Match: " << cur_path);
@@ -413,10 +417,11 @@ namespace trezor {
       CHECK_AND_ASSERT_THROW_MES(msg, "Empty message");
       MDEBUG("on_button_request, code: " << msg->code());
 
+      TREZOR_CALLBACK(on_button_request, msg->code());
+
       messages::common::ButtonAck ack;
       write_raw(&ack);
 
-      TREZOR_CALLBACK(on_button_request, msg->code());
       resp = read_raw();
     }
 

@@ -84,7 +84,7 @@ namespace cryptonote
 // advance which version they will stop working with
 // Don't go over 32767 for any of these
 #define CORE_RPC_VERSION_MAJOR 2
-#define CORE_RPC_VERSION_MINOR 5
+#define CORE_RPC_VERSION_MINOR 6
 #define MAKE_CORE_RPC_VERSION(major,minor) (((major)<<16)|(minor))
 #define CORE_RPC_VERSION MAKE_CORE_RPC_VERSION(CORE_RPC_VERSION_MAJOR, CORE_RPC_VERSION_MINOR)
 
@@ -364,6 +364,7 @@ namespace cryptonote
       uint64_t block_height;
       uint64_t block_timestamp;
       std::vector<uint64_t> output_indices;
+      bool relayed;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_hash)
@@ -374,9 +375,16 @@ namespace cryptonote
         KV_SERIALIZE(as_json)
         KV_SERIALIZE(in_pool)
         KV_SERIALIZE(double_spend_seen)
-        KV_SERIALIZE(block_height)
-        KV_SERIALIZE(block_timestamp)
-        KV_SERIALIZE(output_indices)
+        if (!this_ref.in_pool)
+        {
+          KV_SERIALIZE(block_height)
+          KV_SERIALIZE(block_timestamp)
+          KV_SERIALIZE(output_indices)
+        }
+        else
+        {
+          KV_SERIALIZE(relayed)
+        }
       END_KV_SERIALIZE_MAP()
     };
 
@@ -577,10 +585,12 @@ namespace cryptonote
     {
       std::string tx_as_hex;
       bool do_not_relay;
+      bool do_sanity_checks;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(tx_as_hex)
         KV_SERIALIZE_OPT(do_not_relay, false)
+        KV_SERIALIZE_OPT(do_sanity_checks, true)
       END_KV_SERIALIZE_MAP()
     };
     typedef epee::misc_utils::struct_init<request_t> request;
@@ -599,6 +609,7 @@ namespace cryptonote
       bool overspend;
       bool fee_too_low;
       bool not_rct;
+      bool sanity_check_failed;
       bool untrusted;
 
       BEGIN_KV_SERIALIZE_MAP()
@@ -613,6 +624,7 @@ namespace cryptonote
         KV_SERIALIZE(overspend)
         KV_SERIALIZE(fee_too_low)
         KV_SERIALIZE(not_rct)
+        KV_SERIALIZE(sanity_check_failed)
         KV_SERIALIZE(untrusted)
       END_KV_SERIALIZE_MAP()
     };
@@ -2308,11 +2320,13 @@ namespace cryptonote
 
     struct response_t
     {
+      bool pruned;
       uint32_t pruning_seed;
       std::string status;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(status)
+        KV_SERIALIZE(pruned)
         KV_SERIALIZE(pruning_seed)
       END_KV_SERIALIZE_MAP()
     };

@@ -193,7 +193,6 @@ namespace net_utils
 								return CONNECT_FAILURE;
 							}
 						}
-						m_ssl_options.support = ssl_support_t::e_ssl_support_enabled;
 					}
 					return CONNECT_SUCCESS;
 				}else
@@ -223,7 +222,6 @@ namespace net_utils
 					return false;
 				if (m_ssl_options.support == epee::net_utils::ssl_support_t::e_ssl_support_autodetect)
 				{
-					m_ssl_options.support = epee::net_utils::ssl_support_t::e_ssl_support_enabled;
 					if (try_connect_result == CONNECT_NO_SSL)
 					{
 						MERROR("SSL handshake failed on an autodetect connection, reconnecting without SSL");
@@ -396,7 +394,7 @@ namespace net_utils
 			if (!m_connected || !m_ssl_socket->next_layer().is_open())
 				return false;
 			if (ssl)
-				*ssl = m_ssl_options.support == ssl_support_t::e_ssl_support_enabled;
+				*ssl = m_ssl_options.support != ssl_support_t::e_ssl_support_disabled;
 			return true;
 		}
 
@@ -428,9 +426,10 @@ namespace net_utils
 			
 				handler_obj hndlr(ec, bytes_transfered);
 
-				char local_buff[10000] = {0};
+				static const size_t max_size = 16384;
+				buff.resize(max_size);
 				
-				async_read(local_buff, sizeof(local_buff), boost::asio::transfer_at_least(1), hndlr);
+				async_read(&buff[0], max_size, boost::asio::transfer_at_least(1), hndlr);
 
 				// Block until the asynchronous operation has completed.
 				while (ec == boost::asio::error::would_block && !boost::interprocess::ipcdetail::atomic_read32(&m_shutdowned))
@@ -447,6 +446,7 @@ namespace net_utils
                     {
                       MTRACE("Connection err_code eof.");
                       //connection closed there, empty
+                      buff.clear();
                       return true;
                     }
 
@@ -463,7 +463,7 @@ namespace net_utils
 					return false;*/
 
 				m_bytes_received += bytes_transfered;
-				buff.assign(local_buff, bytes_transfered);
+				buff.resize(bytes_transfered);
 				return true;
 			}
 
@@ -649,7 +649,7 @@ namespace net_utils
 		bool write(const void* data, size_t sz, boost::system::error_code& ec)
 		{
 			bool success;
-			if(m_ssl_options.support == ssl_support_t::e_ssl_support_enabled)
+			if(m_ssl_options.support != ssl_support_t::e_ssl_support_disabled)
 				success = boost::asio::write(*m_ssl_socket, boost::asio::buffer(data, sz), ec);
 			else
 				success = boost::asio::write(m_ssl_socket->next_layer(), boost::asio::buffer(data, sz), ec);
@@ -658,7 +658,7 @@ namespace net_utils
 		
 		void async_write(const void* data, size_t sz, boost::system::error_code& ec) 
 		{
-			if(m_ssl_options.support == ssl_support_t::e_ssl_support_enabled)
+			if(m_ssl_options.support != ssl_support_t::e_ssl_support_disabled)
 				boost::asio::async_write(*m_ssl_socket, boost::asio::buffer(data, sz), boost::lambda::var(ec) = boost::lambda::_1);
 			else
 				boost::asio::async_write(m_ssl_socket->next_layer(), boost::asio::buffer(data, sz), boost::lambda::var(ec) = boost::lambda::_1);
@@ -666,7 +666,7 @@ namespace net_utils
 		
 		void async_read(char* buff, size_t sz, boost::asio::detail::transfer_at_least_t transfer_at_least, handler_obj& hndlr)
 		{
-			if(m_ssl_options.support != ssl_support_t::e_ssl_support_enabled)
+			if(m_ssl_options.support == ssl_support_t::e_ssl_support_disabled)
 				boost::asio::async_read(m_ssl_socket->next_layer(), boost::asio::buffer(buff, sz), transfer_at_least, hndlr);
 			else
 				boost::asio::async_read(*m_ssl_socket, boost::asio::buffer(buff, sz), transfer_at_least, hndlr);

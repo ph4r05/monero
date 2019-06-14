@@ -754,6 +754,21 @@ public:
   virtual void batch_stop() = 0;
 
   /**
+   * @brief aborts a batch transaction
+   *
+   * If the subclass implements batching, this function should abort the
+   * batch it is currently on.
+   *
+   * If no batch is in-progress, this function should throw a DB_ERROR.
+   * This exception may change in the future if it is deemed necessary to
+   * have a more granular exception type for this scenario.
+   *
+   * If any of this cannot be done, the subclass should throw the corresponding
+   * subclass of DB_EXCEPTION
+   */
+  virtual void batch_abort() = 0;
+
+  /**
    * @brief sets whether or not to batch transactions
    *
    * If the subclass implements batching, this function tells it to begin
@@ -770,9 +785,12 @@ public:
    */
   virtual void set_batch_transactions(bool) = 0;
 
-  virtual void block_txn_start(bool readonly=false) = 0;
-  virtual void block_txn_stop() = 0;
-  virtual void block_txn_abort() = 0;
+  virtual void block_wtxn_start() = 0;
+  virtual void block_wtxn_stop() = 0;
+  virtual void block_wtxn_abort() = 0;
+  virtual bool block_rtxn_start() const = 0;
+  virtual void block_rtxn_stop() const = 0;
+  virtual void block_rtxn_abort() const = 0;
 
   virtual void set_hard_fork(HardFork* hf);
 
@@ -1698,6 +1716,52 @@ public:
   mutable epee::critical_section m_synchronization_lock;  //!< A lock, currently for when BlockchainLMDB needs to resize the backing db file
 
 };  // class BlockchainDB
+
+class db_txn_guard
+{
+public:
+  db_txn_guard(BlockchainDB *db, bool readonly): db(db), readonly(readonly), active(false)
+  {
+    if (readonly)
+    {
+      active = db->block_rtxn_start();
+    }
+    else
+    {
+      db->block_wtxn_start();
+      active = true;
+    }
+  }
+  virtual ~db_txn_guard()
+  {
+    if (active)
+      stop();
+  }
+  void stop()
+  {
+    if (readonly)
+      db->block_rtxn_stop();
+    else
+      db->block_wtxn_stop();
+    active = false;
+  }
+  void abort()
+  {
+    if (readonly)
+      db->block_rtxn_abort();
+    else
+      db->block_wtxn_abort();
+    active = false;
+  }
+
+private:
+  BlockchainDB *db;
+  bool readonly;
+  bool active;
+};
+
+class db_rtxn_guard: public db_txn_guard { public: db_rtxn_guard(BlockchainDB *db): db_txn_guard(db, true) {} };
+class db_wtxn_guard: public db_txn_guard { public: db_wtxn_guard(BlockchainDB *db): db_txn_guard(db, false) {} };
 
 BlockchainDB *new_db(const std::string& db_type);
 

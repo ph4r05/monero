@@ -176,8 +176,15 @@ namespace nodetool
     if(!addr.is_blockable())
       return false;
 
+    const time_t now = time(nullptr);
+
     CRITICAL_REGION_LOCAL(m_blocked_hosts_lock);
-    m_blocked_hosts[addr.host_str()] = time(nullptr) + seconds;
+    time_t limit;
+    if (now > std::numeric_limits<time_t>::max() - seconds)
+      limit = std::numeric_limits<time_t>::max();
+    else
+      limit = now + seconds;
+    m_blocked_hosts[addr.host_str()] = limit;
 
     // drop any connection to that address. This should only have to look into
     // the zone related to the connection, but really make sure everything is
@@ -1948,7 +1955,7 @@ namespace nodetool
     const epee::net_utils::zone zone_type = context.m_remote_address.get_zone();
     network_zone& zone = m_network_zones.at(zone_type);
 
-    zone.m_peerlist.get_peerlist_head(rsp.local_peerlist_new);
+    zone.m_peerlist.get_peerlist_head(rsp.local_peerlist_new, true);
     m_payload_handler.get_payload_sync_data(rsp.payload_data);
 
     /* Tor/I2P nodes receiving connections via forwarding (from tor/i2p daemon)
@@ -2051,7 +2058,7 @@ namespace nodetool
     });
 
     //fill response
-    zone.m_peerlist.get_peerlist_head(rsp.local_peerlist_new);
+    zone.m_peerlist.get_peerlist_head(rsp.local_peerlist_new, true);
     get_local_node_data(rsp.node_data, zone);
     m_payload_handler.get_payload_sync_data(rsp.payload_data);
     LOG_DEBUG_CC(context, "COMMAND_HANDSHAKE");

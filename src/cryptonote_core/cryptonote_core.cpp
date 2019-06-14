@@ -675,8 +675,14 @@ namespace cryptonote
     {
       // display a message if the blockchain is not pruned yet
       if (m_blockchain_storage.get_current_blockchain_height() > 1 && !m_blockchain_storage.get_blockchain_pruning_seed())
+      {
         MGINFO("Pruning blockchain...");
-      CHECK_AND_ASSERT_MES(m_blockchain_storage.prune_blockchain(), false, "Failed to prune blockchain");
+        CHECK_AND_ASSERT_MES(m_blockchain_storage.prune_blockchain(), false, "Failed to prune blockchain");
+      }
+      else
+      {
+        CHECK_AND_ASSERT_MES(m_blockchain_storage.update_blockchain_pruning(), false, "Failed to update blockchain pruning");
+      }
     }
 
     return load_state_data();
@@ -1609,6 +1615,9 @@ namespace cryptonote
   //-----------------------------------------------------------------------------------------------
   bool core::check_fork_time()
   {
+    if (m_nettype == FAKECHAIN)
+      return true;
+
     HardFork::State state = m_blockchain_storage.get_hard_fork_state();
     const el::Level level = el::Level::Warning;
     switch (state) {
@@ -1824,7 +1833,7 @@ namespace cryptonote
   //-----------------------------------------------------------------------------------------------
   bool core::check_block_rate()
   {
-    if (m_offline || m_target_blockchain_height > get_current_blockchain_height())
+    if (m_offline || m_nettype == FAKECHAIN || m_target_blockchain_height > get_current_blockchain_height())
     {
       MDEBUG("Not checking block rate, offline or syncing");
       return true;
