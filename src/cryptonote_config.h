@@ -168,6 +168,7 @@
 #define HF_VERSION_ENFORCE_MIN_AGE              12
 #define HF_VERSION_EFFECTIVE_SHORT_TERM_MEDIAN_IN_PENALTY 12
 #define HF_VERSION_CLSAG                        13
+#define HF_VERSION_ALL_RCT_OUTPUTS              254
 
 #define PER_KB_FEE_QUANTIZATION_DECIMALS        8
 
