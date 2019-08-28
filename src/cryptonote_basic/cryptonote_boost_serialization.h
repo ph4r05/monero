@@ -324,7 +324,7 @@ namespace boost
     if (x.rangeSigs.empty())
       a & x.bulletproofs;
     a & x.MGs;
-    if (ver >= 1)
+    if (ver >= 1u)
       a & x.CLSAGs;
     if (x.rangeSigs.empty())
       a & x.pseudoOuts;
@@ -350,7 +350,7 @@ namespace boost
     if (x.p.rangeSigs.empty())
       a & x.p.bulletproofs;
     a & x.p.MGs;
-    if (ver >= 1)
+    if (ver >= 1u)
       a & x.p.CLSAGs;
     if (x.type == rct::RCTTypeBulletproof || x.type == rct::RCTTypeBulletproof2 || x.type == rct::RCTTypeCLSAG)
       a & x.p.pseudoOuts;
