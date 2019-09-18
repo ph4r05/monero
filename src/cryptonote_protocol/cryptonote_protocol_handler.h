@@ -145,6 +145,7 @@ namespace cryptonote
     bool check_standby_peers();
     bool update_sync_search();
     bool restart_wedged_sync();
+    bool drop_broken_peers();
     int try_add_next_blocks(cryptonote_connection_context &context);
     void notify_new_stripe(cryptonote_connection_context &context, uint32_t stripe);
     void skip_unneeded_hashes(cryptonote_connection_context& context, bool check_block_queue) const;
@@ -170,6 +171,7 @@ namespace cryptonote
     epee::math_helper::once_a_time_seconds<150> m_wedged_sync_restarter;
     size_t m_block_download_max_size;
     bool m_sync_pruned_blocks;
+    epee::math_helper::once_a_time_seconds<20> m_broken_peer_dropper;
 
     boost::mutex m_buffer_mutex;
     double get_avg_block_size();
