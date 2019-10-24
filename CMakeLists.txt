@@ -551,6 +551,7 @@ add_definitions("-DBLOCKCHAIN_DB=${BLOCKCHAIN_DB}")
 if (APPLE)
   set(DEFAULT_STACK_TRACE OFF)
   set(LIBUNWIND_LIBRARIES "")
+  set(ICU_LIBRARIES iconv)  # icuio icui18n icuuc icudata icutu 
 elseif (DEPENDS AND NOT LINUX)
   set(DEFAULT_STACK_TRACE OFF)
   set(LIBUNWIND_LIBRARIES "")
