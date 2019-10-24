@@ -58,6 +58,7 @@ target_link_libraries(trezor_tests
     rpc
     cryptonote_protocol
     daemon_rpc_server
+    ${SODIUM_LIBRARY}
     ${Boost_CHRONO_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
