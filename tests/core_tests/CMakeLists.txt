@@ -73,6 +73,7 @@ add_executable(core_tests
   ${core_tests_headers})
 target_link_libraries(core_tests
   PRIVATE
+    ${SODIUM_LIBRARY}
     multisig
     cryptonote_core
     p2p
