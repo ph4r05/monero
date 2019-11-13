@@ -700,6 +700,7 @@ namespace cryptonote
       return true;
     }
     blobdata bd = get_block_hashing_blob(b);
+    MINFO("get_long_hash, hf=" << (int)b.major_version << ", pbc=" << (pbc != NULL));
     if (b.major_version >= RX_BLOCK_VERSION)
     {
       uint64_t seed_height, main_height;
@@ -715,6 +716,7 @@ namespace cryptonote
         seed_height = 0;
         main_height = 0;
       }
+      MINFO(" .. seed_height: " << (int)seed_height << ", hash: " << hash);
       rx_slow_hash(main_height, seed_height, hash.data, bd.data(), bd.size(), res.data, seed_height ? 0 : miners, !!seed_hash);
     } else {
       const int pow_variant = b.major_version >= 7 ? b.major_version - 6 : 0;

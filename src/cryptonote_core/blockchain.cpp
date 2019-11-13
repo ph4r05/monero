@@ -3882,14 +3882,19 @@ leave:
     {
       precomputed = true;
       proof_of_work = it->second;
+      MINFO("Cached PoW: " << proof_of_work);
+      proof_of_work = get_block_longhash(this, bl, blockchain_height, 0);
+      MINFO("Recomputed PoW: " << proof_of_work);
     }
     else
     {
       PERF_TIMER(get_block_longhash);
       proof_of_work = get_block_longhash(this, bl, blockchain_height, 0);
+      MINFO("Recomputing PoW: " << proof_of_work);
     }
 
     // validate proof_of_work versus difficulty target
+    MINFO("Validating PoW, hash: " << proof_of_work << " at diffic: " << current_diffic << ", fixed: " << m_fixed_difficulty);
     PERF_TIMER(check_hash);
     if(!check_hash(proof_of_work, current_diffic))
     {
@@ -3898,6 +3903,20 @@ leave:
       bvc.m_bad_pow = true;
       goto leave;
     }
+
+    MINFO("Hash Check: " << proof_of_work << ", at diffic: 2, pow_ok: " << check_hash(proof_of_work, 2));
+
+    memset(proof_of_work.data, 0xff, 32); //proof_of_work[0] = 0xff; proof_of_work[31] = 0xff;
+    MINFO("Random check: " << proof_of_work << ", pow_ok: " << check_hash(proof_of_work, current_diffic));
+
+    memset(proof_of_work.data, 0x00, 32); //proof_of_work[0] = 0x00; proof_of_work[31] = 0x00;
+    MINFO("Random check: " << proof_of_work << ", pow_ok: " << check_hash(proof_of_work, current_diffic));
+
+    memset(proof_of_work.data, 0xaa, 32); //proof_of_work[0] = 0xaa; proof_of_work[31] = 0xaa;
+    MINFO("Random check: " << proof_of_work << ", pow_ok: " << check_hash(proof_of_work, current_diffic));
+
+    memset(proof_of_work.data, 0x55, 32); //proof_of_work[0] = 0x55; proof_of_work[31] = 0x55;
+    MINFO("Random check: " << proof_of_work << ", pow_ok: " << check_hash(proof_of_work, current_diffic));
   }
 
   // If we're at a checkpoint, ensure that our hardcoded checkpoint hash

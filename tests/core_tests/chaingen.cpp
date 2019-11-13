@@ -798,9 +798,12 @@ void fill_tx_sources_and_destinations(const std::vector<test_event_entry>& event
 
 void fill_nonce(cryptonote::block& blk, const difficulty_type& diffic, uint64_t height)
 {
+  MINFO("Filling nonce for h: " << height << ", hf: " << (int)blk.major_version << ", diffic: " << diffic);
   blk.nonce = 0;
   while (!miner::find_nonce_for_given_block([](const cryptonote::block &b, uint64_t height, const crypto::hash *seed_hash, unsigned int threads, crypto::hash &hash){
-    return cryptonote::get_block_longhash(NULL, b, hash, height, NULL, threads);
+    auto r = cryptonote::get_block_longhash(NULL, b, hash, height, NULL, threads);
+    MINFO("... " << hash);
+    return r;
   }, blk, diffic, height))
     blk.timestamp++;
 }

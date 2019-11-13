@@ -171,13 +171,19 @@ bool gen_bp_tx_validation_base::generate_with(std::vector<test_event_entry>& eve
     DO_CALLBACK(events, "mark_invalid_tx");
   events.push_back(rct_txes);
 
+  MINFO("BPTEST constructing block");
   CHECK_AND_ASSERT_MES(generator.construct_block_manually(blk_txes, blk_last, miner_account,
       test_generator::bf_major_ver | test_generator::bf_minor_ver | test_generator::bf_timestamp | test_generator::bf_tx_hashes | test_generator::bf_hf_version | test_generator::bf_max_outs,
       hf_version, hf_version, blk_last.timestamp + DIFFICULTY_BLOCKS_ESTIMATE_TIMESPAN * 2, // v2 has blocks twice as long
-      crypto::hash(), 0, transaction(), starting_rct_tx_hashes, 0, 6, 10),
+      crypto::hash(), 0, transaction(), starting_rct_tx_hashes, 0, 6, hf_version),
       false, "Failed to generate block");
   if (!valid)
     DO_CALLBACK(events, "mark_invalid_block");
+  blk_txes.invalidate_hashes();
+
+  auto proof_of_work = get_block_longhash(nullptr, blk_txes, 74, 0);
+  MINFO("Computed PoW: " << proof_of_work);
+
   events.push_back(blk_txes);
   blk_last = blk_txes;
 
