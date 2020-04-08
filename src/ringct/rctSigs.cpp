@@ -311,6 +311,7 @@ namespace rct {
 
         // Compute final scalar
         hwdev.clsag_sign(c,a,p,z,mu_P,mu_C,sig.s[l]);
+        memwipe(&a, sizeof(key));
 
         if (mscout)
           *mscout = c;
@@ -740,7 +741,7 @@ namespace rct {
         sk[0] = copy(inSk.dest);
         sc_sub(sk[1].bytes, inSk.mask.bytes, a.bytes);
         clsag result = CLSAG_Gen(message, P, sk[0], C, sk[1], C_nonzero, Cout, index, kLRki, mscout, mspout, hwdev);
-        memwipe(&sk[0], sizeof(key));
+        memwipe(sk.data(), sk.size() * sizeof(key));
         return result;
     }
 
