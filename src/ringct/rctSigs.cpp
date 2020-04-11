@@ -28,6 +28,7 @@
 // STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
 // THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#include "string_tools.h"
 #include "misc_log_ex.h"
 #include "common/perf_timer.h"
 #include "common/threadpool.h"
@@ -164,6 +165,14 @@ namespace rct {
       return verifyBorromean(bb, P1_p3, P2_p3);
     }
 
+    static std::string dpkv(const keyV & keys) {
+      std::stringstream ss;
+      for (auto &x: keys){
+        ss << epee::string_tools::pod_to_hex(x);
+      }
+      return ss.str();
+    }
+
     // Generate a CLSAG signature
     // See paper by Goodell et al. (https://eprint.iacr.org/2019/654)
     //
@@ -234,9 +243,14 @@ namespace rct {
         mu_C_to_hash[2*n+2] = sig.D;
         mu_C_to_hash[2*n+3] = C_offset;
         key mu_P, mu_C;
+        std::cout << "mu_P_to_hash:  " << dpkv(mu_P_to_hash) << std::endl;
+        std::cout << "mu_C_to_hash:  " << dpkv(mu_C_to_hash) << std::endl;
         mu_P = hash_to_scalar(mu_P_to_hash);
         mu_C = hash_to_scalar(mu_C_to_hash);
 
+        std::cout << "mu_P:  " << epee::string_tools::pod_to_hex(mu_P) << std::endl;
+        std::cout << "mu_C:  " << epee::string_tools::pod_to_hex(mu_C) << std::endl;
+        
         // Initial commitment
         keyV c_to_hash(2*n+5); // domain, P, C, C_offset, message, aG, aH
         key c;
@@ -262,7 +276,9 @@ namespace rct {
             c_to_hash[2*n+3] = aG;
             c_to_hash[2*n+4] = aH;
         }
+        std::cout << "pre-c:  " << dpkv(c_to_hash) << std::endl;
         hwdev.clsag_hash(c_to_hash,c);
+        std::cout << "c:  " << epee::string_tools::pod_to_hex(c) << std::endl;
         
         size_t i;
         i = (l + 1) % n;
@@ -301,6 +317,15 @@ namespace rct {
 
             c_to_hash[2*n+3] = L;
             c_to_hash[2*n+4] = R;
+
+            std::cout << " c[" << i << "]:  " << epee::string_tools::pod_to_hex(c) << std::endl;
+            std::cout << " s[" << i << "]:  " << epee::string_tools::pod_to_hex(sig.s[i]) << std::endl;
+            std::cout << "cp[" << i << "]:  " << epee::string_tools::pod_to_hex(c_p) << std::endl;
+            std::cout << "cc[" << i << "]:  " << epee::string_tools::pod_to_hex(c_c) << std::endl;
+            std::cout << " L[" << i << "]:  " << epee::string_tools::pod_to_hex(L) << std::endl;
+            std::cout << " R[" << i << "]:  " << epee::string_tools::pod_to_hex(R) << std::endl;
+            std::cout << " h[" << i << "]:  " << dpkv(c_to_hash) << std::endl;
+
             hwdev.clsag_hash(c_to_hash,c_new);
             copy(c,c_new);
             
@@ -311,6 +336,8 @@ namespace rct {
 
         // Compute final scalar
         hwdev.clsag_sign(c,a,p,z,mu_P,mu_C,sig.s[l]);
+        std::cout << " c[" << l << "]:  " << epee::string_tools::pod_to_hex(c) << std::endl;
+        std::cout << " s[" << l << "]:  " << epee::string_tools::pod_to_hex(sig.s[l]) << std::endl;
         memwipe(&a, sizeof(key));
 
         if (mscout)
@@ -875,8 +902,12 @@ namespace rct {
             mu_C_to_hash[2*n+2] = sig.D;
             mu_C_to_hash[2*n+3] = C_offset;
             key mu_P, mu_C;
+          std::cout << "mu_P_to_hash:  " << dpkv(mu_P_to_hash) << std::endl;
+          std::cout << "mu_C_to_hash:  " << dpkv(mu_C_to_hash) << std::endl;
             mu_P = hash_to_scalar(mu_P_to_hash);
             mu_C = hash_to_scalar(mu_C_to_hash);
+            std::cout << "mu_P:  " << epee::string_tools::pod_to_hex(mu_P) << std::endl;
+            std::cout << "mu_C:  " << epee::string_tools::pod_to_hex(mu_C) << std::endl;
 
             // Set up round hash
             keyV c_to_hash(2*n+5); // domain, P, C, C_offset, message, L, R

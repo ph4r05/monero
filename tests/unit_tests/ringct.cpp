@@ -177,126 +177,146 @@ TEST(ringct, CLSAG)
   insk.dest = p;
   insk.mask = t;
   
-  // bad message
-  clsag = rct::proveRctCLSAGSimple(zero(),pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  // bad message
+//  clsag = rct::proveRctCLSAGSimple(zero(),pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//
+//  // bad index at creation
+//  try
+//  {
+//    clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,(idx + 1) % N,hw::get_device("default"));
+//    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  }
+//  catch (...) { /* either exception, or failure to verify above */ }
+//
+//  // bad z at creation
+//  try
+//  {
+//    ctkey insk2;
+//    insk2.dest = insk.dest;
+//    insk2.mask = skGen();
+//    clsag = rct::proveRctCLSAGSimple(message,pubs,insk2,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
+//    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  }
+//  catch (...) { /* either exception, or failure to verify above */ }
+//
+//  // bad C at creation
+//  backup = pubs[idx];
+//  pubs[idx].mask = scalarmultBase(skGen());
+//  try
+//  {
+//    clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
+//    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  }
+//  catch (...) { /* either exception, or failure to verify above */ }
+//  pubs[idx] = backup;
+//
+//  // bad p at creation
+//  try
+//  {
+//    ctkey insk2;
+//    insk2.dest = skGen();
+//    insk2.mask = insk.mask;
+//    clsag = rct::proveRctCLSAGSimple(message,pubs,insk2,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
+//    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  }
+//  catch (...) { /* either exception, or failure to verify above */ }
+//
+//  // bad P at creation
+//  backup = pubs[idx];
+//  pubs[idx].dest = scalarmultBase(skGen());
+//  try
+//  {
+//    clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
+//    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  }
+//  catch (...) { /* either exception, or failure to verify above */ }
+//  pubs[idx] = backup;
 
-  // bad index at creation
-  try
-  {
-    clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,(idx + 1) % N,hw::get_device("default"));
-    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  }
-  catch (...) { /* either exception, or failure to verify above */ }
-
-  // bad z at creation
-  try
-  {
-    ctkey insk2;
-    insk2.dest = insk.dest;
-    insk2.mask = skGen();
-    clsag = rct::proveRctCLSAGSimple(message,pubs,insk2,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
-    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  }
-  catch (...) { /* either exception, or failure to verify above */ }
-
-  // bad C at creation
-  backup = pubs[idx];
-  pubs[idx].mask = scalarmultBase(skGen());
-  try
-  {
-    clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
-    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  }
-  catch (...) { /* either exception, or failure to verify above */ }
-  pubs[idx] = backup;
-
-  // bad p at creation
-  try
-  {
-    ctkey insk2;
-    insk2.dest = skGen();
-    insk2.mask = insk.mask;
-    clsag = rct::proveRctCLSAGSimple(message,pubs,insk2,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
-    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  }
-  catch (...) { /* either exception, or failure to verify above */ }
-
-  // bad P at creation
-  backup = pubs[idx];
-  pubs[idx].dest = scalarmultBase(skGen());
-  try
-  {
-    clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
-    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  }
-  catch (...) { /* either exception, or failure to verify above */ }
-  pubs[idx] = backup;
-
+  std::cout << "======================================\n";
   // Test correct signature
   clsag = rct::proveRctCLSAGSimple(message,pubs,insk,t2,Cout,NULL,NULL,NULL,idx,hw::get_device("default"));
+  std::cout << "===============  VER  =================\n";
   ASSERT_TRUE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-
-  // empty s
-  auto sbackup = clsag.s;
-  clsag.s.clear();
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.s = sbackup;
-
-  // too few s elements
-  key backup_key;
-  backup_key = clsag.s.back();
-  clsag.s.pop_back();
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.s.push_back(backup_key);
-
-  // too many s elements
-  clsag.s.push_back(skGen());
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.s.pop_back();
-
-  // bad s in clsag at verification
-  for (auto &s: clsag.s)
-  {
-    backup_key = s;
-    s = skGen();
-    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-    s = backup_key;
+  std::cout << "{" << std::endl;
+  std::cout << "\"msg\":  \"" << epee::string_tools::pod_to_hex(message) << "\"," << std::endl;
+  std::cout << "\"cout\": \"" << epee::string_tools::pod_to_hex(Cout) << "\"," << std::endl;
+  std::cout << "\"sI\":   \"" << epee::string_tools::pod_to_hex(clsag.I) << "\"," << std::endl;
+  std::cout << "\"sD\":   \"" << epee::string_tools::pod_to_hex(clsag.D) << "\"," << std::endl;
+  std::cout << "\"sc1\":  \"" << epee::string_tools::pod_to_hex(clsag.c1) << "\"," << std::endl;
+  std::cout << "\"ss\":  \n";
+  rct::dp(clsag.s);
+  std::cout << ",\"ring\": [\n";
+  for(int ii=0; ii<N; ++ii){
+    std::cout << "    [\"" 
+        << epee::string_tools::pod_to_hex(pubs[ii].dest) << "\", \""
+        << epee::string_tools::pod_to_hex(pubs[ii].mask) << "\"]";
+    if (ii+1 < N) std::cout << ",";
+    std::cout << "\n";
   }
+  std::cout << "]\n}\n"; 	
+  std::cout << "======================================\n";
 
-  // bad c1 in clsag at verification
-  backup_key = clsag.c1;
-  clsag.c1 = skGen();
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.c1 = backup_key;
-
-  // bad I in clsag at verification
-  backup_key = clsag.I;
-  clsag.I = scalarmultBase(skGen());
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.I = backup_key;
-
-  // bad D in clsag at verification
-  backup_key = clsag.D;
-  clsag.D = scalarmultBase(skGen());
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.D = backup_key;
-
-  // D not in main subgroup in clsag at verification
-  backup_key = clsag.D;
-  rct::key x;
-  ASSERT_TRUE(epee::string_tools::hex_to_pod("c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa", x));
-  clsag.D = rct::addKeys(clsag.D, x);
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  clsag.D = backup_key;
-
-  // swapped I and D in clsag at verification
-  std::swap(clsag.I, clsag.D);
-  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
-  std::swap(clsag.I, clsag.D);
-
-  // check it's still good, in case we failed to restore
-  ASSERT_TRUE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  // empty s
+//  auto sbackup = clsag.s;
+//  clsag.s.clear();
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.s = sbackup;
+//
+//  // too few s elements
+//  key backup_key;
+//  backup_key = clsag.s.back();
+//  clsag.s.pop_back();
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.s.push_back(backup_key);
+//
+//  // too many s elements
+//  clsag.s.push_back(skGen());
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.s.pop_back();
+//
+//  // bad s in clsag at verification
+//  for (auto &s: clsag.s)
+//  {
+//    backup_key = s;
+//    s = skGen();
+//    ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//    s = backup_key;
+//  }
+//
+//  // bad c1 in clsag at verification
+//  backup_key = clsag.c1;
+//  clsag.c1 = skGen();
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.c1 = backup_key;
+//
+//  // bad I in clsag at verification
+//  backup_key = clsag.I;
+//  clsag.I = scalarmultBase(skGen());
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.I = backup_key;
+//
+//  // bad D in clsag at verification
+//  backup_key = clsag.D;
+//  clsag.D = scalarmultBase(skGen());
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.D = backup_key;
+//
+//  // D not in main subgroup in clsag at verification
+//  backup_key = clsag.D;
+//  rct::key x;
+//  ASSERT_TRUE(epee::string_tools::hex_to_pod("c7176a703d4dd84fba3c0b760d10670f2a2053fa2c39ccc64ec7fd7792ac03fa", x));
+//  clsag.D = rct::addKeys(clsag.D, x);
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  clsag.D = backup_key;
+//
+//  // swapped I and D in clsag at verification
+//  std::swap(clsag.I, clsag.D);
+//  ASSERT_FALSE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
+//  std::swap(clsag.I, clsag.D);
+//
+//  // check it's still good, in case we failed to restore
+//  ASSERT_TRUE(rct::verRctCLSAGSimple(message,clsag,pubs,Cout));
 }
 
 TEST(ringct, range_proofs)

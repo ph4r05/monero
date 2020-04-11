@@ -36,7 +36,7 @@
 
 
 #ifndef USE_DEVICE_LEDGER
-#define USE_DEVICE_LEDGER 1
+#define USE_DEVICE_LEDGER 0
 #endif
 
 #if !defined(HAVE_HIDAPI) 
