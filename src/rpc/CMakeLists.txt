@@ -167,6 +167,7 @@ target_link_libraries(daemon_rpc_server
     version
     daemon_messages
     serialization
+    ${SODIUM_LIBRARY}
     ${Boost_CHRONO_LIBRARY}
     ${Boost_REGEX_LIBRARY}
     ${Boost_SYSTEM_LIBRARY}
