@@ -1146,7 +1146,7 @@ if(PROTOLIB_LIBRARY)
   set(ZMQ_LIB "${ZMQ_LIB};${PROTOLIB_LIBRARY}")
 endif()
 if(SODIUM_LIBRARY)
-  set(ZMQ_LIB "${ZMQ_LIB};${SODIUM_LIBRARY}")
+  set(ZMQ_LIB "${SODIUM_LIBRARY};${ZMQ_LIB}")
 endif()
 
 include(external/supercop/functions.cmake) # place after setting flags and before src directory inclusion

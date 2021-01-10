@@ -84,6 +84,7 @@ if(NOT IOS)
 
   target_link_libraries(wallet_rpc_server
     PRIVATE
+      ${SODIUM_LIBRARY}
       wallet
       rpc_base
       cryptonote_core
