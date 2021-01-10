@@ -51,6 +51,7 @@ target_link_libraries(simplewallet
     ${EPEE_READLINE}
     qrcodegen
     version
+    ${SODIUM_LIBRARY}
     ${Boost_CHRONO_LIBRARY}
     ${Boost_PROGRAM_OPTIONS_LIBRARY}
     ${Boost_FILESYSTEM_LIBRARY}
