@@ -81,7 +81,7 @@ debug-trezor-san:
 
 debug-test-trezor:
 	mkdir -p $(builddir)/debug
-	cd $(builddir)/debug && cmake -D BUILD_TESTS=ON -D TREZOR_DEBUG=ON -D CMAKE_BUILD_TYPE=Debug $(topdir) &&  $(MAKE) && $(MAKE) ARGS="-E libwallet_api_tests"
+	cd $(builddir)/debug && cmake -D BUILD_TESTS=ON -D TREZOR_DEBUG=ON -DMANUAL_SUBMODULES=1 -D CMAKE_BUILD_TYPE=Debug $(topdir) &&  $(MAKE) && $(MAKE) ARGS="-E libwallet_api_tests"
 
 debug-test-trezor-san:
 	mkdir -p $(builddir)/debug
@@ -89,7 +89,7 @@ debug-test-trezor-san:
 
 debug-test-trezor-stat:
 	mkdir -p $(builddir)/debug
-	cd $(builddir)/debug && cmake -D BUILD_TESTS=ON -D TREZOR_DEBUG=ON -D STATIC=ON -D CMAKE_BUILD_TYPE=Debug $(topdir) &&  $(MAKE) && $(MAKE) ARGS="-E libwallet_api_tests"
+	cd $(builddir)/debug && cmake -D BUILD_TESTS=ON -D TREZOR_DEBUG=ON -D STATIC=ON -DMANUAL_SUBMODULES=1 -D CMAKE_BUILD_TYPE=Debug $(topdir) &&  $(MAKE) && $(MAKE) ARGS="-E libwallet_api_tests"
 
 debug-test-trezor-stat-san:
 	mkdir -p $(builddir)/debug
