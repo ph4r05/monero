@@ -402,6 +402,9 @@ else()
   set(BOOST_IGNORE_SYSTEM_PATHS_DEFAULT OFF)
 endif()
 
+add_definitions(-DBOOST_ERROR_CODE_HEADER_ONLY)
+#add_definitions(-DNGHTTP2_STATICLIB)
+
 message(STATUS "BOOST_IGNORE_SYSTEM_PATHS defaults to ${BOOST_IGNORE_SYSTEM_PATHS_DEFAULT}")
 option(BOOST_IGNORE_SYSTEM_PATHS "Ignore boost system paths for local boost installation" ${BOOST_IGNORE_SYSTEM_PATHS_DEFAULT})
 
