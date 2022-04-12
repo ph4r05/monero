@@ -306,7 +306,19 @@ public:
   bool generate(std::vector<test_event_entry>& events) override;
 };
 
+class gen_trezor_4utxo_to_15outs : public gen_trezor_base
+{
+public:
+  bool generate(std::vector<test_event_entry>& events) override;
+};
+
 class gen_trezor_many_utxo : public gen_trezor_base
+{
+public:
+  bool generate(std::vector<test_event_entry>& events) override;
+};
+
+class gen_trezor_many_utxo_many_txo : public gen_trezor_base
 {
 public:
   bool generate(std::vector<test_event_entry>& events) override;

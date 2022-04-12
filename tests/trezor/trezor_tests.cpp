@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
     hw::register_device(HW_TREZOR_NAME, ensure_trezor_test_device());  // shim device for call tracking
 
     // Bootstrapping common chain & accounts
-    const uint8_t initial_hf =  (uint8_t)get_env_long("TEST_MIN_HF", 12);
+    const uint8_t initial_hf =  (uint8_t)get_env_long("TEST_MIN_HF", HF_VERSION_CLSAG);
     const uint8_t max_hf = (uint8_t)get_env_long("TEST_MAX_HF", HF_VERSION_CLSAG);
     auto sync_test = get_env_long("TEST_KI_SYNC", 1);
     MINFO("Test versions " << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")");
@@ -201,12 +201,14 @@ int main(int argc, char* argv[])
       TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_1norm_2sub, core, trezor_base);
       TREZOR_COMMON_TEST_CASE(gen_trezor_2utxo_sub_acc_to_1norm_2sub, core, trezor_base);
       TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_7outs, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_4utxo_to_15outs, core, trezor_base);
       TREZOR_COMMON_TEST_CASE(wallet_api_tests, core, trezor_base);
     }
 
     if (trezor_base.heavy_tests())
     {
       TREZOR_COMMON_TEST_CASE(gen_trezor_many_utxo, core, trezor_base);
+      TREZOR_COMMON_TEST_CASE(gen_trezor_many_utxo_many_txo, core, trezor_base);
     }
 
     core->deinit();
@@ -1817,6 +1819,34 @@ bool gen_trezor_4utxo_to_7outs::generate(std::vector<test_event_entry>& events)
   TREZOR_TEST_SUFFIX();
 }
 
+bool gen_trezor_4utxo_to_15outs::generate(std::vector<test_event_entry>& events)
+{
+  TREZOR_TEST_PREFIX();
+  t_builder->cur_height(num_blocks(events) - 1)
+      ->mixin(TREZOR_TEST_MIXIN)
+      ->fee(TREZOR_TEST_FEE)
+      ->from(m_wl_alice.get(), 0)
+      ->compute_sources(4, MK_COINS(1), -1, -1)
+      ->add_destination(m_wl_eve->get_subaddress({1, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({2, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 2}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 3}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 4}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({1, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({2, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 2}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 3}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 4}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 4}), true, 1000)
+      ->add_destination(m_wl_eve.get(), false, 1000)
+      ->rct_config(m_rct_config)
+      ->build_tx();
+
+  TREZOR_TEST_SUFFIX();
+}
+
 bool gen_trezor_many_utxo::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
@@ -1826,6 +1856,35 @@ bool gen_trezor_many_utxo::generate(std::vector<test_event_entry>& events)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(110, MK_COINS(1), -1, -1)
       ->add_destination(m_eve_account, false, 1000)
+      ->rct_config(m_rct_config)
+      ->build_tx();
+
+  TREZOR_TEST_SUFFIX();
+}
+
+bool gen_trezor_many_utxo_many_txo::generate(std::vector<test_event_entry>& events)
+{
+  TREZOR_TEST_PREFIX();
+  t_builder->cur_height(num_blocks(events) - 1)
+      ->mixin(TREZOR_TEST_MIXIN)
+      ->fee(TREZOR_TEST_FEE)
+      ->from(m_wl_alice.get(), 0)
+      ->compute_sources(40, MK_COINS(1), -1, -1)
+      ->add_destination(m_eve_account, false, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({1, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({2, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 2}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 3}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 4}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({1, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({2, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 1}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 2}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({0, 3}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({1, 4}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({2, 4}), true, 1000)
+      ->add_destination(m_wl_eve->get_subaddress({3, 4}), true, 1000)
       ->rct_config(m_rct_config)
       ->build_tx();
 
