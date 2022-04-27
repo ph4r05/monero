@@ -698,7 +698,7 @@ namespace trezor {
       }
 
       unsigned client_version = 3;
-      if (trezor_version >= pack_version(2, 5, 1)){
+      if (trezor_version >= pack_version(2, 5, 2)){
         client_version = 4;
       }
 

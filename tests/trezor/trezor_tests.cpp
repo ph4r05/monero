@@ -52,7 +52,6 @@ namespace po = boost::program_options;
 namespace
 {
   const command_line::arg_descriptor<std::string> arg_filter                      = { "filter", "Regular expression filter for which tests to run" };
-  const command_line::arg_descriptor<bool>        arg_generate_and_play_test_data = {"generate_and_play_test_data", ""};
   const command_line::arg_descriptor<std::string> arg_trezor_path                 = {"trezor_path", "Path to the trezor device to use, has to support debug link", ""};
   const command_line::arg_descriptor<bool>        arg_heavy_tests                 = {"heavy_tests", "Runs expensive tests (volume tests with real device)", false};
   const command_line::arg_descriptor<std::string> arg_chain_path                  = {"chain_path", "Path to the serialized blockchain, speeds up testing", ""};
@@ -162,6 +161,10 @@ int main(int argc, char* argv[])
     // Transaction tests
     for(uint8_t hf=initial_hf; hf <= max_hf + 1; ++hf)
     {
+      if (hf == 14) {  // HF 14 is skipped.
+        continue;
+      }
+
       if (hf > initial_hf || hf > max_hf)
       {
         daemon->stop_and_deinit();
@@ -557,7 +560,7 @@ static void expand_tsx(cryptonote::transaction &tx)
       rv.p.MGs[n].II[0] = rct::ki2rct(boost::get<txin_to_key>(tx.vin[n]).k_image);
     }
   }
-  else if (rv.type == rct::RCTTypeCLSAG)
+  else if (rv.type == rct::RCTTypeCLSAG || rv.type == rct::RCTTypeBulletproofPlus)
   {
     if (!tx.pruned)
     {
@@ -1271,6 +1274,8 @@ void gen_trezor_base::set_hard_fork(uint8_t hf)
     rct_config({rct::RangeProofPaddedBulletproof, 2});
   } else if (hf == HF_VERSION_CLSAG){
     rct_config({rct::RangeProofPaddedBulletproof, 3});
+  }  else if (hf == HF_VERSION_BULLETPROOF_PLUS){
+    rct_config({rct::RangeProofPaddedBulletproof, 4});
   } else {
     throw std::runtime_error("Unsupported HF");
   }
@@ -1657,7 +1662,7 @@ bool gen_trezor_1utxo::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-           ->mixin(TREZOR_TEST_MIXIN)
+           ->mixin(num_mixin())
            ->fee(TREZOR_TEST_FEE)
            ->from(m_wl_alice.get(), 0)
            ->compute_sources(boost::none, MK_COINS(1), -1, -1)
@@ -1673,7 +1678,7 @@ bool gen_trezor_1utxo_paymentid_short::generate(std::vector<test_event_entry>& e
   TREZOR_TEST_PREFIX();
   TREZOR_SKIP_IF_VERSION_LEQ(hw::trezor::pack_version(2, 0, 9));
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(boost::none, MK_COINS(1), -1, -1)
@@ -1690,7 +1695,7 @@ bool gen_trezor_1utxo_paymentid_short_integrated::generate(std::vector<test_even
   TREZOR_TEST_PREFIX();
   TREZOR_SKIP_IF_VERSION_LEQ(hw::trezor::pack_version(2, 0, 9));
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(boost::none, MK_COINS(1), -1, -1)
@@ -1707,7 +1712,7 @@ bool gen_trezor_4utxo::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1722,7 +1727,7 @@ bool gen_trezor_4utxo_acc1::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 1)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1737,7 +1742,7 @@ bool gen_trezor_4utxo_to_sub::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1752,7 +1757,7 @@ bool gen_trezor_4utxo_to_2sub::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1768,7 +1773,7 @@ bool gen_trezor_4utxo_to_1norm_2sub::generate(std::vector<test_event_entry>& eve
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1785,7 +1790,7 @@ bool gen_trezor_2utxo_sub_acc_to_1norm_2sub::generate(std::vector<test_event_ent
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources_to_sub_acc(2, MK_COINS(1) >> 2, -1, -1)
@@ -1802,7 +1807,7 @@ bool gen_trezor_4utxo_to_7outs::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1823,7 +1828,7 @@ bool gen_trezor_4utxo_to_15outs::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(4, MK_COINS(1), -1, -1)
@@ -1851,7 +1856,7 @@ bool gen_trezor_many_utxo::generate(std::vector<test_event_entry>& events)
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(110, MK_COINS(1), -1, -1)
@@ -1866,7 +1871,7 @@ bool gen_trezor_many_utxo_many_txo::generate(std::vector<test_event_entry>& even
 {
   TREZOR_TEST_PREFIX();
   t_builder->cur_height(num_blocks(events) - 1)
-      ->mixin(TREZOR_TEST_MIXIN)
+      ->mixin(num_mixin())
       ->fee(TREZOR_TEST_FEE)
       ->from(m_wl_alice.get(), 0)
       ->compute_sources(40, MK_COINS(1), -1, -1)
@@ -1932,7 +1937,7 @@ bool wallet_api_tests::generate(std::vector<test_event_entry>& events)
   Monero::PendingTransaction * transaction = w->createTransaction(recepient_address,
                                                                   "",
                                                                   MK_COINS(10),
-                                                                  TREZOR_TEST_MIXIN,
+                                                                  num_mixin(),
                                                                   Monero::PendingTransaction::Priority_Medium,
                                                                   0,
                                                                   std::set<uint32_t>{});

@@ -38,6 +38,7 @@
 #include <crypto/hmac-keccak.h>
 #include <ringct/rctSigs.h>
 #include <ringct/bulletproofs.h>
+#include <ringct/bulletproofs_plus.h>
 #include "cryptonote_config.h"
 #include <sodium.h>
 #include <sodium/crypto_verify_32.h>
@@ -671,6 +672,7 @@ namespace tx {
     CHECK_AND_ASSERT_THROW_MES(is_req_bulletproof(), "Borromean rsig not supported");
     cryptonote::tx_out tx_out;
     rct::Bulletproof bproof{};
+    rct::BulletproofPlus bproof_plus{};
     rct::ctkey out_pk{};
     rct::ecdhTuple ecdh{};
 
@@ -709,21 +711,32 @@ namespace tx {
       memcpy(ecdh.amount.bytes, ack->ecdh_info().data(), 8);
     }
 
-    if (has_rsig && !cn_deserialize(rsig_buff, bproof)){
-      throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
-    }
-
     m_ct.tx.vout.emplace_back(tx_out);
     m_ct.tx_out_hmacs.push_back(ack->vouti_hmac());
     m_ct.tx_out_pk.emplace_back(out_pk);
     m_ct.tx_out_ecdh.emplace_back(ecdh);
+
+    rsig_v bp_obj{};
+    if (has_rsig) {
+      bool deserialize_success;
+      if (is_req_bulletproof_plus()) {
+        deserialize_success = cn_deserialize(rsig_buff, bproof_plus);
+        bp_obj = bproof_plus;
+      } else {
+        deserialize_success = cn_deserialize(rsig_buff, bproof);
+        bp_obj = bproof;
+      }
+      if (!deserialize_success) {
+        throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
+      }
+    }
 
     // Generates BP after all masks in the current batch are generated
     if (!has_rsig || is_offloading()){
       return;
     }
 
-    process_bproof(bproof);
+    process_bproof(bp_obj);
     m_ct.cur_batch_idx += 1;
     m_ct.cur_output_in_batch_idx = 0;
   }
@@ -748,13 +761,21 @@ namespace tx {
       masks.push_back(m_ct.rsig_gamma[bidx]);
     }
 
-    auto bp = bulletproof_PROVE(amounts, masks);  // TODO: BP+
-    auto serRsig = cn_serialize(bp);
-    m_ct.tx_out_rsigs.emplace_back(bp);
+    std::string serRsig;
+    if (is_req_bulletproof_plus()) {
+      auto bp = bulletproof_plus_PROVE(amounts, masks);
+      serRsig = cn_serialize(bp);
+      m_ct.tx_out_rsigs.emplace_back(bp);
+    } else {
+      auto bp = bulletproof_PROVE(amounts, masks);
+      serRsig = cn_serialize(bp);
+      m_ct.tx_out_rsigs.emplace_back(bp);
+    }
+
     rsig_data.set_rsig(serRsig);
   }
 
-  void Signer::process_bproof(rct::Bulletproof & bproof){  // TODO: BP+
+  void Signer::process_bproof(rsig_v & bproof){
     CHECK_AND_ASSERT_THROW_MES(m_ct.cur_batch_idx < m_ct.grouping_vct.size(), "Invalid batch index");
     auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
     for (size_t i = 0; i < batch_size; ++i){
@@ -763,12 +784,22 @@ namespace tx {
 
       rct::key commitment = m_ct.tx_out_pk[bidx].mask;
       commitment = rct::scalarmultKey(commitment, rct::INV_EIGHT);
-      bproof.V.push_back(commitment);
+      if (is_req_bulletproof_plus()) {
+        boost::get<rct::BulletproofPlus>(bproof).V.push_back(commitment);
+      } else {
+        boost::get<rct::Bulletproof>(bproof).V.push_back(commitment);
+      }
     }
 
     m_ct.tx_out_rsigs.emplace_back(bproof);
-    if (!rct::bulletproof_VERIFY(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs.back()))) {
-      throw exc::ProtocolException("Returned range signature is invalid");
+    if (is_req_bulletproof_plus()) {
+      if (!rct::bulletproof_plus_VERIFY(boost::get<rct::BulletproofPlus>(m_ct.tx_out_rsigs.back()))) {
+        throw exc::ProtocolException("Returned range signature is invalid");
+      }
+    } else {
+      if (!rct::bulletproof_VERIFY(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs.back()))) {
+        throw exc::ProtocolException("Returned range signature is invalid");
+      }
     }
   }
 
@@ -838,7 +869,11 @@ namespace tx {
     }
 
     for(size_t i = 0; i < m_ct.tx_out_rsigs.size(); ++i){
-      m_ct.rv->p.bulletproofs.push_back(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs[i]));
+      if (is_req_bulletproof_plus()) {
+        m_ct.rv->p.bulletproofs_plus.push_back(boost::get<rct::BulletproofPlus>(m_ct.tx_out_rsigs[i]));
+      } else {
+        m_ct.rv->p.bulletproofs.push_back(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs[i]));
+      }
     }
 
     rct::key hash_computed = rct::get_pre_mlsag_hash(*(m_ct.rv), hwdev);

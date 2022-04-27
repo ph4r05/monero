@@ -37,7 +37,9 @@
 #include "../core_tests/wallet_tools.h"
 
 #define TREZOR_TEST_FEE 90000000000
-#define TREZOR_TEST_MIXIN 11
+#define TREZOR_TEST_CLSAG_MIXIN 11
+#define TREZOR_TEST_HF15_MIXIN 16
+#define TREZOR_TEST_MIXIN TREZOR_TEST_CLSAG_MIXIN
 
 /************************************************************************/
 /*                                                                      */
@@ -93,6 +95,7 @@ public:
   bool heavy_tests() const { return m_heavy_tests; }
   void rct_config(rct::RCTConfig rct_config) { m_rct_config = rct_config; }
   uint8_t cur_hf() const { return m_hard_forks.size() > 0 ? m_hard_forks.back().first : 0; }
+  size_t num_mixin() const { return  m_top_hard_fork >= HF_VERSION_BULLETPROOF_PLUS ? TREZOR_TEST_HF15_MIXIN : TREZOR_TEST_CLSAG_MIXIN; }
   cryptonote::network_type nettype() const { return m_network_type; }
   std::shared_ptr<mock_daemon> daemon() const { return m_daemon; }
   void daemon(std::shared_ptr<mock_daemon> daemon){ m_daemon = std::move(daemon); }
