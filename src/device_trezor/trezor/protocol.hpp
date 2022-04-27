@@ -245,7 +245,7 @@ namespace tx {
     void compute_integrated_indices(TsxData * tsx_data);
     bool should_compute_bp_now() const;
     void compute_bproof(messages::monero::MoneroTransactionRsigData & rsig_data);
-    void process_bproof(rct::Bulletproof & bproof);
+    void process_bproof(rsig_v & bproof);
     void set_tx_input(MoneroTransactionSourceEntry * dst, size_t idx, bool need_ring_keys=false, bool need_ring_indices=false);
 
   public:
@@ -300,6 +300,14 @@ namespace tx {
 
     bool is_req_bulletproof() const {
       return m_ct.tx_data.rct_config.range_proof_type != rct::RangeProofBorromean;
+    }
+
+    bool is_req_clsag() const {
+      return is_req_bulletproof() && m_ct.tx_data.rct_config.bp_version >= 3;
+    }
+
+    bool is_req_bulletproof_plus() const {
+      return is_req_bulletproof() && m_ct.tx_data.rct_config.bp_version == 4;  // rct::genRctSimple
     }
 
     bool is_bulletproof() const {
