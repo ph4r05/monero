@@ -145,8 +145,7 @@ namespace ki {
 
   bool key_image_data(wallet_shim * wallet,
                       const std::vector<tools::wallet2::transfer_details> & transfers,
-                      std::vector<MoneroTransferDetails> & res,
-                      bool need_all_additionals)
+                      std::vector<MoneroTransferDetails> & res)
   {
     for(auto & td : transfers){
       ::crypto::public_key tx_pub_key = wallet->get_tx_pub_key_from_received_outs(td);
@@ -159,11 +158,7 @@ namespace ki {
       cres.set_internal_output_index(td.m_internal_output_index);
       cres.set_sub_addr_major(td.m_subaddr_index.major);
       cres.set_sub_addr_minor(td.m_subaddr_index.minor);
-      if (need_all_additionals) {
-        for (auto &aux : additional_tx_pub_keys) {
-          cres.add_additional_tx_pub_keys(key_to_string(aux));
-        }
-      } else if (!additional_tx_pub_keys.empty() && additional_tx_pub_keys.size() > td.m_internal_output_index) {
+      if (!additional_tx_pub_keys.empty() && additional_tx_pub_keys.size() > td.m_internal_output_index) {
         cres.add_additional_tx_pub_keys(key_to_string(additional_tx_pub_keys[td.m_internal_output_index]));
       }
     }
@@ -194,8 +189,7 @@ namespace ki {
 
   void generate_commitment(std::vector<MoneroTransferDetails> & mtds,
                            const std::vector<tools::wallet2::transfer_details> & transfers,
-                           std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> & req,
-                           bool need_subaddr_indices)
+                           std::shared_ptr<messages::monero::MoneroKeyImageExportInitRequest> & req)
   {
     req = std::make_shared<messages::monero::MoneroKeyImageExportInitRequest>();
 
@@ -218,16 +212,6 @@ namespace ki {
       auto search = sub_indices.emplace(cur.m_subaddr_index.major, std::set<uint32_t>());
       auto & st = search.first->second;
       st.insert(cur.m_subaddr_index.minor);
-    }
-
-    if (need_subaddr_indices) {
-      for (auto &x: sub_indices) {
-        auto subs = req->add_subs();
-        subs->set_account(x.first);
-        for (auto minor : x.second) {
-          subs->add_minor_indices(minor);
-        }
-      }
     }
   }
 
@@ -399,7 +383,7 @@ namespace tx {
     m_tx_idx = tx_idx;
     m_ct.tx_data = cur_src_tx();
     m_multisig = false;
-    m_client_version = 1;
+    m_client_version = 3;
   }
 
   void Signer::extract_payment_id(){
@@ -474,25 +458,19 @@ namespace tx {
       auto & cur = src.outputs[i];
       auto out = dst->add_outputs();
 
-      if (i == src.real_output || need_ring_indices || client_version() <= 1) {
+      if (i == src.real_output || need_ring_indices) {
         out->set_idx(cur.first);
       }
-      if (i == src.real_output || need_ring_keys || client_version() <= 1) {
+      if (i == src.real_output || need_ring_keys) {
         translate_rct_key(out->mutable_key(), &(cur.second));
       }
     }
 
     dst->set_real_out_tx_key(key_to_string(src.real_out_tx_key));
     dst->set_real_output_in_tx_index(src.real_output_in_tx_index);
-
-    if (client_version() <= 1) {
-      for (auto &cur : src.real_out_additional_tx_keys) {
-        dst->add_real_out_additional_tx_keys(key_to_string(cur));
-      }
-    } else if (!src.real_out_additional_tx_keys.empty()) {
+    if (!src.real_out_additional_tx_keys.empty()) {
       dst->add_real_out_additional_tx_keys(key_to_string(src.real_out_additional_tx_keys.at(src.real_output_in_tx_index)));
     }
-
     dst->set_amount(src.amount);
     dst->set_rct(src.rct);
     dst->set_mask(key_to_string(src.mask));
@@ -532,7 +510,7 @@ namespace tx {
 
     m_ct.tx.version = 2;
     m_ct.tx.unlock_time = tx.unlock_time;
-    m_client_version = (m_aux_data->client_version ? m_aux_data->client_version.get() : 1);
+    m_client_version = (m_aux_data->client_version ? m_aux_data->client_version.get() : 3);
 
     tsx_data.set_version(1);
     tsx_data.set_client_version(client_version());
@@ -543,18 +521,13 @@ namespace tx {
     tsx_data.set_monero_version(std::string(MONERO_VERSION) + "|" + MONERO_VERSION_TAG);
     tsx_data.set_hard_fork(m_aux_data->hard_fork ? m_aux_data->hard_fork.get() : 0);
 
-    if (client_version() <= 1){
-      assign_to_repeatable(tsx_data.mutable_minor_indices(), tx.subaddr_indices.begin(), tx.subaddr_indices.end());
-    }
-
     // Rsig decision
     auto rsig_data = tsx_data.mutable_rsig_data();
     m_ct.rsig_type = get_rsig_type(tx.rct_config, tx.splitted_dsts.size());
     rsig_data->set_rsig_type(m_ct.rsig_type);
-    if (tx.rct_config.range_proof_type != rct::RangeProofBorromean){
-      m_ct.bp_version = (m_aux_data->bp_version ? m_aux_data->bp_version.get() : 1);
-      rsig_data->set_bp_version((uint32_t) m_ct.bp_version);
-    }
+    CHECK_AND_ASSERT_THROW_MES(tx.rct_config.range_proof_type != rct::RangeProofBorromean, "Borromean rsig not supported");
+    m_ct.bp_version = (m_aux_data->bp_version ? m_aux_data->bp_version.get() : 1);
+    rsig_data->set_bp_version((uint32_t) m_ct.bp_version);
 
     generate_rsig_batch_sizes(m_ct.grouping_vct, m_ct.rsig_type, tx.splitted_dsts.size());
     assign_to_repeatable(rsig_data->mutable_grouping(), m_ct.grouping_vct.begin(), m_ct.grouping_vct.end());
@@ -652,22 +625,6 @@ namespace tx {
     });
   }
 
-  std::shared_ptr<messages::monero::MoneroTransactionInputsPermutationRequest> Signer::step_permutation(){
-    sort_ki();
-    if (client_version() >= 2){
-      return nullptr;
-    }
-
-    auto res = std::make_shared<messages::monero::MoneroTransactionInputsPermutationRequest>();
-    assign_to_repeatable(res->mutable_perm(), m_ct.source_permutation.begin(), m_ct.source_permutation.end());
-
-    return res;
-  }
-
-  void Signer::step_permutation_ack(std::shared_ptr<const messages::monero::MoneroTransactionInputsPermutationAck> ack){
-
-  }
-
   std::shared_ptr<messages::monero::MoneroTransactionInputViniRequest> Signer::step_set_vini_input(size_t idx){
     CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx_data.sources.size(), "Invalid transaction index");
     CHECK_AND_ASSERT_THROW_MES(idx < m_ct.tx.vin.size(), "Invalid transaction index");
@@ -711,6 +668,7 @@ namespace tx {
   }
 
   void Signer::step_set_output_ack(std::shared_ptr<const messages::monero::MoneroTransactionSetOutputAck> ack){
+    CHECK_AND_ASSERT_THROW_MES(is_req_bulletproof(), "Borromean rsig not supported");
     cryptonote::tx_out tx_out;
     rct::Bulletproof bproof{};
     rct::ctkey out_pk{};
@@ -727,7 +685,7 @@ namespace tx {
         rsig_buff = rsig_data.rsig();
       }
 
-      if (client_version() >= 1 && rsig_data.has_mask()){
+      if (rsig_data.has_mask()){
         rct::key cmask{};
         string_to_key(cmask, rsig_data.mask());
         m_ct.rsig_gamma.emplace_back(cmask);
@@ -751,7 +709,7 @@ namespace tx {
       memcpy(ecdh.amount.bytes, ack->ecdh_info().data(), 8);
     }
 
-    if (has_rsig && is_req_bulletproof() && !cn_deserialize(rsig_buff, bproof)){
+    if (has_rsig && !cn_deserialize(rsig_buff, bproof)){
       throw exc::ProtocolException("Cannot deserialize bulletproof rangesig");
     }
 
@@ -760,9 +718,8 @@ namespace tx {
     m_ct.tx_out_pk.emplace_back(out_pk);
     m_ct.tx_out_ecdh.emplace_back(ecdh);
 
-    // ClientV0, if no rsig was generated on Trezor, do not continue.
-    // ClientV1+ generates BP after all masks in the current batch are generated
-    if (!has_rsig || (client_version() >= 1 && is_offloading())){
+    // Generates BP after all masks in the current batch are generated
+    if (!has_rsig || is_offloading()){
       return;
     }
 
@@ -791,13 +748,13 @@ namespace tx {
       masks.push_back(m_ct.rsig_gamma[bidx]);
     }
 
-    auto bp = bulletproof_PROVE(amounts, masks);
+    auto bp = bulletproof_PROVE(amounts, masks);  // TODO: BP+
     auto serRsig = cn_serialize(bp);
     m_ct.tx_out_rsigs.emplace_back(bp);
     rsig_data.set_rsig(serRsig);
   }
 
-  void Signer::process_bproof(rct::Bulletproof & bproof){
+  void Signer::process_bproof(rct::Bulletproof & bproof){  // TODO: BP+
     CHECK_AND_ASSERT_THROW_MES(m_ct.cur_batch_idx < m_ct.grouping_vct.size(), "Invalid batch index");
     auto batch_size = m_ct.grouping_vct[m_ct.cur_batch_idx];
     for (size_t i = 0; i < batch_size; ++i){
@@ -840,6 +797,7 @@ namespace tx {
   }
 
   void Signer::step_all_outs_set_ack(std::shared_ptr<const messages::monero::MoneroTransactionAllOutSetAck> ack, hw::device &hwdev){
+    CHECK_AND_ASSERT_THROW_MES(is_req_bulletproof(), "Borromean rsig not supported");
     m_ct.rv = std::make_shared<rct::rctSig>();
     m_ct.rv->txnFee = ack->rv().txn_fee();
     m_ct.rv->type = static_cast<uint8_t>(ack->rv().rv_type());
@@ -864,23 +822,14 @@ namespace tx {
 
     // RctSig
     auto num_sources = m_ct.tx_data.sources.size();
-    if (is_simple() || is_req_bulletproof()){
-      auto dst = &m_ct.rv->pseudoOuts;
-      if (is_bulletproof()){
-        dst = &m_ct.rv->p.pseudoOuts;
-      }
-
-      dst->clear();
-      for (const auto &pseudo_out : m_ct.pseudo_outs) {
-        dst->emplace_back();
-        string_to_key(dst->back(), pseudo_out);
-      }
-
-      m_ct.rv->mixRing.resize(num_sources);
-    } else {
-      m_ct.rv->mixRing.resize(m_ct.tsx_data.mixin());
-      m_ct.rv->mixRing[0].resize(num_sources);
+    auto dst = &m_ct.rv->p.pseudoOuts;
+    dst->clear();
+    for (const auto &pseudo_out : m_ct.pseudo_outs) {
+      dst->emplace_back();
+      string_to_key(dst->back(), pseudo_out);
     }
+
+    m_ct.rv->mixRing.resize(num_sources);
 
     CHECK_AND_ASSERT_THROW_MES(m_ct.tx_out_pk.size() == m_ct.tx_out_ecdh.size(), "Invalid vector sizes");
     for(size_t i = 0; i < m_ct.tx_out_ecdh.size(); ++i){
@@ -889,11 +838,7 @@ namespace tx {
     }
 
     for(size_t i = 0; i < m_ct.tx_out_rsigs.size(); ++i){
-      if (is_bulletproof()){
-        m_ct.rv->p.bulletproofs.push_back(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs[i]));
-      } else {
-        m_ct.rv->p.rangeSigs.push_back(boost::get<rct::rangeSig>(m_ct.tx_out_rsigs[i]));
-      }
+      m_ct.rv->p.bulletproofs.push_back(boost::get<rct::Bulletproof>(m_ct.tx_out_rsigs[i]));
     }
 
     rct::key hash_computed = rct::get_pre_mlsag_hash(*(m_ct.rv), hwdev);
@@ -936,8 +881,8 @@ namespace tx {
   void Signer::step_sign_input_ack(std::shared_ptr<const messages::monero::MoneroTransactionSignInputAck> ack){
     m_ct.signatures.push_back(ack->signature());
 
-    // Sync updated pseudo_outputs, client_version>=1, HF10+
-    if (client_version() >= 1 && ack->has_pseudo_out()){
+    // Sync updated pseudo_outputs
+    if (ack->has_pseudo_out()){
       CHECK_AND_ASSERT_THROW_MES(m_ct.cur_input_idx < m_ct.pseudo_outs.size(), "Invalid pseudo-out index");
       m_ct.pseudo_outs[m_ct.cur_input_idx] = ack->pseudo_out();
       if (is_bulletproof()){
@@ -955,6 +900,8 @@ namespace tx {
   }
 
   void Signer::step_final_ack(std::shared_ptr<const messages::monero::MoneroTransactionFinalAck> ack){
+    CHECK_AND_ASSERT_THROW_MES(is_clsag(), "Only CLSAGs signatures are supported");
+
     if (m_multisig){
       auto & cout_key = ack->cout_key();
       for(auto & cur : m_ct.couts){
@@ -975,47 +922,34 @@ namespace tx {
     m_ct.enc_keys = ack->tx_enc_keys();
 
     // Opening the sealed signatures
-    if (client_version() >= 3){
-      if(!ack->has_opening_key()){
-        throw exc::ProtocolException("Client version 3+ requires sealed signatures");
-      }
-
-      for(size_t i = 0; i < m_ct.signatures.size(); ++i){
-        CHECK_AND_ASSERT_THROW_MES(m_ct.signatures[i].size() > crypto::chacha::TAG_SIZE, "Invalid signature size");
-        std::string nonce = compute_sealing_key(ack->opening_key(), i, true);
-        std::string key = compute_sealing_key(ack->opening_key(), i, false);
-        size_t plen = m_ct.signatures[i].size() - crypto::chacha::TAG_SIZE;
-        std::unique_ptr<uint8_t[]> plaintext(new uint8_t[plen]);
-        uint8_t * buff = plaintext.get();
-
-        protocol::crypto::chacha::decrypt(
-            m_ct.signatures[i].data(),
-            m_ct.signatures[i].size(),
-            reinterpret_cast<const uint8_t *>(key.data()),
-            reinterpret_cast<const uint8_t *>(nonce.data()),
-            reinterpret_cast<char *>(buff), &plen);
-        m_ct.signatures[i].assign(reinterpret_cast<const char *>(buff), plen);
-      }
+    if(!ack->has_opening_key()){
+      throw exc::ProtocolException("Client version 3+ requires sealed signatures");
     }
 
-    if (m_ct.rv->type == rct::RCTTypeCLSAG){
-      m_ct.rv->p.CLSAGs.reserve(m_ct.signatures.size());
-      for (size_t i = 0; i < m_ct.signatures.size(); ++i) {
-        rct::clsag clsag;
-        if (!cn_deserialize(m_ct.signatures[i], clsag)) {
-          throw exc::ProtocolException("Cannot deserialize clsag[i]");
-        }
-        m_ct.rv->p.CLSAGs.push_back(clsag);
+    for(size_t i = 0; i < m_ct.signatures.size(); ++i){
+      CHECK_AND_ASSERT_THROW_MES(m_ct.signatures[i].size() > crypto::chacha::TAG_SIZE, "Invalid signature size");
+      std::string nonce = compute_sealing_key(ack->opening_key(), i, true);
+      std::string key = compute_sealing_key(ack->opening_key(), i, false);
+      size_t plen = m_ct.signatures[i].size() - crypto::chacha::TAG_SIZE;
+      std::unique_ptr<uint8_t[]> plaintext(new uint8_t[plen]);
+      uint8_t * buff = plaintext.get();
+
+      protocol::crypto::chacha::decrypt(
+          m_ct.signatures[i].data(),
+          m_ct.signatures[i].size(),
+          reinterpret_cast<const uint8_t *>(key.data()),
+          reinterpret_cast<const uint8_t *>(nonce.data()),
+          reinterpret_cast<char *>(buff), &plen);
+      m_ct.signatures[i].assign(reinterpret_cast<const char *>(buff), plen);
+    }
+
+    m_ct.rv->p.CLSAGs.reserve(m_ct.signatures.size());
+    for (size_t i = 0; i < m_ct.signatures.size(); ++i) {
+      rct::clsag clsag;
+      if (!cn_deserialize(m_ct.signatures[i], clsag)) {
+        throw exc::ProtocolException("Cannot deserialize clsag[i]");
       }
-    } else {
-      m_ct.rv->p.MGs.reserve(m_ct.signatures.size());
-      for (size_t i = 0; i < m_ct.signatures.size(); ++i) {
-        rct::mgSig mg;
-        if (!cn_deserialize(m_ct.signatures[i], mg)) {
-          throw exc::ProtocolException("Cannot deserialize mg[i]");
-        }
-        m_ct.rv->p.MGs.push_back(mg);
-      }
+      m_ct.rv->p.CLSAGs.push_back(clsag);
     }
 
     m_ct.tx.rct_signatures = *(m_ct.rv);
