@@ -115,3 +115,41 @@ set_property(TARGET http_client_tests
 add_test(
         NAME    http_client_tests
         COMMAND http_client_tests)
+
+set(serialization_tests_sources
+        tools.cpp
+        serialize.cpp)
+
+set(serialization_tests_headers)
+add_executable(serialization_tests
+        ${serialization_tests_sources}
+        ${serialization_tests_headers})
+target_link_libraries(serialization_tests
+        PRIVATE
+        ringct
+        cryptonote_protocol
+        cryptonote_core
+        blockchain_db
+        rpc
+        net
+        epee
+        version
+        serialization
+        wallet
+        p2p
+        version
+        daemon_rpc_server
+        ${Boost_CHRONO_LIBRARY}
+        ${Boost_THREAD_LIBRARY}
+        ${Boost_PROGRAM_OPTIONS_LIBRARY}
+        ${Boost_SYSTEM_LIBRARY}
+        ${ZMQ_LIB}
+        ${GTEST_BOTH_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${EXTRA_LIBRARIES})
+set_property(TARGET serialization_tests
+        PROPERTY
+        FOLDER "tests")
+add_test(
+        NAME    serialization_tests
+        COMMAND serialization_tests)
