@@ -1055,7 +1055,10 @@ void gen_trezor_base::test_trezor_tx(std::vector<test_event_entry>& events, std:
     CHECK_AND_ASSERT_THROW_MES(resy, "Trezor tx_1 Nonsemantics failed");
 
     tx_list.push_back(c_ptx.tx);
+    const crypto::hash txhash = cryptonote::get_transaction_hash(c_ptx.tx);
     MDEBUG("Transaction: " << dump_data(c_ptx.tx));
+    MDEBUG("Transaction hash: " << epee::string_tools::pod_to_hex(txhash));
+    MDEBUG("Serialized transaction: " << epee::string_tools::buff_to_hex_nodelimer(tx_to_blob(c_ptx.tx)));
   }
 
   add_transactions_to_events(events, generator, tx_list);
