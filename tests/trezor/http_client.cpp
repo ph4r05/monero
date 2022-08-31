@@ -59,7 +59,7 @@ using auth_responses = std::vector<fields>;
 #define GET_VERSION_MC(m_http_client, VER) \
   cryptonote::COMMAND_RPC_GET_VERSION::request req_t = AUTO_VAL_INIT(req_t);          \
   cryptonote::COMMAND_RPC_GET_VERSION::response resp_t = AUTO_VAL_INIT(resp_t);       \
-  bool r = net_utils::invoke_http_json_rpc("/json_rpc", "get_version", req_t, resp_t, m_http_client, std::chrono::seconds(60)); \
+  bool r = epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_version", req_t, resp_t, m_http_client, std::chrono::seconds(60)); \
                                                                                       \
   CHECK_AND_ASSERT_THROW_MES(r, "RPC error - Get version");                           \
   CHECK_AND_ASSERT_THROW_MES(resp_t.status != CORE_RPC_STATUS_BUSY, "Daemon problem");\
@@ -76,7 +76,7 @@ static uint64_t get_version(epee::net_utils::http::http_simple_client & m_http_c
 static uint64_t get_version2(epee::net_utils::http::http_simple_client & m_http_client){
   cryptonote::COMMAND_RPC_GET_VERSION::request req_t = AUTO_VAL_INIT(req_t);
   cryptonote::COMMAND_RPC_GET_VERSION::response resp_t = AUTO_VAL_INIT(resp_t);
-  bool r = net_utils::invoke_http_json_rpc("/json_rpc", "get_version", req_t, resp_t, m_http_client, std::chrono::seconds(60));
+  bool r = epee::net_utils::invoke_http_json_rpc("/json_rpc", "get_version", req_t, resp_t, m_http_client, std::chrono::seconds(60));
 
   CHECK_AND_ASSERT_THROW_MES(r, "RPC error - Get version");
   CHECK_AND_ASSERT_THROW_MES(resp_t.status != CORE_RPC_STATUS_BUSY, "Daemon problem");
