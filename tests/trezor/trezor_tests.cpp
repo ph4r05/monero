@@ -138,7 +138,7 @@ int main(int argc, char* argv[])
 
     // Bootstrapping common chain & accounts
     const uint8_t initial_hf =  (uint8_t)get_env_long("TEST_MIN_HF", HF_VERSION_CLSAG);
-    const uint8_t max_hf = (uint8_t)get_env_long("TEST_MAX_HF", HF_VERSION_CLSAG);
+    const uint8_t max_hf = (uint8_t)get_env_long("TEST_MAX_HF", HF_VERSION_BULLETPROOF_PLUS);
     auto sync_test = get_env_long("TEST_KI_SYNC", 1);
     MINFO("Test versions " << MONERO_RELEASE_NAME << "' (v" << MONERO_VERSION_FULL << ")");
     MINFO("Testing hardforks [" << (int)initial_hf << ", " << (int)max_hf << "], sync-test: " << sync_test);
@@ -1387,7 +1387,9 @@ tsx_builder * tsx_builder::add_destination(const tools::wallet2 * wallet, bool i
 
 tsx_builder * tsx_builder::set_integrated(size_t idx)
 {
+  CHECK_AND_ASSERT_THROW_MES(m_destinations_orig.size() > idx, "Destination size not big enough to set integrated flag");
   m_integrated.insert(idx);
+  m_destinations_orig[idx].is_integrated = true;
   return this;
 }
 
@@ -1454,7 +1456,7 @@ tsx_builder * tsx_builder::construct_pending_tx(tools::wallet2::pending_tx &ptx,
   auto change_addr = m_from->get_account().get_keys().m_account_address;
   bool r = construct_tx_and_get_tx_key(m_from->get_account().get_keys(), subaddresses, m_sources, destinations_copy,
                                        change_addr, extra ? extra.get() : std::vector<uint8_t>(), tx, 0, tx_key,
-                                       additional_tx_keys, true, m_rct_config, nullptr);
+                                       additional_tx_keys, true, m_rct_config, this->m_tester->cur_hf() >= HF_VERSION_VIEW_TAGS);
   CHECK_AND_ASSERT_THROW_MES(r, "Transaction construction failed");
 
   // Selected transfers permutation
