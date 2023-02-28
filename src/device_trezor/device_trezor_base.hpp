@@ -318,7 +318,6 @@ namespace trezor {
     void on_button_pressed();
     void on_pin_request(GenericMessage & resp, const messages::common::PinMatrixRequest * msg);
     void on_passphrase_request(GenericMessage & resp, const messages::common::PassphraseRequest * msg);
-    void on_passphrase_state_request(GenericMessage & resp, const messages::common::Deprecated_PassphraseStateRequest * msg);
 
 #ifdef WITH_TREZOR_DEBUGGING
     void set_debug(bool debug){
