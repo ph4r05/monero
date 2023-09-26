@@ -23,6 +23,7 @@ env:
   CCACHE_SETTINGS: |
         ccache --max-size=150M
         ccache --set-config=compression=true
+  USE_DEVICE_TREZOR_MANDATORY: ON
 
 concurrency:
   group: ${{ github.repository }}-${{ github.head_ref || github.run_id }}-${{ github.workflow }}
