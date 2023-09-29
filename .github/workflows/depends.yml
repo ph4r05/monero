@@ -20,10 +20,6 @@ env:
         ccache --set-config=compression=true
   USE_DEVICE_TREZOR_MANDATORY: ON
 
-concurrency:
-  group: ${{ github.repository }}-${{ github.head_ref || github.run_id }}-${{ github.workflow }}
-  cancel-in-progress: true
-
 jobs:
   build-cross:
     runs-on: ubuntu-20.04
