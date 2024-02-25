@@ -38,3 +38,22 @@ FIND_PATH(UNBOUND_INCLUDE_DIR
 )
 
 find_library(UNBOUND_LIBRARIES unbound)
+
+# Look for Nettle
+message(STATUS "Looking for Nettle")
+find_path(NETTLE_INCLUDE_DIR
+        NAMES nettle/nettle-types.h
+        PATH_SUFFIXES include/
+        PATHS "${PROJECT_SOURCE_DIR}"
+        /usr/local/
+        /usr/
+)
+find_library(NETTLE_LIBRARIES NAMES nettle)
+
+if(NETTLE_LIBRARIES)
+    # Append NETTLE_LIBRARIES to UNBOUND_LIBRARIES
+    set(UNBOUND_LIBRARIES ${UNBOUND_LIBRARIES} ${NETTLE_LIBRARIES})
+    message(STATUS "Nettle found. Adding Nettle to Unbound libraries. ${UNBOUND_LIBRARIES}")
+else()
+    message(STATUS "Nettle not found. Proceeding without Nettle.")
+endif()
